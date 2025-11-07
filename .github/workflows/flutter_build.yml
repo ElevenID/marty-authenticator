@@ -1,0 +1,86 @@
+name: Flutter Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build_ios:
+    name: (iOS)
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "16.4" # Set to a specific recent stable Xcode version
+
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "17" # Use JDK 17 for better compatibility
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: "3.35.3" # Use the latest stable Flutter version as of Sep 03 2025
+
+      - run: flutter clean
+      - run: flutter --version
+      - run: flutter doctor -v
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter build ios -t "lib/mains/main_netknights.dart" --debug --flavor netknights --no-codesign
+
+  build_appbundle:
+    name: (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Removed the 'strategy' block with 'api-level' and 'target' matrix
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java Development Kit
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "21" # Keeping Java 21 as per your current setup
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: "3.35.3" # Current latest as of Sep 03 2025
+
+      - name: Clean Flutter project
+        run: flutter clean
+
+      - name: Display Flutter version
+        run: flutter --version
+
+      - name: Run Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Generate localization files
+        run: flutter gen-l10n
+
+      # Cache Gradle dependencies for faster subsequent builds
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # Build the Android APK (Debug)
+      - name: Build Android APK (Debug)
+        run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights

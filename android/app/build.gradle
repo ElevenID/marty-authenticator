@@ -1,0 +1,142 @@
+plugins {
+    id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+
+
+dependencies {
+    // Add this [coreLibraryDesugaring] inside [dependencies]
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystorePropertiesNetknights = new Properties()
+def keystorePropertiesFileNetknights = rootProject.file('app/src/netknights/key.properties')
+if (keystorePropertiesFileNetknights.exists()) {
+    keystorePropertiesNetknights.load(new FileInputStream(keystorePropertiesFileNetknights))
+}
+
+def keystorePropertiesNetknightsDebug = new Properties()
+def keystorePropertiesFileNetknightsDebug = rootProject.file('app/src/netknights_debug/key.properties')
+if (keystorePropertiesFileNetknightsDebug.exists()) {
+    keystorePropertiesNetknightsDebug.load(new FileInputStream(keystorePropertiesFileNetknightsDebug))
+}
+
+
+android {
+    namespace 'it.netknights.piauthenticator'
+
+    compileSdkVersion 36
+    ndkVersion = "27.0.12077973"
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    kotlinOptions {
+        jvmTarget = '21'
+    }
+
+    defaultConfig {
+        applicationId "it.netknights.piauthenticator"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 35
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    signingConfigs {
+        netknights {
+            storeFile keystorePropertiesNetknights['storeFile'] ? file(keystorePropertiesNetknights['storeFile']) : null
+            storePassword keystorePropertiesNetknights['storePassword']
+            keyAlias keystorePropertiesNetknights['keyAlias']
+            keyPassword keystorePropertiesNetknights['keyPassword']
+        }
+        netknights_debug {
+            storeFile keystorePropertiesNetknightsDebug['storeFile'] ? file(keystorePropertiesNetknightsDebug['storeFile']) : null
+            storePassword keystorePropertiesNetknightsDebug['storePassword']
+            keyAlias keystorePropertiesNetknightsDebug['keyAlias']
+            keyPassword keystorePropertiesNetknightsDebug['keyPassword']
+        }
+    }
+
+    flavorDimensions "pi-authenticator"
+
+    productFlavors {
+        netknights{
+            dimension "pi-authenticator"
+            applicationId "it.netknights.piauthenticator"
+            resValue "string", "app_name", "privacyIDEA Authenticator"
+            signingConfig signingConfigs.netknights
+        }
+        netknights_debug{
+            dimension "pi-authenticator"
+            applicationId "it.netknights.piauthenticator.debug"
+            resValue "string", "app_name", "Internal - privacyIDEA Authenticator"
+            signingConfig signingConfigs.netknights_debug
+        }
+    }
+
+    buildTypes {
+        release {
+            // Enables code shrinking, obfuscation, and optimization for only
+            // your project's release build type.
+            minifyEnabled false
+
+            // Enables resource shrinking, which is performed by the
+            // Android Gradle plugin.
+            shrinkResources false
+
+            // Includes the default ProGuard rules files that are packaged with
+            // the Android Gradle plugin. To learn more, go to the section about
+            // R8 configuration files.
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
+
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+
+            shrinkResources false
+
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}

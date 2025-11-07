@@ -1,0 +1,119 @@
+name: privacyidea_authenticator
+description: An OTP Authenticator App for privacyIDEA Authentication Server.
+homepage: https://netknights.it
+repository: https://github.com/privacyidea/pi-authenticator
+publish_to: none
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 4.6.0+406003 # TODO Set the right version number
+
+# version: major.minor.build          + 2x major|2x minor|3x build
+# version: version number             + build number (optional)
+# android: build-name                 + versionCode
+# iOS    : CFBundleShortVersionString + CFBundleVersion
+environment:
+  sdk: ">=3.8.0 < 4.0.0"
+
+dependencies:
+  app_links: ^6.3.2
+  asn1lib: ^1.5.5
+  async: ^2.11.0
+  base32: ^2.1.3
+  basic_utils: ^5.7.0
+  camera_android: ^0.10.10
+  collection: ^1.18.0
+  connectivity_plus: ^6.1.0
+  crypto: ^3.0.6
+  cryptography: ^2.7.0
+  device_info_plus: ^11.1.0
+  easy_dynamic_theme: ^2.3.1
+  encrypt: ^5.0.3
+  expandable: ^5.0.1
+  file_selector: ^1.0.3
+  firebase_core: ^4.1.0
+  firebase_messaging: ^16.0.1
+  fixnum: ^1.1.1
+  fluentui_system_icons: ^1.1.260
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^19.4.1
+  flutter_localizations:
+    sdk: flutter
+  flutter_mailer: ^3.0.0
+  flutter_riverpod: ^3.0.0-dev.17
+  flutter_secure_storage: ^9.2.4
+  flutter_slidable: ^4.0.0
+  flutter_svg: ^2.0.16
+  flutter_zxing: ^2.1.0
+  font_awesome_flutter: ^10.8.0
+  freezed_annotation: ^3.1.0
+  gms_check: ^1.0.3
+  hex: ^0.2.0
+  home_widget: ^0.8.0
+  http: ^1.2.2
+  image: ^4.3.0
+  image_cropper: ^9.0.0
+  image_picker: ^1.1.2
+  intl: ^0.20.2
+  json_annotation: ^4.9.0
+  local_auth: ^2.3.0
+  local_auth_android: ^1.0.46
+  local_auth_darwin: ^1.4.1
+  logger: ^2.4.0
+  material_design_icons_flutter: ^7.0.7296
+  mutex: ^3.1.0
+  no_screenshot: ^0.3.1
+  otp: ^3.1.4
+  package_info_plus: ^8.1.0
+  path_provider: ^2.1.4
+  permission_handler: ^12.0.1
+  pointycastle: ^3.9.1
+  protobuf: ^4.1.1
+  riverpod_annotation: ^3.0.0-dev.17
+  shared_preferences: ^2.3.2
+  simple_icons: ^14.6.1
+  url_launcher: ^6.3.1
+  uuid: ^4.5.1
+  zxing2: ^0.2.3
+
+dev_dependencies:
+  build_runner: ^2.4.11
+  dependency_validator: ^5.0.2
+  flutter_launcher_icons: ^0.14.1
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  freezed: ^3.1.0
+  integration_test:
+    sdk: flutter
+  json_serializable: ^6.8.0
+  mockito: ^5.4.2
+  riverpod_generator: ^3.0.0-dev.17
+  riverpod_lint: ^3.0.0-dev.17
+  test: ^1.24.1
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+# The following section is specific to Flutter.
+flutter:
+  # Automatically create files used for localization
+  generate: true
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #  - images/a_dot_burr.jpeg
+  #  - images/a_dot_ham.jpeg
