@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/tokens/push_token.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../../settings_view_widgets/settings_group.dart';
@@ -32,15 +32,22 @@ class SettingsGroupPushToken extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tokens = ref.watch(tokenProvider).value?.tokens ?? [];
-    final enrolledPushTokenList = tokens.whereType<PushToken>().where((e) => e.isRolledOut).toList();
-    final unsupportedPushTokens = enrolledPushTokenList.where((e) => e.url == null).toList();
+    final enrolledPushTokenList = tokens
+        .whereType<PushToken>()
+        .where((e) => e.isRolledOut)
+        .toList();
+    final unsupportedPushTokens = enrolledPushTokenList
+        .where((e) => e.url == null)
+        .toList();
     return SettingsGroup(
       title: AppLocalizations.of(context)!.pushToken,
       isActive: enrolledPushTokenList.isNotEmpty,
       onPressed: () => showDialog(
         useRootNavigator: false,
         context: context,
-        builder: (_) => SettingsGroupPushTokenDialog(unsupportedPushTokens: unsupportedPushTokens),
+        builder: (_) => SettingsGroupPushTokenDialog(
+          unsupportedPushTokens: unsupportedPushTokens,
+        ),
       ),
       trailingIcon: Icons.notifications,
     );

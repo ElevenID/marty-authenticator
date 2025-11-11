@@ -24,6 +24,8 @@ abstract class HttpStatusChecker {
   }
 
   static bool isError(int statusCode) {
-    return isClientError(statusCode) || isServerError(statusCode) || isInvalidStatus(statusCode);
+    return isClientError(statusCode) ||
+        isServerError(statusCode) ||
+        isInvalidStatus(statusCode);
   }
 }

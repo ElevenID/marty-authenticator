@@ -20,7 +20,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../utils/lock_auth.dart';
 import '../../../../../utils/view_utils.dart';
 import '../../../../../widgets/dialog_widgets/default_dialog.dart';
@@ -28,9 +28,8 @@ import '../../../../../widgets/dialog_widgets/default_dialog.dart';
 class AllowScreenshotDialog extends StatelessWidget {
   const AllowScreenshotDialog({super.key});
 
-  static Future<bool?> showDialog() => showAsyncDialog(
-        builder: (context) => AllowScreenshotDialog(),
-      );
+  static Future<bool?> showDialog() =>
+      showAsyncDialog(builder: (context) => AllowScreenshotDialog());
 
   @override
   Widget build(BuildContext context) {

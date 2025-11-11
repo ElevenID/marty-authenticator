@@ -37,10 +37,12 @@ class TransferContainerDialog extends ConsumerStatefulWidget {
   const TransferContainerDialog({super.key, required this.container});
 
   @override
-  ConsumerState<TransferContainerDialog> createState() => _TransferContainerDialogState();
+  ConsumerState<TransferContainerDialog> createState() =>
+      _TransferContainerDialogState();
 }
 
-class _TransferContainerDialogState extends ConsumerState<TransferContainerDialog> {
+class _TransferContainerDialogState
+    extends ConsumerState<TransferContainerDialog> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
@@ -69,13 +71,19 @@ class _TransferContainerDialogState extends ConsumerState<TransferContainerDialo
 
   Future<void> _startTransfer(TokenContainerFinalized container) async {
     final String qrData;
-    final hasOfflineToken = (await ref.read(tokenProvider.future)).containerTokens(container.serial).where((token) => token.isOffline);
+    final hasOfflineToken = (await ref.read(
+      tokenProvider.future,
+    )).containerTokens(container.serial).where((token) => token.isOffline);
     if (hasOfflineToken.isNotEmpty) {
-      final continueTransfer = await showAsyncDialog(builder: (_) => TransferOfflineTokenDialog(hasOfflineToken.length));
+      final continueTransfer = await showAsyncDialog(
+        builder: (_) => TransferOfflineTokenDialog(hasOfflineToken.length),
+      );
       if (continueTransfer != true) return;
     }
     try {
-      qrData = await ref.read(tokenContainerProvider.notifier).getRolloverQrData(container);
+      qrData = await ref
+          .read(tokenContainerProvider.notifier)
+          .getRolloverQrData(container);
     } catch (e) {
       if (!mounted) return;
       return showErrorStatusMessage(

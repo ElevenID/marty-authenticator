@@ -21,7 +21,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/view_utils.dart';
 import '../../../../widgets/dialog_widgets/default_dialog.dart';
@@ -30,7 +30,8 @@ class QrNotFoundDialog extends StatelessWidget {
   final XFile xFile;
   const QrNotFoundDialog({super.key, required this.xFile});
 
-  Future<XFile?> show(BuildContext context) async => showDialog<XFile>(context: context, builder: build);
+  Future<XFile?> show(BuildContext context) async =>
+      showDialog<XFile>(context: context, builder: build);
 
   @override
   Widget build(BuildContext context) {
@@ -40,22 +41,16 @@ class QrNotFoundDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            appLocalizations.qrInFileNotFound,
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            appLocalizations.qrInFileNotFound2,
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            appLocalizations.qrInFileNotFound3,
-            textAlign: TextAlign.center,
-          ),
+          Text(appLocalizations.qrInFileNotFound, textAlign: TextAlign.center),
+          Text(appLocalizations.qrInFileNotFound2, textAlign: TextAlign.center),
+          Text(appLocalizations.qrInFileNotFound3, textAlign: TextAlign.center),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(appLocalizations.cancel)),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.cancel),
+        ),
         TextButton(
           onPressed: () async {
             CroppedFile? croppedFile;
@@ -65,8 +60,12 @@ class QrNotFoundDialog extends StatelessWidget {
               croppedFile = await ImageCropper().cropImage(
                 sourcePath: xFile.path,
                 uiSettings: [
-                  AndroidUiSettings(aspectRatioPresets: [CropAspectRatioPreset.square]),
-                  IOSUiSettings(aspectRatioPresets: [CropAspectRatioPreset.square]),
+                  AndroidUiSettings(
+                    aspectRatioPresets: [CropAspectRatioPreset.square],
+                  ),
+                  IOSUiSettings(
+                    aspectRatioPresets: [CropAspectRatioPreset.square],
+                  ),
                   WebUiSettings(context: context),
                 ],
               );

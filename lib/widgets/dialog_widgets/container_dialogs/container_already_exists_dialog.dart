@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 
-import '../../../../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../../../../model/token_container.dart';
 import '../../../../../../../../views/container_view/container_widgets/container_widget.dart';
 import '../../../../../../../../widgets/button_widgets/cooldown_button.dart';
@@ -32,16 +32,21 @@ import '../../../utils/riverpod/riverpod_providers/generated_providers/token_con
 class ContainerAlreadyExistsDialog extends ConsumerStatefulWidget {
   final List<TokenContainerUnfinalized> newContainers;
 
-  static Future<List<TokenContainerUnfinalized>?> showDialog(List<TokenContainerUnfinalized> newContainers) =>
-      showAsyncDialog<List<TokenContainerUnfinalized>>(builder: (context) => ContainerAlreadyExistsDialog(newContainers));
+  static Future<List<TokenContainerUnfinalized>?> showDialog(
+    List<TokenContainerUnfinalized> newContainers,
+  ) => showAsyncDialog<List<TokenContainerUnfinalized>>(
+    builder: (context) => ContainerAlreadyExistsDialog(newContainers),
+  );
 
   const ContainerAlreadyExistsDialog(this.newContainers, {super.key});
 
   @override
-  ConsumerState<ContainerAlreadyExistsDialog> createState() => _ContainerAlreadyExistsDialogState();
+  ConsumerState<ContainerAlreadyExistsDialog> createState() =>
+      _ContainerAlreadyExistsDialogState();
 }
 
-class _ContainerAlreadyExistsDialogState extends ConsumerState<ContainerAlreadyExistsDialog> {
+class _ContainerAlreadyExistsDialogState
+    extends ConsumerState<ContainerAlreadyExistsDialog> {
   late final List<TokenContainerUnfinalized> unhandledContainers;
   final List<TokenContainerUnfinalized> replaceContainers = [];
 
@@ -56,29 +61,49 @@ class _ContainerAlreadyExistsDialogState extends ConsumerState<ContainerAlreadyE
   Widget build(BuildContext context) {
     final container = unhandledContainers.firstOrNull;
     if (container == null) return SizedBox.shrink();
-    final currentContainer = ref.watch(tokenContainerProvider).value?.currentOf<TokenContainer>(container);
+    final currentContainer = ref
+        .watch(tokenContainerProvider)
+        .value
+        ?.currentOf<TokenContainer>(container);
     if (currentContainer == null) return SizedBox.shrink();
     final appLocalizations = AppLocalizations.of(context)!;
     return DefaultDialog(
       title: Text(appLocalizations.containerAlreadyExists),
       content: ContainerWidget(container: currentContainer, isPreview: true),
       actions: [
-        TextButton(onPressed: () => _dismiss(container), child: Text(appLocalizations.dismiss)),
-        CooldownButton(onPressed: () => _replace(currentContainer, container), child: Text(appLocalizations.replaceButton)),
+        TextButton(
+          onPressed: () => _dismiss(container),
+          child: Text(appLocalizations.dismiss),
+        ),
+        CooldownButton(
+          onPressed: () => _replace(currentContainer, container),
+          child: Text(appLocalizations.replaceButton),
+        ),
       ],
     );
   }
 
   void _dismiss(TokenContainer container) {
     setState(() => unhandledContainers.remove(container));
-    if (unhandledContainers.isEmpty) Navigator.of(context).pop<List<TokenContainerUnfinalized>>(replaceContainers);
+    if (unhandledContainers.isEmpty)
+      Navigator.of(
+        context,
+      ).pop<List<TokenContainerUnfinalized>>(replaceContainers);
   }
 
-  Future<void> _replace(TokenContainer oldContainer, TokenContainerUnfinalized newContainer) async {
+  Future<void> _replace(
+    TokenContainer oldContainer,
+    TokenContainerUnfinalized newContainer,
+  ) async {
     setState(() {
-      unhandledContainers.removeWhere((element) => element.serial == oldContainer.serial);
+      unhandledContainers.removeWhere(
+        (element) => element.serial == oldContainer.serial,
+      );
       replaceContainers.add(newContainer);
     });
-    if (unhandledContainers.isEmpty) Navigator.of(context).pop<List<TokenContainerUnfinalized>>(replaceContainers);
+    if (unhandledContainers.isEmpty)
+      Navigator.of(
+        context,
+      ).pop<List<TokenContainerUnfinalized>>(replaceContainers);
   }
 }

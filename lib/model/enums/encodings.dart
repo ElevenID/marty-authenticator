@@ -17,8 +17,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum Encodings {
-  none,
-  base32,
-  hex,
-}
+enum Encodings { none, base32, hex }

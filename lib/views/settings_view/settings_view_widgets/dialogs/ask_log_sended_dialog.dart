@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../utils/logger.dart';
 import '../../../../widgets/dialog_widgets/default_dialog.dart';
 
@@ -40,9 +40,7 @@ class AskLogSentDialog extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Text(
-              AppLocalizations.of(context)!.askLogSentDescription,
-            ),
+            child: Text(AppLocalizations.of(context)!.askLogSentDescription),
           ),
         ],
       ),
@@ -65,7 +63,7 @@ class AskLogSentDialog extends StatelessWidget {
             overflow: TextOverflow.fade,
             softWrap: false,
           ),
-        )
+        ),
       ],
     );
   }

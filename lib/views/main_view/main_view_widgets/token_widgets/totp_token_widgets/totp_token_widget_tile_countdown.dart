@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../widgets/pi_circular_progress_indicator.dart';
 
 class TotpTokenWidgetTileCountdown extends StatelessWidget {
@@ -43,15 +43,13 @@ class TotpTokenWidgetTileCountdown extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Text(
-            '$value',
-            overflow: TextOverflow.fade,
-            softWrap: false,
-          ),
+          Text('$value', overflow: TextOverflow.fade, softWrap: false),
           PiCircularProgressIndicator(
             1 - (secondsUntilNextOTP / period),
             foregroundColor: currentColor,
-            semanticsLabel: AppLocalizations.of(context)!.a11ySecondsUntilNextOTP(value),
+            semanticsLabel: AppLocalizations.of(
+              context,
+            )!.a11ySecondsUntilNextOTP(value),
             semanticsValue: '$value',
           ),
         ],

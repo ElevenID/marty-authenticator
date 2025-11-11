@@ -38,7 +38,11 @@ class PiServerResultError extends PiServerResult implements Error {
   });
 
   factory PiServerResultError({required int code, required String message}) =>
-      PiServerResultError._(code: code, message: message, stackTrace: StackTrace.current);
+      PiServerResultError._(
+        code: code,
+        message: message,
+        stackTrace: StackTrace.current,
+      );
 
   factory PiServerResultError.fromResult(Map<String, dynamic> json) {
     final map = validateMap(
@@ -49,7 +53,10 @@ class PiServerResultError extends PiServerResult implements Error {
       },
       name: 'PiServerResultError#fromJson',
     );
-    return PiServerResultError(code: map[CODE] as int, message: map[MESSAGE] as String);
+    return PiServerResultError(
+      code: map[CODE] as int,
+      message: map[MESSAGE] as String,
+    );
   }
   @override
   String toString() => 'PiError(code: $code, message: $message)';

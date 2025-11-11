@@ -21,7 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/riverpod_states/token_state.dart';
 import '../../../../model/token_container.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
@@ -32,26 +32,31 @@ import '../../../../widgets/dialog_widgets/default_dialog.dart';
 class RolloverContainerTokensDialog extends ConsumerStatefulWidget {
   final TokenContainerFinalized container;
 
-  static Future<void> showDialog(BuildContext context, TokenContainerFinalized container) async {
-    await showAsyncDialog(builder: (context) => RolloverContainerTokensDialog(container: container));
+  static Future<void> showDialog(
+    BuildContext context,
+    TokenContainerFinalized container,
+  ) async {
+    await showAsyncDialog(
+      builder: (context) => RolloverContainerTokensDialog(container: container),
+    );
   }
 
   const RolloverContainerTokensDialog({required this.container, super.key});
 
   @override
-  ConsumerState<RolloverContainerTokensDialog> createState() => _RolloverContainerTokensDialogState();
+  ConsumerState<RolloverContainerTokensDialog> createState() =>
+      _RolloverContainerTokensDialogState();
 }
 
-class _RolloverContainerTokensDialogState extends ConsumerState<RolloverContainerTokensDialog> {
+class _RolloverContainerTokensDialogState
+    extends ConsumerState<RolloverContainerTokensDialog> {
   @override
   Widget build(BuildContext context) {
     return DefaultDialog(
       title: Text(AppLocalizations.of(context)!.renewSecretsDialogTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(AppLocalizations.of(context)!.renewSecretsDialogText),
-        ],
+        children: [Text(AppLocalizations.of(context)!.renewSecretsDialogText)],
       ),
       actions: [
         TextButton(
@@ -73,9 +78,14 @@ class _RolloverContainerTokensDialogState extends ConsumerState<RolloverContaine
 
   Future<void> _renewSecrets({required TokenState tokenState}) async {
     try {
-      await ref.read(tokenContainerProvider.notifier).rolloverTokens(tokenState: tokenState, container: widget.container);
+      await ref
+          .read(tokenContainerProvider.notifier)
+          .rolloverTokens(tokenState: tokenState, container: widget.container);
     } catch (e) {
-      showErrorStatusMessage(message: (l) => l.failedToRenewSecrets, details: (_) => e.toString());
+      showErrorStatusMessage(
+        message: (l) => l.failedToRenewSecrets,
+        details: (_) => e.toString(),
+      );
     }
   }
 }

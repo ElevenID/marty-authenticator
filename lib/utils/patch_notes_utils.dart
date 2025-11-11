@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../model/enums/patch_note_type.dart';
 import '../model/version.dart';
 import '../widgets/dialog_widgets/patch_notes_dialog.dart';
@@ -28,28 +28,51 @@ import 'globals.dart';
 import 'logger.dart';
 
 class PatchNotesUtils {
-  static Map<Version, Map<PatchNoteType, List<String>>> _getNewPatchNotes({required BuildContext context, required Version latestStartedVersion}) {
+  static Map<Version, Map<PatchNoteType, List<String>>> _getNewPatchNotes({
+    required BuildContext context,
+    required Version latestStartedVersion,
+  }) {
     final Map<Version, Map<PatchNoteType, List<String>>> newNotes = {};
     final allNotes = getLocalizedPatchNotes(AppLocalizations.of(context)!);
     for (Version noteVersion in allNotes.keys) {
-      if (noteVersion > latestStartedVersion) newNotes[noteVersion] = allNotes[noteVersion]!;
+      if (noteVersion > latestStartedVersion)
+        newNotes[noteVersion] = allNotes[noteVersion]!;
     }
     while (newNotes.length > 2) {
-      newNotes.remove(newNotes.keys.fold(null, (oldest, e) => e > oldest ? oldest : e));
+      final oldestVersion = newNotes.keys.reduce(
+        (oldest, e) => e < oldest ? e : oldest,
+      );
+      newNotes.remove(oldestVersion);
     }
     return newNotes;
   }
 
-  static void showPatchNotesIfNeeded(BuildContext context, Version latestStartedVersion) {
+  static void showPatchNotesIfNeeded(
+    BuildContext context,
+    Version latestStartedVersion,
+  ) {
     if (latestStartedVersion < InfoUtils.currentVersion) {
-      Logger.info('Showing patch notes between $latestStartedVersion and ${InfoUtils.currentVersion}');
-      return _showPatchNotes(context: context, latestStartedVersion: latestStartedVersion);
+      Logger.info(
+        'Showing patch notes between $latestStartedVersion and ${InfoUtils.currentVersion}',
+      );
+      return _showPatchNotes(
+        context: context,
+        latestStartedVersion: latestStartedVersion,
+      );
     }
-    Logger.info('No patch notes to show. Latest version: $latestStartedVersion. Current version: ${InfoUtils.currentVersion}');
+    Logger.info(
+      'No patch notes to show. Latest version: $latestStartedVersion. Current version: ${InfoUtils.currentVersion}',
+    );
   }
 
-  static void _showPatchNotes({required BuildContext context, required Version latestStartedVersion}) {
-    final newNotes = _getNewPatchNotes(context: context, latestStartedVersion: latestStartedVersion);
+  static void _showPatchNotes({
+    required BuildContext context,
+    required Version latestStartedVersion,
+  }) {
+    final newNotes = _getNewPatchNotes(
+      context: context,
+      latestStartedVersion: latestStartedVersion,
+    );
     if (newNotes.isEmpty) return;
     showDialog(
       context: context,

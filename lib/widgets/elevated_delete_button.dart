@@ -33,8 +33,8 @@ class ElevatedDeleteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ElevatedButton(
-        onPressed: onPressed,
-        style: Theme.of(context).extension<ElevatedDeleteButtonTheme>()?.style,
-        child: Text(text),
-      );
+    onPressed: onPressed,
+    style: Theme.of(context).extension<ElevatedDeleteButtonTheme>()?.style,
+    child: Text(text),
+  );
 }

@@ -28,9 +28,13 @@ abstract class ProgressState with _$ProgressState {
 
   const ProgressState._();
 
-  const factory ProgressState.uninitialized({@Default(0) int max, @Default(0) int value}) = ProgressStateUninitialized;
+  const factory ProgressState.uninitialized({
+    @Default(0) int max,
+    @Default(0) int value,
+  }) = ProgressStateUninitialized;
 
   @Assert('max >= 0', 'max must be greater than or equal to 0')
   @Assert('value <= max', 'value must be less than or equal to max')
-  const factory ProgressState({required int max, required int value}) = _ProgressState;
+  const factory ProgressState({required int max, required int value}) =
+      _ProgressState;
 }

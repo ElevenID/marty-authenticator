@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../../model/extensions/enums/duration_unit_extension.dart';
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/enums/duration_unit.dart';
 import '../labeled_dropdown_button.dart';
 
@@ -38,11 +38,13 @@ class DurationDropdownButton extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => LabeledDropdownButton<Duration>(
-        label: AppLocalizations.of(context)!.period,
-        enabled: enabled,
-        valueNotifier: periodNotifier,
-        values: values,
-        valueLabels: [for (final value in values) unit.durationToUnitInt(value).toString()],
-        postFix: unit.postfix,
-      );
+    label: AppLocalizations.of(context)!.period,
+    enabled: enabled,
+    valueNotifier: periodNotifier,
+    values: values,
+    valueLabels: [
+      for (final value in values) unit.durationToUnitInt(value).toString(),
+    ],
+    postFix: unit.postfix,
+  );
 }

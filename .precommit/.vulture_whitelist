@@ -1,0 +1,39 @@
+# Vulture whitelist file
+# This file contains exceptions for vulture dead code detection
+
+# Generated Flutter files - these have required LLDB interface signatures
+ios/Flutter/ephemeral/flutter_lldb_helper.py:*
+local_plugins/pi-authenticator-legacy/example/ios/Flutter/ephemeral/flutter_lldb_helper.py:*
+
+# Plugin files with unused imports/variables for future development
+docker/plugins/custom-tokens/demotoken.py:to_bytes
+docker/plugins/custom-tokens/demotoken.py:to_unicode
+docker/plugins/custom-tokens/mdoctoken.py:time
+docker/plugins/custom-tokens/mdoctoken.py:Tuple
+docker/plugins/custom-tokens/oid4vc_token.py:quote
+docker/plugins/custom-tokens/oid4vc_token.py:urlencode
+docker/plugins/custom-tokens/oid4vc_token.py:create_png
+docker/plugins/custom-tokens/oid4vc_token.py:generate_otpkey
+docker/plugins/custom-tokens/oid4vc_token.py:GROUP
+
+# Variables used for debugging or future implementation
+docker/plugins/custom-tokens/demotoken.py:counter
+docker/plugins/custom-tokens/demotoken.py:window
+docker/plugins/custom-tokens/oid4vc_token.py:count
+docker/plugins/custom-tokens/oid4vc_token.py:curTime
+docker/plugins/custom-tokens/oid4vc_token.py:epoch_end
+docker/plugins/custom-tokens/oid4vc_token.py:epoch_start
+docker/plugins/custom-tokens/oid4vc_token.py:otp1
+docker/plugins/custom-tokens/oid4vc_token.py:otp2
+docker/plugins/custom-tokens/spruce_mdoc_token.py:response_data
+docker/plugins/custom-tokens/spruce_oid4vc_token.py:vp_jwt
+docker/plugins/custom-tokens/spruce_oid4vc_token.py:credential_data
+docker/plugins/custom-tokens/spruce_sdjwt_token.py:disclosure_frame
+docker/plugins/custom-tokens/spruce_sdjwt_token.py:disclosed_claims
+docker/plugins/custom-tokens/spruce_sdjwt_token.py:disclosure_policy
+
+# Service integration variables for future development
+docker/plugins/custom-services/spruce_integration_service.py:disclosure_frame
+docker/plugins/custom-services/spruce_integration_service.py:required_claims
+docker/plugins/custom-services/spruce_integration_service.py:vp_request
+docker/plugins/custom-services/spruce_integration_service.py:credential_offer

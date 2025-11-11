@@ -21,7 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/token_container.dart';
 import '../../../../../utils/view_utils.dart';
 import '../../../../../widgets/dialog_widgets/default_dialog.dart';
@@ -36,7 +36,10 @@ class DeleteContainerTokenDialog extends ConsumerWidget {
     final returnValue = await showAsyncDialog(
       builder: (context) => DeleteContainerTokenDialog(container),
     );
-    assert(returnValue is bool?, "The return value of the DeleteContainerTokenDialog must be a bool or null.");
+    assert(
+      returnValue is bool?,
+      "The return value of the DeleteContainerTokenDialog must be a bool or null.",
+    );
     return returnValue;
   }
 
@@ -44,8 +47,14 @@ class DeleteContainerTokenDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
     return DefaultDialog(
-      title: Text(AppLocalizations.of(context)!.deleteContainerDialogTitle(container.serial)),
-      content: Text(appLocalizations.containerDeleteCorrespondingTokenDialogContent),
+      title: Text(
+        AppLocalizations.of(
+          context,
+        )!.deleteContainerDialogTitle(container.serial),
+      ),
+      content: Text(
+        appLocalizations.containerDeleteCorrespondingTokenDialogContent,
+      ),
       hasCloseButton: true,
       actions: [
         ElevatedDeleteButton(

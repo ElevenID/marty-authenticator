@@ -22,7 +22,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../../model/enums/introduction.dart';
 import '../../../../../../model/tokens/totp_token.dart';
 import '../../../../../../utils/customization/theme_extentions/action_theme.dart';
@@ -35,58 +35,67 @@ import '../../slideable_action.dart';
 class EditTOTPTokenAction extends ConsumerSlideableAction {
   final TOTPToken token;
 
-  const EditTOTPTokenAction({
-    super.key,
-    required this.token,
-  });
+  const EditTOTPTokenAction({super.key, required this.token});
 
   @override
   CustomSlidableAction build(context, ref) => CustomSlidableAction(
-      backgroundColor: Theme.of(context).extension<TokenTileTheme>()!.editColor,
-      foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
-      onPressed: (context) async {
-        if (token.isLocked && !await lockAuth(reason: (localization) => localization.editLockedToken, localization: AppLocalizations.of(context)!)) {
-          return;
-        }
-        _showDialog();
-      },
-      child: FocusedItemAsOverlay(
-        tooltipWhenFocused: AppLocalizations.of(context)!.introEditToken,
-        childIsMoving: true,
-        alignment: Alignment.bottomCenter,
-        isFocused: ref.watch(introductionNotifierProvider).when(
-              data: (value) => value.isConditionFulfilled(ref, Introduction.editToken),
-              error: (Object error, StackTrace stackTrace) => false,
-              loading: () => false,
-            ),
-        onComplete: () => ref.read(introductionNotifierProvider.notifier).complete(Introduction.editToken),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(Icons.edit),
-            Text(
-              AppLocalizations.of(context)!.edit,
-              overflow: TextOverflow.fade,
-              softWrap: false,
-            ),
-          ],
-        ),
-      ));
+    backgroundColor: Theme.of(context).extension<TokenTileTheme>()!.editColor,
+    foregroundColor: Theme.of(
+      context,
+    ).extension<TokenTileTheme>()!.actionForegroundColor,
+    onPressed: (context) async {
+      if (token.isLocked &&
+          !await lockAuth(
+            reason: (localization) => localization.editLockedToken,
+            localization: AppLocalizations.of(context)!,
+          )) {
+        return;
+      }
+      _showDialog();
+    },
+    child: FocusedItemAsOverlay(
+      tooltipWhenFocused: AppLocalizations.of(context)!.introEditToken,
+      childIsMoving: true,
+      alignment: Alignment.bottomCenter,
+      isFocused: ref
+          .watch(introductionNotifierProvider)
+          .when(
+            data: (value) =>
+                value.isConditionFulfilled(ref, Introduction.editToken),
+            error: (Object error, StackTrace stackTrace) => false,
+            loading: () => false,
+          ),
+      onComplete: () => ref
+          .read(introductionNotifierProvider.notifier)
+          .complete(Introduction.editToken),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(Icons.edit),
+          Text(
+            AppLocalizations.of(context)!.edit,
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+        ],
+      ),
+    ),
+  );
 
   void _showDialog() => showAsyncDialog(
-        builder: (BuildContext context) => DefaultEditActionDialog(
-          token: token,
-          additionalChildren: [
-            ReadOnlyTextFormField(
-              text: token.algorithm.name,
-              labelText: AppLocalizations.of(context)!.algorithm,
-            ),
-            ReadOnlyTextFormField(
-              text: token.period.toString().split('.').first,
-              labelText: AppLocalizations.of(context)!.period,
-            ),
-          ],
+    builder: (BuildContext context) => DefaultEditActionDialog(
+      token: token,
+      additionalChildren: [
+        ReadOnlyTextFormField(
+          text: token.algorithm.name,
+          labelText: AppLocalizations.of(context)!.algorithm,
         ),
-      );
+        ReadOnlyTextFormField(
+          text: token.period.toString().split('.').first,
+          labelText: AppLocalizations.of(context)!.period,
+        ),
+      ],
+    ),
+  );
 }

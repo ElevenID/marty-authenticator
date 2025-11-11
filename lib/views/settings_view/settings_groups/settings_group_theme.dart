@@ -20,7 +20,7 @@
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/home_widget_utils.dart';
 import '../settings_view_widgets/settings_group.dart';
 
@@ -35,7 +35,9 @@ class SettingsGroupTheme extends StatelessWidget {
       onPressed: () {
         switch (current) {
           case ThemeMode.light:
-            EasyDynamicTheme.of(context).changeTheme(dynamic: false, dark: true);
+            EasyDynamicTheme.of(
+              context,
+            ).changeTheme(dynamic: false, dark: true);
             HomeWidgetUtils().setCurrentThemeMode(ThemeMode.dark);
             break;
           case ThemeMode.dark:
@@ -43,11 +45,15 @@ class SettingsGroupTheme extends StatelessWidget {
             HomeWidgetUtils().setCurrentThemeMode(ThemeMode.system);
             break;
           case ThemeMode.system:
-            EasyDynamicTheme.of(context).changeTheme(dynamic: false, dark: false);
+            EasyDynamicTheme.of(
+              context,
+            ).changeTheme(dynamic: false, dark: false);
             HomeWidgetUtils().setCurrentThemeMode(ThemeMode.light);
             break;
           case null:
-            EasyDynamicTheme.of(context).changeTheme(dynamic: false, dark: false);
+            EasyDynamicTheme.of(
+              context,
+            ).changeTheme(dynamic: false, dark: false);
             HomeWidgetUtils().setCurrentThemeMode(ThemeMode.light);
             break;
         }

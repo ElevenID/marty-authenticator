@@ -28,17 +28,29 @@ class NavigationDeepLinkListener extends DeepLinkListener {
   static BuildContext? _context;
   NavigationDeepLinkListener({required super.provider, BuildContext? context})
     : super(
-        onNewState: (WidgetRef ref, AsyncValue<DeepLink>? previous, AsyncValue<DeepLink> next) {
-          _onNewState(previous, next);
-        },
+        onNewState:
+            (
+              WidgetRef ref,
+              AsyncValue<DeepLink>? previous,
+              AsyncValue<DeepLink> next,
+            ) {
+              _onNewState(previous, next);
+            },
         listenerName: 'NavigationSchemeProcessor.processUriByAny',
       ) {
     _context = context;
   }
 
-  static void _onNewState(AsyncValue<DeepLink>? previous, AsyncValue<DeepLink> next) {
+  static void _onNewState(
+    AsyncValue<DeepLink>? previous,
+    AsyncValue<DeepLink> next,
+  ) {
     next.whenData((next) {
-      NavigationSchemeProcessor.processUriByAny(next.uri, context: _context, fromInit: next.fromInit);
+      NavigationSchemeProcessor.processUriByAny(
+        next.uri,
+        context: _context,
+        fromInit: next.fromInit,
+      );
     });
   }
 }

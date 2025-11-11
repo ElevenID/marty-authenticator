@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/extensions/token_list_extension.dart';
 import '../../../../../model/tokens/token.dart';
 import '../../../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
@@ -30,27 +30,40 @@ import '../../../../../widgets/select_tokens_widget.dart';
 class SelectExportTokensDialog extends ConsumerStatefulWidget {
   final bool multiSelect;
   final Widget Function(Set<Token> tokens) dialogBuilder;
-  const SelectExportTokensDialog({this.multiSelect = true, required this.dialogBuilder, super.key});
+  const SelectExportTokensDialog({
+    this.multiSelect = true,
+    required this.dialogBuilder,
+    super.key,
+  });
 
   @override
-  ConsumerState<SelectExportTokensDialog> createState() => _SelectTokensDialogState();
+  ConsumerState<SelectExportTokensDialog> createState() =>
+      _SelectTokensDialogState();
 }
 
 class _SelectTokensDialogState extends ConsumerState<SelectExportTokensDialog> {
   final Set<Token> _selectedTokens = {};
   @override
   Widget build(BuildContext context) {
-    final exportableTokens = ref.read(tokenProvider).value?.tokens.exportableTokens.toSet() ?? {};
+    final exportableTokens =
+        ref.read(tokenProvider).value?.tokens.exportableTokens.toSet() ?? {};
     final theme = Theme.of(context);
     final appLocalizations = AppLocalizations.of(context)!;
     return DefaultDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(child: Text(appLocalizations.selectTokensToExport(widget.multiSelect ? 2 : 1))),
+          Flexible(
+            child: Text(
+              appLocalizations.selectTokensToExport(widget.multiSelect ? 2 : 1),
+            ),
+          ),
           GestureDetector(
             onTap: _showHelpDialog,
-            child: Icon(Icons.help_outline_rounded, color: theme.textTheme.bodyMedium?.color),
+            child: Icon(
+              Icons.help_outline_rounded,
+              color: theme.textTheme.bodyMedium?.color,
+            ),
           ),
         ],
       ),
@@ -69,7 +82,10 @@ class _SelectTokensDialogState extends ConsumerState<SelectExportTokensDialog> {
               },
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(appLocalizations.cancel)),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(appLocalizations.cancel),
+        ),
         if (widget.multiSelect)
           TextButton(
             onPressed: _selectedTokens.isNotEmpty
@@ -85,14 +101,20 @@ class _SelectTokensDialogState extends ConsumerState<SelectExportTokensDialog> {
 
   void _showExportDialog(Set<Token> tokens) async {
     if (tokens.isEmpty) return;
-    final isExported = await showDialog<bool>(useRootNavigator: false, context: context, builder: (context) => widget.dialogBuilder(tokens));
+    final isExported = await showDialog<bool>(
+      useRootNavigator: false,
+      context: context,
+      builder: (context) => widget.dialogBuilder(tokens),
+    );
     if (isExported == true && mounted) Navigator.of(context).pop(isExported);
   }
 
   void _showHelpDialog() => showDialog(
     context: context,
-    builder: (context) =>
-        DefaultDialog(title: Text(AppLocalizations.of(context)!.selectTokensToExportHelpTitle), content: SelectTokensToExportHelpContentWidget()),
+    builder: (context) => DefaultDialog(
+      title: Text(AppLocalizations.of(context)!.selectTokensToExportHelpTitle),
+      content: SelectTokensToExportHelpContentWidget(),
+    ),
   );
 }
 
@@ -105,7 +127,9 @@ class SelectTokensToExportHelpContentWidget extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('${appLocalizations.selectTokensToExportHelpContent1} ${appLocalizations.selectTokensToExportHelpContent2}'),
+        Text(
+          '${appLocalizations.selectTokensToExportHelpContent1} ${appLocalizations.selectTokensToExportHelpContent2}',
+        ),
         SizedBox(height: 8),
         Text(appLocalizations.selectTokensToExportHelpContent3),
         SizedBox(height: 8),

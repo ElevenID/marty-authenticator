@@ -11,7 +11,8 @@ class PushRequestListener extends ConsumerStatefulWidget {
   const PushRequestListener({required this.child, super.key});
 
   @override
-  ConsumerState<PushRequestListener> createState() => _PushRequestListenerState();
+  ConsumerState<PushRequestListener> createState() =>
+      _PushRequestListenerState();
 }
 
 class _PushRequestListenerState extends ConsumerState<PushRequestListener> {
@@ -27,12 +28,17 @@ class _PushRequestListenerState extends ConsumerState<PushRequestListener> {
   Widget build(BuildContext context) {
     final hasPushToken = ref.watch(tokenProvider).value?.hasPushTokens ?? false;
     if (!hasPushToken) return widget.child;
-    final pushRequest = ref.watch(pushRequestProvider).whenOrNull(data: (data) => data.pushRequests.firstOrNull);
+    final pushRequest = ref
+        .watch(pushRequestProvider)
+        .whenOrNull(data: (data) => data.pushRequests.firstOrNull);
     if (pushRequest == null) return widget.child;
     return Stack(
       children: [
         widget.child,
-        PushRequestDialog(pushRequest: pushRequest, key: Key('${pushRequest.hashCode.toString()}#PushRequestDialog')),
+        PushRequestDialog(
+          pushRequest: pushRequest,
+          key: Key('${pushRequest.hashCode.toString()}#PushRequestDialog'),
+        ),
       ],
     );
   }

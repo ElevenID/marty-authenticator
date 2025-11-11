@@ -27,14 +27,24 @@ import '../../../model/tokens/token.dart';
 import '../../home_widget_utils.dart';
 
 class HomeWidgetTokenStateListener extends TokenStateListener {
-  const HomeWidgetTokenStateListener({required super.provider}) : super(onNewState: _onNewState, listenerName: 'HomeWidgetUtils().updateTokensIfLinked');
+  const HomeWidgetTokenStateListener({required super.provider})
+    : super(
+        onNewState: _onNewState,
+        listenerName: 'HomeWidgetUtils().updateTokensIfLinked',
+      );
 
-  static void _onNewState(AsyncValue<TokenState>? previous, AsyncValue<TokenState> next, WidgetRef ref) {
+  static void _onNewState(
+    AsyncValue<TokenState>? previous,
+    AsyncValue<TokenState> next,
+    WidgetRef ref,
+  ) {
     final updateTokens = <Token>[];
     final previousTokens = previous?.value?.tokens ?? [];
     final nextTokens = next.value?.lastlyUpdatedTokens ?? [];
     for (final nextToken in nextTokens) {
-      final previousToken = previousTokens.firstWhereOrNull((previousToken) => previousToken.id == nextToken.id);
+      final previousToken = previousTokens.firstWhereOrNull(
+        (previousToken) => previousToken.id == nextToken.id,
+      );
       if (previousToken == null) {
         updateTokens.add(nextToken);
         continue;
@@ -42,7 +52,9 @@ class HomeWidgetTokenStateListener extends TokenStateListener {
       if (previousToken.issuer != nextToken.issuer ||
           previousToken.label != nextToken.label ||
           previousToken.isLocked != nextToken.isLocked ||
-          (previousToken is HOTPToken && nextToken is HOTPToken && previousToken.counter != nextToken.counter)) {
+          (previousToken is HOTPToken &&
+              nextToken is HOTPToken &&
+              previousToken.counter != nextToken.counter)) {
         updateTokens.add(nextToken);
       }
     }

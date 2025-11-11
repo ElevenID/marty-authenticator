@@ -1,0 +1,48 @@
+# Simplified pre-commit configuration for testing
+# See https://pre-commit.com for more information
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        exclude: ^pubspec\.yaml$
+      - id: check-json
+      - id: check-merge-conflict
+
+  # Python formatting and linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Python import sorting
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--line-length", "88"]
+
+  # Flutter/Dart formatting
+  - repo: local
+    hooks:
+      - id: dart-format
+        name: Format Dart files
+        entry: dart format --fix
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      - id: flutter-analyze
+        name: Flutter analyze
+        entry: flutter analyze
+        language: system
+        files: \.dart$
+        pass_filenames: false
+        stages: [pre-commit]

@@ -23,7 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
 import 'package:privacyidea_authenticator/views/settings_view/settings_groups/settings_group_allow_screenshot/dialogs/allow_screenshot_dialog.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../settings_view_widgets/settings_group.dart';
 
 class SettingsGroupAllowScreenshot extends ConsumerWidget {
@@ -55,7 +55,9 @@ class SettingsGroupAllowScreenshot extends ConsumerWidget {
                 if (allowed != true) return;
                 ref.read(allowScreenshotProvider.notifier).allowScreenshots();
               } else {
-                ref.read(allowScreenshotProvider.notifier).disallowScreenshots();
+                ref
+                    .read(allowScreenshotProvider.notifier)
+                    .disallowScreenshots();
               }
             },
           ),

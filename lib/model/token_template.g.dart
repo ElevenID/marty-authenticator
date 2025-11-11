@@ -6,9 +6,9 @@ part of 'token_template.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_TokenTemplateWithSerial _$TokenTemplateWithSerialFromJson(
+_$TokenTemplateWithSerialImpl _$$TokenTemplateWithSerialImplFromJson(
   Map<String, dynamic> json,
-) => _TokenTemplateWithSerial(
+) => _$TokenTemplateWithSerialImpl(
   otpAuthMap: json['otpAuthMap'] as Map<String, dynamic>,
   serial: json['serial'] as String,
   additionalData: json['additionalData'] as Map<String, dynamic>? ?? const {},
@@ -18,8 +18,8 @@ _TokenTemplateWithSerial _$TokenTemplateWithSerialFromJson(
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$TokenTemplateWithSerialToJson(
-  _TokenTemplateWithSerial instance,
+Map<String, dynamic> _$$TokenTemplateWithSerialImplToJson(
+  _$TokenTemplateWithSerialImpl instance,
 ) => <String, dynamic>{
   'otpAuthMap': instance.otpAuthMap,
   'serial': instance.serial,
@@ -28,9 +28,9 @@ Map<String, dynamic> _$TokenTemplateWithSerialToJson(
   'runtimeType': instance.$type,
 };
 
-_TokenTemplateWithOtps _$TokenTemplateWithOtpsFromJson(
+_$TokenTemplateWithOtpsImpl _$$TokenTemplateWithOtpsImplFromJson(
   Map<String, dynamic> json,
-) => _TokenTemplateWithOtps(
+) => _$TokenTemplateWithOtpsImpl(
   otpAuthMap: json['otpAuthMap'] as Map<String, dynamic>,
   otps: (json['otps'] as List<dynamic>).map((e) => e as String).toList(),
   additionalData: json['additionalData'] as Map<String, dynamic>? ?? const {},
@@ -40,8 +40,8 @@ _TokenTemplateWithOtps _$TokenTemplateWithOtpsFromJson(
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$TokenTemplateWithOtpsToJson(
-  _TokenTemplateWithOtps instance,
+Map<String, dynamic> _$$TokenTemplateWithOtpsImplToJson(
+  _$TokenTemplateWithOtpsImpl instance,
 ) => <String, dynamic>{
   'otpAuthMap': instance.otpAuthMap,
   'otps': instance.otps,

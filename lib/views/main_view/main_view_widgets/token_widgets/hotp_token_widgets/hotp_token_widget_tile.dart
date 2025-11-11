@@ -23,7 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../../utils/view_utils.dart';
 import '../../../../../../../widgets/button_widgets/cooldown_button.dart';
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/tokens/hotp_token.dart';
 import '../../../../../utils/globals.dart';
 import '../../../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
@@ -47,7 +47,9 @@ class HOTPTokenWidgetTile extends ConsumerWidget {
 
     globalRef?.read(disableCopyOtpProvider.notifier).state = true;
     Clipboard.setData(ClipboardData(text: token.otpValue));
-    showSnackBar(AppLocalizations.of(context)!.otpValueCopiedMessage(token.otpValue));
+    showSnackBar(
+      AppLocalizations.of(context)!.otpValueCopiedMessage(token.otpValue),
+    );
     Future.delayed(const Duration(seconds: 5), () {
       globalRef?.read(disableCopyOtpProvider.notifier).state = false;
     });
@@ -55,48 +57,38 @@ class HOTPTokenWidgetTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TokenWidgetTile(
-        key: Key('${token.hashCode}TokenWidgetTile'),
-        token: token,
-        semanticsLabel: token.isHidden ? AppLocalizations.of(context)!.authenticateToShowOtp : AppLocalizations.of(context)!.copyOTPToClipboard,
-        titleOnTap: isPreview
-            ? null
-            : token.isLocked && token.isHidden
-                ? () async => await ref.read(tokenProvider.notifier).showToken(token)
-                : () => _copyOtpValue(context),
-        title: insertCharAt(token.otpValue, ' ', (token.digits / 2).ceil()),
-        additionalSubtitles: isPreview
-            ? [
-                'Algorithm: ${token.algorithm.name}',
-                'Counter: ${token.counter}',
-              ]
-            : [],
-        trailing: CustomTrailing(
-          child: isPreview
-              ? FittedBox(
-                  fit: BoxFit.contain,
-                  child: Icon(
-                    size: 100,
-                    Icons.replay,
-                  ),
-                )
-              : HideableWidget(
-                  token: token,
-                  isHidden: token.isHidden,
-                  child: Semantics(
-                    label: AppLocalizations.of(context)!.increaseCounter,
-                    child: CooldownButton(
-                      styleType: CooldownButtonStyleType.iconButton,
-                      onPressed: () async => _updateOtpValue(),
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: Icon(
-                          size: 100,
-                          Icons.replay,
-                        ),
-                      ),
-                    ),
+    key: Key('${token.hashCode}TokenWidgetTile'),
+    token: token,
+    semanticsLabel: token.isHidden
+        ? AppLocalizations.of(context)!.authenticateToShowOtp
+        : AppLocalizations.of(context)!.copyOTPToClipboard,
+    titleOnTap: isPreview
+        ? null
+        : token.isLocked && token.isHidden
+        ? () async => await ref.read(tokenProvider.notifier).showToken(token)
+        : () => _copyOtpValue(context),
+    title: insertCharAt(token.otpValue, ' ', (token.digits / 2).ceil()),
+    additionalSubtitles: isPreview
+        ? ['Algorithm: ${token.algorithm.name}', 'Counter: ${token.counter}']
+        : [],
+    trailing: CustomTrailing(
+      child: isPreview
+          ? FittedBox(fit: BoxFit.contain, child: Icon(size: 100, Icons.replay))
+          : HideableWidget(
+              token: token,
+              isHidden: token.isHidden,
+              child: Semantics(
+                label: AppLocalizations.of(context)!.increaseCounter,
+                child: CooldownButton(
+                  styleType: CooldownButtonStyleType.iconButton,
+                  onPressed: () async => _updateOtpValue(),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Icon(size: 100, Icons.replay),
                   ),
                 ),
-        ),
-      );
+              ),
+            ),
+    ),
+  );
 }

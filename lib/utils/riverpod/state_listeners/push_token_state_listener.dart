@@ -25,10 +25,19 @@ import '../../../interfaces/riverpod/state_listeners/state_notifier_provider_lis
 import '../../../model/riverpod_states/token_state.dart';
 
 class PushProviderTokenStateListener extends TokenStateListener {
-  const PushProviderTokenStateListener({required super.provider}) : super(onNewState: _onNewState, listenerName: 'pushRequestProvider: initFirebase');
+  const PushProviderTokenStateListener({required super.provider})
+    : super(
+        onNewState: _onNewState,
+        listenerName: 'pushRequestProvider: initFirebase',
+      );
 
-  static void _onNewState(AsyncValue<TokenState>? previousValue, AsyncValue<TokenState> nextValue, WidgetRef ref) {
-    if (previousValue?.value?.needsFirebase == nextValue.value?.needsFirebase) return;
+  static void _onNewState(
+    AsyncValue<TokenState>? previousValue,
+    AsyncValue<TokenState> nextValue,
+    WidgetRef ref,
+  ) {
+    if (previousValue?.value?.needsFirebase == nextValue.value?.needsFirebase)
+      return;
     if (nextValue.value?.needsFirebase != true) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(pushRequestProvider.notifier).initFirebase();

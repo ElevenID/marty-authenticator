@@ -11,19 +11,19 @@ import 'package:privacyidea_authenticator/model/tokens/token.dart';
 import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
 
 TOTPToken get totpToken => TOTPToken(
-      period: 30,
-      label: 'label',
-      issuer: 'issuer',
-      id: 'id',
-      algorithm: Algorithms.SHA1,
-      digits: 6,
-      secret: 'secret',
-      pin: false,
-      tokenImage: 'example.png',
-      sortIndex: 0,
-      isLocked: false,
-      folderId: 0,
-    );
+  period: 30,
+  label: 'label',
+  issuer: 'issuer',
+  id: 'id',
+  algorithm: Algorithms.SHA1,
+  digits: 6,
+  secret: 'secret',
+  pin: false,
+  tokenImage: 'example.png',
+  sortIndex: 0,
+  isLocked: false,
+  folderId: 0,
+);
 
 void main() {
   _testTotpToken();
@@ -87,7 +87,9 @@ void _testTotpToken() {
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
           OTPToken.DIGITS: '6',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           TOTPToken.PERIOD_SECONDS: '30',
         };
         final totpFromUriMap = TOTPToken.fromOtpAuthMap(uriMap);
@@ -112,7 +114,10 @@ void _testTotpToken() {
           OTPToken.DIGITS: 6,
           TOTPToken.PERIOD_SECONDS: 30,
         };
-        expect(() => TOTPToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => TOTPToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
       test('with zero period', () {
         final uriMap = {
@@ -126,7 +131,10 @@ void _testTotpToken() {
           OTPToken.SECRET_BASE32: Uint8List.fromList(utf8.encode('secret')),
           TOTPToken.PERIOD_SECONDS: 0,
         };
-        expect(() => TOTPToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => TOTPToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
       test('with zero digits', () {
         final uriMap = {
@@ -140,7 +148,10 @@ void _testTotpToken() {
           OTPToken.SECRET_BASE32: Uint8List.fromList(utf8.encode('secret')),
           TOTPToken.PERIOD_SECONDS: 30,
         };
-        expect(() => TOTPToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => TOTPToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
       test('with lowercase algorithm', () {
         final uriMap = {
@@ -159,7 +170,10 @@ void _testTotpToken() {
       });
       test('with empty map', () {
         final uriMap = <String, dynamic>{};
-        expect(() => TOTPToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => TOTPToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
     });
     test('toUriMap', () {
@@ -249,7 +263,12 @@ void _testTotpToken() {
         secret: 'secret',
       );
 
-      expect(totpToken.isSameTokenAs(totpToken.copyWith(algorithm: Algorithms.SHA256)), isTrue);
+      expect(
+        totpToken.isSameTokenAs(
+          totpToken.copyWith(algorithm: Algorithms.SHA256),
+        ),
+        isTrue,
+      );
     });
     test('no serial | different id | same parameters', () {
       // No serial, different id. Should recognize by parameters
@@ -277,7 +296,12 @@ void _testTotpToken() {
         secret: 'secret',
       );
 
-      expect(totpToken.isSameTokenAs(totpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), isFalse);
+      expect(
+        totpToken.isSameTokenAs(
+          totpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        isFalse,
+      );
     });
     test('same serial | different id | different parameters', () {
       // Different id, different parameters. Should recognize by serial
@@ -292,7 +316,12 @@ void _testTotpToken() {
         secret: 'secret',
       );
 
-      expect(totpToken.isSameTokenAs(totpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), isTrue);
+      expect(
+        totpToken.isSameTokenAs(
+          totpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        isTrue,
+      );
     });
     test('different serial | same id | different parameters', () {
       // Different serial, different parameters. Should recognize by id
@@ -307,7 +336,12 @@ void _testTotpToken() {
         secret: 'secret',
       );
 
-      expect(totpToken.isSameTokenAs(totpToken.copyWith(serial: 'serial2', algorithm: Algorithms.SHA256)), isTrue);
+      expect(
+        totpToken.isSameTokenAs(
+          totpToken.copyWith(serial: 'serial2', algorithm: Algorithms.SHA256),
+        ),
+        isTrue,
+      );
     });
     test('different serial | different id | same parameters', () {
       // Different serial, different id. Should NOT recognize by parameters
@@ -322,7 +356,12 @@ void _testTotpToken() {
         secret: 'secret',
       );
 
-      expect(totpToken.isSameTokenAs(totpToken.copyWith(serial: 'serial2', id: 'id2')), isFalse);
+      expect(
+        totpToken.isSameTokenAs(
+          totpToken.copyWith(serial: 'serial2', id: 'id2'),
+        ),
+        isFalse,
+      );
     });
   });
   group('Calculate TOTP Token values', () {
@@ -340,7 +379,9 @@ void _testTotpToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -362,7 +403,9 @@ void _testTotpToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -387,7 +430,9 @@ void _testTotpToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -409,7 +454,9 @@ void _testTotpToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -435,7 +482,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -457,7 +506,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -479,7 +530,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -505,7 +558,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -527,7 +582,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,
@@ -549,7 +606,9 @@ void _testTotpToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final totpToken = TOTPToken(
           period: period.inSeconds,

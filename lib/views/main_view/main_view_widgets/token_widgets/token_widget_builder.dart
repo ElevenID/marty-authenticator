@@ -41,18 +41,48 @@ abstract class TokenWidgetBuilder {
       const (TOTPToken) => TOTPTokenWidget(token as TOTPToken, key: key),
       const (HOTPToken) => HOTPTokenWidget(token as HOTPToken, key: key),
       const (PushToken) => PushTokenWidget(token as PushToken, key: key),
-      const (DayPasswordToken) => DayPasswordTokenWidget(token as DayPasswordToken, key: key),
+      const (DayPasswordToken) => DayPasswordTokenWidget(
+        token as DayPasswordToken,
+        key: key,
+      ),
       const (SteamToken) => TOTPTokenWidget(token as SteamToken, key: key),
-      _ => throw UnimplementedError('Token type (${token.runtimeType}) not supported in this Version of the App')
+      _ => throw UnimplementedError(
+        'Token type (${token.runtimeType}) not supported in this Version of the App',
+      ),
     };
   }
 
-  static Widget previewFromToken(Token token, {Key? key}) => switch (token.runtimeType) {
-        const (TOTPToken) => TOTPTokenWidgetTile(token as TOTPToken, key: key, isPreview: true),
-        const (HOTPToken) => HOTPTokenWidgetTile(token as HOTPToken, key: key, isPreview: true),
-        const (PushToken) => PushTokenWidgetTile(token as PushToken, key: key, isPreview: true),
-        const (DayPasswordToken) => DayPasswordTokenWidgetTile(token as DayPasswordToken, key: key, isPreview: true),
-        const (SteamToken) => TOTPTokenWidgetTile(token as SteamToken, key: key, isPreview: true),
-        _ => throw UnimplementedError('Preview for token type (${token.runtimeType}) not supported in this Version of the App')
-      };
+  static Widget previewFromToken(
+    Token token, {
+    Key? key,
+  }) => switch (token.runtimeType) {
+    const (TOTPToken) => TOTPTokenWidgetTile(
+      token as TOTPToken,
+      key: key,
+      isPreview: true,
+    ),
+    const (HOTPToken) => HOTPTokenWidgetTile(
+      token as HOTPToken,
+      key: key,
+      isPreview: true,
+    ),
+    const (PushToken) => PushTokenWidgetTile(
+      token as PushToken,
+      key: key,
+      isPreview: true,
+    ),
+    const (DayPasswordToken) => DayPasswordTokenWidgetTile(
+      token as DayPasswordToken,
+      key: key,
+      isPreview: true,
+    ),
+    const (SteamToken) => TOTPTokenWidgetTile(
+      token as SteamToken,
+      key: key,
+      isPreview: true,
+    ),
+    _ => throw UnimplementedError(
+      'Preview for token type (${token.runtimeType}) not supported in this Version of the App',
+    ),
+  };
 }

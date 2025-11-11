@@ -9,20 +9,20 @@ import 'package:privacyidea_authenticator/model/tokens/otp_token.dart';
 import 'package:privacyidea_authenticator/model/tokens/token.dart';
 
 HOTPToken get hotpToken => HOTPToken(
-      counter: 1,
-      label: 'label',
-      issuer: 'issuer',
-      id: 'id',
-      algorithm: Algorithms.SHA1,
-      digits: 6,
-      secret: 'secret',
-      type: 'type',
-      pin: true,
-      tokenImage: 'example.png',
-      sortIndex: 0,
-      isLocked: false,
-      folderId: 0,
-    );
+  counter: 1,
+  label: 'label',
+  issuer: 'issuer',
+  id: 'id',
+  algorithm: Algorithms.SHA1,
+  digits: 6,
+  secret: 'secret',
+  type: 'type',
+  pin: true,
+  tokenImage: 'example.png',
+  sortIndex: 0,
+  isLocked: false,
+  folderId: 0,
+);
 
 void main() {
   _testHotpToken();
@@ -89,7 +89,9 @@ void _testHotpToken() {
           Token.PIN: Token.PIN_VALUE_TRUE,
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           OTPToken.DIGITS: '6',
           HOTPToken.COUNTER: '10',
         };
@@ -125,7 +127,9 @@ void _testHotpToken() {
           Token.PIN: Token.PIN_VALUE_TRUE,
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           OTPToken.DIGITS: '0',
           HOTPToken.COUNTER: '10',
         };
@@ -146,7 +150,9 @@ void _testHotpToken() {
           Token.PIN: Token.PIN_VALUE_TRUE,
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'sha1',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           OTPToken.DIGITS: '6',
           HOTPToken.COUNTER: '10',
         };
@@ -241,7 +247,12 @@ void _testHotpToken() {
         counter: 0,
       );
 
-      expect(hotpToken.isSameTokenAs(hotpToken.copyWith(algorithm: Algorithms.SHA256)), true);
+      expect(
+        hotpToken.isSameTokenAs(
+          hotpToken.copyWith(algorithm: Algorithms.SHA256),
+        ),
+        true,
+      );
     });
     test('no serial | different id | same parameters', () {
       // No serial, different id. Should recognize by parameters
@@ -269,7 +280,12 @@ void _testHotpToken() {
         counter: 0,
       );
 
-      expect(hotpToken.isSameTokenAs(hotpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), false);
+      expect(
+        hotpToken.isSameTokenAs(
+          hotpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        false,
+      );
     });
     test('same serial | different id | different parameters', () {
       // Different id, different parameters. Should recognize by serial
@@ -284,7 +300,12 @@ void _testHotpToken() {
         counter: 0,
       );
 
-      expect(hotpToken.isSameTokenAs(hotpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), true);
+      expect(
+        hotpToken.isSameTokenAs(
+          hotpToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        true,
+      );
     });
     test('different serial | same id | different parameters', () {
       // Different serial, different parameters. Should recognize by id
@@ -299,7 +320,12 @@ void _testHotpToken() {
         counter: 0,
       );
 
-      expect(hotpToken.isSameTokenAs(hotpToken.copyWith(serial: 'serial2', algorithm: Algorithms.SHA256)), true);
+      expect(
+        hotpToken.isSameTokenAs(
+          hotpToken.copyWith(serial: 'serial2', algorithm: Algorithms.SHA256),
+        ),
+        true,
+      );
     });
     test('different serial | different id | same parameters', () {
       // Different serial, different id. Should NOT recognize by parameters
@@ -314,7 +340,12 @@ void _testHotpToken() {
         counter: 0,
       );
 
-      expect(hotpToken.isSameTokenAs(hotpToken.copyWith(serial: 'serial2', id: 'id2')), false);
+      expect(
+        hotpToken.isSameTokenAs(
+          hotpToken.copyWith(serial: 'serial2', id: 'id2'),
+        ),
+        false,
+      );
     });
   });
   group('Calculate hotp values', () {

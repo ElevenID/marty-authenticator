@@ -15,10 +15,27 @@ void _testPrivacyideaAuthenticatorQrProcessor() {
   group('Pia Scheme Processor test', () {
     test('processUri', () async {
       final tokensList = [
-        HOTPToken(id: 'id1', algorithm: Algorithms.SHA1, digits: 6, secret: 'secret1'),
-        TOTPToken(period: 30, id: 'id2', algorithm: Algorithms.SHA256, digits: 8, secret: 'secret2'),
+        HOTPToken(
+          id: 'id1',
+          algorithm: Algorithms.SHA1,
+          digits: 6,
+          secret: 'secret1',
+        ),
+        TOTPToken(
+          period: 30,
+          id: 'id2',
+          algorithm: Algorithms.SHA256,
+          digits: 8,
+          secret: 'secret2',
+        ),
         SteamToken(id: 'id3', secret: 'secret3'),
-        DayPasswordToken(period: const Duration(hours: 24), id: 'id4', algorithm: Algorithms.SHA512, digits: 10, secret: 'secret4'),
+        DayPasswordToken(
+          period: const Duration(hours: 24),
+          id: 'id4',
+          algorithm: Algorithms.SHA512,
+          digits: 10,
+          secret: 'secret4',
+        ),
         PushToken(serial: 'serial', id: 'id5'),
       ];
       const uriStrings = [

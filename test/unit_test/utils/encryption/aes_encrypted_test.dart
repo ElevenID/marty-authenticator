@@ -16,7 +16,24 @@ void _testAesEncrypted() {
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]),
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -26,8 +43,14 @@ void _testAesEncrypted() {
       );
       expect(aesEncrypted, isNotNull);
       expect(aesEncrypted.data, Uint8List.fromList([41, 142, 95, 156]));
-      expect(aesEncrypted.salt, Uint8List.fromList(List.generate(16, (index) => index)));
-      expect(aesEncrypted.iv, Uint8List.fromList(List.generate(16, (index) => index)));
+      expect(
+        aesEncrypted.salt,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
+      expect(
+        aesEncrypted.iv,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
       expect(
         aesEncrypted.kdf,
         Pbkdf2(
@@ -37,14 +60,51 @@ void _testAesEncrypted() {
         ),
       );
       expect(aesEncrypted.cypher, AesGcm.with256bits());
-      expect(aesEncrypted.mac, const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]));
+      expect(
+        aesEncrypted.mac,
+        const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
+      );
     });
 
     test('constructor mac from data', () {
       final AesEncrypted aesEncrypted = AesEncrypted(
         data: Uint8List.fromList([
           ...[41, 142, 95, 156], // data
-          ...[103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3], // mac
+          ...[
+            103,
+            169,
+            139,
+            92,
+            212,
+            40,
+            200,
+            3,
+            208,
+            110,
+            165,
+            128,
+            152,
+            185,
+            48,
+            3,
+          ], // mac
         ]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
@@ -57,9 +117,35 @@ void _testAesEncrypted() {
       );
       expect(aesEncrypted, isNotNull);
       expect(aesEncrypted.data, Uint8List.fromList([41, 142, 95, 156]));
-      expect(aesEncrypted.salt, Uint8List.fromList(List.generate(16, (index) => index)));
-      expect(aesEncrypted.iv, Uint8List.fromList(List.generate(16, (index) => index)));
-      expect(aesEncrypted.mac, const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]));
+      expect(
+        aesEncrypted.salt,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
+      expect(
+        aesEncrypted.iv,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
+      expect(
+        aesEncrypted.mac,
+        const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
+      );
       expect(
         aesEncrypted.kdf,
         Pbkdf2(
@@ -123,7 +209,24 @@ void _testAesEncrypted() {
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]),
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -138,7 +241,24 @@ void _testAesEncrypted() {
       final AesEncrypted aesEncrypted = AesEncrypted(
         data: Uint8List.fromList([
           ...[41, 142, 95, 156],
-          ...[103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3],
+          ...[
+            103,
+            169,
+            139,
+            92,
+            212,
+            40,
+            200,
+            3,
+            208,
+            110,
+            165,
+            128,
+            152,
+            185,
+            48,
+            3,
+          ],
         ]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
@@ -157,7 +277,24 @@ void _testAesEncrypted() {
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]),
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -165,14 +302,34 @@ void _testAesEncrypted() {
         ),
         cypher: AesGcm.with256bits(),
       );
-      expect(aesEncrypted.decrypt("wrong password"), throwsA(isA<SecretBoxAuthenticationError>()));
+      expect(
+        aesEncrypted.decrypt("wrong password"),
+        throwsA(isA<SecretBoxAuthenticationError>()),
+      );
     });
     test('decrypt wrong mac', () async {
       final AesEncrypted aesEncrypted = AesEncrypted(
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 4]), // last byte is wrong
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          4,
+        ]), // last byte is wrong
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -180,14 +337,34 @@ void _testAesEncrypted() {
         ),
         cypher: AesGcm.with256bits(),
       );
-      expect(aesEncrypted.decrypt("password"), throwsA(isA<SecretBoxAuthenticationError>()));
+      expect(
+        aesEncrypted.decrypt("password"),
+        throwsA(isA<SecretBoxAuthenticationError>()),
+      );
     });
     test('decryptToString', () async {
       final AesEncrypted aesEncrypted = AesEncrypted(
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]),
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -215,7 +392,10 @@ void _testAesEncrypted() {
         jsonEncode(aesEncrypted.toJson()),
         '{"data":"KY5fnA==","salt":"AAECAwQFBgcICQoLDA0ODw==","iv":"AAECAwQFBgcICQoLDA0ODw==","mac":"","kdf":{"algorithm":"Pbkdf2","macAlgorithm":{"algorithm":"Hmac","hashAlgorithm":{"algorithm":"DartSha256"}},"iterations":100000,"bits":256},"cypher":{"algorithm":"AesGcm","secretKeyLength":32}}',
       );
-      expect(aesEncrypted.decrypt("password"), throwsA(isA<SecretBoxAuthenticationError>()));
+      expect(
+        aesEncrypted.decrypt("password"),
+        throwsA(isA<SecretBoxAuthenticationError>()),
+      );
     });
 
     test('toJson', () {
@@ -223,7 +403,24 @@ void _testAesEncrypted() {
         data: Uint8List.fromList([41, 142, 95, 156]),
         salt: Uint8List.fromList(List.generate(16, (index) => index)),
         iv: Uint8List.fromList(List.generate(16, (index) => index)),
-        mac: const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]),
+        mac: const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
         kdf: Pbkdf2(
           macAlgorithm: AesEncrypted.defaultMacAlgorithm,
           iterations: AesEncrypted.defaultIterations,
@@ -247,18 +444,44 @@ void _testAesEncrypted() {
           "algorithm": "Pbkdf2",
           "macAlgorithm": {
             "algorithm": "Hmac",
-            "hashAlgorithm": {"algorithm": "DartSha256"}
+            "hashAlgorithm": {"algorithm": "DartSha256"},
           },
           "iterations": 100000,
-          "bits": 256
+          "bits": 256,
         },
-        "cypher": {"algorithm": "AesGcm", "secretKeyLength": 32}
+        "cypher": {"algorithm": "AesGcm", "secretKeyLength": 32},
       };
       final aesEncrypted = AesEncrypted.fromJson(json);
       expect(aesEncrypted.data, Uint8List.fromList([41, 142, 95, 156]));
-      expect(aesEncrypted.salt, Uint8List.fromList(List.generate(16, (index) => index)));
-      expect(aesEncrypted.iv, Uint8List.fromList(List.generate(16, (index) => index)));
-      expect(aesEncrypted.mac, const Mac([103, 169, 139, 92, 212, 40, 200, 3, 208, 110, 165, 128, 152, 185, 48, 3]));
+      expect(
+        aesEncrypted.salt,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
+      expect(
+        aesEncrypted.iv,
+        Uint8List.fromList(List.generate(16, (index) => index)),
+      );
+      expect(
+        aesEncrypted.mac,
+        const Mac([
+          103,
+          169,
+          139,
+          92,
+          212,
+          40,
+          200,
+          3,
+          208,
+          110,
+          165,
+          128,
+          152,
+          185,
+          48,
+          3,
+        ]),
+      );
       expect(
         aesEncrypted.kdf,
         Pbkdf2(
@@ -268,7 +491,10 @@ void _testAesEncrypted() {
         ),
       );
       expect(aesEncrypted.cypher, AesGcm.with256bits());
-      expect(aesEncrypted.decrypt("password"), completion(Uint8List.fromList([116, 101, 115, 116])));
+      expect(
+        aesEncrypted.decrypt("password"),
+        completion(Uint8List.fromList([116, 101, 115, 116])),
+      );
     });
 
     test('fromJson2', () async {
@@ -281,12 +507,12 @@ void _testAesEncrypted() {
           "algorithm": "Pbkdf2",
           "macAlgorithm": {
             "algorithm": "Hmac",
-            "hashAlgorithm": {"algorithm": "DartSha256"}
+            "hashAlgorithm": {"algorithm": "DartSha256"},
           },
           "iterations": 100000,
-          "bits": 256
+          "bits": 256,
         },
-        "cypher": {"algorithm": "AesGcm", "secretKeyLength": 32}
+        "cypher": {"algorithm": "AesGcm", "secretKeyLength": 32},
       }; // FormatException: Invalid base64
       try {
         AesEncrypted.fromJson(json);

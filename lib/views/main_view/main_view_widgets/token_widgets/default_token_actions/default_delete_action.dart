@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/tokens/token.dart';
 import '../../../../../utils/customization/theme_extentions/action_theme.dart';
 import '../../../../../utils/globals.dart';
@@ -36,17 +36,28 @@ class DefaultDeleteAction extends ConsumerSlideableAction {
   final Token token;
   final bool isEnabled;
 
-  const DefaultDeleteAction({super.key, required this.isEnabled, required this.token});
+  const DefaultDeleteAction({
+    super.key,
+    required this.isEnabled,
+    required this.token,
+  });
 
   @override
   CustomSlidableAction build(context, ref) {
     return CustomSlidableAction(
-      backgroundColor:
-          isEnabled ? Theme.of(context).extension<TokenTileTheme>()!.deleteColor : Theme.of(context).extension<TokenTileTheme>()!.actionDisabledColor,
-      foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
+      backgroundColor: isEnabled
+          ? Theme.of(context).extension<TokenTileTheme>()!.deleteColor
+          : Theme.of(context).extension<TokenTileTheme>()!.actionDisabledColor,
+      foregroundColor: Theme.of(
+        context,
+      ).extension<TokenTileTheme>()!.actionForegroundColor,
       onPressed: isEnabled
           ? (_) async {
-              if (token.isLocked && !await lockAuth(reason: (localization) => localization.deleteLockedToken, localization: AppLocalizations.of(context)!)) {
+              if (token.isLocked &&
+                  !await lockAuth(
+                    reason: (localization) => localization.deleteLockedToken,
+                    localization: AppLocalizations.of(context)!,
+                  )) {
                 return;
               }
               _showDialog();
@@ -68,46 +79,53 @@ class DefaultDeleteAction extends ConsumerSlideableAction {
   }
 
   void _showDialog() => showAsyncDialog(
-      builder: (BuildContext context) => DefaultDialog(
-            scrollable: true,
-            title: Text(
-              AppLocalizations.of(context)!.confirmDeletion,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.error),
-            ),
-            content: Column(
-              children: [
-                Text(AppLocalizations.of(context)!.confirmDeletionOf(token.label), style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(height: 8),
-                Text(
-                  AppLocalizations.of(context)!.confirmTokenDeletionHint,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  AppLocalizations.of(context)!.cancel,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  LoadingIndicator.show(
-                    context: context,
-                    action: () async => globalRef?.read(tokenProvider.notifier).removeToken(token),
-                  );
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  AppLocalizations.of(context)!.delete,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                ),
-              ),
-            ],
-          ));
+    builder: (BuildContext context) => DefaultDialog(
+      scrollable: true,
+      title: Text(
+        AppLocalizations.of(context)!.confirmDeletion,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: Theme.of(context).colorScheme.error,
+        ),
+      ),
+      content: Column(
+        children: [
+          Text(
+            AppLocalizations.of(context)!.confirmDeletionOf(token.label),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AppLocalizations.of(context)!.confirmTokenDeletionHint,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            AppLocalizations.of(context)!.cancel,
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            LoadingIndicator.show(
+              context: context,
+              action: () async =>
+                  globalRef?.read(tokenProvider.notifier).removeToken(token),
+            );
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            AppLocalizations.of(context)!.delete,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+        ),
+      ],
+    ),
+  );
 }

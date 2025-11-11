@@ -19,20 +19,28 @@
  */
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import 'globals.dart';
 import 'logger.dart';
 import 'riverpod/riverpod_providers/state_providers/status_message_provider.dart';
 
 /// Shows a snackbar message to the user for 3 seconds.
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBarShort(String message) => _showSnackBar(message, const Duration(seconds: 3));
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBarShort(
+  String message,
+) => _showSnackBar(message, const Duration(seconds: 3));
 
 /// Shows a snackbar message to the user for 10 seconds.
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBarLong(String message) => _showSnackBar(message, const Duration(seconds: 10));
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBarLong(
+  String message,
+) => _showSnackBar(message, const Duration(seconds: 10));
 
 /// Shows a snackbar message to the user for 1 second per 15 characters of the message.
-ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBar(String message) =>
-    _showSnackBar(message, Duration(milliseconds: message.length * 1000 ~/ 20 + 500));
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBar(
+  String message,
+) => _showSnackBar(
+  message,
+  Duration(milliseconds: message.length * 1000 ~/ 20 + 500),
+);
 
 /// Shows a snackbar message to the user for a given `Duration`.
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _showSnackBar(
@@ -52,24 +60,38 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _showSnackBar(
   );
 }
 
-void showErrorStatusMessage({required String Function(AppLocalizations) message, String Function(AppLocalizations)? details}) {
+void showErrorStatusMessage({
+  required String Function(AppLocalizations) message,
+  String Function(AppLocalizations)? details,
+}) {
   final ref = globalRef;
   Logger.warning('$message : $details');
   if (ref == null) {
     Logger.error('Could not show status message: globalRef is null');
     return;
   }
-  ref.read(statusMessageProvider.notifier).state = StatusMessage(message: message, details: details, isError: true);
+  ref.read(statusMessageProvider.notifier).state = StatusMessage(
+    message: message,
+    details: details,
+    isError: true,
+  );
 }
 
-void showSuccessStatusMessage({required String Function(AppLocalizations) message, String Function(AppLocalizations)? details}) {
+void showSuccessStatusMessage({
+  required String Function(AppLocalizations) message,
+  String Function(AppLocalizations)? details,
+}) {
   final ref = globalRef;
   Logger.warning('$message : $details');
   if (ref == null) {
     Logger.error('Could not show status message: globalRef is null');
     return;
   }
-  ref.read(statusMessageProvider.notifier).state = StatusMessage(message: message, details: details, isError: false);
+  ref.read(statusMessageProvider.notifier).state = StatusMessage(
+    message: message,
+    details: details,
+    isError: false,
+  );
 }
 
 Future<T?> showAsyncDialog<T>({

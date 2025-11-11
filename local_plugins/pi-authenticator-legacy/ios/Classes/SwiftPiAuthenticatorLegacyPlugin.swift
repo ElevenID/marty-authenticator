@@ -3,23 +3,23 @@ import UIKit
 import SwiftyRSA
 
 public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "it.netknights.piauthenticator.legacy", binaryMessenger: registrar.messenger())
         let instance = SwiftPiAuthenticatorLegacyPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
     let pubKeyAttr: [String: Any] =
         [kSecAttrKeyType as String:            kSecAttrKeyTypeRSA,
          kSecAttrKeySizeInBits as String:      4096,
          kSecAttrKeyClass as String:           kSecAttrKeyClassPublic]
-    
+
     let privKeyAttr: [String: Any] =
         [kSecAttrKeyType as String:            kSecAttrKeyTypeRSA,
          kSecAttrKeySizeInBits as String:      4096,
          kSecAttrKeyClass as String:           kSecAttrKeyClassPrivate]
-    
+
     let query: [String: Any] = [
         kSecClass as String : kSecClassGenericPassword,
         kSecReturnData as String  : kCFBooleanTrue as Any,
@@ -27,26 +27,26 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
         kSecReturnRef as String : kCFBooleanTrue as Any,
         kSecMatchLimit as String : kSecMatchLimitAll
     ]
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //print("HANDLE \(call.method)")
         switch call.method {
-            
+
         case "load_all_tokens":
             var resultObj: AnyObject?
-            
+
             let lastResultCode = withUnsafeMutablePointer(to: &resultObj) {
                 SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
             }
-            
+
             var tokens = [String]()
-            
+
             if lastResultCode == noErr {
                 let array = resultObj as? Array<Dictionary<String, Any>>
                 for item in array! {
                     if let key = item[kSecAttrAccount as String] as? String,
                         let value = item[kSecValueData as String] as? Data {
-                        
+
                         // Do not touch data that was saved by the new app or metadata or seckeys
                         if (key.starts(with: "firebaseconfig") || key.starts(with: "privacyidea.authenticator")
                             || key.starts(with: "app_v3_") || key.starts(with: "private") || key.starts(with: "piPub")) {}
@@ -58,9 +58,9 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
-            
+
             var retJSONArray:String = "["
-            
+
             // Adjust the loaded token to have the format that is expected by the new app
             for t in tokens {
                 do {
@@ -84,7 +84,7 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                             }
                         }
                     }
-                    
+
                     let completed = try JSONSerialization.data(withJSONObject: dict, options: [])
                     let tokenStr = String(bytes: completed, encoding: .utf8)!
                     //print("Completed Token: \(tokenStr)")
@@ -94,7 +94,7 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                     print(error)
                 }
             }
-            
+
             if (retJSONArray.count < 2) {
                 //print("Empty result, returning empty string")
                 result("")
@@ -105,18 +105,18 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                 result(retJSONArray)
             }
             break;
-            
+
         case "load_firebase_config":
             var ret:String = ""
             var thisResult: AnyObject?
-            
+
             let lastResultCode = withUnsafeMutablePointer(to: &thisResult) {
                 SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
             }
-            
+
             if lastResultCode == noErr {
                 let array = thisResult as? Array<Dictionary<String, Any>>
-                
+
                 for item in array! {
                     if let key = item[kSecAttrAccount as String] as? String,
                         let value = item[kSecValueData as String] as? Data {
@@ -137,18 +137,18 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
             //print("Returning legacy firebase config: \(ret)")
             result(ret)
             break;
-            
+
         case "sign":
             var ret: String? = nil
             // [serial, message]
             if let args = call.arguments as? [String:Any] {
                 let serial = args["serial"] as? String
                 let message = args["message"] as? String
-                
+
                 if (serial == nil || message == nil) {
                     print("missing argument for signing \(call.arguments ?? "empty")")
                 }
-                
+
                 if let privateKeyStr = getEntryForSerial("private"+serial!) {
                     if let privateKeyData = stringToNSData(privateKeyStr) {
                         var error: Unmanaged<CFError>?
@@ -166,24 +166,24 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
-            
+
             //print("Returning \(ret ?? "empty string")")
             result(ret)
             break;
-            
+
         case "verify":
             var verified: Bool = false
-            
+
             if let args = call.arguments as? [String:Any] {
                 // [serial, signedData, signature]
                 let serial = args["serial"] as? String
                 let signedData = args["signedData"] as? String
                 let signatureb32 = args["signature"] as? String
-                
+
                 if (serial == nil || signedData == nil || signatureb32 == nil) {
                     print("missing argument for verification \(call.arguments ?? "empty")")
                 }
-                
+
                 if let publicKeyStr = getEntryForSerial("piPub"+serial!) {
                     if let publicKeyData = stringToNSData(publicKeyStr) {
                         var error: Unmanaged<CFError>?
@@ -192,7 +192,7 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
                                 let sign = Signature(data: base32DecodeToData(signatureb32!)!)
                                 let clear = try  ClearMessage(string: signedData!, using: .utf8)
                                 let pubKey = try PublicKey(reference: publicKey)
-                                
+
                                 verified = try clear.verify(with: pubKey, signature: sign, digestType: .sha256)
                             } catch {
                                 //print("validation error \(error.localizedDescription)")
@@ -206,7 +206,7 @@ public class SwiftPiAuthenticatorLegacyPlugin: NSObject, FlutterPlugin {
             //print("Returning \(verified)")
             result(verified)
             break;
-            
+
         default:
             result("")
             break;
@@ -227,13 +227,13 @@ public func getEntryForSerial(_ serial: String) -> String? {
         kSecReturnRef as String : kCFBooleanTrue as Any,
         kSecMatchLimit as String : kSecMatchLimitAll
     ]
-    
+
     var thisResult: AnyObject?
-    
+
     let lastResultCode = withUnsafeMutablePointer(to: &thisResult) {
         SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
     }
-    
+
     var ret:String? = nil
     if lastResultCode == noErr {
         let array = thisResult as? Array<Dictionary<String, Any>>
@@ -356,30 +356,30 @@ extension String {
     public var base32DecodedData: Data? {
         return base32DecodeToData(self)
     }
-    
+
     public var base32EncodedString: String {
         return utf8CString.withUnsafeBufferPointer {
             base32encode($0.baseAddress!, $0.count - 1, alphabetEncodeTable)
         }
     }
-    
+
     public func base32DecodedString(_ encoding: String.Encoding = .utf8) -> String? {
         return base32DecodedData.flatMap {
             String(data: $0, encoding: .utf8)
         }
     }
-    
+
     // base32Hex
     public var base32HexDecodedData: Data? {
         return base32HexDecodeToData(self)
     }
-    
+
     public var base32HexEncodedString: String {
         return utf8CString.withUnsafeBufferPointer {
             base32encode($0.baseAddress!, $0.count - 1, extendedHexAlphabetEncodeTable)
         }
     }
-    
+
     public func base32HexDecodedString(_ encoding: String.Encoding = .utf8) -> String? {
         return base32HexDecodedData.flatMap {
             String(data: $0, encoding: .utf8)
@@ -392,16 +392,16 @@ extension Data {
     public var base32EncodedString: String {
         return base32Encode(self)
     }
-    
+
     public var base32DecodedData: Data? {
         return String(data: self, encoding: .utf8).flatMap(base32DecodeToData)
     }
-    
+
     // base32Hex
     public var base32HexEncodedString: String {
         return base32HexEncode(self)
     }
-    
+
     public var base32HexDecodedData: Data? {
         return String(data: self, encoding: .utf8).flatMap(base32HexDecodeToData)
     }
@@ -420,13 +420,13 @@ private func base32encode(_ data: UnsafeRawPointer, _ length: Int, _ table: [Int
         return ""
     }
     var length = length
-    
+
     var bytes = data.assumingMemoryBound(to: UInt8.self)
-    
+
     let resultBufferSize = Int(ceil(Double(length) / 5)) * 8 + 1    // need null termination
     let resultBuffer = UnsafeMutablePointer<Int8>.allocate(capacity: resultBufferSize)
     var encoded = resultBuffer
-    
+
     // encode regular blocks
     while length >= 5 {
         encoded[0] = table[Int(bytes[0] >> 3)]
@@ -441,7 +441,7 @@ private func base32encode(_ data: UnsafeRawPointer, _ length: Int, _ table: [Int
         encoded = encoded.advanced(by: 8)
         bytes = bytes.advanced(by: 5)
     }
-    
+
     // encode last block
     var byte0, byte1, byte2, byte3, byte4: UInt8
     (byte0, byte1, byte2, byte3, byte4) = (0,0,0,0,0)
@@ -466,7 +466,7 @@ private func base32encode(_ data: UnsafeRawPointer, _ length: Int, _ table: [Int
         encoded[0] = table[Int(byte0 >> 3)]
     default: break
     }
-    
+
     // padding
     let pad = Int8(UnicodeScalar("=").value)
     switch length {
@@ -490,7 +490,7 @@ private func base32encode(_ data: UnsafeRawPointer, _ length: Int, _ table: [Int
         encoded[8] = 0
         break
     }
-    
+
     // return
     if let base32Encoded = String(validatingUTF8: resultBuffer) {
         #if swift(>=4.1)
@@ -555,7 +555,7 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
     if length == 0 {
         return []
     }
-    
+
     // calc padding length
     func getLeastPaddingLength(_ string: String) -> Int {
         if string.hasSuffix("======") {
@@ -570,7 +570,7 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
             return 0
         }
     }
-    
+
     // validate string
     let leastPaddingLength = getLeastPaddingLength(string)
     if let index = string.unicodeScalars.firstIndex(where: {$0.value > 0xff || table[Int($0.value)] > 31}) {
@@ -582,7 +582,7 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
             return nil
         }
     }
-    
+
     var remainEncodedLength = length - leastPaddingLength
     var additionalBytes = 0
     switch remainEncodedLength % 8 {
@@ -596,18 +596,18 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
         print("string length is invalid.")
         return nil
     }
-    
+
     // validated
     let dataSize = remainEncodedLength / 8 * 5 + additionalBytes
-    
+
     // Use UnsafePointer<UInt8>
     return string.utf8CString.withUnsafeBufferPointer {
         (data: UnsafeBufferPointer<CChar>) -> [UInt8] in
         var encoded = data.baseAddress!
-        
+
         let result = Array<UInt8>(repeating: 0, count: dataSize)
         var decoded = UnsafeMutablePointer<UInt8>(mutating: result)
-        
+
         // decode regular blocks
         var value0, value1, value2, value3, value4, value5, value6, value7: UInt8
         (value0, value1, value2, value3, value4, value5, value6, value7) = (0,0,0,0,0,0,0,0)
@@ -620,18 +620,18 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
             value5 = table[Int(encoded[5])]
             value6 = table[Int(encoded[6])]
             value7 = table[Int(encoded[7])]
-            
+
             decoded[0] = value0 << 3 | value1 >> 2
             decoded[1] = value1 << 6 | value2 << 1 | value3 >> 4
             decoded[2] = value3 << 4 | value4 >> 1
             decoded[3] = value4 << 7 | value5 << 2 | value6 >> 3
             decoded[4] = value6 << 5 | value7
-            
+
             remainEncodedLength -= 8
             decoded = decoded.advanced(by: 5)
             encoded = encoded.advanced(by: 8)
         }
-        
+
         // decode last block
         (value0, value1, value2, value3, value4, value5, value6, value7) = (0,0,0,0,0,0,0,0)
         switch remainEncodedLength {
@@ -665,7 +665,7 @@ private func base32decode(_ string: String, _ table: [UInt8]) -> [UInt8]? {
             decoded[0] = value0 << 3 | value1 >> 2
         default: break
         }
-        
+
         return result
     }
 }

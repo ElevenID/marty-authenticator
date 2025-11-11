@@ -13,15 +13,21 @@ sealed class IntroductionState with _$IntroductionState {
   // It is automatically handled by the factory constructor.
 
   const IntroductionState._();
-  Set<Introduction> get uncompletedIntroductions => Introduction.values.toSet().difference(completedIntroductions);
+  Set<Introduction> get uncompletedIntroductions =>
+      Introduction.values.toSet().difference(completedIntroductions);
 
-  const factory IntroductionState({@Default({}) Set<Introduction> completedIntroductions}) = _IntroductionState;
+  const factory IntroductionState({
+    @Default({}) Set<Introduction> completedIntroductions,
+  }) = _IntroductionState;
 
-  static IntroductionState withAllCompleted() => IntroductionState(completedIntroductions: Introduction.values.toSet());
+  static IntroductionState withAllCompleted() =>
+      IntroductionState(completedIntroductions: Introduction.values.toSet());
 
-  bool isCompleted(Introduction introduction) => completedIntroductions.contains(introduction);
+  bool isCompleted(Introduction introduction) =>
+      completedIntroductions.contains(introduction);
   bool isUncompleted(Introduction introduction) => !isCompleted(introduction);
-  bool isConditionFulfilled(WidgetRef ref, Introduction introduction) => introduction.isConditionFulfilled(ref, this);
+  bool isConditionFulfilled(WidgetRef ref, Introduction introduction) =>
+      introduction.isConditionFulfilled(ref, this);
 
   IntroductionState withCompletedIntroduction(Introduction introduction) {
     final newCompletedIntroductions = {...completedIntroductions};
@@ -47,5 +53,6 @@ sealed class IntroductionState with _$IntroductionState {
     return IntroductionState(completedIntroductions: newCompletedIntroductions);
   }
 
-  factory IntroductionState.fromJson(Map<String, dynamic> json) => _$IntroductionStateFromJson(json);
+  factory IntroductionState.fromJson(Map<String, dynamic> json) =>
+      _$IntroductionStateFromJson(json);
 }

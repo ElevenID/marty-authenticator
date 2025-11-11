@@ -24,7 +24,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../../../../../views/main_view/main_view_widgets/drag_target_divider.dart';
 import '../../../../../../../views/main_view/main_view_widgets/main_view_navigation_buttons/qr_scanner_button.dart';
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../view_interface.dart';
 import 'container_widgets/container_widget.dart';
@@ -41,7 +41,11 @@ class ContainerView extends ConsumerView {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final containerList = ref.watch(tokenContainerProvider).whenOrNull(data: (data) => data.containerList) ?? [];
+    final containerList =
+        ref
+            .watch(tokenContainerProvider)
+            .whenOrNull(data: (data) => data.containerList) ??
+        [];
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -58,7 +62,8 @@ class ContainerView extends ConsumerView {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               for (var container in containerList) ...[
-                if (containerList.indexOf(container) != 0) const DefaultDivider(),
+                if (containerList.indexOf(container) != 0)
+                  const DefaultDivider(),
                 ContainerWidget(container: container),
               ],
             ],

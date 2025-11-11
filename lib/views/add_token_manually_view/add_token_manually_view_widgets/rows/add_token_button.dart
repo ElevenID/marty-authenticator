@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/tokens/token.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../../../../widgets/button_widgets/mutex_button.dart';
@@ -38,21 +38,23 @@ class AddTokenButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => SizedBox(
-        width: double.infinity,
-        child: MutexButton(
-          onPressed: () async {
-            if (!context.mounted) return;
-            final token = tokenBuilder();
-            if (token == null) return;
-            Navigator.pop(context);
-            await ref.read(tokenProvider.notifier).addOrReplaceToken(token);
-          },
-          child: Text(
-            AppLocalizations.of(context)!.addToken,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-            overflow: TextOverflow.fade,
-            softWrap: false,
-          ),
+    width: double.infinity,
+    child: MutexButton(
+      onPressed: () async {
+        if (!context.mounted) return;
+        final token = tokenBuilder();
+        if (token == null) return;
+        Navigator.pop(context);
+        await ref.read(tokenProvider.notifier).addOrReplaceToken(token);
+      },
+      child: Text(
+        AppLocalizations.of(context)!.addToken,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
-      );
+        overflow: TextOverflow.fade,
+        softWrap: false,
+      ),
+    ),
+  );
 }

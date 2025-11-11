@@ -28,11 +28,15 @@ import '../../../utils/token_import_origins.dart';
 import 'otp_auth_processor.dart';
 
 class FreeOtpPlusQrProcessor extends OtpAuthProcessor {
-  static ObjectValidator<TokenNotifier> get resultHandlerType => OtpAuthProcessor.resultHandlerType;
+  static ObjectValidator<TokenNotifier> get resultHandlerType =>
+      OtpAuthProcessor.resultHandlerType;
   const FreeOtpPlusQrProcessor();
 
   @override
-  Future<List<ProcessorResult<Token>>> processUri(Uri uri, {bool fromInit = false}) => _processOtpAuth(uri);
+  Future<List<ProcessorResult<Token>>> processUri(
+    Uri uri, {
+    bool fromInit = false,
+  }) => _processOtpAuth(uri);
 
   Future<List<ProcessorResult<Token>>> _processOtpAuth(Uri uri) async {
     final results = (await super.processUri(uri)).toList();

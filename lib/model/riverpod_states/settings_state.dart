@@ -22,7 +22,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../version.dart';
 
 /// This class contains all device specific settings. E.g., the language used, whether to show the guide on start, etc.

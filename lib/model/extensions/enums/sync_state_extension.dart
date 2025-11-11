@@ -18,16 +18,16 @@
  * limitations under the License.
  */
 
-import '../../../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../enums/sync_state.dart';
 
 extension SyncStateX on SyncState {
   String localizedName(AppLocalizations localization) => switch (this) {
-        SyncState.notStarted => localization.syncStateNotStartedDescription,
-        SyncState.syncing => localization.syncStateSyncingDescription,
-        SyncState.completed => localization.syncStateCompletedDescription,
-        SyncState.failed => localization.syncStateFailedDescription,
-      };
+    SyncState.notStarted => localization.syncStateNotStartedDescription,
+    SyncState.syncing => localization.syncStateSyncingDescription,
+    SyncState.completed => localization.syncStateCompletedDescription,
+    SyncState.failed => localization.syncStateFailedDescription,
+  };
 
   bool get isIdle => this != SyncState.syncing;
 }

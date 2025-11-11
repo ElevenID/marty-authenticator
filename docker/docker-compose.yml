@@ -1,0 +1,99 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: privacyidea-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=privacyidea
+      - MYSQL_USER=pi_user
+      - MYSQL_PASSWORD=pi_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+
+  privacyidea:
+    image: khalibre/privacyidea:latest
+    container_name: privacyidea-server
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      - PI_SKIP_BOOTSTRAP=false
+      - PI_DB_VENDOR=mysql
+      - PI_DB_HOST=mysql
+      - PI_DB_PORT=3306
+      - PI_DB_NAME=privacyidea
+      - PI_DB_USER=pi_user
+      - PI_DB_PASSWORD=pi_password
+      - PI_DATA_DIR=/data/privacyidea
+      - PI_CFG_DIR=/etc/privacyidea
+      - PI_CFG_FILE=pi.cfg
+      - PI_BIND_HOST=0.0.0.0
+      - PI_BIND_PORT=8080
+      - PI_SECRET_KEY=changeme-secret-key-for-demo
+      - PI_PEPPER=changeme-pepper-for-demo
+      - PI_ADMIN_PASSWORD=admin123
+      # Load custom token modules - use PRIVACYIDEA prefix for from_prefixed_env()
+      - PRIVACYIDEA_PI_TOKEN_MODULES=privacyidea.lib.tokens.custom.demotoken
+    volumes:
+      # Plugin development support
+      - ./plugins:/opt/privacyidea/lib/python3.9/site-packages/privacyidea/lib/plugins
+      - ./plugins/custom-tokens:/opt/privacyidea/lib/python3.9/site-packages/privacyidea/lib/tokens/custom
+      - ./plugins/custom-eventhandlers:/opt/privacyidea/lib/python3.9/site-packages/privacyidea/lib/eventhandler/custom
+      - ./plugins/custom-resolvers:/opt/privacyidea/lib/python3.9/site-packages/privacyidea/lib/resolvers/custom
+      # Mount custom configuration file
+      - ./pi.cfg:/etc/privacyidea/pi.cfg
+      # Config and data persistence
+      - privacyidea-data:/data/privacyidea
+      - privacyidea-config:/etc/privacyidea
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # Development convenience - code server for plugin development
+  plugin-dev:
+    image: codercom/code-server:latest
+    container_name: plugin-development
+    ports:
+      - "8443:8080"
+    environment:
+      - PASSWORD=developer
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./plugins:/home/coder/plugins
+      - ./plugins/custom-tokens:/home/coder/custom-tokens
+      - ./plugins/custom-eventhandlers:/home/coder/custom-eventhandlers
+      - ./plugins/custom-resolvers:/home/coder/custom-resolvers
+    restart: unless-stopped
+
+  # Initialization service - runs setup script like Keycloak realm import
+  privacyidea-init:
+    image: khalibre/privacyidea:latest
+    container_name: privacyidea-init
+    depends_on:
+      - privacyidea
+      - mysql
+    volumes:
+      - ./init-privacyidea.sh:/init-privacyidea.sh
+      - /var/run/docker.sock:/var/run/docker.sock # Access to Docker for restart
+    working_dir: /
+    command: /bin/bash -c "apt-get update && apt-get install -y docker.io curl && chmod +x /init-privacyidea.sh && /init-privacyidea.sh"
+    profiles: ["init"] # Only run when explicitly requested
+
+volumes:
+  privacyidea-data:
+    driver: local
+  privacyidea-config:
+    driver: local
+  mysql_data:
+    driver: local
+  plugin-dev-config:
+    driver: local

@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_icons/simple_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/globals.dart';
 import '../../license_view/license_view.dart';
 import '../settings_view_widgets/settings_group.dart';

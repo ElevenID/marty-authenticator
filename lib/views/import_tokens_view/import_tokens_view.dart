@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../model/token_import/token_import_origin.dart';
 import '../../model/tokens/token.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
@@ -63,12 +63,14 @@ class _ImportTokensViewState extends ConsumerState<ImportTokensView> {
     } else {
       tokensToImport = await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => SelectImportTypePage(tokenImportOrigin: tokenImportOrigin),
+          builder: (context) =>
+              SelectImportTypePage(tokenImportOrigin: tokenImportOrigin),
         ),
       );
     }
     if (tokensToImport == null) return;
-    if (tokensToImport.isNotEmpty) ref.read(tokenProvider.notifier).addOrReplaceTokens(tokensToImport);
+    if (tokensToImport.isNotEmpty)
+      ref.read(tokenProvider.notifier).addOrReplaceTokens(tokensToImport);
     if (mounted) return Navigator.of(context).pop(tokensToImport.isNotEmpty);
   }
 
@@ -99,12 +101,8 @@ class _ImportTokensViewState extends ConsumerState<ImportTokensView> {
                   ),
                   trailing: Theme(
                     data: ThemeData(
-                      iconTheme: const IconThemeData(
-                        color: Colors.red,
-                      ),
-                      primaryIconTheme: const IconThemeData(
-                        color: Colors.blue,
-                      ),
+                      iconTheme: const IconThemeData(color: Colors.red),
+                      primaryIconTheme: const IconThemeData(color: Colors.blue),
                       iconButtonTheme: const IconButtonThemeData(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll(Colors.green),

@@ -57,9 +57,9 @@ class EncryptionParams {
   }
 
   Map<String, dynamic> toUriMap() => {
-        SYNC_ENC_PARAMS_ALGORITHM: algorithm,
-        SYNC_ENC_PARAMS_IV: initVector,
-        SYNC_ENC_PARAMS_MODE: mode,
-        SYNC_ENC_PARAMS_TAG: tag,
-      };
+    SYNC_ENC_PARAMS_ALGORITHM: algorithm,
+    SYNC_ENC_PARAMS_IV: initVector,
+    SYNC_ENC_PARAMS_MODE: mode,
+    SYNC_ENC_PARAMS_TAG: tag,
+  };
 }

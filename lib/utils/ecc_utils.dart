@@ -28,25 +28,46 @@ import '../../../../../../../model/extensions/enums/ec_key_algorithm_extension.d
 class EccUtils {
   const EccUtils();
 
-  String serializeECPublicKey(ECPublicKey publicKey) => CryptoUtils.encodeEcPublicKeyToPem(publicKey);
-  ECPublicKey deserializeECPublicKey(String ecPublicKey) => CryptoUtils.ecPublicKeyFromPem(ecPublicKey);
-  String serializeECPrivateKey(ECPrivateKey ecPrivateKey) => CryptoUtils.encodeEcPrivateKeyToPem(ecPrivateKey);
-  ECPrivateKey deserializeECPrivateKey(String ecPrivateKey) => CryptoUtils.ecPrivateKeyFromPem(ecPrivateKey);
+  String serializeECPublicKey(ECPublicKey publicKey) =>
+      CryptoUtils.encodeEcPublicKeyToPem(publicKey);
+  ECPublicKey deserializeECPublicKey(String ecPublicKey) =>
+      CryptoUtils.ecPublicKeyFromPem(ecPublicKey);
+  String serializeECPrivateKey(ECPrivateKey ecPrivateKey) =>
+      CryptoUtils.encodeEcPrivateKeyToPem(ecPrivateKey);
+  ECPrivateKey deserializeECPrivateKey(String ecPrivateKey) =>
+      CryptoUtils.ecPrivateKeyFromPem(ecPrivateKey);
 
   String signWithPrivateKey(ECPrivateKey privateKey, String message) {
-    final ecSignature = CryptoUtils.ecSign(privateKey, Uint8List.fromList(message.codeUnits), algorithmName: 'SHA-256/ECDSA');
+    final ecSignature = CryptoUtils.ecSign(
+      privateKey,
+      Uint8List.fromList(message.codeUnits),
+      algorithmName: 'SHA-256/ECDSA',
+    );
     return CryptoUtils.ecSignatureToBase64(ecSignature);
   }
 
-  AsymmetricKeyPair<ECPublicKey, ECPrivateKey> generateKeyPair(EcKeyAlgorithm keyAlgorithm) {
-    final keyPair = CryptoUtils.generateEcKeyPair(curve: keyAlgorithm.curveName);
+  AsymmetricKeyPair<ECPublicKey, ECPrivateKey> generateKeyPair(
+    EcKeyAlgorithm keyAlgorithm,
+  ) {
+    final keyPair = CryptoUtils.generateEcKeyPair(
+      curve: keyAlgorithm.curveName,
+    );
     final public = keyPair.publicKey;
     final private = keyPair.privateKey;
     return AsymmetricKeyPair(public as ECPublicKey, private as ECPrivateKey);
   }
 
-  bool validateSignature(ECPublicKey publicKey, String signature, String message) {
+  bool validateSignature(
+    ECPublicKey publicKey,
+    String signature,
+    String message,
+  ) {
     final ecSignature = CryptoUtils.ecSignatureFromBase64(signature);
-    return CryptoUtils.ecVerify(publicKey, Uint8List.fromList(message.codeUnits), ecSignature, algorithm: 'SHA-256/ECDSA');
+    return CryptoUtils.ecVerify(
+      publicKey,
+      Uint8List.fromList(message.codeUnits),
+      ecSignature,
+      algorithm: 'SHA-256/ECDSA',
+    );
   }
 }

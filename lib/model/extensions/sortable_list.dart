@@ -52,14 +52,18 @@ extension SortableList<T extends SortableMixin> on List<T> {
     final newIndex = moveBefore != null
         ? list.indexOf(moveBefore)
         : moveAfter != null && list.contains(moveAfter)
-            ? list.indexOf(moveAfter) + 1
-            : list.length;
+        ? list.indexOf(moveAfter) + 1
+        : list.length;
     list.insert(newIndex, movedItem);
     list = list.withCurrentSortIndexSet();
     return list;
   }
 
-  List<T> moveAllBetween({T? moveAfter, required List<T> movedItems, T? moveBefore}) {
+  List<T> moveAllBetween({
+    T? moveAfter,
+    required List<T> movedItems,
+    T? moveBefore,
+  }) {
     var list = List<T>.from(this).sorted.withCurrentSortIndexSet();
     List<T> removedItems = [];
     for (final movedItem in movedItems) {
@@ -70,8 +74,8 @@ extension SortableList<T extends SortableMixin> on List<T> {
     final newIndex = moveBefore != null
         ? list.indexOf(moveBefore)
         : moveAfter != null && list.contains(moveAfter)
-            ? list.indexOf(moveAfter) + 1
-            : list.length;
+        ? list.indexOf(moveAfter) + 1
+        : list.length;
     list.insertAll(newIndex, removedItems);
     list = list.withCurrentSortIndexSet();
     return list;

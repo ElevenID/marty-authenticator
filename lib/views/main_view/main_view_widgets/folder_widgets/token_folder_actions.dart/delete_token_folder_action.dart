@@ -18,10 +18,11 @@
  * limitations under the License.
  */
 import 'package:flutter/material.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 
-import '../../../../../l10n/app_localizations.dart';
 import '../../../../../model/token_folder.dart';
 import '../../../../../utils/customization/theme_extentions/action_theme.dart';
 import '../../../../../utils/globals.dart';
@@ -36,12 +37,20 @@ class DeleteTokenFolderAction extends ConsumerSlideableAction {
 
   const DeleteTokenFolderAction({super.key, required this.folder});
   @override
-  CustomSlidableAction build(BuildContext context, ref) {
+  CustomSlidableAction build(BuildContext context, WidgetRef ref) {
     return CustomSlidableAction(
-      backgroundColor: Theme.of(context).extension<TokenTileTheme>()!.deleteColor,
-      foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
+      backgroundColor: Theme.of(
+        context,
+      ).extension<TokenTileTheme>()!.deleteColor,
+      foregroundColor: Theme.of(
+        context,
+      ).extension<TokenTileTheme>()!.actionForegroundColor,
       onPressed: (context) async {
-        if (folder.isLocked && !await lockAuth(reason: (localization) => localization.unlock, localization: AppLocalizations.of(context)!)) {
+        if (folder.isLocked &&
+            !await lockAuth(
+              reason: (localization) => localization.unlock,
+              localization: AppLocalizations.of(context)!,
+            )) {
           return;
         }
         _showDialog();
@@ -62,37 +71,44 @@ class DeleteTokenFolderAction extends ConsumerSlideableAction {
   }
 
   void _showDialog() => showAsyncDialog(
-        builder: (BuildContext context) => DefaultDialog(
-          scrollable: true,
-          title: Text(
-            AppLocalizations.of(context)!.confirmDeletion,
+    builder: (BuildContext context) => DefaultDialog(
+      scrollable: true,
+      title: Text(AppLocalizations.of(context)!.confirmDeletion),
+      content: Text(
+        AppLocalizations.of(context)!.confirmDeletionOf(folder.label),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            AppLocalizations.of(context)!.cancel,
+            overflow: TextOverflow.fade,
+            softWrap: false,
           ),
-          content: Text(AppLocalizations.of(context)!.confirmDeletionOf(folder.label)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                AppLocalizations.of(context)!.cancel,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                final tokens = (await globalRef?.read(tokenProvider.future))?.tokensInFolder(folder);
-                if (tokens == null) return;
-                globalRef?.read(tokenProvider.notifier).updateTokens(tokens, (p0) => p0.copyWith(folderId: () => null));
-                globalRef?.read(tokenFolderProvider.notifier).removeFolder(folder);
-                if (!context.mounted) return;
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                AppLocalizations.of(context)!.delete,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-              ),
-            ),
-          ],
         ),
-      );
+        TextButton(
+          onPressed: () async {
+            final tokens = (await globalRef?.read(
+              tokenProvider.future,
+            ))?.tokensInFolder(folder);
+            if (tokens == null) return;
+            globalRef
+                ?.read(tokenProvider.notifier)
+                .updateTokens(
+                  tokens,
+                  (p0) => p0.copyWith(folderId: () => null),
+                );
+            globalRef?.read(tokenFolderProvider.notifier).removeFolder(folder);
+            if (!context.mounted) return;
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            AppLocalizations.of(context)!.delete,
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -45,13 +45,19 @@ class RequirePresenceButtonRow<T> extends StatelessWidget {
     final totalAnswersNum = answers.length;
     const numPerRow = 3;
     while (answers.isNotEmpty) {
-      final maxThisRow = answers.length == numPerRow + 1 ? min(answers.length, (numPerRow / 2).ceil()) : min(answers.length, numPerRow);
+      final maxThisRow = answers.length == numPerRow + 1
+          ? min(answers.length, (numPerRow / 2).ceil())
+          : min(answers.length, numPerRow);
       final answersThisRow = answers.sublist(0, maxThisRow);
       answers.removeRange(0, maxThisRow);
       final spacer = (maxThisRow != numPerRow && totalAnswersNum > maxThisRow)
-          ? Expanded(flex: (numPerRow - answersThisRow.length) * answersThisRow.length, child: const SizedBox())
+          ? Expanded(
+              flex: (numPerRow - answersThisRow.length) * answersThisRow.length,
+              child: const SizedBox(),
+            )
           : const SizedBox();
-      final pushRequestTheme = (Theme.of(context).extensions[PushRequestTheme] as PushRequestTheme);
+      final pushRequestTheme =
+          (Theme.of(context).extensions[PushRequestTheme] as PushRequestTheme);
       children.add(
         SizedBox(
           child: Row(
@@ -66,7 +72,9 @@ class RequirePresenceButtonRow<T> extends StatelessWidget {
                   child: CooldownButton(
                     style: ButtonStyle(
                       shape: PushRequestDialog.getButtonShape(context),
-                      backgroundColor: WidgetStateProperty.all(pushRequestTheme.acceptColor),
+                      backgroundColor: WidgetStateProperty.all(
+                        pushRequestTheme.acceptColor,
+                      ),
                     ),
                     onPressed: () => _onPressedAnswer(possibleAnswer),
                     child: SizedBox(

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../widgets/dialog_widgets/default_dialog.dart';
 
 class TransferOfflineTokenDialog extends StatelessWidget {
@@ -29,18 +29,22 @@ class TransferOfflineTokenDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DefaultDialog(
-        title: Text(AppLocalizations.of(context)!.transferOfflineTokenDialogTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(AppLocalizations.of(context)!.transferOfflineTokenDialogContent(offlineTokenCount)),
-          ],
+    title: Text(AppLocalizations.of(context)!.transferOfflineTokenDialogTitle),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          AppLocalizations.of(
+            context,
+          )!.transferOfflineTokenDialogContent(offlineTokenCount),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppLocalizations.of(context)!.ok),
-          ),
-        ],
-      );
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(true),
+        child: Text(AppLocalizations.of(context)!.ok),
+      ),
+    ],
+  );
 }

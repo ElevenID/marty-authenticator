@@ -21,7 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../utils/logger.dart';
 import '../../views/view_interface.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
@@ -36,21 +36,32 @@ class QRScannerView extends StatefulView {
   State<QRScannerView> createState() => _QRScannerViewState();
 
   @override
-  RouteSettings get routeSettings => const RouteSettings(name: QRScannerView.routeName);
+  RouteSettings get routeSettings =>
+      const RouteSettings(name: QRScannerView.routeName);
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
-  Future<PermissionStatus> _requestCameraPermission() => Permission.camera.request().then(
+  Future<PermissionStatus> _requestCameraPermission() => Permission.camera
+      .request()
+      .then(
         (value) => _cameraPermission = value,
         onError: (e) {
-          Logger.warning('.then(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission');
+          Logger.warning(
+            '.then(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
+          );
           return _cameraPermission = PermissionStatus.permanentlyDenied;
         },
-      ).onError((e, stackTrace) {
-        Logger.warning('.onError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission');
+      )
+      .onError((e, stackTrace) {
+        Logger.warning(
+          '.onError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
+        );
         return _cameraPermission = PermissionStatus.permanentlyDenied;
-      }).catchError((e) {
-        Logger.warning('.catchError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission');
+      })
+      .catchError((e) {
+        Logger.warning(
+          '.catchError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
+        );
         return _cameraPermission = PermissionStatus.permanentlyDenied;
       });
 
@@ -58,46 +69,61 @@ class _QRScannerViewState extends State<QRScannerView> {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<PermissionStatus>(
-        future: Future<PermissionStatus>(() async => _cameraPermission ?? await _requestCameraPermission()),
-        builder: (context, isGranted) {
-          if (isGranted.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
-          return switch (isGranted.data) {
-            PermissionStatus.permanentlyDenied => DefaultDialog(
-                title: Text(AppLocalizations.of(context)!.grantCameraPermissionDialogTitle),
-                content: Text(AppLocalizations.of(context)!.grantCameraPermissionDialogPermanentlyDenied),
+    future: Future<PermissionStatus>(
+      () async => _cameraPermission ?? await _requestCameraPermission(),
+    ),
+    builder: (context, isGranted) {
+      if (isGranted.connectionState != ConnectionState.done)
+        return const Center(child: CircularProgressIndicator());
+      return switch (isGranted.data) {
+        PermissionStatus.permanentlyDenied => DefaultDialog(
+          title: Text(
+            AppLocalizations.of(context)!.grantCameraPermissionDialogTitle,
+          ),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.grantCameraPermissionDialogPermanentlyDenied,
+          ),
+        ),
+        PermissionStatus.granted => Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          extendBodyBehindAppBar: true,
+          body: const QRScannerWidget(),
+        ),
+        _ => DefaultDialog(
+          title: Text(
+            AppLocalizations.of(context)!.grantCameraPermissionDialogTitle,
+          ),
+          content: Text(
+            AppLocalizations.of(context)!.grantCameraPermissionDialogContent,
+          ),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.cancel),
+              onPressed: () {
+                Navigator.pop(context, null);
+              },
+            ),
+            ElevatedButton(
+              child: Text(
+                AppLocalizations.of(context)!.grantCameraPermissionDialogButton,
               ),
-            PermissionStatus.granted => Scaffold(
-                resizeToAvoidBottomInset: false,
-                backgroundColor: Colors.transparent,
-                appBar: AppBar(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                extendBodyBehindAppBar: true,
-                body: const QRScannerWidget(),
-              ),
-            _ => DefaultDialog(
-                title: Text(AppLocalizations.of(context)!.grantCameraPermissionDialogTitle),
-                content: Text(AppLocalizations.of(context)!.grantCameraPermissionDialogContent),
-                actions: [
-                  TextButton(
-                    child: Text(AppLocalizations.of(context)!.cancel),
-                    onPressed: () {
-                      Navigator.pop(context, null);
-                    },
-                  ),
-                  ElevatedButton(
-                    child: Text(AppLocalizations.of(context)!.grantCameraPermissionDialogButton),
-                    onPressed: () async {
-                      //Trigger the permission to request it
-                      final cameraPermission = await _requestCameraPermission();
-                      setState(() => _cameraPermission = cameraPermission);
-                    },
-                  ),
-                ],
-              ),
-          };
-        },
-      );
+              onPressed: () async {
+                //Trigger the permission to request it
+                final cameraPermission = await _requestCameraPermission();
+                setState(() => _cameraPermission = cameraPermission);
+              },
+            ),
+          ],
+        ),
+      };
+    },
+  );
 }

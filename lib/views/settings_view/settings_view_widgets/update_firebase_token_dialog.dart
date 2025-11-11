@@ -21,7 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../model/tokens/push_token.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
@@ -30,13 +30,15 @@ import '../../../widgets/dialog_widgets/default_dialog.dart';
 
 class UpdateFirebaseTokenDialog extends ConsumerStatefulWidget {
   final AppLocalizations appLocalizations;
-  const UpdateFirebaseTokenDialog(this.appLocalizations, {super.key});
+  const UpdateFirebaseTokenDialog({required this.appLocalizations, super.key});
 
   @override
-  ConsumerState<UpdateFirebaseTokenDialog> createState() => _UpdateFirebaseTokenDialogState();
+  ConsumerState<UpdateFirebaseTokenDialog> createState() =>
+      _UpdateFirebaseTokenDialogState();
 }
 
-class _UpdateFirebaseTokenDialogState extends ConsumerState<UpdateFirebaseTokenDialog> {
+class _UpdateFirebaseTokenDialogState
+    extends ConsumerState<UpdateFirebaseTokenDialog> {
   Widget _content = const Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [CircularProgressIndicator()],
@@ -67,9 +69,13 @@ class _UpdateFirebaseTokenDialogState extends ConsumerState<UpdateFirebaseTokenD
     Logger.info('Starting update of firebase token.');
 
     // TODO What to do with poll only tokens if google-services is used?
-    final pushTokensNotPollOnly = (await ref.read(tokenProvider.future)).pushTokensNotPollOnly;
+    final pushTokensNotPollOnly = (await ref.read(
+      tokenProvider.future,
+    )).pushTokensNotPollOnly;
 
-    final tuple = await ref.read(tokenProvider.notifier).updateFirebaseTokens(tokens: pushTokensNotPollOnly);
+    final tuple = await ref
+        .read(tokenProvider.notifier)
+        .updateFirebaseTokens(tokens: pushTokensNotPollOnly);
     if (tuple == null) {
       showErrorStatusMessage(
         message: (l) => l.firebaseToken,
@@ -89,9 +95,7 @@ class _UpdateFirebaseTokenDialogState extends ConsumerState<UpdateFirebaseTokenD
       List<Widget> children = [];
 
       if (tokenWithFailedUpdate.isNotEmpty) {
-        children.add(
-          Text('${localizations.syncFbTokenFailed}\n'),
-        );
+        children.add(Text('${localizations.syncFbTokenFailed}\n'));
         for (PushToken p in tokenWithFailedUpdate) {
           children.add(Text('• ${p.label}'));
         }

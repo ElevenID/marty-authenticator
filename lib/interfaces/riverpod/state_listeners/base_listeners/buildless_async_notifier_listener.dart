@@ -24,15 +24,31 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../utils/logger.dart';
 
-abstract class BuildlessAsyncNotifierListener<NotifierT extends $AsyncNotifier<StateT>, StateT> {
+abstract class BuildlessAsyncNotifierListener<
+  NotifierT extends $AsyncNotifier<StateT>,
+  StateT
+> {
   final String listenerName;
   // ignore: invalid_use_of_visible_for_testing_member
   final $AsyncNotifierProvider<NotifierT, StateT>? provider;
-  final void Function(AsyncValue<StateT>? previous, AsyncValue<StateT> next, WidgetRef ref)? onNewState;
-  const BuildlessAsyncNotifierListener({this.provider, this.onNewState, required this.listenerName});
+  final void Function(
+    AsyncValue<StateT>? previous,
+    AsyncValue<StateT> next,
+    WidgetRef ref,
+  )?
+  onNewState;
+  const BuildlessAsyncNotifierListener({
+    this.provider,
+    this.onNewState,
+    required this.listenerName,
+  });
   void buildListen(WidgetRef ref) {
     Logger.debug('("$listenerName") listening to provider ("$provider")');
     if (provider == null || onNewState == null) return;
-    ref.listen(provider!, (AsyncValue<StateT>? previous, AsyncValue<StateT> next) => onNewState!(previous, next, ref));
+    ref.listen(
+      provider!,
+      (AsyncValue<StateT>? previous, AsyncValue<StateT> next) =>
+          onNewState!(previous, next, ref),
+    );
   }
 }

@@ -46,23 +46,26 @@ class TOTPToken extends OTPToken {
 
   @override
   Duration get showDuration {
-    final Duration duration = Duration(milliseconds: (period * 1000 + (secondsUntilNextOTP * 1000).toInt()));
+    final Duration duration = Duration(
+      milliseconds: (period * 1000 + (secondsUntilNextOTP * 1000).toInt()),
+    );
     Logger.info('$runtimeType showDuration: ${duration.inSeconds} seconds');
     return duration;
   }
 
   String otpFromTime(DateTime time) => algorithm.generateTOTPCodeString(
-        secret: secret,
-        time: time,
-        length: digits,
-        interval: Duration(seconds: period),
-        isGoogle: true,
-      );
+    secret: secret,
+    time: time,
+    length: digits,
+    interval: Duration(seconds: period),
+    isGoogle: true,
+  );
 
   @override
   String get otpValue => otpFromTime(DateTime.now());
   @override
-  String get nextValue => otpFromTime(DateTime.now().add(Duration(seconds: period)));
+  String get nextValue =>
+      otpFromTime(DateTime.now().add(Duration(seconds: period)));
 
   TOTPToken({
     required int period,
@@ -84,8 +87,10 @@ class TOTPToken extends OTPToken {
     super.label = '',
     super.issuer = '',
     super.isOffline,
-  })  : period = period < 1 ? 30 : period, // period must be greater than 0 otherwise IntegerDivisionByZeroException is thrown in OTP.generateTOTPCodeString
-        super(type: type ?? tokenType);
+  }) : period = period < 1
+           ? 30
+           : period, // period must be greater than 0 otherwise IntegerDivisionByZeroException is thrown in OTP.generateTOTPCodeString
+       super(type: type ?? tokenType);
 
   // @override
   // No changeable value in TOTPToken
@@ -124,7 +129,9 @@ class TOTPToken extends OTPToken {
       serial: serial ?? this.serial,
       label: label ?? this.label,
       issuer: issuer ?? this.issuer,
-      containerSerial: containerSerial != null ? containerSerial() : this.containerSerial,
+      containerSerial: containerSerial != null
+          ? containerSerial()
+          : this.containerSerial,
       checkedContainer: checkedContainer ?? this.checkedContainer,
       id: id ?? this.id,
       algorithm: algorithm ?? this.algorithm,
@@ -178,7 +185,10 @@ class TOTPToken extends OTPToken {
     return 'T${super.toString()}period: $period}';
   }
 
-  factory TOTPToken.fromOtpAuthMap(Map<String, dynamic> otpAuthMap, {Map<String, dynamic> additionalData = const {}}) {
+  factory TOTPToken.fromOtpAuthMap(
+    Map<String, dynamic> otpAuthMap, {
+    Map<String, dynamic> additionalData = const {},
+  }) {
     final validatedMap = validateMap(
       map: otpAuthMap,
       validators: {
@@ -188,14 +198,18 @@ class TOTPToken extends OTPToken {
         Token.IMAGE: const ObjectValidatorNullable<String>(),
         Token.PIN: boolValidatorNullable,
         Token.OFFLINE: boolValidatorNullable,
-        OTPToken.ALGORITHM: stringToAlgorithmsValidator.withDefault(Algorithms.SHA1),
+        OTPToken.ALGORITHM: stringToAlgorithmsValidator.withDefault(
+          Algorithms.SHA1,
+        ),
         OTPToken.DIGITS: otpAuthDigitsValidator,
         OTPToken.SECRET_BASE32: base32Secretvalidator,
         PERIOD_SECONDS: otpAuthPeriodSecondsValidator,
       },
       name: 'TOTPToken#otpAuthMap',
     );
-    final validatedAdditionalData = Token.validateAdditionalData(additionalData);
+    final validatedAdditionalData = Token.validateAdditionalData(
+      additionalData,
+    );
     return TOTPToken(
       label: validatedMap[Token.LABEL] as String,
       issuer: validatedMap[Token.ISSUER] as String,
@@ -238,23 +252,23 @@ class TOTPToken extends OTPToken {
   /// ```
   @override
   Map<String, dynamic> toOtpAuthMap() {
-    return super.toOtpAuthMap()
-      ..addAll({
-        PERIOD_SECONDS: period.toString(),
-      });
+    return super.toOtpAuthMap()..addAll({PERIOD_SECONDS: period.toString()});
   }
 
   double get currentProgress {
-    final secondsSinceEpoch = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
+    final secondsSinceEpoch =
+        DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
     return (secondsSinceEpoch % (period)) * (1 / period);
   }
 
   double get secondsUntilNextOTP {
-    final secondsSinceEpoch = (DateTime.now().toUtc().millisecondsSinceEpoch / 1000);
+    final secondsSinceEpoch =
+        (DateTime.now().toUtc().millisecondsSinceEpoch / 1000);
     return period - (secondsSinceEpoch % (period));
   }
 
   @override
   Map<String, dynamic> toJson() => _$TOTPTokenToJson(this);
-  factory TOTPToken.fromJson(Map<String, dynamic> json) => _$TOTPTokenFromJson(json);
+  factory TOTPToken.fromJson(Map<String, dynamic> json) =>
+      _$TOTPTokenFromJson(json);
 }

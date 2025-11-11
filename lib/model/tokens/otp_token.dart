@@ -42,9 +42,11 @@ abstract class OTPToken extends Token {
   /// The first value is the current otp value, the second value is the next otp value.
   static const String OTP_VALUES = 'otp';
 
-  final Algorithms algorithm; // the hashing algorithm that is used to calculate the otp value
+  final Algorithms
+  algorithm; // the hashing algorithm that is used to calculate the otp value
   final int digits; // the number of digits the otp value will have
-  final String secret; // the secret based on which the otp value is calculated in base32
+  final String
+  secret; // the secret based on which the otp value is calculated in base32
   String get otpValue; // the current otp value
   String get nextValue; // the next otp value
   Duration get showDuration {
@@ -141,13 +143,12 @@ abstract class OTPToken extends Token {
   @override
   Map<String, dynamic> toOtpAuthMap() {
     Logger.debug('$OTP_VALUES ${jsonEncode([otpValue, nextValue])}');
-    return super.toOtpAuthMap()
-      ..addAll({
-        ALGORITHM: algorithm.name,
-        DIGITS: digits.toString(),
-        SECRET_BASE32: secret,
-        if (serial == null) OTP_VALUES: [otpValue, nextValue],
-      });
+    return super.toOtpAuthMap()..addAll({
+      ALGORITHM: algorithm.name,
+      DIGITS: digits.toString(),
+      SECRET_BASE32: secret,
+      if (serial == null) OTP_VALUES: [otpValue, nextValue],
+    });
   }
 
   @override

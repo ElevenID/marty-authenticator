@@ -22,13 +22,30 @@ void main() {
   setUp(() {
     mockStorage = MockFlutterSecureStorage();
     mockLegacyStorage = MockFlutterSecureStorage();
-    storage = SecureStorage(storagePrefix: SecureTokenRepository.TOKEN_PREFIX, storage: mockStorage);
-    legacyStorage = SecureStorage(storagePrefix: SecureTokenRepository.TOKEN_PREFIX_LEGACY, storage: mockLegacyStorage);
-    repository = SecureTokenRepository(storage: storage, legacyStorage: legacyStorage);
+    storage = SecureStorage(
+      storagePrefix: SecureTokenRepository.TOKEN_PREFIX,
+      storage: mockStorage,
+    );
+    legacyStorage = SecureStorage(
+      storagePrefix: SecureTokenRepository.TOKEN_PREFIX_LEGACY,
+      storage: mockLegacyStorage,
+    );
+    repository = SecureTokenRepository(
+      storage: storage,
+      legacyStorage: legacyStorage,
+    );
   });
 
   TOTPToken createToken(String id) {
-    return TOTPToken(label: id, issuer: 'issuer', secret: 'SECRET', id: id, algorithm: Algorithms.SHA1, digits: 6, period: 30);
+    return TOTPToken(
+      label: id,
+      issuer: 'issuer',
+      secret: 'SECRET',
+      id: id,
+      algorithm: Algorithms.SHA1,
+      digits: 6,
+      period: 30,
+    );
   }
 
   group('SecureTokenRepository', () {
@@ -45,7 +62,10 @@ void main() {
       final token1 = createToken('id1');
       final token2 = createToken('id2');
       // readAll on the raw storage returns prefixed keys
-      final tokenMap = {'${newPrefix}_${token1.id}': jsonEncode(token1.toJson()), '${newPrefix}_${token2.id}': jsonEncode(token2.toJson())};
+      final tokenMap = {
+        '${newPrefix}_${token1.id}': jsonEncode(token1.toJson()),
+        '${newPrefix}_${token2.id}': jsonEncode(token2.toJson()),
+      };
 
       when(mockStorage.readAll()).thenAnswer((_) async => tokenMap);
       when(mockLegacyStorage.readAll()).thenAnswer((_) async => {});
@@ -62,12 +82,16 @@ void main() {
       final expectedKey = '${newPrefix}_${token.id}';
       final expectedValue = jsonEncode(token.toJson());
 
-      when(mockStorage.write(key: expectedKey, value: expectedValue)).thenAnswer((_) async {});
+      when(
+        mockStorage.write(key: expectedKey, value: expectedValue),
+      ).thenAnswer((_) async {});
 
       final result = await repository.saveOrReplaceToken(token);
 
       expect(result, isTrue);
-      verify(mockStorage.write(key: expectedKey, value: expectedValue)).called(1);
+      verify(
+        mockStorage.write(key: expectedKey, value: expectedValue),
+      ).called(1);
     });
 
     test('deleteToken removes a token from storage', () async {
@@ -94,7 +118,9 @@ void main() {
       final newTokenMap = {newKey: value};
 
       when(mockLegacyStorage.readAll()).thenAnswer((_) async => legacyTokenMap);
-      when(mockStorage.write(key: newKey, value: value)).thenAnswer((_) async {});
+      when(
+        mockStorage.write(key: newKey, value: value),
+      ).thenAnswer((_) async {});
       when(mockLegacyStorage.delete(key: legacyKey)).thenAnswer((_) async {});
       when(mockStorage.readAll()).thenAnswer((_) async => newTokenMap);
 
@@ -113,7 +139,9 @@ void main() {
 
       await repository.loadTokens();
 
-      verifyNever(mockStorage.write(key: anyNamed('key'), value: anyNamed('value')));
+      verifyNever(
+        mockStorage.write(key: anyNamed('key'), value: anyNamed('value')),
+      );
       verifyNever(mockLegacyStorage.delete(key: anyNamed('key')));
     });
 
@@ -125,8 +153,11 @@ void main() {
 
       final legacyData = {
         validLegacyKey: validTokenValue, // Valid token
-        '${legacyPrefix}_invalid_json': 'this is not a json string', // Invalid JSON
-        '${legacyPrefix}_missing_type': jsonEncode({'some_key': 'some_value'}), // Valid JSON, but not a token
+        '${legacyPrefix}_invalid_json':
+            'this is not a json string', // Invalid JSON
+        '${legacyPrefix}_missing_type': jsonEncode({
+          'some_key': 'some_value',
+        }), // Valid JSON, but not a token
       };
 
       final expectedNewTokenMap = {validNewKey: validTokenValue};
@@ -135,20 +166,40 @@ void main() {
       when(mockStorage.readAll()).thenAnswer((_) async => expectedNewTokenMap);
 
       // Expect write and delete to be called only for the valid token
-      when(mockStorage.write(key: validNewKey, value: validTokenValue)).thenAnswer((_) async {});
-      when(mockLegacyStorage.delete(key: validLegacyKey)).thenAnswer((_) async {});
+      when(
+        mockStorage.write(key: validNewKey, value: validTokenValue),
+      ).thenAnswer((_) async {});
+      when(
+        mockLegacyStorage.delete(key: validLegacyKey),
+      ).thenAnswer((_) async {});
 
       final tokens = await repository.loadTokens();
 
       // Verify that only the valid token was migrated
-      verify(mockStorage.write(key: validNewKey, value: validTokenValue)).called(1);
+      verify(
+        mockStorage.write(key: validNewKey, value: validTokenValue),
+      ).called(1);
       verify(mockLegacyStorage.delete(key: validLegacyKey)).called(1);
 
       // Verify that write/delete were NOT called for invalid entries
-      verifyNever(mockStorage.write(key: '${legacyPrefix}_invalid_json', value: anyNamed('value')));
-      verifyNever(mockLegacyStorage.delete(key: '${legacyPrefix}_invalid_json'));
-      verifyNever(mockStorage.write(key: '${legacyPrefix}_missing_type', value: anyNamed('value')));
-      verifyNever(mockLegacyStorage.delete(key: '${legacyPrefix}_missing_type'));
+      verifyNever(
+        mockStorage.write(
+          key: '${legacyPrefix}_invalid_json',
+          value: anyNamed('value'),
+        ),
+      );
+      verifyNever(
+        mockLegacyStorage.delete(key: '${legacyPrefix}_invalid_json'),
+      );
+      verifyNever(
+        mockStorage.write(
+          key: '${legacyPrefix}_missing_type',
+          value: anyNamed('value'),
+        ),
+      );
+      verifyNever(
+        mockLegacyStorage.delete(key: '${legacyPrefix}_missing_type'),
+      );
 
       // Verify the final list contains only the valid migrated token
       expect(tokens.length, 1);

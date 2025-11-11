@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 import 'package:privacyidea_authenticator/widgets/dialog_widgets/default_dialog.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/customization/theme_extentions/status_colors.dart';
 import '../../button_widgets/delayed_elevated_button.dart';
 
@@ -29,8 +29,13 @@ class SendOTPsWithoutSSLDialog extends StatelessWidget {
   const SendOTPsWithoutSSLDialog({super.key});
 
   static Future<bool?> showDialog() async {
-    final returnValue = await showAsyncDialog(builder: (context) => SendOTPsWithoutSSLDialog());
-    assert(returnValue is bool?, "The return value of the SendOTPsWithoutSSLDialog must be a bool or null.");
+    final returnValue = await showAsyncDialog(
+      builder: (context) => SendOTPsWithoutSSLDialog(),
+    );
+    assert(
+      returnValue is bool?,
+      "The return value of the SendOTPsWithoutSSLDialog must be a bool or null.",
+    );
     return returnValue;
   }
 
@@ -54,13 +59,21 @@ class SendOTPsWithoutSSLDialog extends StatelessWidget {
                 children: [
                   Text(
                     localizations.initialTokenAssignmentDialogSSLWarning1,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).extension<StatusColors>()!.warning),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).extension<StatusColors>()!.warning,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 4),
                   Text(
                     localizations.initialTokenAssignmentDialogSSLWarning2,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).extension<StatusColors>()!.warning),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).extension<StatusColors>()!.warning,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

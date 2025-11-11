@@ -33,17 +33,24 @@ part 'token_container_state.g.dart';
 @freezed
 sealed class TokenContainerState with _$TokenContainerState {
   const TokenContainerState._();
-  const factory TokenContainerState({required List<TokenContainer> containerList}) = _TokenContainerState;
+  const factory TokenContainerState({
+    required List<TokenContainer> containerList,
+  }) = _TokenContainerState;
 
-  bool get hasFinalizedContainers => containerList.any((container) => container is TokenContainerFinalized);
+  bool get hasFinalizedContainers =>
+      containerList.any((container) => container is TokenContainerFinalized);
 
   TokenContainer? containerOf(String containerSerial) {
     if (containerList.isEmpty) return null;
-    return containerList.firstWhereOrNull((container) => container.serial == containerSerial);
+    return containerList.firstWhereOrNull(
+      (container) => container.serial == containerSerial,
+    );
   }
 
   static TokenContainerState fromJsonStringList(List<String> jsonStrings) {
-    final containerList = jsonStrings.map((jsonString) => TokenContainer.fromJson(jsonDecode(jsonString))).toList();
+    final containerList = jsonStrings
+        .map((jsonString) => TokenContainer.fromJson(jsonDecode(jsonString)))
+        .toList();
     return TokenContainerState(containerList: containerList);
   }
 
@@ -56,9 +63,11 @@ sealed class TokenContainerState with _$TokenContainerState {
     return null;
   }
 
-  TokenContainer? ofSerial(String serial) => containerList.firstWhereOrNull((container) => container.serial == serial);
+  TokenContainer? ofSerial(String serial) =>
+      containerList.firstWhereOrNull((container) => container.serial == serial);
 
-  factory TokenContainerState.fromJson(Map<String, dynamic> json) => _$TokenContainerStateFromJson(json);
+  factory TokenContainerState.fromJson(Map<String, dynamic> json) =>
+      _$TokenContainerStateFromJson(json);
 
   SyncState? getSyncState(Token token) {
     if (token.containerSerial == null) return null;
@@ -68,5 +77,6 @@ sealed class TokenContainerState with _$TokenContainerState {
     return null;
   }
 
-  TokenContainer? currentOfSerial(String serial) => containerList.firstWhereOrNull((container) => container.serial == serial);
+  TokenContainer? currentOfSerial(String serial) =>
+      containerList.firstWhereOrNull((container) => container.serial == serial);
 }

@@ -1,0 +1,363 @@
+# Comprehensive pre-commit configuration for Flutter/Dart + Python project
+# See https://pre-commit.com for more information
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        exclude: ^pubspec\.yaml$
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-vcs-permalinks
+      - id: forbid-new-submodules
+      - id: fix-byte-order-marker
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, master]
+      - id: requirements-txt-fixer
+        files: requirements.*\.txt$
+      - id: check-docstring-first
+
+  # Security - Comprehensive Secret Detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: package-lock.json
+
+  # Security - Gitleaks (comprehensive secret scanning)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.1
+    hooks:
+      - id: gitleaks
+
+  # Security - Semgrep (SAST)
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.45.0
+    hooks:
+      - id: semgrep
+        args: ["--config", "auto", "--error"]
+        stages: [pre-commit]
+
+  # Security - Python vulnerabilities
+  - repo: https://github.com/pyupio/safety
+    rev: "2.3.5"
+    hooks:
+      - id: safety
+        args: [--json]
+
+  # Security - Bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: "1.7.6"
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+  # Python - Ruff (linting and formatting)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.8
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # Python formatting and import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile, ruff, --line-length, "88"]
+        types_or: [python, pyi]
+
+  # Python - Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports, --warn-unused-configs]
+        types_or: [python, pyi]
+
+  # Python - Dead code detection
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.10
+    hooks:
+      - id: vulture
+        args: ["--min-confidence", "80"]
+        types_or: [python, pyi]
+
+  # Python - Code complexity
+  - repo: https://github.com/yunojuno/pre-commit-xenon
+    rev: v0.1
+    hooks:
+      - id: xenon
+        args:
+          ["--max-absolute", "B", "--max-modules", "B", "--max-average", "A"]
+
+  # Python - Docstring linting
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ["--convention=google"]
+        additional_dependencies: [toml]
+        types_or: [python, pyi]
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: ["--fix"]
+        types: [markdown]
+
+  # Markdown link checking
+  - repo: https://github.com/tcort/markdown-link-check
+    rev: v3.11.2
+    hooks:
+      - id: markdown-link-check
+        args: ["--quiet"]
+        types: [markdown]
+
+  # Dart/Flutter hooks
+  - repo: local
+    hooks:
+      # Dart format
+      - id: dart-format
+        name: Dart Format
+        entry: dart
+        args: [format, --set-exit-if-changed, .]
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      # Flutter analyze - try to restore
+      - id: flutter-analyze
+        name: Flutter Analyze
+        entry: flutter
+        args: [analyze, --fatal-infos]
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      # Dart fix (dry run to check for available fixes)
+      - id: dart-fix-check
+        name: Dart Fix (dry-run)
+        entry: dart
+        args: [fix, --dry-run]
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      # Dart import ordering check
+      - id: dart-import-order
+        name: Check Dart Import Order
+        entry: bash
+        args:
+          - -c
+          - |
+            # Check that dart: imports come before package: imports
+            violations=0
+            for file in $(find lib -name "*.dart"); do
+              if grep -n "^import 'package:" "$file" | head -1 | read line_num _; then
+                if grep -n "^import 'dart:" "$file" | while read dart_line dart_import; do
+                  if [ "$dart_line" -gt "$line_num" ]; then
+                    echo "❌ $file: dart: import on line $dart_line should come before package: import on line $line_num"
+                    violations=$((violations + 1))
+                  fi
+                done; [ $violations -eq 0 ]; then
+                  :
+                else
+                  exit 1
+                fi
+              fi
+            done
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      # Check for TODO/FIXME comments in production code
+      - id: check-todos
+        name: Check for TODO/FIXME comments
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -rn --include="*.dart" --exclude-dir=test "TODO\|FIXME" lib/; then
+              echo "❌ Found TODO/FIXME comments in lib/ directory. Please resolve before committing."
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+
+      # Check for print statements in production code
+      - id: check-print-statements
+        name: Check for print statements
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -rn --include="*.dart" --exclude-dir=test "\bprint(" lib/; then
+              echo "❌ Found print() statements in lib/ directory. Use proper logging instead."
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+
+      # Enhanced Security checks
+      - id: check-api-keys
+        name: Check for Hardcoded API Keys
+        entry: bash
+        args:
+          - -c
+          - |
+            # More comprehensive API key detection
+            patterns=(
+              "api[_-]?key\s*=\s*['\"][^'\"]{8,}['\"]"
+              "api[_-]?secret\s*=\s*['\"][^'\"]{8,}['\"]"
+              "access[_-]?token\s*=\s*['\"][^'\"]{8,}['\"]"
+              "auth[_-]?token\s*=\s*['\"][^'\"]{8,}['\"]"
+              "private[_-]?key\s*=\s*['\"][^'\"]{8,}['\"]"
+              "bearer\s+[a-zA-Z0-9_-]{20,}"
+              "sk-[a-zA-Z0-9]{20,}"
+              "ghp_[a-zA-Z0-9]{36}"
+              "gho_[a-zA-Z0-9]{36}"
+            )
+            found=0
+            for pattern in "${patterns[@]}"; do
+              if grep -rEi --include="*.dart" --include="*.py" "$pattern" . --exclude-dir=.git --exclude-dir=test --exclude-dir=tests 2>/dev/null; then
+                echo "❌ Found potential API key/token pattern: $pattern"
+                found=1
+              fi
+            done
+            if [ $found -eq 1 ]; then
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+
+      # Check for hardcoded passwords
+      - id: check-hardcoded-passwords
+        name: Check for Hardcoded Passwords
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -rEi --include="*.dart" --include="*.py" "(password|passwd|pwd)\s*=\s*['\"][^'\"]{3,}['\"]" . --exclude-dir=.git --exclude-dir=test --exclude-dir=tests 2>/dev/null | grep -v "test\|example\|TODO\|placeholder\|your_password"; then
+              echo "❌ Found hardcoded passwords"
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+
+      # Check for insecure HTTP usage
+      - id: check-insecure-http
+        name: Check for Insecure HTTP Usage
+        entry: bash
+        args:
+          - -c
+          - |
+            if grep -r --include="*.dart" "http://" lib/ 2>/dev/null | grep -v "localhost\|127.0.0.1\|example.com"; then
+              echo "❌ Found insecure HTTP usage (use HTTPS in production)"
+              exit 1
+            fi
+        language: system
+        files: \.dart$
+        pass_filenames: false
+
+      # Flutter security configuration check
+      - id: flutter-security-config
+        name: Check Flutter Security Configuration
+        entry: bash
+        args:
+          - -c
+          - |
+            if [ -f android/app/src/main/AndroidManifest.xml ]; then
+              if grep -q "android:usesCleartextTraffic=\"true\"" android/app/src/main/AndroidManifest.xml; then
+                echo "⚠️  Warning: Cleartext traffic is enabled in Android manifest"
+              fi
+              if grep -q "android:debuggable=\"true\"" android/app/src/main/AndroidManifest.xml; then
+                echo "❌ Debug mode is enabled in release manifest"
+                exit 1
+              fi
+              if grep -q "android:allowBackup=\"true\"" android/app/src/main/AndroidManifest.xml; then
+                echo "⚠️  Warning: App backup is enabled - consider security implications"
+              fi
+            fi
+            if [ -f ios/Runner/Info.plist ]; then
+              if grep -A1 "NSAppTransportSecurity" ios/Runner/Info.plist | grep -q "NSAllowsArbitraryLoads.*true"; then
+                echo "❌ iOS App Transport Security is disabled"
+                exit 1
+              fi
+            fi
+        language: system
+        files: ^(android/app/src/main/AndroidManifest\.xml|ios/Runner/Info\.plist)$
+        pass_filenames: false
+
+      # Check for copyright headers
+      - id: check-copyright
+        name: Check Copyright Headers
+        entry: bash
+        args:
+          - -c
+          - |
+            missing_files=()
+            for file in $(git diff --cached --name-only --diff-filter=A 2>/dev/null | grep -E "\.(dart|py)$"); do
+              if [ -f "$file" ] && ! grep -q -i "copyright\|license" "$file"; then
+                missing_files+=("$file")
+              fi
+            done
+            if [ ${#missing_files[@]} -gt 0 ]; then
+              echo "⚠️  Missing copyright/license headers in new files:"
+              printf '%s\n' "${missing_files[@]}"
+              echo "Consider adding appropriate headers"
+            fi
+        language: system
+        pass_filenames: false
+
+  # YAML formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types_or: [yaml, json, markdown]
+        exclude: |
+          (?x)^(
+            pubspec\.lock|
+            .*\.g\.dart|
+            .*\.freezed\.dart|
+            .*\.pb\.dart|
+            .*\.pbenum\.dart|
+            .*\.pbgrpc\.dart|
+            \.secrets\.baseline
+          )$
+
+# Configuration for tools
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: weekly
+  skip: [gitleaks, semgrep] # Skip heavy tools in CI
+  submodules: false

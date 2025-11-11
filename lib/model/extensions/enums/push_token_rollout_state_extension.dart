@@ -17,54 +17,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../enums/push_token_rollout_state.dart';
 
 extension PushTokenRollOutStateX on PushTokenRollOutState {
   bool get rollOutInProgress => switch (this) {
-        PushTokenRollOutState.rolloutNotStarted => false,
-        PushTokenRollOutState.generatingRSAKeyPair => true,
-        PushTokenRollOutState.generatingRSAKeyPairFailed => false,
-        PushTokenRollOutState.receivingFirebaseToken => true,
-        PushTokenRollOutState.receivingFirebaseTokenFailed => false,
-        PushTokenRollOutState.sendRSAPublicKey => true,
-        PushTokenRollOutState.sendRSAPublicKeyFailed => false,
-        PushTokenRollOutState.parsingResponse => true,
-        PushTokenRollOutState.parsingResponseFailed => false,
-        PushTokenRollOutState.rolloutComplete => false,
-      };
+    PushTokenRollOutState.rolloutNotStarted => false,
+    PushTokenRollOutState.generatingRSAKeyPair => true,
+    PushTokenRollOutState.generatingRSAKeyPairFailed => false,
+    PushTokenRollOutState.receivingFirebaseToken => true,
+    PushTokenRollOutState.receivingFirebaseTokenFailed => false,
+    PushTokenRollOutState.sendRSAPublicKey => true,
+    PushTokenRollOutState.sendRSAPublicKeyFailed => false,
+    PushTokenRollOutState.parsingResponse => true,
+    PushTokenRollOutState.parsingResponseFailed => false,
+    PushTokenRollOutState.rolloutComplete => false,
+  };
 
   bool get rolloutFailed => switch (this) {
-        PushTokenRollOutState.generatingRSAKeyPairFailed => true,
-        PushTokenRollOutState.receivingFirebaseTokenFailed => true,
-        PushTokenRollOutState.sendRSAPublicKeyFailed => true,
-        PushTokenRollOutState.parsingResponseFailed => true,
-        _ => false,
-      };
+    PushTokenRollOutState.generatingRSAKeyPairFailed => true,
+    PushTokenRollOutState.receivingFirebaseTokenFailed => true,
+    PushTokenRollOutState.sendRSAPublicKeyFailed => true,
+    PushTokenRollOutState.parsingResponseFailed => true,
+    _ => false,
+  };
 
   PushTokenRollOutState getFailed() => switch (this) {
-        PushTokenRollOutState.rolloutNotStarted => PushTokenRollOutState.rolloutNotStarted,
-        PushTokenRollOutState.generatingRSAKeyPair => PushTokenRollOutState.generatingRSAKeyPairFailed,
-        PushTokenRollOutState.generatingRSAKeyPairFailed => PushTokenRollOutState.generatingRSAKeyPairFailed,
-        PushTokenRollOutState.receivingFirebaseToken => PushTokenRollOutState.receivingFirebaseTokenFailed,
-        PushTokenRollOutState.receivingFirebaseTokenFailed => PushTokenRollOutState.receivingFirebaseTokenFailed,
-        PushTokenRollOutState.sendRSAPublicKey => PushTokenRollOutState.sendRSAPublicKeyFailed,
-        PushTokenRollOutState.sendRSAPublicKeyFailed => PushTokenRollOutState.sendRSAPublicKeyFailed,
-        PushTokenRollOutState.parsingResponse => PushTokenRollOutState.parsingResponseFailed,
-        PushTokenRollOutState.parsingResponseFailed => PushTokenRollOutState.parsingResponseFailed,
-        PushTokenRollOutState.rolloutComplete => PushTokenRollOutState.rolloutComplete,
-      };
+    PushTokenRollOutState.rolloutNotStarted =>
+      PushTokenRollOutState.rolloutNotStarted,
+    PushTokenRollOutState.generatingRSAKeyPair =>
+      PushTokenRollOutState.generatingRSAKeyPairFailed,
+    PushTokenRollOutState.generatingRSAKeyPairFailed =>
+      PushTokenRollOutState.generatingRSAKeyPairFailed,
+    PushTokenRollOutState.receivingFirebaseToken =>
+      PushTokenRollOutState.receivingFirebaseTokenFailed,
+    PushTokenRollOutState.receivingFirebaseTokenFailed =>
+      PushTokenRollOutState.receivingFirebaseTokenFailed,
+    PushTokenRollOutState.sendRSAPublicKey =>
+      PushTokenRollOutState.sendRSAPublicKeyFailed,
+    PushTokenRollOutState.sendRSAPublicKeyFailed =>
+      PushTokenRollOutState.sendRSAPublicKeyFailed,
+    PushTokenRollOutState.parsingResponse =>
+      PushTokenRollOutState.parsingResponseFailed,
+    PushTokenRollOutState.parsingResponseFailed =>
+      PushTokenRollOutState.parsingResponseFailed,
+    PushTokenRollOutState.rolloutComplete =>
+      PushTokenRollOutState.rolloutComplete,
+  };
 
   String rolloutMsg(AppLocalizations localizations) => switch (this) {
-        PushTokenRollOutState.rolloutNotStarted => localizations.rolloutStateNotStarted,
-        PushTokenRollOutState.generatingRSAKeyPair => localizations.rolloutStateGeneratingKeyPair,
-        PushTokenRollOutState.generatingRSAKeyPairFailed => localizations.rolloutStateGeneratingKeyPairFailed,
-        PushTokenRollOutState.receivingFirebaseToken => localizations.rolloutStateReceivingFirebaseToken,
-        PushTokenRollOutState.receivingFirebaseTokenFailed => localizations.rolloutStateReceivingFirebaseTokenFailed,
-        PushTokenRollOutState.sendRSAPublicKey => localizations.rolloutStateSendingPublicKey,
-        PushTokenRollOutState.sendRSAPublicKeyFailed => localizations.rolloutStateSendingPublicKeyFailed,
-        PushTokenRollOutState.parsingResponse => localizations.rolloutStateParsingResponse,
-        PushTokenRollOutState.parsingResponseFailed => localizations.rolloutStateParsingResponseFailed,
-        PushTokenRollOutState.rolloutComplete => localizations.rolloutStateCompleted,
-      };
+    PushTokenRollOutState.rolloutNotStarted =>
+      localizations.rolloutStateNotStarted,
+    PushTokenRollOutState.generatingRSAKeyPair =>
+      localizations.rolloutStateGeneratingKeyPair,
+    PushTokenRollOutState.generatingRSAKeyPairFailed =>
+      localizations.rolloutStateGeneratingKeyPairFailed,
+    PushTokenRollOutState.receivingFirebaseToken =>
+      localizations.rolloutStateReceivingFirebaseToken,
+    PushTokenRollOutState.receivingFirebaseTokenFailed =>
+      localizations.rolloutStateReceivingFirebaseTokenFailed,
+    PushTokenRollOutState.sendRSAPublicKey =>
+      localizations.rolloutStateSendingPublicKey,
+    PushTokenRollOutState.sendRSAPublicKeyFailed =>
+      localizations.rolloutStateSendingPublicKeyFailed,
+    PushTokenRollOutState.parsingResponse =>
+      localizations.rolloutStateParsingResponse,
+    PushTokenRollOutState.parsingResponseFailed =>
+      localizations.rolloutStateParsingResponseFailed,
+    PushTokenRollOutState.rolloutComplete =>
+      localizations.rolloutStateCompleted,
+  };
 }

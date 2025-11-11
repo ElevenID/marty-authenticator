@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/utils/view_utils.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/extensions/enums/push_token_rollout_state_extension.dart';
 import '../../../../../model/tokens/push_token.dart';
 import '../../../../../utils/globals.dart';
@@ -54,30 +54,34 @@ class PushTokenStartRolloutWidget extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Expanded(
-                flex: 12,
-                child: SizedBox(),
-              ),
+              const Expanded(flex: 12, child: SizedBox()),
               Expanded(
                 flex: 35,
                 child: CooldownButton(
-                  onPressed: () => globalRef?.read(tokenProvider.notifier).rolloutPushToken(token) ?? Future.value(),
+                  onPressed: () =>
+                      globalRef
+                          ?.read(tokenProvider.notifier)
+                          .rolloutPushToken(token) ??
+                      Future.value(),
                   child: Text(
-                    token.rolloutState.rolloutFailed ? localizations.retryRolloutButton : token.rolloutState.rolloutMsg(localizations),
+                    token.rolloutState.rolloutFailed
+                        ? localizations.retryRolloutButton
+                        : token.rolloutState.rolloutMsg(localizations),
                     style: Theme.of(context).textTheme.bodyMedium,
                     overflow: TextOverflow.fade,
                     softWrap: false,
                   ),
                 ),
               ),
-              const Expanded(
-                flex: 6,
-                child: SizedBox(),
-              ),
+              const Expanded(flex: 6, child: SizedBox()),
               Expanded(
                 flex: 35,
                 child: CooldownButton(
-                  style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.errorContainer)),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.errorContainer,
+                    ),
+                  ),
                   onPressed: () => _showDialog(),
                   child: Text(
                     localizations.delete,
@@ -87,10 +91,7 @@ class PushTokenStartRolloutWidget extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Expanded(
-                flex: 12,
-                child: SizedBox(),
-              ),
+              const Expanded(flex: 12, child: SizedBox()),
             ],
           ),
         ],
@@ -98,35 +99,35 @@ class PushTokenStartRolloutWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _showDialog() => showAsyncDialog(builder: (BuildContext context) {
-        final localizations = AppLocalizations.of(context)!;
-        return DefaultDialog(
-          scrollable: true,
-          title: Text(
-            localizations.confirmDeletion,
+  Future<void> _showDialog() => showAsyncDialog(
+    builder: (BuildContext context) {
+      final localizations = AppLocalizations.of(context)!;
+      return DefaultDialog(
+        scrollable: true,
+        title: Text(localizations.confirmDeletion),
+        content: Text(localizations.confirmDeletionOf(token.label)),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              localizations.cancel,
+              overflow: TextOverflow.fade,
+              softWrap: false,
+            ),
           ),
-          content: Text(localizations.confirmDeletionOf(token.label)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                localizations.cancel,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-              ),
+          TextButton(
+            onPressed: () {
+              globalRef?.read(tokenProvider.notifier).removeToken(token);
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              localizations.delete,
+              overflow: TextOverflow.fade,
+              softWrap: false,
             ),
-            TextButton(
-              onPressed: () {
-                globalRef?.read(tokenProvider.notifier).removeToken(token);
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                localizations.delete,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-              ),
-            ),
-          ],
-        );
-      });
+          ),
+        ],
+      );
+    },
+  );
 }

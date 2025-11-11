@@ -18,9 +18,10 @@
  * limitations under the License.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/token_folder.dart';
 import '../../../../../utils/customization/theme_extentions/action_theme.dart';
 import '../../../../../utils/globals.dart';
@@ -33,12 +34,19 @@ class LockTokenFolderAction extends ConsumerSlideableAction {
 
   const LockTokenFolderAction({super.key, required this.folder});
   @override
-  CustomSlidableAction build(BuildContext context, ref) {
+  CustomSlidableAction build(BuildContext context, WidgetRef ref) {
     return CustomSlidableAction(
       backgroundColor: Theme.of(context).extension<TokenTileTheme>()!.lockColor,
-      foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
+      foregroundColor: Theme.of(
+        context,
+      ).extension<TokenTileTheme>()!.actionForegroundColor,
       onPressed: (context) async {
-        if (await lockAuth(reason: (localization) => localization.unlock, localization: AppLocalizations.of(context)!) == false) return;
+        if (await lockAuth(
+              reason: (localization) => localization.unlock,
+              localization: AppLocalizations.of(context)!,
+            ) ==
+            false)
+          return;
         globalRef?.read(tokenFolderProvider.notifier).toggleFolderLock(folder);
       },
       child: Column(
@@ -47,7 +55,9 @@ class LockTokenFolderAction extends ConsumerSlideableAction {
         children: [
           const Icon(Icons.lock),
           Text(
-            folder.isLocked ? AppLocalizations.of(context)!.unlock : AppLocalizations.of(context)!.lock,
+            folder.isLocked
+                ? AppLocalizations.of(context)!.unlock
+                : AppLocalizations.of(context)!.lock,
             overflow: TextOverflow.fade,
             softWrap: false,
           ),

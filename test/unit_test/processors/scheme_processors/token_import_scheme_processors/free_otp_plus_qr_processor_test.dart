@@ -15,9 +15,13 @@ void _testFreeOtpPlusQrProcessor() {
     FreeOtpPlusQrProcessor;
     test('processUri', () async {
       // Arrange
-      final normalOtpAuthUri = Uri.parse('otpauth://totp/FreeOTP+:alice?secret=AAAAAAAA&issuer=FreeOTP&algorithm=SHA1&digits=6&period=30');
+      final normalOtpAuthUri = Uri.parse(
+        'otpauth://totp/FreeOTP+:alice?secret=AAAAAAAA&issuer=FreeOTP&algorithm=SHA1&digits=6&period=30',
+      );
       // Act
-      final results = await const FreeOtpPlusQrProcessor().processUri(normalOtpAuthUri);
+      final results = await const FreeOtpPlusQrProcessor().processUri(
+        normalOtpAuthUri,
+      );
       // Assert
       expect(results.length, equals(1));
       expect(results.first, isA<ProcessorResultSuccess<Token>>());
@@ -30,27 +34,42 @@ void _testFreeOtpPlusQrProcessor() {
     });
     test('processUri without secret', () async {
       // Arrange
-      final normalOtpAuthUri = Uri.parse('otpauth://totp/FreeOTP+:alice?issuer=FreeOTP&algorithm=SHA1&digits=6&period=30');
+      final normalOtpAuthUri = Uri.parse(
+        'otpauth://totp/FreeOTP+:alice?issuer=FreeOTP&algorithm=SHA1&digits=6&period=30',
+      );
       // Act
-      final results = await const FreeOtpPlusQrProcessor().processUri(normalOtpAuthUri);
+      final results = await const FreeOtpPlusQrProcessor().processUri(
+        normalOtpAuthUri,
+      );
       // Assert
       expect(results.length, equals(1));
       expect(results.first, isA<ProcessorResultFailed<Token>>());
       final firstResult = results.first as ProcessorResultFailed<Token>;
-      expect(firstResult.message(AppLocalizationsEn()).isNotEmpty, equals(true));
+      expect(
+        firstResult.message(AppLocalizationsEn()).isNotEmpty,
+        equals(true),
+      );
     });
     test('processUri without counter', () async {
       // Arrange
-      final normalOtpAuthUri = Uri.parse('otpauth://hotp/FreeOTP+:alice?secret=AAAAAAAA&issuer=FreeOTP&algorithm=SHA1&digits=6');
+      final normalOtpAuthUri = Uri.parse(
+        'otpauth://hotp/FreeOTP+:alice?secret=AAAAAAAA&issuer=FreeOTP&algorithm=SHA1&digits=6',
+      );
       // Act
-      final results = await const FreeOtpPlusQrProcessor().processUri(normalOtpAuthUri);
+      final results = await const FreeOtpPlusQrProcessor().processUri(
+        normalOtpAuthUri,
+      );
       // Assert
       expect(results.length, equals(1));
       final result0 = results[0];
       expect(result0, isA<ProcessorResultFailed<Token>>());
       final message = result0.asFailed!.message(AppLocalizationsEn());
       final error = result0.asFailed!.error;
-      expect(message.toLowerCase().contains(HOTPToken.COUNTER) || error.toString().toLowerCase().contains(HOTPToken.COUNTER), isTrue);
+      expect(
+        message.toLowerCase().contains(HOTPToken.COUNTER) ||
+            error.toString().toLowerCase().contains(HOTPToken.COUNTER),
+        isTrue,
+      );
     });
   });
 }

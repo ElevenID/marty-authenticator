@@ -37,18 +37,29 @@ import '../../../widgets/dialog_widgets/two_step_dialog.dart';
 import 'token_import_scheme_processor_interface.dart';
 
 class OtpAuthProcessor extends TokenImportSchemeProcessor {
-  static ObjectValidator<TokenNotifier> get resultHandlerType => TokenImportSchemeProcessor.resultHandlerType;
+  static ObjectValidator<TokenNotifier> get resultHandlerType =>
+      TokenImportSchemeProcessor.resultHandlerType;
   const OtpAuthProcessor();
   @override
   Set<String> get supportedSchemes => {'otpauth'};
-  Set<String> get supportedHosts => TokenTypes.values.map((e) => e.name).toSet();
+  Set<String> get supportedHosts =>
+      TokenTypes.values.map((e) => e.name).toSet();
 
   /// This method parses otpauth uris according
   /// to https://github.com/google/google-authenticator/wiki/Key-Uri-Format.
   @override
-  Future<List<ProcessorResult<Token>>> processUri(Uri uri, {bool fromInit = false}) async {
-    if (!supportedSchemes.contains(uri.scheme) || !supportedHosts.contains(uri.host.toUpperCase())) {
-      return [ProcessorResultFailed((l) => l.notSupported('scheme', uri.scheme), resultHandlerType: resultHandlerType)];
+  Future<List<ProcessorResult<Token>>> processUri(
+    Uri uri, {
+    bool fromInit = false,
+  }) async {
+    if (!supportedSchemes.contains(uri.scheme) ||
+        !supportedHosts.contains(uri.host.toUpperCase())) {
+      return [
+        ProcessorResultFailed(
+          (l) => l.notSupported('scheme', uri.scheme),
+          resultHandlerType: resultHandlerType,
+        ),
+      ];
     }
     Logger.info('Try to handle ${uri.scheme} uri with host ${uri.host}');
     // The values from queryParameters are always strings.
@@ -65,7 +76,12 @@ class OtpAuthProcessor extends TokenImportSchemeProcessor {
     if (twoStepSecretFuture != null) {
       final twoStepSecretString = await twoStepSecretFuture;
       if (twoStepSecretString == null) {
-        return [ProcessorResultFailed((l) => l.twoStepSecretFailed, resultHandlerType: resultHandlerType)];
+        return [
+          ProcessorResultFailed(
+            (l) => l.twoStepSecretFailed,
+            resultHandlerType: resultHandlerType,
+          ),
+        ];
       }
       // Update the secret with the two step secret.
       queryParameters[OTPToken.SECRET_BASE32] = twoStepSecretString;
@@ -73,12 +89,21 @@ class OtpAuthProcessor extends TokenImportSchemeProcessor {
     try {
       return [
         ProcessorResultSuccess(
-          Token.fromOtpAuthMap(queryParameters, additionalData: {Token.ORIGIN: _parseCreatorToOrigin(uri)}),
+          Token.fromOtpAuthMap(
+            queryParameters,
+            additionalData: {Token.ORIGIN: _parseCreatorToOrigin(uri)},
+          ),
           resultHandlerType: resultHandlerType,
         ),
       ];
     } catch (e) {
-      return [ProcessorResultFailed((l) => l.unableToCreateToken, error: e, resultHandlerType: resultHandlerType)];
+      return [
+        ProcessorResultFailed(
+          (l) => l.unableToCreateToken,
+          error: e,
+          resultHandlerType: resultHandlerType,
+        ),
+      ];
     }
   }
 }
@@ -88,7 +113,9 @@ TokenOriginData _parseCreatorToOrigin(Uri uri) {
     data: uri.toString(),
     originName: getCurrentAppName(),
     // If creator is present, it is a privacyIDEA token. If not it could be from an old version of the server too.
-    isPrivacyIdeaToken: uri.queryParameters[Token.CREATOR] != null ? true : null,
+    isPrivacyIdeaToken: uri.queryParameters[Token.CREATOR] != null
+        ? true
+        : null,
     creator: uri.queryParameters[Token.CREATOR],
     createdAt: DateTime.now(),
   );
@@ -149,14 +176,18 @@ Future<String?>? _parse2StepSecret(Uri uri) {
   validateMap(
     map: queryParameters,
     validators: {
-      OTPToken.SECRET_BASE32: ObjectValidator<Uint8List>(transformer: (v) => Encodings.base32.decode(v)),
+      OTPToken.SECRET_BASE32: ObjectValidator<Uint8List>(
+        transformer: (v) => Encodings.base32.decode(v),
+      ),
       Token.TWO_STEP_SALT_LENTH: intValidator,
       Token.TWO_STEP_OUTPUT_LENTH: intValidator,
       Token.TWO_STEP_ITERATIONS: intValidator,
     },
     name: '2StepSecret',
   );
-  final secret = Encodings.base32.decode(queryParameters[OTPToken.SECRET_BASE32]!);
+  final secret = Encodings.base32.decode(
+    queryParameters[OTPToken.SECRET_BASE32]!,
+  );
   // Calculate the whole secret.
 
   final twoStepSecret = showAsyncDialog<Uint8List>(
@@ -198,13 +229,17 @@ void _logInfo(Uri uri) {
 Map<String, String> _secretAddPadding(Map<String, String> queryParameters) {
   if (queryParameters[OTPToken.SECRET_BASE32] == null) return queryParameters;
   final secret = queryParameters[OTPToken.SECRET_BASE32]!;
-  return {...queryParameters}..addAll({OTPToken.SECRET_BASE32: '$secret${secret.length % 2 == 1 ? '=' : ''}'});
+  return {...queryParameters}..addAll({
+    OTPToken.SECRET_BASE32: '$secret${secret.length % 2 == 1 ? '=' : ''}',
+  });
 }
 
 String _parseTokenType(Uri uri) {
   if (_parseIssuer(uri) == "Steam") return TokenTypes.STEAM.name;
   Logger.debug('Token type host: ${uri.host}');
-  Logger.debug('Token type queryParameters: ${uri.queryParameters[Token.TOKENTYPE_OTPAUTH]}');
+  Logger.debug(
+    'Token type queryParameters: ${uri.queryParameters[Token.TOKENTYPE_OTPAUTH]}',
+  );
   final value = uri.queryParameters[Token.TOKENTYPE_OTPAUTH] ?? uri.host;
   Logger.debug('Token type value: $value');
   return validate(

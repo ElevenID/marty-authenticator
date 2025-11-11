@@ -27,13 +27,19 @@ import '../../utils/encryption/aes_encrypted.dart';
 import '../../utils/logger.dart';
 
 class TokenEncryption {
-  static Future<String> encrypt({required Iterable<Token> tokens, required String password}) async {
+  static Future<String> encrypt({
+    required Iterable<Token> tokens,
+    required String password,
+  }) async {
     Logger.info('Encrypting tokens');
     final String jsonString;
     try {
       final jsonsList = tokens.map((e) => e.toJson()).toList();
       final encoded = json.encode(jsonsList);
-      final encrypted = (await AesEncrypted.encrypt(data: encoded, password: password)).toJson();
+      final encrypted = (await AesEncrypted.encrypt(
+        data: encoded,
+        password: password,
+      )).toJson();
       jsonString = jsonEncode(encrypted);
     } catch (e, s) {
       Logger.error('Failed to encrypt tokens', error: e, stackTrace: s);
@@ -43,14 +49,21 @@ class TokenEncryption {
     return jsonString;
   }
 
-  static Future<List<Token>> decrypt({required String encryptedTokens, required String password}) async {
+  static Future<List<Token>> decrypt({
+    required String encryptedTokens,
+    required String password,
+  }) async {
     Logger.info('Decrypting tokens');
     List<Token> tokens = [];
     try {
       final json = jsonDecode(encryptedTokens);
-      final tokenJsonString = await AesEncrypted.fromJson(json).decryptToString(password);
+      final tokenJsonString = await AesEncrypted.fromJson(
+        json,
+      ).decryptToString(password);
       final tokenJsonsList = jsonDecode(tokenJsonString) as List;
-      tokens = tokenJsonsList.map<Token>((e) => Token.fromJson(e).copyWith(folderId: () => null)).toList();
+      tokens = tokenJsonsList
+          .map<Token>((e) => Token.fromJson(e).copyWith(folderId: () => null))
+          .toList();
     } catch (e, s) {
       // Does not has to be an error, if the password is wrong.
       Logger.warning('Failed to decrypt tokens', error: e, stackTrace: s);
@@ -68,7 +81,9 @@ class TokenEncryption {
       final encoded = json.encode(tokenJson);
       final bytes = utf8.encode(encoded);
       final base64 = base64Url.encode(bytes);
-      uri = Uri.parse('${PiaSchemeProcessor.scheme}://${PiaSchemeProcessor.qrBackupHost}?data=$base64');
+      uri = Uri.parse(
+        '${PiaSchemeProcessor.scheme}://${PiaSchemeProcessor.qrBackupHost}?data=$base64',
+      );
     } catch (e, s) {
       Logger.error('Failed to generate export URI', error: e, stackTrace: s);
       rethrow;
@@ -84,7 +99,11 @@ class TokenEncryption {
       qrCode = Encoder.encode(
         generateExportUri(token: token).toString(),
         ErrorCorrectionLevel.l,
-        hints: EncodeHints()..put<CharacterSetECI>(EncodeHintType.characterSet, CharacterSetECI.ASCII),
+        hints: EncodeHints()
+          ..put<CharacterSetECI>(
+            EncodeHintType.characterSet,
+            CharacterSetECI.ASCII,
+          ),
       );
     } catch (e, s) {
       Logger.error('Failed to generate QR code', error: e, stackTrace: s);

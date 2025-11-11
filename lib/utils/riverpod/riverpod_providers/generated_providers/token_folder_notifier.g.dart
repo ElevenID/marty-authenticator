@@ -6,104 +6,158 @@ part of 'token_folder_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-@ProviderFor(TokenFolderNotifier)
-const tokenFolderNotifierProviderOf = TokenFolderNotifierFamily._();
+String _$tokenFolderNotifierHash() =>
+    r'68ed2236cd7c4405693cd095b32ec34978e47c7d';
 
-final class TokenFolderNotifierProvider
-    extends $NotifierProvider<TokenFolderNotifier, TokenFolderState> {
-  const TokenFolderNotifierProvider._({
-    required TokenFolderNotifierFamily super.from,
-    required TokenFolderRepository super.argument,
-  }) : super(
-         retry: null,
-         name: r'tokenFolderNotifierProviderOf',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
 
-  @override
-  String debugGetCreateSourceHash() => _$tokenFolderNotifierHash();
-
-  @override
-  String toString() {
-    return r'tokenFolderNotifierProviderOf'
-        ''
-        '($argument)';
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
   }
 
-  @$internal
-  @override
-  TokenFolderNotifier create() => TokenFolderNotifier();
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TokenFolderState value) {
-    return $ProviderOverride(
+abstract class _$TokenFolderNotifier
+    extends BuildlessNotifier<TokenFolderState> {
+  late final TokenFolderRepository repo;
+
+  TokenFolderState build({required TokenFolderRepository repo});
+}
+
+/// See also [TokenFolderNotifier].
+@ProviderFor(TokenFolderNotifier)
+const tokenFolderNotifierProviderOf = TokenFolderNotifierFamily();
+
+/// See also [TokenFolderNotifier].
+class TokenFolderNotifierFamily extends Family<TokenFolderState> {
+  /// See also [TokenFolderNotifier].
+  const TokenFolderNotifierFamily();
+
+  /// See also [TokenFolderNotifier].
+  TokenFolderNotifierProvider call({required TokenFolderRepository repo}) {
+    return TokenFolderNotifierProvider(repo: repo);
+  }
+
+  @override
+  TokenFolderNotifierProvider getProviderOverride(
+    covariant TokenFolderNotifierProvider provider,
+  ) {
+    return call(repo: provider.repo);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'tokenFolderNotifierProviderOf';
+}
+
+/// See also [TokenFolderNotifier].
+class TokenFolderNotifierProvider
+    extends NotifierProviderImpl<TokenFolderNotifier, TokenFolderState> {
+  /// See also [TokenFolderNotifier].
+  TokenFolderNotifierProvider({required TokenFolderRepository repo})
+    : this._internal(
+        () => TokenFolderNotifier()..repo = repo,
+        from: tokenFolderNotifierProviderOf,
+        name: r'tokenFolderNotifierProviderOf',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tokenFolderNotifierHash,
+        dependencies: TokenFolderNotifierFamily._dependencies,
+        allTransitiveDependencies:
+            TokenFolderNotifierFamily._allTransitiveDependencies,
+        repo: repo,
+      );
+
+  TokenFolderNotifierProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.repo,
+  }) : super.internal();
+
+  final TokenFolderRepository repo;
+
+  @override
+  TokenFolderState runNotifierBuild(covariant TokenFolderNotifier notifier) {
+    return notifier.build(repo: repo);
+  }
+
+  @override
+  Override overrideWith(TokenFolderNotifier Function() create) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<TokenFolderState>(value),
+      override: TokenFolderNotifierProvider._internal(
+        () => create()..repo = repo,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        repo: repo,
+      ),
     );
   }
 
   @override
+  NotifierProviderElement<TokenFolderNotifier, TokenFolderState>
+  createElement() {
+    return _TokenFolderNotifierProviderElement(this);
+  }
+
+  @override
   bool operator ==(Object other) {
-    return other is TokenFolderNotifierProvider && other.argument == argument;
+    return other is TokenFolderNotifierProvider && other.repo == repo;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, repo.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$tokenFolderNotifierHash() =>
-    r'68ed2236cd7c4405693cd095b32ec34978e47c7d';
-
-final class TokenFolderNotifierFamily extends $Family
-    with
-        $ClassFamilyOverride<
-          TokenFolderNotifier,
-          TokenFolderState,
-          TokenFolderState,
-          TokenFolderState,
-          TokenFolderRepository
-        > {
-  const TokenFolderNotifierFamily._()
-    : super(
-        retry: null,
-        name: r'tokenFolderNotifierProviderOf',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
-
-  TokenFolderNotifierProvider call({required TokenFolderRepository repo}) =>
-      TokenFolderNotifierProvider._(argument: repo, from: this);
-
-  @override
-  String toString() => r'tokenFolderNotifierProviderOf';
+mixin TokenFolderNotifierRef on NotifierProviderRef<TokenFolderState> {
+  /// The parameter `repo` of this provider.
+  TokenFolderRepository get repo;
 }
 
-abstract class _$TokenFolderNotifier extends $Notifier<TokenFolderState> {
-  late final _$args = ref.$arg as TokenFolderRepository;
-  TokenFolderRepository get repo => _$args;
+class _TokenFolderNotifierProviderElement
+    extends NotifierProviderElement<TokenFolderNotifier, TokenFolderState>
+    with TokenFolderNotifierRef {
+  _TokenFolderNotifierProviderElement(super.provider);
 
-  TokenFolderState build({required TokenFolderRepository repo});
-  @$mustCallSuper
   @override
-  void runBuild() {
-    final created = build(repo: _$args);
-    final ref = this.ref as $Ref<TokenFolderState, TokenFolderState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<TokenFolderState, TokenFolderState>,
-              TokenFolderState,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
-  }
+  TokenFolderRepository get repo =>
+      (origin as TokenFolderNotifierProvider).repo;
 }
 
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -17,9 +17,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum SyncState {
-  notStarted,
-  syncing,
-  completed,
-  failed,
-}
+enum SyncState { notStarted, syncing, completed, failed }

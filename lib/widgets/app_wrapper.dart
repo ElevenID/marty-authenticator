@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,7 +48,9 @@ class _AppWrapperState extends ConsumerState<_AppWrapper> {
     super.initState();
     _listener = AppLifecycleListener(
       onResume: () async {
-        final state = await ref.read(tokenProvider.notifier).loadStateFromRepo();
+        final state = await ref
+            .read(tokenProvider.notifier)
+            .loadStateFromRepo();
         Logger.info('Refreshed tokens on resume');
         final hasPushToken = state?.hasPushTokens == true;
         if (hasPushToken) {
@@ -63,10 +66,17 @@ class _AppWrapperState extends ConsumerState<_AppWrapper> {
         if (await ref.read(tokenProvider.notifier).onMinimizeApp() == false) {
           Logger.error('Failed to save tokens on Hide');
         }
-        if ((await ref.read(tokenFolderProvider.notifier).collapseLockedFolders()).folders.any((folder) => folder.isLocked && folder.isExpanded)) {
+        if ((await ref
+                .read(tokenFolderProvider.notifier)
+                .collapseLockedFolders())
+            .folders
+            .any((folder) => folder.isLocked && folder.isExpanded)) {
           Logger.error('Failed to collapse locked folders on Hide');
         }
-        await FlutterLocalNotificationsPlugin().cancelAll();
+        // Skip notification cancellation on web platform where the plugin isn't supported
+        if (!kIsWeb) {
+          await FlutterLocalNotificationsPlugin().cancelAll();
+        }
         Logger.info('Collapsed locked folders on Hide');
       },
       onExitRequested: () async {

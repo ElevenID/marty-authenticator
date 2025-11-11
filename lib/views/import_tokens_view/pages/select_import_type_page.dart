@@ -20,7 +20,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../model/enums/token_import_type.dart';
 import '../../../model/extensions/enums/token_import_type_extension.dart';
 import '../../../model/token_import/token_import_origin.dart';
@@ -49,7 +49,9 @@ class SelectImportTypePage extends StatelessWidget {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: ImportTokensView.pagePaddingHorizontal),
+            padding: const EdgeInsets.symmetric(
+              horizontal: ImportTokensView.pagePaddingHorizontal,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -67,7 +69,10 @@ class SelectImportTypePage extends StatelessWidget {
                 ),
                 const SizedBox(height: ImportTokensView.itemSpacingHorizontal),
                 for (final importEntity in tokenImportOrigin.importSources) ...[
-                  if (importEntity != tokenImportOrigin.importSources.first) const SizedBox(height: ImportTokensView.itemSpacingHorizontal / 2),
+                  if (importEntity != tokenImportOrigin.importSources.first)
+                    const SizedBox(
+                      height: ImportTokensView.itemSpacingHorizontal / 2,
+                    ),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -77,10 +82,14 @@ class SelectImportTypePage extends StatelessWidget {
                             flex: 8,
                             child: Text(
                               switch (importEntity.type) {
-                                const (TokenImportType.backupFile) => localizations.selectFile,
-                                const (TokenImportType.qrScan) => localizations.scanQrCode,
-                                const (TokenImportType.qrFile) => localizations.selectFile,
-                                const (TokenImportType.link) => localizations.enterLink,
+                                const (TokenImportType.backupFile) =>
+                                  localizations.selectFile,
+                                const (TokenImportType.qrScan) =>
+                                  localizations.scanQrCode,
+                                const (TokenImportType.qrFile) =>
+                                  localizations.selectFile,
+                                const (TokenImportType.link) =>
+                                  localizations.enterLink,
                               },
                               style: Theme.of(context).textTheme.headlineSmall,
                               overflow: TextOverflow.fade,
@@ -88,13 +97,14 @@ class SelectImportTypePage extends StatelessWidget {
                               softWrap: false,
                             ),
                           ),
-                          Expanded(
-                            child: Icon(importEntity.type.icon),
-                          ),
+                          Expanded(child: Icon(importEntity.type.icon)),
                           const Expanded(child: SizedBox()),
                         ],
                       ),
-                      onPressed: () => _routeStartPage(context: context, importSource: importEntity),
+                      onPressed: () => _routeStartPage(
+                        context: context,
+                        importSource: importEntity,
+                      ),
                     ),
                   ),
                 ],
@@ -107,10 +117,16 @@ class SelectImportTypePage extends StatelessWidget {
     );
   }
 
-  Future<void> _routeStartPage({required TokenImportSource importSource, required BuildContext context}) async {
+  Future<void> _routeStartPage({
+    required TokenImportSource importSource,
+    required BuildContext context,
+  }) async {
     final tokensToImport = await Navigator.of(context).push<List<Token>>(
       MaterialPageRoute(
-        builder: (context) => ImportStartPage(appName: tokenImportOrigin.appName, selectedSource: importSource),
+        builder: (context) => ImportStartPage(
+          appName: tokenImportOrigin.appName,
+          selectedSource: importSource,
+        ),
       ),
     );
     if (tokensToImport != null) {

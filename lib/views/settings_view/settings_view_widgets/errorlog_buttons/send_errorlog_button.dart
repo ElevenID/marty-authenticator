@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../utils/logger.dart';
 import '../send_error_dialog.dart';
 import 'errorlog_button.dart';
@@ -29,9 +29,9 @@ class SendErrorLogButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ErrorlogButton(
-        onPressed: () => _pressSendErrorLog(context),
-        text: AppLocalizations.of(context)!.send,
-      );
+    onPressed: () => _pressSendErrorLog(context),
+    text: AppLocalizations.of(context)!.send,
+  );
 }
 
 void _pressSendErrorLog(BuildContext context) {

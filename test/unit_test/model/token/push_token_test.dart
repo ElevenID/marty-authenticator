@@ -4,25 +4,25 @@ import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
 import 'package:privacyidea_authenticator/model/tokens/token.dart';
 
 PushToken get pushToken => PushToken(
-      serial: 'serial',
-      expirationDate: DateTime(2017, 9, 7, 17, 30),
-      label: 'label',
-      issuer: 'issuer',
-      id: 'id',
-      sslVerify: true,
-      enrollmentCredentials: 'enrollmentCredentials',
-      url: Uri.parse('http://www.example.com'),
-      publicServerKey: 'publicServerKey',
-      publicTokenKey: 'publicTokenKey',
-      privateTokenKey: 'privateTokenKey',
-      isRolledOut: true,
-      rolloutState: PushTokenRollOutState.rolloutNotStarted,
-      sortIndex: 0,
-      tokenImage: 'example.png',
-      folderId: 0,
-      isLocked: true,
-      pin: true,
-    );
+  serial: 'serial',
+  expirationDate: DateTime(2017, 9, 7, 17, 30),
+  label: 'label',
+  issuer: 'issuer',
+  id: 'id',
+  sslVerify: true,
+  enrollmentCredentials: 'enrollmentCredentials',
+  url: Uri.parse('http://www.example.com'),
+  publicServerKey: 'publicServerKey',
+  publicTokenKey: 'publicTokenKey',
+  privateTokenKey: 'privateTokenKey',
+  isRolledOut: true,
+  rolloutState: PushTokenRollOutState.rolloutNotStarted,
+  sortIndex: 0,
+  tokenImage: 'example.png',
+  folderId: 0,
+  isLocked: true,
+  pin: true,
+);
 void main() {
   _testPushToken();
 }
@@ -124,14 +124,19 @@ void _testPushToken() {
       expect(token.folderId, 0);
       expect(token.sortIndex, 0);
       expect(token.type, 'PIPUSH');
-      expect(token.expirationDate.toString(), DateTime(2017, 9, 7, 17, 30).toString());
+      expect(
+        token.expirationDate.toString(),
+        DateTime(2017, 9, 7, 17, 30).toString(),
+      );
       expect(token.serial, 'serial');
       expect(token.sslVerify, true);
       expect(token.enrollmentCredentials, 'enrollmentCredentials');
       expect(token.url, Uri.parse('http://www.example.com'));
       expect(token.isRolledOut, true);
-      expect(token.rolloutState,
-          PushTokenRollOutState.generatingRSAKeyPairFailed); // When loading from json, an processing state should be converted to a failed state.
+      expect(
+        token.rolloutState,
+        PushTokenRollOutState.generatingRSAKeyPairFailed,
+      ); // When loading from json, an processing state should be converted to a failed state.
       expect(token.publicServerKey, 'publicServerKey');
       expect(token.privateTokenKey, 'privateTokenKey');
       expect(token.publicTokenKey, 'publicTokenKey');
@@ -162,7 +167,7 @@ void _testPushToken() {
         "rolloutState": "rolloutNotStarted",
         "publicServerKey": "publicServerKey",
         "privateTokenKey": "privateTokenKey",
-        "publicTokenKey": "publicTokenKey"
+        "publicTokenKey": "publicTokenKey",
       };
       for (final key in json.keys) {
         expect(tokenJson[key], json[key]);
@@ -192,7 +197,10 @@ void _testPushToken() {
       });
       test('with empty map', () {
         final uriMap = <String, dynamic>{};
-        expect(() => PushToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => PushToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
     });
 
@@ -259,14 +267,19 @@ void _testPushToken() {
       expect(token.folderId, 0);
       expect(token.sortIndex, 0);
       expect(token.type, 'PIPUSH');
-      expect(token.expirationDate.toString(), DateTime(2017, 9, 7, 17, 30).toString());
+      expect(
+        token.expirationDate.toString(),
+        DateTime(2017, 9, 7, 17, 30).toString(),
+      );
       expect(token.serial, 'serial');
       expect(token.sslVerify, true);
       expect(token.enrollmentCredentials, 'enrollmentCredentials');
       expect(token.url, Uri.parse('http://www.example.com'));
       expect(token.isRolledOut, true);
-      expect(token.rolloutState,
-          PushTokenRollOutState.generatingRSAKeyPairFailed); // When loading from json, an processing state should be converted to a failed state.
+      expect(
+        token.rolloutState,
+        PushTokenRollOutState.generatingRSAKeyPairFailed,
+      ); // When loading from json, an processing state should be converted to a failed state.
       expect(token.publicServerKey, 'publicServerKey');
       expect(token.privateTokenKey, 'privateTokenKey');
       expect(token.publicTokenKey, 'publicTokenKey');
@@ -297,7 +310,7 @@ void _testPushToken() {
         "rolloutState": "rolloutNotStarted",
         "publicServerKey": "publicServerKey",
         "privateTokenKey": "privateTokenKey",
-        "publicTokenKey": "publicTokenKey"
+        "publicTokenKey": "publicTokenKey",
       };
       for (final key in json.keys) {
         expect(tokenJson[key], json[key]);
@@ -313,7 +326,12 @@ void _testPushToken() {
         privateTokenKey: 'privateTokenKey',
       );
 
-      expect(pushToken.isSameTokenAs(pushToken.copyWith(id: 'id2', privateTokenKey: 'privateTokenKey2')), true);
+      expect(
+        pushToken.isSameTokenAs(
+          pushToken.copyWith(id: 'id2', privateTokenKey: 'privateTokenKey2'),
+        ),
+        true,
+      );
     });
     test('different serial | same id | different parameters', () {
       // Different serial, different parameters. Should recognize by id
@@ -323,7 +341,15 @@ void _testPushToken() {
         privateTokenKey: 'privateTokenKey',
       );
 
-      expect(pushToken.isSameTokenAs(pushToken.copyWith(serial: 'serial2', privateTokenKey: 'privateTokenKey2')), true);
+      expect(
+        pushToken.isSameTokenAs(
+          pushToken.copyWith(
+            serial: 'serial2',
+            privateTokenKey: 'privateTokenKey2',
+          ),
+        ),
+        true,
+      );
     });
     test('different serial | different id | same parameters', () {
       // Different serial, different id. Should NOT recognize by parameters
@@ -333,7 +359,12 @@ void _testPushToken() {
         privateTokenKey: 'privateTokenKey',
       );
 
-      expect(pushToken.isSameTokenAs(pushToken.copyWith(serial: 'serial2', id: 'id2')), false);
+      expect(
+        pushToken.isSameTokenAs(
+          pushToken.copyWith(serial: 'serial2', id: 'id2'),
+        ),
+        false,
+      );
     });
   });
 }

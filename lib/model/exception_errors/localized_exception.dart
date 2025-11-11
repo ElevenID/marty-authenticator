@@ -18,13 +18,16 @@
  * limitations under the License.
  */
 
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 
 class LocalizedException implements Exception {
   final String Function(AppLocalizations localizations) localizedMessage;
   final String unlocalizedMessage;
 
-  const LocalizedException({required this.localizedMessage, required this.unlocalizedMessage});
+  const LocalizedException({
+    required this.localizedMessage,
+    required this.unlocalizedMessage,
+  });
 
   @override
   String toString() => 'Exception: $unlocalizedMessage';

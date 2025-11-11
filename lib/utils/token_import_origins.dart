@@ -44,13 +44,16 @@ class TokenImportOrigins {
   static const _importSourceIconFolder = 'assets/images/import_sources/';
 
   static final privacyIDEAAuthenticator = TokenImportOrigin(
-    appName: PrivacyIDEAAuthenticator.currentCustomization?.appName ?? 'privacyIDEA Authenticator',
+    appName:
+        PrivacyIDEAAuthenticator.currentCustomization?.appName ??
+        'privacyIDEA Authenticator',
     iconPath: '${_importSourceIconFolder}privacyidea_authenticator.png',
     importSources: [
       TokenImportSource(
         processor: const PiaSchemeProcessor(),
         type: TokenImportType.qrScan,
-        importHint: (localizations) => localizations.importHintPrivacyIdeaQrScan,
+        importHint: (localizations) =>
+            localizations.importHintPrivacyIdeaQrScan,
       ),
       TokenImportSource(
         processor: const PrivacyIDEAAuthenticatorImportFileProcessor(),
@@ -115,7 +118,8 @@ class TokenImportOrigins {
       TokenImportSource(
         processor: const AuthenticatorProImportFileProcessor(),
         type: TokenImportType.backupFile,
-        importHint: (localizations) => localizations.importHintAuthenticatorProFile,
+        importHint: (localizations) =>
+            localizations.importHintAuthenticatorProFile,
       ),
     ],
   );
@@ -126,7 +130,8 @@ class TokenImportOrigins {
       TokenImportSource(
         processor: const FreeOtpPlusQrProcessor(),
         type: TokenImportType.qrScan,
-        importHint: (localizations) => localizations.importHintFreeOtpPlusQrScan,
+        importHint: (localizations) =>
+            localizations.importHintFreeOtpPlusQrScan,
       ),
       TokenImportSource(
         processor: const FreeOtpPlusImportFileProcessor(),

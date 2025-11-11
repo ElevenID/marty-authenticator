@@ -40,7 +40,10 @@ import '../rows/token_type_dropdown_button.dart';
 import 'add_token_manually_interface.dart';
 
 class AddTotpManually extends AddTokenManuallyPage {
-  static final allowedPeriodsTOTP = [const Duration(seconds: 30), const Duration(seconds: 60)];
+  static final allowedPeriodsTOTP = [
+    const Duration(seconds: 30),
+    const Duration(seconds: 60),
+  ];
 
   final TextEditingController labelController;
 
@@ -72,7 +75,11 @@ class AddTotpManually extends AddTokenManuallyPage {
       autoValidateLabel.value = true;
       return null;
     }
-    if (SecretInputField.validator(secretController.text, encodingNofitier.value) != null) {
+    if (SecretInputField.validator(
+          secretController.text,
+          encodingNofitier.value,
+        ) !=
+        null) {
       autoValidateSecret.value = true;
       return null;
     }
@@ -84,7 +91,10 @@ class AddTotpManually extends AddTokenManuallyPage {
       id: const Uuid().v4(),
       algorithm: algorithmsNotifier.value,
       digits: digitsNotifier.value!,
-      secret: encodingNofitier.value.encodeStringTo(Encodings.base32, secretController.text),
+      secret: encodingNofitier.value.encodeStringTo(
+        Encodings.base32,
+        secretController.text,
+      ),
       type: TokenTypes.TOTP.name,
       origin: TokenOriginSourceType.manually.toTokenOrigin(),
       label: labelController.text,
@@ -94,30 +104,30 @@ class AddTotpManually extends AddTokenManuallyPage {
 
   @override
   AddTokenManually build(BuildContext context) => AddTokenManually(
-        fields: [
-          LabelInputField(
-            controller: labelController,
-            autoValidate: autoValidateLabel,
-          ),
-          SecretInputField(
-            controller: secretController,
-            autoValidate: autoValidateSecret,
-            encodingNotifier: encodingNofitier,
-          ),
-          TokenTypeDropdownButton(typeNotifier: typeNotifier),
-          EncodingsDropdownButton(encodingNotifier: encodingNofitier),
-          AlgorithmsDropdownButton(algorithmsNotifier: algorithmsNotifier),
-          DigitsDropdownButton(digitsNotifier: digitsNotifier),
-          DurationDropdownButton(
-            periodNotifier: periodNotifier,
-            values: allowedPeriodsTOTP,
-            unit: DurationUnit.seconds,
-          ),
-        ],
-        button: AddTokenButton(
-          autoValidateLabel: autoValidateLabel,
-          autoValidateSecret: autoValidateSecret,
-          tokenBuilder: _tryBuildToken,
-        ),
-      );
+    fields: [
+      LabelInputField(
+        controller: labelController,
+        autoValidate: autoValidateLabel,
+      ),
+      SecretInputField(
+        controller: secretController,
+        autoValidate: autoValidateSecret,
+        encodingNotifier: encodingNofitier,
+      ),
+      TokenTypeDropdownButton(typeNotifier: typeNotifier),
+      EncodingsDropdownButton(encodingNotifier: encodingNofitier),
+      AlgorithmsDropdownButton(algorithmsNotifier: algorithmsNotifier),
+      DigitsDropdownButton(digitsNotifier: digitsNotifier),
+      DurationDropdownButton(
+        periodNotifier: periodNotifier,
+        values: allowedPeriodsTOTP,
+        unit: DurationUnit.seconds,
+      ),
+    ],
+    button: AddTokenButton(
+      autoValidateLabel: autoValidateLabel,
+      autoValidateSecret: autoValidateSecret,
+      tokenBuilder: _tryBuildToken,
+    ),
+  );
 }

@@ -17,7 +17,8 @@ class DelayedElevatedButton extends StatefulWidget {
   State<DelayedElevatedButton> createState() => _DelayedElevatedButtonState();
 }
 
-class _DelayedElevatedButtonState extends State<DelayedElevatedButton> with SingleTickerProviderStateMixin {
+class _DelayedElevatedButtonState extends State<DelayedElevatedButton>
+    with SingleTickerProviderStateMixin {
   late int currentCount;
   late AnimationController animation;
   late DateTime lastCountDateTime;
@@ -39,7 +40,9 @@ class _DelayedElevatedButtonState extends State<DelayedElevatedButton> with Sing
     setState(() {
       currentCount = widget.delaySeconds;
       animation.forward(from: 0);
-      countDownFuture = Future.doWhile(_countDown).then((_) => countDownFuture = null);
+      countDownFuture = Future.doWhile(
+        _countDown,
+      ).then((_) => countDownFuture = null);
     });
   }
 
@@ -75,7 +78,11 @@ class _DelayedElevatedButtonState extends State<DelayedElevatedButton> with Sing
                       animation.value / animation.upperBound,
                       strokeWidth: 5,
                       swapColors: currentCount % 2 == 0,
-                      backgroundColor: Theme.of(context).elevatedButtonTheme.style!.backgroundColor!.resolve({WidgetState.disabled}),
+                      backgroundColor: Theme.of(context)
+                          .elevatedButtonTheme
+                          .style!
+                          .backgroundColor!
+                          .resolve({WidgetState.disabled}),
                     ),
                   ),
                 ),

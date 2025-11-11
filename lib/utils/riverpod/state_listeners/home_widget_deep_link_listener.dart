@@ -24,9 +24,17 @@ import '../../../interfaces/riverpod/state_listeners/state_notifier_provider_lis
 import '../../../processors/scheme_processors/home_widget_processor.dart';
 
 class HomeWidgetDeepLinkListener extends DeepLinkListener {
-  const HomeWidgetDeepLinkListener({required super.provider}) : super(onNewState: _onNewState, listenerName: 'HomeWidgetProcessor().processUri');
+  const HomeWidgetDeepLinkListener({required super.provider})
+    : super(
+        onNewState: _onNewState,
+        listenerName: 'HomeWidgetProcessor().processUri',
+      );
 
-  static void _onNewState(WidgetRef ref, AsyncValue<DeepLink>? previous, AsyncValue<DeepLink> next) {
+  static void _onNewState(
+    WidgetRef ref,
+    AsyncValue<DeepLink>? previous,
+    AsyncValue<DeepLink> next,
+  ) {
     next.whenData((next) {
       const HomeWidgetProcessor().processUri(next.uri, fromInit: next.fromInit);
     });

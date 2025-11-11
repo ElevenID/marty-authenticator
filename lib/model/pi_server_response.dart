@@ -30,7 +30,8 @@ import 'exception_errors/pi_server_result_error.dart';
 part 'pi_server_response.freezed.dart';
 
 @Freezed(copyWith: false)
-sealed class PiServerResponse<T extends PiServerResultValue> with _$PiServerResponse {
+sealed class PiServerResponse<T extends PiServerResultValue>
+    with _$PiServerResponse {
   static const RESULT = 'result';
   static const DETAIL = 'detail';
   static const ID = 'id';
@@ -57,7 +58,8 @@ sealed class PiServerResponse<T extends PiServerResultValue> with _$PiServerResp
     required String signature,
   }) = PiSuccessResponse;
   bool get isSuccess => this is PiSuccessResponse;
-  PiSuccessResponse<T>? get asSuccess => this is PiSuccessResponse<T> ? this as PiSuccessResponse<T> : null;
+  PiSuccessResponse<T>? get asSuccess =>
+      this is PiSuccessResponse<T> ? this as PiSuccessResponse<T> : null;
 
   factory PiServerResponse.error({
     required int statusCode,
@@ -73,9 +75,13 @@ sealed class PiServerResponse<T extends PiServerResultValue> with _$PiServerResp
     required String signature,
   }) = PiErrorResponse;
   bool get isError => this is PiErrorResponse;
-  PiErrorResponse<T>? get asError => this is PiErrorResponse<T> ? this as PiErrorResponse<T> : null;
+  PiErrorResponse<T>? get asError =>
+      this is PiErrorResponse<T> ? this as PiErrorResponse<T> : null;
 
-  factory PiServerResponse.fromJson(Map<String, dynamic> json, {int statisCode = 200}) {
+  factory PiServerResponse.fromJson(
+    Map<String, dynamic> json, {
+    int statisCode = 200,
+  }) {
     Logger.debug('Received container sync response: $json');
     final map = validateMap<dynamic>(
       map: json,
@@ -119,7 +125,9 @@ sealed class PiServerResponse<T extends PiServerResultValue> with _$PiServerResp
         detail: map[DETAIL],
         id: json[ID],
         jsonrpc: map[JSONRPC],
-        piServerResultError: PiServerResultError.fromResult(result[RESULT_ERROR]),
+        piServerResultError: PiServerResultError.fromResult(
+          result[RESULT_ERROR],
+        ),
         time: map[TIME],
         version: map[VERSION],
         versionNumber: map[VERSION_NUMBER] ?? map[VERSION].split(' ')[1],
@@ -136,6 +144,9 @@ sealed class PiServerResponse<T extends PiServerResultValue> with _$PiServerResp
   }
 
   factory PiServerResponse.fromResponse(Response response) {
-    return PiServerResponse<T>.fromJson(jsonDecode(response.body), statisCode: response.statusCode);
+    return PiServerResponse<T>.fromJson(
+      jsonDecode(response.body),
+      statisCode: response.statusCode,
+    );
   }
 }

@@ -10,16 +10,16 @@ import 'package:privacyidea_authenticator/model/tokens/token.dart';
 import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
 
 SteamToken get steamToken => SteamToken(
-      label: 'label',
-      issuer: 'issuer',
-      id: 'id',
-      secret: 'secret',
-      pin: false,
-      tokenImage: 'example.png',
-      sortIndex: 0,
-      isLocked: false,
-      folderId: 0,
-    );
+  label: 'label',
+  issuer: 'issuer',
+  id: 'id',
+  secret: 'secret',
+  pin: false,
+  tokenImage: 'example.png',
+  sortIndex: 0,
+  isLocked: false,
+  folderId: 0,
+);
 void main() {
   _testSteamToken();
 }
@@ -44,12 +44,15 @@ void _testSteamToken() {
       });
       test('copyWith', () {
         final totpCopy = steamToken.copyWith(
-          period: 60, // Should not affect the period because steam tokens always have 30 seconds period
+          period:
+              60, // Should not affect the period because steam tokens always have 30 seconds period
           label: 'labelCopy',
           issuer: 'issuerCopy',
           id: 'idCopy',
-          algorithm: Algorithms.SHA256, // Should not affect the algorithm because steam tokens always have SHA1 algorithm
-          digits: 8, // Should not affect the digits because steam tokens always have 5 digits
+          algorithm: Algorithms
+              .SHA256, // Should not affect the algorithm because steam tokens always have SHA1 algorithm
+          digits:
+              8, // Should not affect the digits because steam tokens always have 5 digits
           secret: 'secretCopy',
           pin: true,
           tokenImage: 'exampleCopy.png',
@@ -81,7 +84,9 @@ void _testSteamToken() {
             Token.TOKENTYPE_OTPAUTH: 'totp',
             Token.PIN: Token.PIN_VALUE_FALSE,
             Token.IMAGE: 'example.png',
-            OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+            OTPToken.SECRET_BASE32: Encodings.base32.encode(
+              utf8.encode('secret'),
+            ),
           };
           final totpFromUriMap = SteamToken.fromOtpAuthMap(uriMap);
           expect(totpFromUriMap.period, 30);
@@ -102,11 +107,17 @@ void _testSteamToken() {
             Token.PIN: Token.PIN_VALUE_FALSE,
             Token.IMAGE: 'example.png',
           };
-          expect(() => SteamToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+          expect(
+            () => SteamToken.fromOtpAuthMap(uriMap),
+            throwsA(isA<ArgumentError>()),
+          );
         });
         test('with empty map', () {
           final uriMap = <String, dynamic>{};
-          expect(() => TOTPToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+          expect(
+            () => TOTPToken.fromOtpAuthMap(uriMap),
+            throwsA(isA<ArgumentError>()),
+          );
         });
       });
       test('toUriMap', () {
@@ -181,7 +192,10 @@ void _testSteamToken() {
           secret: 'secret',
         );
 
-        expect(steamToken.isSameTokenAs(steamToken.copyWith(secret: 'secret2')), isTrue);
+        expect(
+          steamToken.isSameTokenAs(steamToken.copyWith(secret: 'secret2')),
+          isTrue,
+        );
       });
       test('no serial | different id | same parameters', () {
         // No serial, different id. Should recognize by parameters
@@ -192,7 +206,10 @@ void _testSteamToken() {
           secret: 'secret',
         );
 
-        expect(steamToken.isSameTokenAs(steamToken.copyWith(id: 'id2')), isTrue);
+        expect(
+          steamToken.isSameTokenAs(steamToken.copyWith(id: 'id2')),
+          isTrue,
+        );
       });
       test('no serial | different id | different parameters', () {
         // No serial, different id, different parameters. Should not recognize
@@ -203,7 +220,12 @@ void _testSteamToken() {
           secret: 'secret',
         );
 
-        expect(steamToken.isSameTokenAs(steamToken.copyWith(id: 'id2', secret: 'secret2')), isFalse);
+        expect(
+          steamToken.isSameTokenAs(
+            steamToken.copyWith(id: 'id2', secret: 'secret2'),
+          ),
+          isFalse,
+        );
       });
     });
     test('otpValue', () {
@@ -218,7 +240,10 @@ void _testSteamToken() {
       final otp = steamToken.otpFromTime(time);
       final otpNow = steamToken.otpFromTime(DateTime.now());
       expect(otp, equals('JGPCJ')); // Checks if the otpOfTime works correctly
-      expect(steamToken.otpValue, equals(otpNow)); // Checks if the otpValue delivers the same value as the otpOfTime method
+      expect(
+        steamToken.otpValue,
+        equals(otpNow),
+      ); // Checks if the otpValue delivers the same value as the otpOfTime method
     });
   });
 }

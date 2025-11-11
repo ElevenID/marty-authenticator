@@ -34,7 +34,10 @@ class TokenFilter {
       return [];
     }
     for (final token in tokens) {
-      if (regExp.hasMatch(token.label) || regExp.hasMatch(token.issuer) || token is PushToken && regExp.hasMatch(token.serial) || regExp.hasMatch(token.type)) {
+      if (regExp.hasMatch(token.label) ||
+          regExp.hasMatch(token.issuer) ||
+          token is PushToken && regExp.hasMatch(token.serial) ||
+          regExp.hasMatch(token.type)) {
         filteredTokens.add(token);
       }
     }

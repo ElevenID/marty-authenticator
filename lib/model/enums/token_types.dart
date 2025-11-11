@@ -18,11 +18,4 @@
  * limitations under the License.
  */
 // Do not rename or remove values, they are used for serialization. Only add new values.
-enum TokenTypes {
-  HOTP,
-  TOTP,
-  PIPUSH,
-  PUSH,
-  DAYPASSWORD,
-  STEAM,
-}
+enum TokenTypes { HOTP, TOTP, PIPUSH, PUSH, DAYPASSWORD, STEAM }

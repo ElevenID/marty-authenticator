@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/dialog_widgets/default_dialog.dart';
 import '../settings_view.dart';
@@ -38,63 +38,71 @@ class _SendErrorDialogState extends State<SendErrorDialog> {
 
   @override
   Widget build(BuildContext context) => DefaultDialog(
-        title: Text(
-          AppLocalizations.of(context)!.send,
+    title: Text(
+      AppLocalizations.of(context)!.send,
+      overflow: TextOverflow.fade,
+      softWrap: false,
+    ),
+    content: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(AppLocalizations.of(context)!.sendErrorLogDescription),
+          TextButton(
+            child: Text(AppLocalizations.of(context)!.showPrivacyPolicy),
+            onPressed: () => launchUrl(
+              Uri.parse('https://netknights.it/en/privacy-statement/'),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          TextField(
+            controller: _textController,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(
+                borderSide: BorderSide(width: 1.5),
+              ),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(width: 1.5),
+              ),
+              focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(width: 1.5),
+              ),
+              labelText: AppLocalizations.of(context)!.additionalErrorMessage,
+            ),
+            maxLines: 5,
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        child: Text(
+          AppLocalizations.of(context)!.dismiss,
           overflow: TextOverflow.fade,
           softWrap: false,
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8.0,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.sendErrorLogDescription,
-              ),
-              TextButton(
-                  child: Text(
-                    AppLocalizations.of(context)!.showPrivacyPolicy,
-                  ),
-                  onPressed: () => launchUrl(Uri.parse('https://netknights.it/en/privacy-statement/'))),
-              const SizedBox(height: 8.0),
-              TextField(
-                controller: _textController,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(borderSide: BorderSide(width: 1.5)),
-                  enabledBorder: const OutlineInputBorder(borderSide: BorderSide(width: 1.5)),
-                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(width: 1.5)),
-                  labelText: AppLocalizations.of(context)!.additionalErrorMessage,
-                ),
-                maxLines: 5,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              AppLocalizations.of(context)!.dismiss,
-              overflow: TextOverflow.fade,
-              softWrap: false,
-            ),
-            onPressed: () => _popDialogs(context),
-          ),
-          TextButton(
-            onPressed: () {
-              Logger.sendErrorLog(_textController.text);
-              showDialog(context: context, builder: (context) => const AskLogSentDialog()).then((value) {
-                if (!context.mounted) return;
-                value == true ? _popDialogs(context) : null;
-              });
-            },
-            child: const Icon(Icons.email),
-          )
-        ],
-      );
+        onPressed: () => _popDialogs(context),
+      ),
+      TextButton(
+        onPressed: () {
+          Logger.sendErrorLog(_textController.text);
+          showDialog(
+            context: context,
+            builder: (context) => const AskLogSentDialog(),
+          ).then((value) {
+            if (!context.mounted) return;
+            value == true ? _popDialogs(context) : null;
+          });
+        },
+        child: const Icon(Icons.email),
+      ),
+    ],
+  );
   void _popDialogs(BuildContext context) {
-    Navigator.of(context).popUntil((route) => SettingsView.routeName == route.settings.name || route.isFirst);
+    Navigator.of(context).popUntil(
+      (route) => SettingsView.routeName == route.settings.name || route.isFirst,
+    );
   }
 }
 
@@ -105,9 +113,7 @@ class NoLogDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultDialog(
       scrollable: true,
-      title: Text(
-        AppLocalizations.of(context)!.errorLogEmpty,
-      ),
+      title: Text(AppLocalizations.of(context)!.errorLogEmpty),
       actions: [
         TextButton(
           child: Text(

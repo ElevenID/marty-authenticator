@@ -22,7 +22,9 @@ import 'pi_server_result_value.dart';
 
 abstract class PiServerResult {
   bool get status;
-  PiServerResultError? get asError => this is PiServerResultError ? this as PiServerResultError : null;
-  PiServerResultValue? get asValue => this is PiServerResultValue ? this as PiServerResultValue : null;
+  PiServerResultError? get asError =>
+      this is PiServerResultError ? this as PiServerResultError : null;
+  PiServerResultValue? get asValue =>
+      this is PiServerResultValue ? this as PiServerResultValue : null;
   const PiServerResult();
 }

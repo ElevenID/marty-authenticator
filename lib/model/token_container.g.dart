@@ -6,9 +6,9 @@ part of 'token_container.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TokenContainerUnfinalized _$TokenContainerUnfinalizedFromJson(
+_$TokenContainerUnfinalizedImpl _$$TokenContainerUnfinalizedImplFromJson(
   Map<String, dynamic> json,
-) => TokenContainerUnfinalized(
+) => _$TokenContainerUnfinalizedImpl(
   issuer: json['issuer'] as String,
   ttl: Duration(microseconds: (json['ttl'] as num).toInt()),
   nonce: json['nonce'] as String,
@@ -36,8 +36,8 @@ TokenContainerUnfinalized _$TokenContainerUnfinalizedFromJson(
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$TokenContainerUnfinalizedToJson(
-  TokenContainerUnfinalized instance,
+Map<String, dynamic> _$$TokenContainerUnfinalizedImplToJson(
+  _$TokenContainerUnfinalizedImpl instance,
 ) => <String, dynamic>{
   'issuer': instance.issuer,
   'ttl': instance.ttl.inMicroseconds,
@@ -123,9 +123,9 @@ const _$FinalizationStateEnumMap = {
   FinalizationState.completed: 'completed',
 };
 
-TokenContainerFinalized _$TokenContainerFinalizedFromJson(
+_$TokenContainerFinalizedImpl _$$TokenContainerFinalizedImplFromJson(
   Map<String, dynamic> json,
-) => TokenContainerFinalized(
+) => _$TokenContainerFinalizedImpl(
   issuer: json['issuer'] as String,
   nonce: json['nonce'] as String,
   timestamp: DateTime.parse(json['timestamp'] as String),
@@ -154,8 +154,8 @@ TokenContainerFinalized _$TokenContainerFinalizedFromJson(
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$TokenContainerFinalizedToJson(
-  TokenContainerFinalized instance,
+Map<String, dynamic> _$$TokenContainerFinalizedImplToJson(
+  _$TokenContainerFinalizedImpl instance,
 ) => <String, dynamic>{
   'issuer': instance.issuer,
   'nonce': instance.nonce,

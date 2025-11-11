@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/token_container.dart';
 import '../../../../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../../../../../utils/view_utils.dart';
@@ -32,7 +32,8 @@ class ForceDeleteContainerDialog extends ConsumerWidget {
 
   const ForceDeleteContainerDialog(this.container, {super.key});
 
-  static Future<bool?> showDialog(TokenContainer container) => showAsyncDialog<bool>(
+  static Future<bool?> showDialog(TokenContainer container) =>
+      showAsyncDialog<bool>(
         builder: (context) => ForceDeleteContainerDialog(container),
       );
 
@@ -40,7 +41,11 @@ class ForceDeleteContainerDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppLocalizations appLocalizations = AppLocalizations.of(context)!;
     return DefaultDialog(
-      title: Text(AppLocalizations.of(context)!.deleteContainerDialogTitle(container.serial)),
+      title: Text(
+        AppLocalizations.of(
+          context,
+        )!.deleteContainerDialogTitle(container.serial),
+      ),
       content: Text(appLocalizations.forceDeleteDialogContent),
       actions: [
         TextButton(
@@ -51,7 +56,9 @@ class ForceDeleteContainerDialog extends ConsumerWidget {
         ),
         ElevatedDeleteButton(
           onPressed: () async {
-            final success = await ref.read(tokenContainerProvider.notifier).deleteContainer(container);
+            final success = await ref
+                .read(tokenContainerProvider.notifier)
+                .deleteContainer(container);
             if (!context.mounted) return;
             Navigator.of(context).pop(success);
           },

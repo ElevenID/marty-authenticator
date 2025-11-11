@@ -17,13 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../enums/patch_note_type.dart';
 
 extension PatchNoteTypeX on PatchNoteType {
   String localizedName(AppLocalizations localizations) => switch (this) {
-        PatchNoteType.newFeature => localizations.patchNotesNewFeatures,
-        PatchNoteType.improvement => localizations.patchNotesImprovements,
-        PatchNoteType.bugFix => localizations.patchNotesBugFixes,
-      };
+    PatchNoteType.newFeature => localizations.patchNotesNewFeatures,
+    PatchNoteType.improvement => localizations.patchNotesImprovements,
+    PatchNoteType.bugFix => localizations.patchNotesBugFixes,
+  };
 }

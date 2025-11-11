@@ -18,7 +18,4 @@
  * limitations under the License.
  */
 // Do not rename or remove values, they are used for serialization. Only add new values.
-enum AppFeature {
-  patchNotes,
-  introductions,
-}
+enum AppFeature { patchNotes, introductions }

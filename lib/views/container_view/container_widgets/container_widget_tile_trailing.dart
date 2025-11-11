@@ -34,7 +34,11 @@ class ContainerWidgetTileTrailing extends ConsumerWidget {
   final TokenContainer container;
   final bool isPreview;
 
-  const ContainerWidgetTileTrailing({required this.container, required this.isPreview, super.key});
+  const ContainerWidgetTileTrailing({
+    required this.container,
+    required this.isPreview,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,10 +49,15 @@ class ContainerWidgetTileTrailing extends ConsumerWidget {
     if (container is TokenContainerUnfinalized) {
       return _buildUnfinalizedContainer(container, context, ref);
     }
-    throw UnimplementedError('Unknown container type: ${container.runtimeType}');
+    throw UnimplementedError(
+      'Unknown container type: ${container.runtimeType}',
+    );
   }
 
-  Widget _buildFinalizedContainer(TokenContainerFinalized container, BuildContext context) {
+  Widget _buildFinalizedContainer(
+    TokenContainerFinalized container,
+    BuildContext context,
+  ) {
     Logger.debug('Is preview: $isPreview');
     final actions = <Widget>[
       SyncContainerButton(container: container, isPreview: isPreview),
@@ -62,22 +71,26 @@ class ContainerWidgetTileTrailing extends ConsumerWidget {
       value: 0,
       items: [
         for (var i = 0; i < actions.length; i++)
-          DropdownMenuItem(
-            value: i,
-            child: actions[i],
-          ),
+          DropdownMenuItem(value: i, child: actions[i]),
       ],
       onChanged: (int? value) {},
     );
   }
 
-  Widget _buildUnfinalizedContainer(TokenContainerUnfinalized container, BuildContext context, WidgetRef ref) {
-    if (container.finalizationState.isFailed || container.finalizationState == FinalizationState.notStarted) {
+  Widget _buildUnfinalizedContainer(
+    TokenContainerUnfinalized container,
+    BuildContext context,
+    WidgetRef ref,
+  ) {
+    if (container.finalizationState.isFailed ||
+        container.finalizationState == FinalizationState.notStarted) {
       return CooldownButton(
         styleType: CooldownButtonStyleType.iconButton,
         childWhenCooldown: CircularProgressIndicator.adaptive(),
         onPressed: () async {
-          await ref.read(tokenContainerProvider.notifier).finalize(container, isManually: true);
+          await ref
+              .read(tokenContainerProvider.notifier)
+              .finalize(container, isManually: true);
         },
         child: const Icon(Icons.link_rounded),
       );

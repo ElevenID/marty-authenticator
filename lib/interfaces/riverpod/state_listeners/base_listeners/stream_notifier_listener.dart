@@ -24,15 +24,29 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../utils/logger.dart';
 
-abstract class BuildlessStreamNotifierListener<NotifierT extends $StreamNotifier<StateT>, StateT> {
+abstract class BuildlessStreamNotifierListener<
+  NotifierT extends $StreamNotifier<StateT>,
+  StateT
+> {
   final String listenerName;
   final $StreamNotifierProvider<NotifierT, StateT> provider;
-  final void Function(WidgetRef ref, AsyncValue<StateT>? previous, AsyncValue<StateT> next) onNewState;
-  const BuildlessStreamNotifierListener({required this.provider, required this.onNewState, required this.listenerName});
+  final void Function(
+    WidgetRef ref,
+    AsyncValue<StateT>? previous,
+    AsyncValue<StateT> next,
+  )
+  onNewState;
+  const BuildlessStreamNotifierListener({
+    required this.provider,
+    required this.onNewState,
+    required this.listenerName,
+  });
   void buildListen(WidgetRef ref) {
     Logger.debug('("$listenerName") listening to provider ("$provider")');
     ref.listen(provider, (previous, next) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => onNewState(ref, previous, next));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => onNewState(ref, previous, next),
+      );
     });
   }
 }

@@ -32,16 +32,15 @@ extension TokenSourceTypeX on TokenOriginSourceType {
     DateTime? createdAt,
     String? creator,
     Version? piServerVersion,
-  }) =>
-      TokenOriginData(
-        source: this,
-        data: data,
-        appName: originName ?? getCurrentAppName(),
-        isPrivacyIdeaToken: isPrivacyIdeaToken,
-        createdAt: createdAt ?? DateTime.now(),
-        creator: creator,
-        piServerVersion: piServerVersion,
-      );
+  }) => TokenOriginData(
+    source: this,
+    data: data,
+    appName: originName ?? getCurrentAppName(),
+    isPrivacyIdeaToken: isPrivacyIdeaToken,
+    createdAt: createdAt ?? DateTime.now(),
+    creator: creator,
+    piServerVersion: piServerVersion,
+  );
 
   TokenOriginData toTokenOrigin({
     String data = '',
@@ -50,15 +49,14 @@ extension TokenSourceTypeX on TokenOriginSourceType {
     DateTime? createdAt,
     String? creator,
     Version? piServerVersion,
-  }) =>
-      _toTokenOrigin(
-        data: data,
-        originName: originName,
-        isPrivacyIdeaToken: isPrivacyIdeaToken,
-        createdAt: createdAt,
-        creator: creator,
-        piServerVersion: piServerVersion,
-      );
+  }) => _toTokenOrigin(
+    data: data,
+    originName: originName,
+    isPrivacyIdeaToken: isPrivacyIdeaToken,
+    createdAt: createdAt,
+    creator: creator,
+    piServerVersion: piServerVersion,
+  );
 
   T addOriginToToken<T extends Token>({
     required T token,
@@ -70,12 +68,14 @@ extension TokenSourceTypeX on TokenOriginSourceType {
     Version? piServerVersion,
   }) =>
       token.copyWith(
-          origin: _toTokenOrigin(
-        data: data,
-        originName: appName,
-        isPrivacyIdeaToken: isPrivacyIdeaToken,
-        createdAt: createdAt,
-        creator: creator,
-        piServerVersion: piServerVersion,
-      )) as T;
+            origin: _toTokenOrigin(
+              data: data,
+              originName: appName,
+              isPrivacyIdeaToken: isPrivacyIdeaToken,
+              createdAt: createdAt,
+              creator: creator,
+              piServerVersion: piServerVersion,
+            ),
+          )
+          as T;
 }

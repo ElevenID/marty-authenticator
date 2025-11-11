@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../../widgets/pi_text_field.dart';
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/enums/introduction.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/introduction_provider.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_folder_notifier.dart';
@@ -42,7 +42,8 @@ class AddTokenFolderDialog extends ConsumerWidget {
         autofocus: true,
         onChanged: (value) {},
         labelText: AppLocalizations.of(context)!.folderName,
-        validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.folderName : null,
+        validator: (value) =>
+            value!.isEmpty ? AppLocalizations.of(context)!.folderName : null,
       ),
       actions: [
         TextButton(
@@ -54,19 +55,26 @@ class AddTokenFolderDialog extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         TextButton(
-            child: Text(
-              AppLocalizations.of(context)!.create,
-              overflow: TextOverflow.fade,
-              softWrap: false,
-            ),
-            onPressed: () async {
-              if (!(await ref.read(introductionNotifierProvider.future)).isCompleted(Introduction.addFolder)) {
-                ref.read(introductionNotifierProvider.notifier).complete(Introduction.addFolder);
-              }
-              ref.read(tokenFolderProvider.notifier).addNewFolder(textController.text);
-              if (!context.mounted) return;
-              Navigator.pop(context);
-            }),
+          child: Text(
+            AppLocalizations.of(context)!.create,
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+          onPressed: () async {
+            if (!(await ref.read(
+              introductionNotifierProvider.future,
+            )).isCompleted(Introduction.addFolder)) {
+              ref
+                  .read(introductionNotifierProvider.notifier)
+                  .complete(Introduction.addFolder);
+            }
+            ref
+                .read(tokenFolderProvider.notifier)
+                .addNewFolder(textController.text);
+            if (!context.mounted) return;
+            Navigator.pop(context);
+          },
+        ),
       ],
     );
   }

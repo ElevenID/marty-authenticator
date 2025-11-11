@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../../model/riverpod_states/settings_state.dart';
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/enums/introduction.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/introduction_provider.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
@@ -35,21 +35,36 @@ class LicensePushViewButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) =>
-      (ref.watch(settingsProvider).whenOrNull(data: (data) => data.hidePushTokens) ?? SettingsState.hidePushTokensDefault)
-          ? FocusedItemAsOverlay(
-              isFocused:
-                  ref.watch(introductionNotifierProvider).whenOrNull(data: (data) => data.isConditionFulfilled(ref, Introduction.hidePushTokens)) ?? false,
-              tooltipWhenFocused: AppLocalizations.of(context)!.introHidePushTokens,
-              onComplete: () => ref.read(introductionNotifierProvider.notifier).complete(Introduction.hidePushTokens),
-              child: AppBarItem(
-                a11y: AppLocalizations.of(context)!.a11yPushTokensButton,
-                onPressed: () => Navigator.pushNamed(context, PushTokensView.routeName),
-                icon: const Icon(Icons.notifications),
-              ),
-            )
-          : AppBarItem(
-              a11y: AppLocalizations.of(context)!.a11yLicensesButton,
-              onPressed: () => Navigator.of(context).pushNamed(LicenseView.routeName),
-              icon: const Icon(Icons.info_outline),
-            );
+      (ref
+              .watch(settingsProvider)
+              .whenOrNull(data: (data) => data.hidePushTokens) ??
+          SettingsState.hidePushTokensDefault)
+      ? FocusedItemAsOverlay(
+          isFocused:
+              ref
+                  .watch(introductionNotifierProvider)
+                  .whenOrNull(
+                    data: (data) => data.isConditionFulfilled(
+                      ref,
+                      Introduction.hidePushTokens,
+                    ),
+                  ) ??
+              false,
+          tooltipWhenFocused: AppLocalizations.of(context)!.introHidePushTokens,
+          onComplete: () => ref
+              .read(introductionNotifierProvider.notifier)
+              .complete(Introduction.hidePushTokens),
+          child: AppBarItem(
+            a11y: AppLocalizations.of(context)!.a11yPushTokensButton,
+            onPressed: () =>
+                Navigator.pushNamed(context, PushTokensView.routeName),
+            icon: const Icon(Icons.notifications),
+          ),
+        )
+      : AppBarItem(
+          a11y: AppLocalizations.of(context)!.a11yLicensesButton,
+          onPressed: () =>
+              Navigator.of(context).pushNamed(LicenseView.routeName),
+          icon: const Icon(Icons.info_outline),
+        );
 }

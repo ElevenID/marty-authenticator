@@ -32,7 +32,7 @@ part 'push_request.g.dart';
 
 @JsonSerializable()
 class PushRequest {
-// Push request:
+  // Push request:
   static const String NONCE = 'nonce'; // 1.
   static const String URL = 'url'; // 2.
   static const String SERIAL = 'serial'; // 3.
@@ -95,13 +95,20 @@ class PushRequest {
       serial: serial ?? this.serial,
       signature: signature ?? this.signature,
       accepted: accepted ?? this.accepted,
-      possibleAnswers: possibleAnswers != null ? possibleAnswers() : this.possibleAnswers,
-      selectedAnswer: selectedAnswer != null ? selectedAnswer() : this.selectedAnswer,
+      possibleAnswers: possibleAnswers != null
+          ? possibleAnswers()
+          : this.possibleAnswers,
+      selectedAnswer: selectedAnswer != null
+          ? selectedAnswer()
+          : this.selectedAnswer,
     );
   }
 
   @override
-  bool operator ==(Object other) => other is PushRequest && runtimeType == other.runtimeType && id == other.id;
+  bool operator ==(Object other) =>
+      other is PushRequest &&
+      runtimeType == other.runtimeType &&
+      id == other.id;
 
   @override
   int get hashCode => Object.hash(runtimeType, id);
@@ -115,7 +122,8 @@ class PushRequest {
         'answers: $possibleAnswers, selectedAnswer: $selectedAnswer}';
   }
 
-  factory PushRequest.fromJson(Map<String, dynamic> json) => _$PushRequestFromJson(json);
+  factory PushRequest.fromJson(Map<String, dynamic> json) =>
+      _$PushRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$PushRequestToJson(this);
 
@@ -135,7 +143,9 @@ class PushRequest {
       serial: data[SERIAL],
       expirationDate: DateTime.now().add(const Duration(minutes: 2)),
       signature: data[SIGNATURE],
-      possibleAnswers: data[ANSWERS] != null ? (data[ANSWERS] as String).split(',') : null,
+      possibleAnswers: data[ANSWERS] != null
+          ? (data[ANSWERS] as String).split(',')
+          : null,
     );
   }
 
@@ -143,38 +153,58 @@ class PushRequest {
   /// Throws ArgumentError if data is invalid
   static void verifyData(Map<String, dynamic> data) {
     if (data[TITLE] is! String) {
-      throw ArgumentError('Push request title is ${data[TITLE].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request title is ${data[TITLE].runtimeType}. Expected String.',
+      );
     }
     if (data[QUESTION] is! String) {
-      throw ArgumentError('Push request question is ${data[QUESTION].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request question is ${data[QUESTION].runtimeType}. Expected String.',
+      );
     }
     if (data[URL] is! String) {
-      throw ArgumentError('Push request url is ${data[URL].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request url is ${data[URL].runtimeType}. Expected String.',
+      );
     } else if (Uri.tryParse(data[URL]) == null) {
       throw ArgumentError('Push request url is a String but not a valid Uri.');
     }
     if (data[NONCE] is! String) {
-      throw ArgumentError('Push request nonce is ${data[NONCE].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request nonce is ${data[NONCE].runtimeType}. Expected String.',
+      );
     }
     if (data[SSL_VERIFY] is! String) {
-      throw ArgumentError('Push request sslVerify is ${data[SSL_VERIFY].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request sslVerify is ${data[SSL_VERIFY].runtimeType}. Expected String.',
+      );
     }
     if (data[SERIAL] is! String) {
-      throw ArgumentError('Push request serial is ${data[SERIAL].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request serial is ${data[SERIAL].runtimeType}. Expected String.',
+      );
     }
     if (data[SIGNATURE] is! String) {
-      throw ArgumentError('Push request signature is ${data[SIGNATURE].runtimeType}. Expected String.');
+      throw ArgumentError(
+        'Push request signature is ${data[SIGNATURE].runtimeType}. Expected String.',
+      );
     }
     if (data[ANSWERS] is! String?) {
-      throw ArgumentError('Push request answers is ${data[ANSWERS].runtimeType}. Expected List<String> or null.');
+      throw ArgumentError(
+        'Push request answers is ${data[ANSWERS].runtimeType}. Expected List<String> or null.',
+      );
     }
     Logger.debug('Push request data ($data) is valid.');
   }
 
-  Future<bool> verifySignature(PushToken token, {RsaUtils rsaUtils = const RsaUtils()}) async {
+  Future<bool> verifySignature(
+    PushToken token, {
+    RsaUtils rsaUtils = const RsaUtils(),
+  }) async {
     //5NV6KJCFCLNQURT2ZTBRHHGY6FDXOCOR|http://192.168.178.22:5000/ttype/push|PIPU0000E793|Pick a Number!|privacyIDEA|0|["A", "B", "C"]
     Logger.info('Adding push request to token');
-    String signedData = '$nonce|'
+    String signedData =
+        '$nonce|'
         '$uri|'
         '$serial|'
         '$question|'
@@ -185,10 +215,19 @@ class PushRequest {
 
     // Re-add url and sslverify to android legacy tokens:
     if (token.url == null) {
-      globalRef?.read(tokenProvider.notifier).updateToken(token, (p0) => p0.copyWith(url: uri, sslVerify: sslVerify));
+      globalRef
+          ?.read(tokenProvider.notifier)
+          .updateToken(
+            token,
+            (p0) => p0.copyWith(url: uri, sslVerify: sslVerify),
+          );
     }
 
-    bool isVerified = rsaUtils.verifyRSASignature(token.rsaPublicServerKey!, utf8.encode(signedData), base32.decode(signature));
+    bool isVerified = rsaUtils.verifyRSASignature(
+      token.rsaPublicServerKey!,
+      utf8.encode(signedData),
+      base32.decode(signature),
+    );
 
     if (!isVerified) {
       Logger.warning(

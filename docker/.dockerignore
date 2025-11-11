@@ -1,0 +1,57 @@
+# Docker ignore for Flutter build optimization
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build outputs (except web build which we need)
+build/
+!build/web/
+.dart_tool/
+
+# Dependencies (will be installed during build)
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# macOS
+.DS_Store
+
+# Other Docker files
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Plugin development
+plugins/
+custom-*/
+
+# Documentation
+README.md
+DEMO_README.md
+*.md
+
+# Scripts
+*.sh
+
+# Test files
+test/
+integration_test/
+
+# Coverage
+coverage/
+
+# Android/iOS (not needed for web build)
+android/
+ios/
+
+# Temporary files
+*.tmp
+*.temp

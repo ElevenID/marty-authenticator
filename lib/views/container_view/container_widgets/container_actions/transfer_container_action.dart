@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/token_container.dart';
 import '../../../../utils/customization/theme_extentions/action_theme.dart';
 import '../../../main_view/main_view_widgets/token_widgets/slideable_action.dart';
@@ -32,20 +32,27 @@ import '../dialogs/transfer_container_action_dialog.dart';
 class TransferContainerAction extends ConsumerSlideableAction {
   final TokenContainerFinalized container;
 
-  const TransferContainerAction({
-    required this.container,
-    super.key,
-  });
+  const TransferContainerAction({required this.container, super.key});
 
   void _showExportContainerDialog(BuildContext context) {
-    showDialog(useRootNavigator: false, context: context, builder: (_) => TransferContainerDialog(container: container));
+    showDialog(
+      useRootNavigator: false,
+      context: context,
+      builder: (_) => TransferContainerDialog(container: container),
+    );
   }
 
   @override
-  CustomSlidableAction build(BuildContext context, WidgetRef ref) => CustomSlidableAction(
-        onPressed: (BuildContext context) => _showExportContainerDialog(context),
-        backgroundColor: Theme.of(context).extension<TokenTileTheme>()!.transferColor,
-        foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
+  CustomSlidableAction build(BuildContext context, WidgetRef ref) =>
+      CustomSlidableAction(
+        onPressed: (BuildContext context) =>
+            _showExportContainerDialog(context),
+        backgroundColor: Theme.of(
+          context,
+        ).extension<TokenTileTheme>()!.transferColor,
+        foregroundColor: Theme.of(
+          context,
+        ).extension<TokenTileTheme>()!.actionForegroundColor,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

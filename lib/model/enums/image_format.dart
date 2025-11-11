@@ -19,13 +19,4 @@
  */
 
 // Do not rename or remove values, they are used for serialization. Only add new values.
-enum ImageFormat {
-  svg,
-  svgz,
-  png,
-  jpg,
-  jpeg,
-  gif,
-  bmp,
-  webp,
-}
+enum ImageFormat { svg, svgz, png, jpg, jpeg, gif, bmp, webp }

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/enums/algorithms.dart';
 import '../labeled_dropdown_button.dart';
 
@@ -35,10 +35,10 @@ class AlgorithmsDropdownButton extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => LabeledDropdownButton<Algorithms>(
-        label: AppLocalizations.of(context)!.algorithm,
-        enabled: enabled,
-        valueNotifier: algorithmsNotifier,
-        values: allowedAlgorithms,
-        valueLabels: [for (final value in allowedAlgorithms) value.name],
-      );
+    label: AppLocalizations.of(context)!.algorithm,
+    enabled: enabled,
+    valueNotifier: algorithmsNotifier,
+    values: allowedAlgorithms,
+    valueLabels: [for (final value in allowedAlgorithms) value.name],
+  );
 }

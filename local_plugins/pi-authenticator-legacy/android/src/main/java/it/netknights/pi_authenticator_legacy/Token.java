@@ -210,4 +210,3 @@ public class Token {
         persistent = val;
     }
 }
-

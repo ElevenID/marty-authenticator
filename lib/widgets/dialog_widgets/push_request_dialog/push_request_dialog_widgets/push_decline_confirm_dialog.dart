@@ -24,7 +24,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../../widgets/dialog_widgets/default_dialog.dart';
 import '../../../../../../../widgets/dialog_widgets/push_request_dialog/push_request_dialog.dart';
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../utils/customization/theme_extentions/push_request_theme.dart';
 import '../../../button_widgets/cooldown_button.dart';
 import '../../../padded_row.dart';
@@ -36,16 +36,16 @@ class PushDeclineConfirmDialog extends StatefulWidget {
     required Future<void> Function() onDiscard,
     required String title,
     required DateTime expirationDate,
-  }) =>
-      showDialog(
-          useRootNavigator: false,
-          context: context,
-          builder: (BuildContext context) => PushDeclineConfirmDialog(
-                onDecline: onDecline,
-                onDiscard: onDiscard,
-                title: title,
-                expirationDate: expirationDate,
-              ));
+  }) => showDialog(
+    useRootNavigator: false,
+    context: context,
+    builder: (BuildContext context) => PushDeclineConfirmDialog(
+      onDecline: onDecline,
+      onDiscard: onDiscard,
+      title: title,
+      expirationDate: expirationDate,
+    ),
+  );
 
   final Future<void> Function() onDecline;
   final Future<void> Function() onDiscard;
@@ -61,7 +61,8 @@ class PushDeclineConfirmDialog extends StatefulWidget {
   });
 
   @override
-  State<PushDeclineConfirmDialog> createState() => _PushDeclineConfirmDialogState();
+  State<PushDeclineConfirmDialog> createState() =>
+      _PushDeclineConfirmDialogState();
 }
 
 class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
@@ -70,10 +71,13 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
   @override
   void initState() {
     super.initState();
-    expirationTimer = Timer(widget.expirationDate!.difference(DateTime.now()), () {
-      if (!mounted) return;
-      Navigator.of(context).pop();
-    });
+    expirationTimer = Timer(
+      widget.expirationDate!.difference(DateTime.now()),
+      () {
+        if (!mounted) return;
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   @override
@@ -84,7 +88,8 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final pushRequestTheme = (Theme.of(context).extensions[PushRequestTheme] as PushRequestTheme);
+    final pushRequestTheme =
+        (Theme.of(context).extensions[PushRequestTheme] as PushRequestTheme);
     final localizations = AppLocalizations.of(context)!;
     return DefaultDialog(
       title: Text(
@@ -116,7 +121,9 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
                       // Discard button
                       style: ButtonStyle(
                         shape: PushRequestDialog.getButtonShape(context),
-                        backgroundColor: WidgetStateProperty.all(pushRequestTheme.acceptColor),
+                        backgroundColor: WidgetStateProperty.all(
+                          pushRequestTheme.acceptColor,
+                        ),
                       ),
                       onPressed: () async {
                         await widget.onDiscard();
@@ -135,7 +142,12 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               localizations.butDiscardIt,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.titleSmall?.color),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.titleSmall?.color,
+                                  ),
                               textAlign: TextAlign.center,
                               softWrap: false,
                             ),
@@ -151,7 +163,9 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
                   child: CooldownButton(
                     // Decline button
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(pushRequestTheme.declineColor),
+                      backgroundColor: WidgetStateProperty.all(
+                        pushRequestTheme.declineColor,
+                      ),
                       shape: PushRequestDialog.getButtonShape(context),
                     ),
                     onPressed: () async {
@@ -169,7 +183,12 @@ class _PushDeclineConfirmDialogState extends State<PushDeclineConfirmDialog> {
                         ),
                         Text(
                           localizations.declineIt,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.titleSmall?.color),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall?.color,
+                              ),
                           textAlign: TextAlign.center,
                           softWrap: false,
                         ),

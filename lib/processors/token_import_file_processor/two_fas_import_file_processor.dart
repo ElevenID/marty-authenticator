@@ -39,7 +39,8 @@ import '../../utils/token_import_origins.dart';
 import 'token_import_file_processor_interface.dart';
 
 class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
-  static ObjectValidator<TokenNotifier> get resultHandlerType => TokenImportFileProcessor.resultHandlerType;
+  static ObjectValidator<TokenNotifier> get resultHandlerType =>
+      TokenImportFileProcessor.resultHandlerType;
   const TwoFasAuthenticatorImportFileProcessor();
   static const String TWOFAS_OTP = 'otp';
   static const String TWOFAS_TYPE = 'tokenType';
@@ -52,7 +53,10 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
   static const String TWOFAS_COUNTER = 'counter';
 
   @override
-  Future<List<ProcessorResult<Token>>> processFile(XFile file, {String? password}) async {
+  Future<List<ProcessorResult<Token>>> processFile(
+    XFile file, {
+    String? password,
+  }) async {
     final String fileContent = await file.readAsString();
     final Map<String, dynamic> json;
     try {
@@ -61,13 +65,18 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
       throw InvalidFileContentException('No valid 2FAS import file');
     }
     if (password == null) return _processPlainFile(json: json);
-    return processEncryptedFile(jsonString: fileContent, json: json, password: password);
+    return processEncryptedFile(
+      jsonString: fileContent,
+      json: json,
+      password: password,
+    );
   }
 
   @override
   Future<bool> fileIsValid(XFile file) async {
     try {
-      final Map<String, dynamic> json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      final Map<String, dynamic> json =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       return json['servicesEncrypted'] != null || json['services'] != null;
     } catch (e) {
       return false;
@@ -77,14 +86,19 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
   @override
   Future<bool> fileNeedsPassword(XFile file) async {
     try {
-      final Map<String, dynamic> json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      final Map<String, dynamic> json =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       return json['servicesEncrypted'] != null;
     } catch (e) {
       return false;
     }
   }
 
-  Future<List<ProcessorResult<Token>>> processEncryptedFile({String? jsonString, Map<String, dynamic>? json, required String password}) async {
+  Future<List<ProcessorResult<Token>>> processEncryptedFile({
+    String? jsonString,
+    Map<String, dynamic>? json,
+    required String password,
+  }) async {
     json ??= jsonDecode(jsonString!) as Map<String, dynamic>;
     if (json['servicesEncrypted'] == null) {
       if (json['services'] == null) {
@@ -106,7 +120,11 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
 
       decryptedTokens = await AesEncrypted(
         cypher: cypther,
-        kdf: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: 10000, bits: salt.length),
+        kdf: Pbkdf2(
+          macAlgorithm: Hmac.sha256(),
+          iterations: 10000,
+          bits: salt.length,
+        ),
         data: dataWithMac,
         salt: salt,
         iv: iv,
@@ -120,10 +138,14 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
     } catch (e) {
       throw InvalidFileContentException('No valid 2FAS import file');
     }
-    return await _processPlainTokens(decryptedTokensJsonList.cast<Map<String, dynamic>>());
+    return await _processPlainTokens(
+      decryptedTokensJsonList.cast<Map<String, dynamic>>(),
+    );
   }
 
-  Future<List<ProcessorResult<Token>>> _processPlainFile({required Map<String, dynamic> json}) async {
+  Future<List<ProcessorResult<Token>>> _processPlainFile({
+    required Map<String, dynamic> json,
+  }) async {
     final tokensJsonList = json['services'] as List<dynamic>?;
     if (tokensJsonList == null || tokensJsonList.isEmpty) {
       if (json['servicesEncrypted'] == null) {
@@ -137,7 +159,9 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
     return _processPlainTokens(tokensJsonList.cast<Map<String, dynamic>>());
   }
 
-  Future<List<ProcessorResult<Token>>> _processPlainTokens(List<Map<String, dynamic>> tokensJsonList) async {
+  Future<List<ProcessorResult<Token>>> _processPlainTokens(
+    List<Map<String, dynamic>> tokensJsonList,
+  ) async {
     final results = <ProcessorResult<Token>>[];
     for (Map<String, dynamic> twoFasToken in tokensJsonList) {
       try {
@@ -157,10 +181,24 @@ class TwoFasAuthenticatorImportFileProcessor extends TokenImportFileProcessor {
           ),
         );
       } on LocalizedException catch (e) {
-        results.add(ProcessorResult.failed((localization) => e.localizedMessage(localization), resultHandlerType: resultHandlerType));
+        results.add(
+          ProcessorResult.failed(
+            (localization) => e.localizedMessage(localization),
+            resultHandlerType: resultHandlerType,
+          ),
+        );
       } catch (e) {
-        Logger.error('Failed to parse token.', error: e, stackTrace: StackTrace.current);
-        results.add(ProcessorResultFailed((_) => e.toString(), resultHandlerType: resultHandlerType));
+        Logger.error(
+          'Failed to parse token.',
+          error: e,
+          stackTrace: StackTrace.current,
+        );
+        results.add(
+          ProcessorResultFailed(
+            (_) => e.toString(),
+            resultHandlerType: resultHandlerType,
+          ),
+        );
       }
     }
     Logger.info('successfully imported ${results.length} tokens');

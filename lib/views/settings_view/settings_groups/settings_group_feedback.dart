@@ -20,7 +20,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../feedback_view/feedback_view.dart';
 import '../settings_view_widgets/settings_group.dart';
 
@@ -29,8 +29,8 @@ class SettingsGroupFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SettingsGroup(
-        title: AppLocalizations.of(context)!.feedback,
-        onPressed: () => Navigator.pushNamed(context, FeedbackView.routeName),
-        trailingIcon: Icons.feedback,
-      );
+    title: AppLocalizations.of(context)!.feedback,
+    onPressed: () => Navigator.pushNamed(context, FeedbackView.routeName),
+    trailingIcon: Icons.feedback,
+  );
 }

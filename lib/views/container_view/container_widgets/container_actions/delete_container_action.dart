@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/token_container.dart';
 import '../../../../utils/customization/theme_extentions/action_theme.dart';
 import '../../../main_view/main_view_widgets/token_widgets/slideable_action.dart';
@@ -31,20 +31,25 @@ import '../dialogs/delete_container_dialogs.dart/delete_container_dialog.dart';
 class DeleteContainerAction extends ConsumerSlideableAction {
   final TokenContainer container;
 
-  const DeleteContainerAction({
-    required this.container,
-    super.key,
-  });
+  const DeleteContainerAction({required this.container, super.key});
 
   @override
   CustomSlidableAction build(BuildContext context, WidgetRef ref) {
-    final deleteAllowed = container is! TokenContainerFinalized || container.policies.disabledUnregister == false;
+    final deleteAllowed =
+        container is! TokenContainerFinalized ||
+        container.policies.disabledUnregister == false;
     return CustomSlidableAction(
-      onPressed: deleteAllowed ? (BuildContext context) => DeleteContainerDialog.showDialog(container) : null,
+      onPressed: deleteAllowed
+          ? (BuildContext context) =>
+                DeleteContainerDialog.showDialog(container)
+          : null,
       autoClose: deleteAllowed,
-      backgroundColor:
-          deleteAllowed ? Theme.of(context).extension<TokenTileTheme>()!.deleteColor : Theme.of(context).extension<TokenTileTheme>()!.actionDisabledColor,
-      foregroundColor: Theme.of(context).extension<TokenTileTheme>()!.actionForegroundColor,
+      backgroundColor: deleteAllowed
+          ? Theme.of(context).extension<TokenTileTheme>()!.deleteColor
+          : Theme.of(context).extension<TokenTileTheme>()!.actionDisabledColor,
+      foregroundColor: Theme.of(
+        context,
+      ).extension<TokenTileTheme>()!.actionForegroundColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,

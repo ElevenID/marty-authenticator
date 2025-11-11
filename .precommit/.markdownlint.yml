@@ -1,0 +1,32 @@
+# Markdownlint configuration
+# See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# MD013: Line length
+MD013:
+  # Allow longer lines for documentation
+  line_length: 120
+  # Allow long URLs and tables
+  code_blocks: false
+  tables: false
+  headings: false
+
+# MD024: Multiple headings with the same content
+MD024:
+  # Allow duplicate headings (common in changelogs)
+  allow_different_nesting: true
+
+# MD025: Multiple top-level headings
+MD025:
+  # Allow multiple H1s (common in multi-section docs)
+  front_matter_title: ""
+
+# MD040: Fenced code language
+MD040:
+  # Allow code blocks without language specification
+  allowed_languages: []
+  language_only: false
+
+# MD041: First line heading
+MD041:
+  # Allow documents that don't start with H1
+  front_matter_title: ""

@@ -38,11 +38,20 @@ void _testAppCustomizer() {
       expect(customization.appbarIcon.imageData, equals(defaultIconUint8List));
       expect(() => customization.appbarIcon.getWidget, returnsNormally);
       expect(customization.splashScreenImage.getWidget, isA<Widget>());
-      expect(customization.splashScreenImage.imageData, equals(defaultImageUint8List));
+      expect(
+        customization.splashScreenImage.imageData,
+        equals(defaultImageUint8List),
+      );
       expect(() => customization.splashScreenImage.getWidget, returnsNormally);
       expect(customization.splashScreenImage.getWidget, isA<Widget>());
-      expect(customization.lightTheme, equals(ApplicationCustomization.defaultCustomization.lightTheme));
-      expect(customization.darkTheme, equals(ApplicationCustomization.defaultCustomization.darkTheme));
+      expect(
+        customization.lightTheme,
+        equals(ApplicationCustomization.defaultCustomization.lightTheme),
+      );
+      expect(
+        customization.darkTheme,
+        equals(ApplicationCustomization.defaultCustomization.darkTheme),
+      );
       expect(customization.disabledFeatures, equals({AppFeature.patchNotes}));
     });
     test('copyWith', () {
@@ -67,8 +76,14 @@ void _testAppCustomizer() {
       // Assert
       expect(newCustomization.appName, equals('test2'));
       expect(newCustomization.websiteLink, equals('https://test2'));
-      expect(newCustomization.appbarIcon.imageData, equals(defaultImageUint8List));
-      expect(newCustomization.splashScreenImage.imageData, equals(defaultIconUint8List));
+      expect(
+        newCustomization.appbarIcon.imageData,
+        equals(defaultImageUint8List),
+      );
+      expect(
+        newCustomization.splashScreenImage.imageData,
+        equals(defaultIconUint8List),
+      );
     });
     group('serialization', () {
       test('toJson (new)', () {
@@ -77,10 +92,34 @@ void _testAppCustomizer() {
         // Assert
         expect(json['appName'], equals('test'));
         expect(json['websiteLink'], equals('https://test'));
-        expect(json['appbarIcon'], equals({'imageFormat': 'png', 'imageData': base64Encode(defaultIconUint8List), 'fileName': 'appbarIcon'}));
-        expect(json['splashScreenImage'], equals({'imageFormat': 'png', 'imageData': base64Encode(defaultImageUint8List), 'fileName': 'splashScreenImage'}));
-        expect(json['lightTheme'], equals(ApplicationCustomization.defaultCustomization.lightTheme.toJson()));
-        expect(json['darkTheme'], equals(ApplicationCustomization.defaultCustomization.darkTheme.toJson()));
+        expect(
+          json['appbarIcon'],
+          equals({
+            'imageFormat': 'png',
+            'imageData': base64Encode(defaultIconUint8List),
+            'fileName': 'appbarIcon',
+          }),
+        );
+        expect(
+          json['splashScreenImage'],
+          equals({
+            'imageFormat': 'png',
+            'imageData': base64Encode(defaultImageUint8List),
+            'fileName': 'splashScreenImage',
+          }),
+        );
+        expect(
+          json['lightTheme'],
+          equals(
+            ApplicationCustomization.defaultCustomization.lightTheme.toJson(),
+          ),
+        );
+        expect(
+          json['darkTheme'],
+          equals(
+            ApplicationCustomization.defaultCustomization.darkTheme.toJson(),
+          ),
+        );
         expect(json['disabledFeatures'], equals({AppFeature.patchNotes.name}));
       });
       test('fromJson (old)', () {
@@ -90,17 +129,31 @@ void _testAppCustomizer() {
           'websiteLink': 'https://test2',
           'appIconBASE64': base64Encode(defaultImageUint8List),
           'appImageBASE64': base64Encode(defaultIconUint8List),
-          'lightTheme': ApplicationCustomization.defaultCustomization.lightTheme.toJson(),
-          'darkTheme': ApplicationCustomization.defaultCustomization.darkTheme.toJson(),
+          'lightTheme': ApplicationCustomization.defaultCustomization.lightTheme
+              .toJson(),
+          'darkTheme': ApplicationCustomization.defaultCustomization.darkTheme
+              .toJson(),
           'disabledFeatures': [],
         });
         // Assert
         expect(newCustomization.appName, equals('test2'));
         expect(newCustomization.websiteLink, equals('https://test2'));
-        expect(newCustomization.appbarIcon.imageData, equals(defaultIconUint8List));
-        expect(newCustomization.splashScreenImage.imageData, equals(defaultImageUint8List));
-        expect(newCustomization.lightTheme, equals(ApplicationCustomization.defaultCustomization.lightTheme));
-        expect(newCustomization.darkTheme, equals(ApplicationCustomization.defaultCustomization.darkTheme));
+        expect(
+          newCustomization.appbarIcon.imageData,
+          equals(defaultIconUint8List),
+        );
+        expect(
+          newCustomization.splashScreenImage.imageData,
+          equals(defaultImageUint8List),
+        );
+        expect(
+          newCustomization.lightTheme,
+          equals(ApplicationCustomization.defaultCustomization.lightTheme),
+        );
+        expect(
+          newCustomization.darkTheme,
+          equals(ApplicationCustomization.defaultCustomization.darkTheme),
+        );
         expect(newCustomization.disabledFeatures, isA<Set>());
         expect(newCustomization.disabledFeatures, isEmpty);
       });
@@ -109,23 +162,54 @@ void _testAppCustomizer() {
         final newCustomization = ApplicationCustomization.fromJson({
           'appName': 'test2',
           'websiteLink': 'https://test2',
-          'appbarIcon': {'imageFormat': 'png', 'imageData': base64Encode(defaultIconUint8List), 'fileName': 'appbarIcon'},
-          'splashScreenImage': {'imageFormat': 'png', 'imageData': base64Encode(defaultImageUint8List), 'fileName': 'splashScreenImage'},
-          'lightTheme': ApplicationCustomization.defaultCustomization.lightTheme.toJson(),
-          'darkTheme': ApplicationCustomization.defaultCustomization.darkTheme.toJson(),
+          'appbarIcon': {
+            'imageFormat': 'png',
+            'imageData': base64Encode(defaultIconUint8List),
+            'fileName': 'appbarIcon',
+          },
+          'splashScreenImage': {
+            'imageFormat': 'png',
+            'imageData': base64Encode(defaultImageUint8List),
+            'fileName': 'splashScreenImage',
+          },
+          'lightTheme': ApplicationCustomization.defaultCustomization.lightTheme
+              .toJson(),
+          'darkTheme': ApplicationCustomization.defaultCustomization.darkTheme
+              .toJson(),
           'disabledFeatures': [],
         });
         // Assert
         expect(newCustomization.appName, equals('test2'));
         expect(newCustomization.websiteLink, equals('https://test2'));
-        expect(newCustomization.appbarIcon.imageFormat, equals(ImageFormat.png));
-        expect(newCustomization.appbarIcon.imageData, equals(defaultIconUint8List));
+        expect(
+          newCustomization.appbarIcon.imageFormat,
+          equals(ImageFormat.png),
+        );
+        expect(
+          newCustomization.appbarIcon.imageData,
+          equals(defaultIconUint8List),
+        );
         expect(newCustomization.appbarIcon.fileName, equals('appbarIcon'));
-        expect(newCustomization.splashScreenImage.imageFormat, equals(ImageFormat.png));
-        expect(newCustomization.splashScreenImage.imageData, equals(defaultImageUint8List));
-        expect(newCustomization.splashScreenImage.fileName, equals('splashScreenImage'));
-        expect(newCustomization.lightTheme, equals(ApplicationCustomization.defaultCustomization.lightTheme));
-        expect(newCustomization.darkTheme, equals(ApplicationCustomization.defaultCustomization.darkTheme));
+        expect(
+          newCustomization.splashScreenImage.imageFormat,
+          equals(ImageFormat.png),
+        );
+        expect(
+          newCustomization.splashScreenImage.imageData,
+          equals(defaultImageUint8List),
+        );
+        expect(
+          newCustomization.splashScreenImage.fileName,
+          equals('splashScreenImage'),
+        );
+        expect(
+          newCustomization.lightTheme,
+          equals(ApplicationCustomization.defaultCustomization.lightTheme),
+        );
+        expect(
+          newCustomization.darkTheme,
+          equals(ApplicationCustomization.defaultCustomization.darkTheme),
+        );
         expect(newCustomization.disabledFeatures, isA<Set>());
         expect(newCustomization.disabledFeatures, isEmpty);
       });

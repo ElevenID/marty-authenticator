@@ -1,0 +1,319 @@
+name: Enhanced Code Quality & Security Checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  FLUTTER_VERSION: "3.24.0"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  pre-commit:
+    name: Pre-commit Hooks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+
+      - name: Install pre-commit and tools
+        run: |
+          pip install pre-commit ruff isort bandit detect-secrets safety mypy vulture pydocstyle
+
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit (excluding heavy tools)
+        run: |
+          SKIP=gitleaks,semgrep pre-commit run --all-files
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for git-based tools
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security tools
+        run: |
+          # GitLeaks
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/gitleaks/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+          # Semgrep
+          pip install semgrep
+
+          # Python security tools
+          pip install bandit detect-secrets safety pip-audit
+
+      - name: Run GitLeaks
+        run: gitleaks detect --source . --verbose
+
+      - name: Run Semgrep
+        run: semgrep --config=auto --error --strict --json --output=semgrep-report.json .
+        continue-on-error: true
+
+      - name: Run Bandit
+        run: bandit -r lib/ docker/plugins/ -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: Run Safety Check
+        run: safety check --json --output safety-report.json
+        continue-on-error: true
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            semgrep-report.json
+            bandit-report.json
+            safety-report.json
+
+  dart-analysis:
+    name: Dart Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Check Dart formatting
+        run: dart format --output none --set-exit-if-changed .
+
+      - name: Analyze Dart code
+        run: flutter analyze
+
+      - name: Check for unused files
+        run: dart run dart_code_metrics:metrics check-unused-files lib
+
+  python-quality:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt || echo "No requirements.txt found"
+          pip install ruff mypy vulture pydocstyle xenon
+
+      - name: Run Ruff format check
+        run: ruff format --check .
+
+      - name: Run Ruff lint
+        run: ruff check .
+
+      - name: Run MyPy
+        run: mypy lib/ docker/plugins/ || echo "MyPy checks completed with warnings"
+
+      - name: Check complexity with Xenon
+        run: xenon --max-absolute B --max-modules A --max-average A lib/ docker/plugins/
+
+  flutter-tests:
+    name: Flutter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0" # Adjust to your Flutter version
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Check for TODO/FIXME in production code
+        run: |
+          if grep -r --include="*.dart" --exclude-dir=test "TODO\|FIXME" lib/; then
+            echo "❌ Found TODO/FIXME comments in lib/ directory"
+            exit 1
+          fi
+
+      - name: Check for print statements in production code
+        run: |
+          if grep -r --include="*.dart" --exclude-dir=test "print(" lib/; then
+            echo "❌ Found print() statements in lib/ directory"
+            exit 1
+          fi
+
+  python-tests:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for Python files
+        id: check-python
+        run: |
+          if find . -name "*.py" -type f | grep -q .; then
+            echo "python-files=true" >> $GITHUB_OUTPUT
+          else
+            echo "python-files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        if: steps.check-python.outputs.python-files == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tools
+        if: steps.check-python.outputs.python-files == 'true'
+        run: |
+          pip install ruff isort bandit detect-secrets safety
+
+      - name: Run ruff linter
+        if: steps.check-python.outputs.python-files == 'true'
+        run: ruff check .
+
+      - name: Check ruff formatting
+        if: steps.check-python.outputs.python-files == 'true'
+        run: ruff format --check .
+
+      - name: Check import sorting
+        if: steps.check-python.outputs.python-files == 'true'
+        run: isort --check-only --diff .
+
+      - name: Run security checks
+        if: steps.check-python.outputs.python-files == 'true'
+        run: bandit -r . -f json -o bandit-report.json || true
+
+      - name: Check for secrets
+        if: steps.check-python.outputs.python-files == 'true'
+        run: detect-secrets scan --baseline .secrets.baseline
+
+      - name: Check dependency vulnerabilities
+        if: steps.check-python.outputs.python-files == 'true'
+        run: safety check --json --output safety-report.json || true
+
+      - name: Upload security reports
+        if: always() && steps.check-python.outputs.python-files == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: |
+          pip install detect-secrets safety bandit
+
+      - name: Run secret detection
+        run: |
+          detect-secrets scan --baseline .secrets.baseline
+          if [ $? -eq 1 ]; then
+            echo "❌ New secrets detected!"
+            detect-secrets scan --baseline .secrets.baseline --force-use-all-plugins
+            exit 1
+          fi
+
+      - name: Run dependency vulnerability scan
+        run: safety check --json --output safety-report.json || echo "Safety scan completed with warnings"
+
+      - name: Run comprehensive security scan
+        run: |
+          # Check for common security issues
+          echo "Checking for hardcoded secrets..."
+          grep -r --include="*.dart" --include="*.py" -i "password\|secret\|key" . | grep -v ".git\|test\|example" || true
+
+          echo "Checking for insecure HTTP usage..."
+          grep -r --include="*.dart" "http://" . | grep -v "localhost\|127.0.0.1\|test" || true
+
+      - name: Upload security artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-results
+          path: |
+            safety-report.json
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    needs: [pre-commit, flutter-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../labeled_dropdown_button.dart';
 
 class DigitsDropdownButton extends StatelessWidget {
@@ -34,9 +34,9 @@ class DigitsDropdownButton extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => LabeledDropdownButton<int>(
-        label: AppLocalizations.of(context)!.digits,
-        enabled: enabled,
-        valueNotifier: digitsNotifier,
-        values: allowedDigits,
-      );
+    label: AppLocalizations.of(context)!.digits,
+    enabled: enabled,
+    valueNotifier: digitsNotifier,
+    values: allowedDigits,
+  );
 }

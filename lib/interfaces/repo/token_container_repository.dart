@@ -22,8 +22,12 @@ import '../../model/token_container.dart';
 
 abstract class TokenContainerRepository {
   Future<TokenContainerState> loadContainerState();
-  Future<TokenContainerState> saveContainerState(TokenContainerState containerState);
-  Future<TokenContainerState> saveContainerList(List<TokenContainer> containerList);
+  Future<TokenContainerState> saveContainerState(
+    TokenContainerState containerState,
+  );
+  Future<TokenContainerState> saveContainerList(
+    List<TokenContainer> containerList,
+  );
   Future<TokenContainerState> deleteContainer(String serial);
   Future<TokenContainerState> deleteAllContainer();
   Future<TokenContainer?> loadContainer(String serial);

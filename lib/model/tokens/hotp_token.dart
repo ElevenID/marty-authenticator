@@ -52,7 +52,8 @@ class HOTPToken extends OTPToken {
     required super.digits,
     required super.secret,
     super.serial,
-    String? type, // just for @JsonSerializable(): type of HOTPToken is always TokenTypes.HOTP
+    String?
+    type, // just for @JsonSerializable(): type of HOTPToken is always TokenTypes.HOTP
     super.tokenImage,
     super.pin,
     super.isLocked,
@@ -66,7 +67,10 @@ class HOTPToken extends OTPToken {
   }) : super(type: TokenTypes.HOTP.name);
 
   @override
-  bool sameValuesAs(Token other) => super.sameValuesAs(other) && other is HOTPToken && other.counter == counter;
+  bool sameValuesAs(Token other) =>
+      super.sameValuesAs(other) &&
+      other is HOTPToken &&
+      other.counter == counter;
 
   @override
   // Counter can be changed even if its the same token
@@ -78,19 +82,19 @@ class HOTPToken extends OTPToken {
 
   @override
   String get otpValue => algorithm.generateHOTPCodeString(
-        secret: secret,
-        counter: counter,
-        length: digits,
-        isGoogle: true,
-      );
+    secret: secret,
+    counter: counter,
+    length: digits,
+    isGoogle: true,
+  );
 
   @override
   String get nextValue => algorithm.generateHOTPCodeString(
-        secret: secret,
-        counter: counter + 1,
-        length: digits,
-        isGoogle: true,
-      );
+    secret: secret,
+    counter: counter + 1,
+    length: digits,
+    isGoogle: true,
+  );
 
   HOTPToken withNextCounter() => copyWith(counter: counter + 1);
 
@@ -114,27 +118,28 @@ class HOTPToken extends OTPToken {
     int? Function()? folderId,
     TokenOriginData? origin,
     bool? isOffline,
-  }) =>
-      HOTPToken(
-        serial: serial ?? this.serial,
-        counter: counter ?? this.counter,
-        label: label ?? this.label,
-        issuer: issuer ?? this.issuer,
-        containerSerial: containerSerial != null ? containerSerial() : this.containerSerial,
-        checkedContainer: checkedContainer ?? this.checkedContainer,
-        id: id ?? this.id,
-        algorithm: algorithm ?? this.algorithm,
-        digits: digits ?? this.digits,
-        secret: secret ?? this.secret,
-        tokenImage: tokenImage ?? this.tokenImage,
-        pin: pin ?? this.pin,
-        isLocked: isLocked ?? this.isLocked,
-        isHidden: isHidden ?? this.isHidden,
-        sortIndex: sortIndex ?? this.sortIndex,
-        folderId: folderId != null ? folderId() : this.folderId,
-        origin: origin ?? this.origin,
-        isOffline: isOffline ?? this.isOffline,
-      );
+  }) => HOTPToken(
+    serial: serial ?? this.serial,
+    counter: counter ?? this.counter,
+    label: label ?? this.label,
+    issuer: issuer ?? this.issuer,
+    containerSerial: containerSerial != null
+        ? containerSerial()
+        : this.containerSerial,
+    checkedContainer: checkedContainer ?? this.checkedContainer,
+    id: id ?? this.id,
+    algorithm: algorithm ?? this.algorithm,
+    digits: digits ?? this.digits,
+    secret: secret ?? this.secret,
+    tokenImage: tokenImage ?? this.tokenImage,
+    pin: pin ?? this.pin,
+    isLocked: isLocked ?? this.isLocked,
+    isHidden: isHidden ?? this.isHidden,
+    sortIndex: sortIndex ?? this.sortIndex,
+    folderId: folderId != null ? folderId() : this.folderId,
+    origin: origin ?? this.origin,
+    isOffline: isOffline ?? this.isOffline,
+  );
 
   @override
   String toString() {
@@ -172,7 +177,10 @@ class HOTPToken extends OTPToken {
     );
   }
 
-  factory HOTPToken.fromOtpAuthMap(Map<String, dynamic> otpAuthMap, {Map<String, dynamic> additionalData = const {}}) {
+  factory HOTPToken.fromOtpAuthMap(
+    Map<String, dynamic> otpAuthMap, {
+    Map<String, dynamic> additionalData = const {},
+  }) {
     final validatedMap = validateMap(
       map: otpAuthMap,
       validators: {
@@ -182,14 +190,18 @@ class HOTPToken extends OTPToken {
         Token.IMAGE: const ObjectValidatorNullable<String>(),
         Token.PIN: boolValidatorNullable,
         Token.OFFLINE: boolValidatorNullable,
-        OTPToken.ALGORITHM: stringToAlgorithmsValidator.withDefault(Algorithms.SHA1),
+        OTPToken.ALGORITHM: stringToAlgorithmsValidator.withDefault(
+          Algorithms.SHA1,
+        ),
         OTPToken.DIGITS: otpAuthDigitsValidatorNullable,
         OTPToken.SECRET_BASE32: base32Secretvalidator,
         COUNTER: otpAuthCounterValidator,
       },
       name: 'HOTPToken#otpAuthMap',
     );
-    final validatedAdditionalData = Token.validateAdditionalData(additionalData);
+    final validatedAdditionalData = Token.validateAdditionalData(
+      additionalData,
+    );
     return HOTPToken(
       label: validatedMap[Token.LABEL] as String,
       issuer: validatedMap[Token.ISSUER] as String,
@@ -241,13 +253,11 @@ class HOTPToken extends OTPToken {
   /// ```
   @override
   Map<String, dynamic> toOtpAuthMap() {
-    return super.toOtpAuthMap()
-      ..addAll({
-        COUNTER: counter.toString(),
-      });
+    return super.toOtpAuthMap()..addAll({COUNTER: counter.toString()});
   }
 
   @override
   Map<String, dynamic> toJson() => _$HOTPTokenToJson(this);
-  factory HOTPToken.fromJson(Map<String, dynamic> json) => _$HOTPTokenFromJson(json);
+  factory HOTPToken.fromJson(Map<String, dynamic> json) =>
+      _$HOTPTokenFromJson(json);
 }

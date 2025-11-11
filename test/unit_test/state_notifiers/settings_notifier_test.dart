@@ -45,7 +45,9 @@ void _testSettingsNotifier() {
         crashReportRecipients: {'someone', 'anotherOne'},
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -60,11 +62,11 @@ void _testSettingsNotifier() {
 
     test('removeCrashReportRecipient', () {
       final container = ProviderContainer();
-      final copyWithSettings = _state.copyWith(
-        crashReportRecipients: {},
-      );
+      final copyWithSettings = _state.copyWith(crashReportRecipients: {});
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -79,11 +81,11 @@ void _testSettingsNotifier() {
 
     test('setIsFirstRun', () {
       final container = ProviderContainer();
-      final copyWithSettings = _state.copyWith(
-        isFirstRun: !_state.isFirstRun,
-      );
+      final copyWithSettings = _state.copyWith(isFirstRun: !_state.isFirstRun);
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -98,11 +100,11 @@ void _testSettingsNotifier() {
 
     test('setHideOpts', () {
       final container = ProviderContainer();
-      final copyWithSettings = _state.copyWith(
-        hideOpts: !_state.hideOpts,
-      );
+      final copyWithSettings = _state.copyWith(hideOpts: !_state.hideOpts);
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -121,7 +123,9 @@ void _testSettingsNotifier() {
         showGuideOnStart: !_state.showGuideOnStart,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -140,7 +144,9 @@ void _testSettingsNotifier() {
         localePreference: const Locale('en'),
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -158,7 +164,9 @@ void _testSettingsNotifier() {
         useSystemLocale: !_state.useSystemLocale,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -177,7 +185,9 @@ void _testSettingsNotifier() {
         enablePolling: !_state.enablePolling,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -195,7 +205,9 @@ void _testSettingsNotifier() {
         verboseLogging: !_state.verboseLogging,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -213,7 +225,9 @@ void _testSettingsNotifier() {
         verboseLogging: !_state.verboseLogging,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -232,7 +246,9 @@ void _testSettingsNotifier() {
         hidePushTokens: !_state.hidePushTokens,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -251,7 +267,9 @@ void _testSettingsNotifier() {
         latestStartedVersion: Version(1, 0, 0),
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -270,7 +288,9 @@ void _testSettingsNotifier() {
         showBackgroundImage: !_state.showBackgroundImage,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);
@@ -289,7 +309,9 @@ void _testSettingsNotifier() {
         showBackgroundImage: !_state.showBackgroundImage,
       );
       when(mockRepo.loadSettings()).thenAnswer((_) async => _state);
-      when(mockRepo.saveSettings(copyWithSettings)).thenAnswer((_) async => true);
+      when(
+        mockRepo.saveSettings(copyWithSettings),
+      ).thenAnswer((_) async => true);
 
       final testProvider = settingsNotifierProviderOf(repo: mockRepo);
       final notifier = container.read(testProvider.notifier);

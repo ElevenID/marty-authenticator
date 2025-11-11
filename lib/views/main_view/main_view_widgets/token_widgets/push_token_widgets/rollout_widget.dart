@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/extensions/enums/push_token_rollout_state_extension.dart';
 import '../../../../../model/tokens/push_token.dart';
 
@@ -29,16 +29,16 @@ class RolloutWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator.adaptive(),
-          Text(
-            token.rolloutState.rolloutMsg(AppLocalizations.of(context)!),
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.fade,
-            softWrap: false,
-          ),
-        ],
-      );
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const CircularProgressIndicator.adaptive(),
+      Text(
+        token.rolloutState.rolloutMsg(AppLocalizations.of(context)!),
+        style: Theme.of(context).textTheme.bodyLarge,
+        textAlign: TextAlign.center,
+        overflow: TextOverflow.fade,
+        softWrap: false,
+      ),
+    ],
+  );
 }

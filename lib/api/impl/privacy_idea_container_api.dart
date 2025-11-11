@@ -377,8 +377,9 @@ class PiContainerApi implements TokenContainerApi {
     if (errorResponse != null) {
       throw errorResponse.piServerResultError;
     }
-    if (HttpStatusChecker.isError(response.statusCode) || piResponse == null)
+    if (HttpStatusChecker.isError(response.statusCode) || piResponse == null) {
       throw ResponseError(response);
+    }
 
     return piResponse.asSuccess!.resultValue;
   }

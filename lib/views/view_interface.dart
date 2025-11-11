@@ -39,6 +39,7 @@ abstract class StatefulView extends StatefulWidget implements ViewWidget {
   const StatefulView({super.key});
 }
 
-abstract class ConsumerStatefulView extends ConsumerStatefulWidget implements ViewWidget {
+abstract class ConsumerStatefulView extends ConsumerStatefulWidget
+    implements ViewWidget {
   const ConsumerStatefulView({super.key});
 }

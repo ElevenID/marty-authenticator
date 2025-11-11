@@ -35,23 +35,26 @@ class RolloverContainerTokensButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final container = ref.watch(tokenContainerProvider).asData?.value.currentOf<TokenContainerFinalized>(this.container);
+    final container = ref
+        .watch(tokenContainerProvider)
+        .asData
+        ?.value
+        .currentOf<TokenContainerFinalized>(this.container);
     return CooldownButton(
       styleType: CooldownButtonStyleType.iconButton,
       childWhenCooldown: CircularProgressIndicator.adaptive(),
       isPressable: container != null && container.syncState.isIdle,
-      onPressed: container != null ? () => RolloverContainerTokensDialog.showDialog(context, this.container) : null,
+      onPressed: container != null
+          ? () => RolloverContainerTokensDialog.showDialog(
+              context,
+              this.container,
+            )
+          : null,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(
-            Icons.sync,
-            size: size * 0.6,
-          ),
-          Icon(
-            Icons.shield_outlined,
-            size: size,
-          ),
+          Icon(Icons.sync, size: size * 0.6),
+          Icon(Icons.shield_outlined, size: size),
         ],
       ),
     );

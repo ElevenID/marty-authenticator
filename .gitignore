@@ -48,6 +48,15 @@ build/
 **/ios/**/.tags*
 **/ios/**/.vagrant/
 **/ios/**/DerivedData/
+
+# Code Quality and Security Tool Caches
+.ruff_cache/
+.mypy_cache/
+.bandit
+.semgrep_logs/
+*-report.json
+*-report.html
+.vulture_whitelist.py
 **/ios/**/Icon?
 **/ios/**/Pods/
 **/ios/**/.symlinks/
@@ -898,3 +907,24 @@ lib/l10n/app_localizations*.dart
 *firebase_options.dart
 !default_firebase_options.dart
 firebase.json
+
+# Pre-commit
+.pre-commit-cache/
+.ruff_cache/
+
+# Security reports
+bandit-report.json
+safety-report.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/

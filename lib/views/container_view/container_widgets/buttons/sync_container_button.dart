@@ -31,7 +31,11 @@ class SyncContainerButton extends ConsumerWidget {
   final TokenContainerFinalized container;
   final bool isPreview;
 
-  const SyncContainerButton({required this.isPreview, required this.container, super.key});
+  const SyncContainerButton({
+    required this.isPreview,
+    required this.container,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +49,13 @@ class SyncContainerButton extends ConsumerWidget {
       isPressable: container.syncState.isIdle,
       onPressed: () async {
         final tokenState = await ref.read(tokenProvider.future);
-        await ref.read(tokenContainerProvider.notifier).syncContainers(tokenState: tokenState, containersToSync: [container], isManually: true);
+        await ref
+            .read(tokenContainerProvider.notifier)
+            .syncContainers(
+              tokenState: tokenState,
+              containersToSync: [container],
+              isManually: true,
+            );
       },
       child: const Icon(Icons.sync, size: 40),
     );

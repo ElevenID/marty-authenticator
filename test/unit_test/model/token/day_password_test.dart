@@ -12,20 +12,20 @@ import 'package:privacyidea_authenticator/model/tokens/token.dart';
 import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
 
 DayPasswordToken get dayPasswordToken => DayPasswordToken(
-      period: const Duration(hours: 24),
-      viewMode: DayPasswordTokenViewMode.VALIDUNTIL,
-      label: 'label',
-      issuer: 'issuer',
-      id: 'id',
-      algorithm: Algorithms.SHA1,
-      digits: 6,
-      secret: 'secret',
-      pin: true,
-      tokenImage: 'example.png',
-      sortIndex: 0,
-      isLocked: false, // if pin is true, its automatically forced to be locked=true
-      folderId: 0,
-    );
+  period: const Duration(hours: 24),
+  viewMode: DayPasswordTokenViewMode.VALIDUNTIL,
+  label: 'label',
+  issuer: 'issuer',
+  id: 'id',
+  algorithm: Algorithms.SHA1,
+  digits: 6,
+  secret: 'secret',
+  pin: true,
+  tokenImage: 'example.png',
+  sortIndex: 0,
+  isLocked: false, // if pin is true, its automatically forced to be locked=true
+  folderId: 0,
+);
 void main() {
   _testDayPasswordToken();
 }
@@ -88,7 +88,9 @@ void _testDayPasswordToken() {
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
           OTPToken.DIGITS: '6',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           TOTPToken.PERIOD_SECONDS: '30',
         };
         final totpFromUriMap = DayPasswordToken.fromOtpAuthMap(uriMap);
@@ -113,7 +115,10 @@ void _testDayPasswordToken() {
           OTPToken.DIGITS: 6,
           TOTPToken.PERIOD_SECONDS: 30,
         };
-        expect(() => DayPasswordToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => DayPasswordToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
       test('with zero period', () {
         final uriMap = {
@@ -124,10 +129,15 @@ void _testDayPasswordToken() {
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
           OTPToken.DIGITS: '6',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           TOTPToken.PERIOD_SECONDS: '0',
         };
-        expect(() => DayPasswordToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => DayPasswordToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
         var errorContainsPeriod = false;
         try {
           DayPasswordToken.fromOtpAuthMap(uriMap);
@@ -145,10 +155,15 @@ void _testDayPasswordToken() {
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'SHA1',
           OTPToken.DIGITS: '0',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           TOTPToken.PERIOD_SECONDS: '30',
         };
-        expect(() => DayPasswordToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => DayPasswordToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
         var errorContainsDigits = false;
         try {
           DayPasswordToken.fromOtpAuthMap(uriMap);
@@ -166,7 +181,9 @@ void _testDayPasswordToken() {
           Token.IMAGE: 'example.png',
           OTPToken.ALGORITHM: 'sha1',
           OTPToken.DIGITS: '6',
-          OTPToken.SECRET_BASE32: Encodings.base32.encode(utf8.encode('secret')),
+          OTPToken.SECRET_BASE32: Encodings.base32.encode(
+            utf8.encode('secret'),
+          ),
           TOTPToken.PERIOD_SECONDS: '30',
         };
         final totpFromUriMap = DayPasswordToken.fromOtpAuthMap(uriMap);
@@ -174,7 +191,10 @@ void _testDayPasswordToken() {
       });
       test('with empty map', () {
         final uriMap = <String, dynamic>{};
-        expect(() => DayPasswordToken.fromOtpAuthMap(uriMap), throwsA(isA<ArgumentError>()));
+        expect(
+          () => DayPasswordToken.fromOtpAuthMap(uriMap),
+          throwsA(isA<ArgumentError>()),
+        );
       });
     });
     test('toUriMap', () {
@@ -276,7 +296,12 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(algorithm: Algorithms.SHA256)), true);
+      expect(
+        dayPasswordToken.isSameTokenAs(
+          dayPasswordToken.copyWith(algorithm: Algorithms.SHA256),
+        ),
+        true,
+      );
     });
     test('no serial | different id | same parameters', () {
       // No serial, different id. Should recognize by parameters
@@ -296,7 +321,10 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(id: 'id2')), true);
+      expect(
+        dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(id: 'id2')),
+        true,
+      );
     });
     test('no serial | different id | different parameters', () {
       // No serial, different id, different parameters. Should not recognize
@@ -316,7 +344,12 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), false);
+      expect(
+        dayPasswordToken.isSameTokenAs(
+          dayPasswordToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        false,
+      );
     });
     test('same serial | different id | different parameters', () {
       // Different id, different parameters. Should recognize by serial
@@ -337,7 +370,12 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256)), true);
+      expect(
+        dayPasswordToken.isSameTokenAs(
+          dayPasswordToken.copyWith(id: 'id2', algorithm: Algorithms.SHA256),
+        ),
+        true,
+      );
     });
     test('different serial | same id | different parameters', () {
       // Different serial, different parameters. Should recognize by id
@@ -358,7 +396,15 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(serial: 'serial2', algorithm: Algorithms.SHA256)), true);
+      expect(
+        dayPasswordToken.isSameTokenAs(
+          dayPasswordToken.copyWith(
+            serial: 'serial2',
+            algorithm: Algorithms.SHA256,
+          ),
+        ),
+        true,
+      );
     });
     test('different serial | different id | same parameters', () {
       // Different serial, different id. Should NOT recognize by parameters
@@ -379,7 +425,12 @@ void _testDayPasswordToken() {
         folderId: 0,
       );
 
-      expect(dayPasswordToken.isSameTokenAs(dayPasswordToken.copyWith(serial: 'serial2', id: 'id2')), false);
+      expect(
+        dayPasswordToken.isSameTokenAs(
+          dayPasswordToken.copyWith(serial: 'serial2', id: 'id2'),
+        ),
+        false,
+      );
     });
   });
   group('Calculate day password values', () {
@@ -398,7 +449,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -420,7 +473,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -442,7 +497,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -464,7 +521,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -486,7 +545,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -511,7 +572,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -533,7 +596,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -555,7 +620,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -577,7 +644,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -599,7 +668,9 @@ void _testDayPasswordToken() {
           algorithm: Algorithms.SHA1,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -625,7 +696,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -647,7 +720,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -669,7 +744,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -695,7 +772,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -717,7 +796,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',
@@ -739,7 +820,9 @@ void _testDayPasswordToken() {
           algorithm: algorithm,
           digits: digits,
           secret: Encodings.base32.encode(utf8.encode('secret')),
-          counter: (DateTime.now().millisecondsSinceEpoch / 1000) ~/ period.inSeconds,
+          counter:
+              (DateTime.now().millisecondsSinceEpoch / 1000) ~/
+              period.inSeconds,
         );
         final dayPassword1h = DayPasswordToken(
           label: '',

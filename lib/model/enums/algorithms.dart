@@ -18,8 +18,4 @@
  * limitations under the License.
  */
 // Do not rename, remove or reorder values, they are used for serialization. Only add new values at the end.
-enum Algorithms {
-  SHA1,
-  SHA256,
-  SHA512,
-}
+enum Algorithms { SHA1, SHA256, SHA512 }

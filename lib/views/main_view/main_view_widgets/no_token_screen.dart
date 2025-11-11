@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 
 class NoTokenScreen extends StatelessWidget {
   const NoTokenScreen({super.key});
@@ -54,7 +54,7 @@ class NoTokenScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               overflow: TextOverflow.fade,
               softWrap: false,
-            )
+            ),
           ],
         ),
       ),

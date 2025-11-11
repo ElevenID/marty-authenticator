@@ -25,7 +25,12 @@ import '../utils/object_validator.dart';
 part 'container_policies.freezed.dart';
 part 'container_policies.g.dart';
 
-@Freezed(toStringOverride: false, addImplicitFinal: true, toJson: true, fromJson: true)
+@Freezed(
+  toStringOverride: false,
+  addImplicitFinal: true,
+  toJson: true,
+  fromJson: true,
+)
 sealed class ContainerPolicies with _$ContainerPolicies {
   static const DISABLED_UNREGISTER = 'disable_client_container_unregister';
   static const DISABLED_TOKEN_DELETION = 'disable_client_token_deletion';
@@ -74,5 +79,6 @@ sealed class ContainerPolicies with _$ContainerPolicies {
     DISABLED_UNREGISTER: disabledUnregister,
   };
 
-  factory ContainerPolicies.fromJson(Map<String, dynamic> json) => _$ContainerPoliciesFromJson(json);
+  factory ContainerPolicies.fromJson(Map<String, dynamic> json) =>
+      _$ContainerPoliciesFromJson(json);
 }

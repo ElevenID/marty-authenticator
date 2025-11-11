@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/token_container.dart';
 import '../../../../../utils/utils.dart';
 import '../../../../../widgets/dialog_widgets/default_dialog.dart';
@@ -30,7 +30,11 @@ class TransferQrDialog extends ConsumerWidget {
   final String qrData;
   final TokenContainerFinalized container;
 
-  const TransferQrDialog({super.key, required this.qrData, required this.container});
+  const TransferQrDialog({
+    super.key,
+    required this.qrData,
+    required this.container,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,9 +58,8 @@ class TransferQrDialog extends ConsumerWidget {
               barrierDismissible: false,
               useRootNavigator: false,
               context: context,
-              builder: (_) => TransferDeleteContainerDialog(
-                container: container,
-              ),
+              builder: (_) =>
+                  TransferDeleteContainerDialog(container: container),
             );
           },
           child: Text(appLocalizations.done),

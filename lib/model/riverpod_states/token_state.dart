@@ -39,26 +39,37 @@ class TokenState {
 
   List<PushToken> get pushTokens => tokens.whereType<PushToken>().toList();
 
-  List<PushToken> get pollOnlyPushTokens => pushTokens.where((element) => element.isPollOnly == true).toList();
-  List<PushToken> get pushTokensNotPollOnly => pushTokens.where((element) => element.isPollOnly != true).toList();
+  List<PushToken> get pollOnlyPushTokens =>
+      pushTokens.where((element) => element.isPollOnly == true).toList();
+  List<PushToken> get pushTokensNotPollOnly =>
+      pushTokens.where((element) => element.isPollOnly != true).toList();
 
   bool get hasPushTokens => pushTokens.isNotEmpty;
-  bool get hasRolledOutPushTokens => pushTokens.any((element) => element.isRolledOut);
+  bool get hasRolledOutPushTokens =>
+      pushTokens.any((element) => element.isRolledOut);
 
-  bool get needsFirebase => pushTokens.any((element) => element.isPollOnly != true);
+  bool get needsFirebase =>
+      pushTokens.any((element) => element.isPollOnly != true);
 
-  List<PushToken> get rolledOutPushTokens => pushTokens.where((t) => t.isRolledOut && t.url != null).toList();
-  List<PushToken> get pushTokensToRollOut =>
-      pushTokens.where((element) => !element.isRolledOut && element.rolloutState == PushTokenRollOutState.rolloutNotStarted).toList();
+  List<PushToken> get rolledOutPushTokens =>
+      pushTokens.where((t) => t.isRolledOut && t.url != null).toList();
+  List<PushToken> get pushTokensToRollOut => pushTokens
+      .where(
+        (element) =>
+            !element.isRolledOut &&
+            element.rolloutState == PushTokenRollOutState.rolloutNotStarted,
+      )
+      .toList();
 
   const TokenState({
     required this.tokens,
     List<Token>? lastlyUpdatedTokens,
     List<Token>? lastlyDeletedTokens,
-  })  : lastlyUpdatedTokens = lastlyUpdatedTokens ?? tokens,
-        lastlyDeletedTokens = lastlyDeletedTokens ?? const [];
+  }) : lastlyUpdatedTokens = lastlyUpdatedTokens ?? tokens,
+       lastlyDeletedTokens = lastlyDeletedTokens ?? const [];
 
-  PushToken? getTokenBySerial(String serial) => pushTokens.firstWhereOrNull((element) => element.serial == serial);
+  PushToken? getTokenBySerial(String serial) =>
+      pushTokens.firstWhereOrNull((element) => element.serial == serial);
 
   /// Maps the given tokens to the tokens that are already in the state.
   /// It ignores the id that is usually used to identify the token.
@@ -69,13 +80,18 @@ class TokenState {
     final stateTokens = this.tokens;
 
     for (var token in tokens) {
-      sameTokensMap[token] = stateTokens.firstWhereOrNull((element) => element.isSameTokenAs(token) == true);
+      sameTokensMap[token] = stateTokens.firstWhereOrNull(
+        (element) => element.isSameTokenAs(token) == true,
+      );
     }
     return sameTokensMap;
   }
 
-  T? currentOf<T extends Token>(T token) => tokens.firstWhereOrNull((element) => element.isSameTokenAs(token) == true) as T?;
-  T? currentOfId<T extends Token>(String id) => tokens.firstWhereOrNull((element) => element.id == id) as T?;
+  T? currentOf<T extends Token>(T token) =>
+      tokens.firstWhereOrNull((element) => element.isSameTokenAs(token) == true)
+          as T?;
+  T? currentOfId<T extends Token>(String id) =>
+      tokens.firstWhereOrNull((element) => element.id == id) as T?;
 
   TokenState withToken(Token token) {
     final newTokens = List<Token>.from(tokens);
@@ -94,16 +110,26 @@ class TokenState {
   TokenState withoutToken(Token token) {
     final newTokens = List<Token>.from(tokens);
     newTokens.removeWhere((element) => element.id == token.id);
-    return TokenState(tokens: newTokens, lastlyUpdatedTokens: const [], lastlyDeletedTokens: [token]);
+    return TokenState(
+      tokens: newTokens,
+      lastlyUpdatedTokens: const [],
+      lastlyDeletedTokens: [token],
+    );
   }
 
   TokenState withoutTokens(List<Token> tokens) {
     final newTokens = List<Token>.from(this.tokens);
-    newTokens.removeWhere((element) => tokens.any((token) {
-          Logger.debug('token.id ${token.id} == element.id ${element.id}');
-          return token.id == element.id;
-        }));
-    return TokenState(tokens: newTokens, lastlyUpdatedTokens: const [], lastlyDeletedTokens: tokens);
+    newTokens.removeWhere(
+      (element) => tokens.any((token) {
+        Logger.debug('token.id ${token.id} == element.id ${element.id}');
+        return token.id == element.id;
+      }),
+    );
+    return TokenState(
+      tokens: newTokens,
+      lastlyUpdatedTokens: const [],
+      lastlyDeletedTokens: tokens,
+    );
   }
 
   /// Add a token if it does not exist yet
@@ -178,7 +204,9 @@ class TokenState {
     final piTokens = tokens.piTokens;
     Logger.debug('PiTokens: $piTokens');
     final containerTokens = piTokens.ofContainer(containerSerial);
-    Logger.debug('${containerTokens.length}/${piTokens.length} tokens with containerSerial: $containerSerial');
+    Logger.debug(
+      '${containerTokens.length}/${piTokens.length} tokens with containerSerial: $containerSerial',
+    );
     return containerTokens;
   }
 }

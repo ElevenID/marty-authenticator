@@ -71,7 +71,14 @@ class AesEncrypted {
       mac = Mac(data.sublist(data.length - 16, data.length));
       data = data.sublist(0, data.length - 16);
     }
-    return AesEncrypted._(mac: mac, kdf: kdf, cypher: cypher, salt: salt, iv: iv, data: data);
+    return AesEncrypted._(
+      mac: mac,
+      kdf: kdf,
+      cypher: cypher,
+      salt: salt,
+      iv: iv,
+      data: data,
+    );
   }
 
   /// Encrypts the data using AES-GCM with 256 bits.
@@ -94,10 +101,21 @@ class AesEncrypted {
       iterations: defaultIterations,
       bits: defaultBits,
     );
-    salt ??= Uint8List.fromList(List.generate(16, (index) => Random.secure().nextInt(256)));
-    iv ??= Uint8List.fromList(List.generate(16, (index) => Random.secure().nextInt(256)));
-    final secretKey = await kdf.deriveKeyFromPassword(password: password, nonce: salt);
-    final secretBox = await cypher.encrypt(plainBytes, secretKey: secretKey, nonce: iv);
+    salt ??= Uint8List.fromList(
+      List.generate(16, (index) => Random.secure().nextInt(256)),
+    );
+    iv ??= Uint8List.fromList(
+      List.generate(16, (index) => Random.secure().nextInt(256)),
+    );
+    final secretKey = await kdf.deriveKeyFromPassword(
+      password: password,
+      nonce: salt,
+    );
+    final secretBox = await cypher.encrypt(
+      plainBytes,
+      secretKey: secretKey,
+      nonce: iv,
+    );
     final encryptedData = secretBox.concatenation(nonce: false, mac: false);
     return AesEncrypted._(
       cypher: cypher,
@@ -162,9 +180,9 @@ extension MacAlgorithmX on MacAlgorithm {
   }
 
   Map<String, dynamic> toJson() => switch (runtimeType) {
-        const (DartHmac) => (this as DartHmac).toJson(),
-        _ => throw UnsupportedError('Unsupported MAC algorithm: $this'),
-      };
+    const (DartHmac) => (this as DartHmac).toJson(),
+    _ => throw UnsupportedError('Unsupported MAC algorithm: $this'),
+  };
 }
 
 extension HmacX on Hmac {
@@ -174,9 +192,9 @@ extension HmacX on Hmac {
   }
 
   Map<String, dynamic> toJson() => {
-        'algorithm': 'Hmac',
-        'hashAlgorithm': hashAlgorithm.toJson(),
-      };
+    'algorithm': 'Hmac',
+    'hashAlgorithm': hashAlgorithm.toJson(),
+  };
 }
 
 extension HashAlgorithmX on HashAlgorithm {
@@ -189,9 +207,7 @@ extension HashAlgorithmX on HashAlgorithm {
     };
   }
 
-  Map<String, dynamic> toJson() => {
-        'algorithm': runtimeType.toString(),
-      };
+  Map<String, dynamic> toJson() => {'algorithm': runtimeType.toString()};
 }
 
 extension KdfAlgorithmX on KdfAlgorithm {
@@ -204,9 +220,9 @@ extension KdfAlgorithmX on KdfAlgorithm {
   }
 
   Map<String, dynamic> toJson() => switch (runtimeType) {
-        const (DartPbkdf2) => (this as DartPbkdf2).toJson(),
-        _ => throw UnsupportedError('Unsupported KDF algorithm: $this'),
-      };
+    const (DartPbkdf2) => (this as DartPbkdf2).toJson(),
+    _ => throw UnsupportedError('Unsupported KDF algorithm: $this'),
+  };
 }
 
 extension Pbkdf2X on Pbkdf2 {
@@ -222,11 +238,11 @@ extension Pbkdf2X on Pbkdf2 {
   }
 
   Map<String, dynamic> toJson() => {
-        'algorithm': 'Pbkdf2',
-        'macAlgorithm': macAlgorithm.toJson(),
-        'iterations': iterations,
-        'bits': bits,
-      };
+    'algorithm': 'Pbkdf2',
+    'macAlgorithm': macAlgorithm.toJson(),
+    'iterations': iterations,
+    'bits': bits,
+  };
 }
 
 extension CipherX on Cipher {
@@ -240,10 +256,10 @@ extension CipherX on Cipher {
   }
 
   Map<String, dynamic> toJson() => switch (runtimeType) {
-        const (DartAesGcm) => (this as DartAesGcm).toJson(),
-        const (DartAesCbc) => (this as DartAesCbc).toJson(),
-        _ => throw UnsupportedError('Unsupported cipher algorithm: $this'),
-      };
+    const (DartAesGcm) => (this as DartAesGcm).toJson(),
+    const (DartAesCbc) => (this as DartAesCbc).toJson(),
+    _ => throw UnsupportedError('Unsupported cipher algorithm: $this'),
+  };
 }
 
 extension AesGcmX on AesGcm {
@@ -253,28 +269,42 @@ extension AesGcmX on AesGcm {
       16 => AesGcm.with128bits(),
       24 => AesGcm.with192bits(),
       32 => AesGcm.with256bits(),
-      _ => throw UnsupportedError('Unsupported secret key length: $secretKeyLength'),
+      _ => throw UnsupportedError(
+        'Unsupported secret key length: $secretKeyLength',
+      ),
     };
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'algorithm': 'AesGcm',
-      'secretKeyLength': secretKeyLength,
-    };
+    return {'algorithm': 'AesGcm', 'secretKeyLength': secretKeyLength};
   }
 }
 
 extension AesCbcX on AesCbc {
   static AesCbc fromJson(Map<String, dynamic> json) {
     final secretKeyLength = json['secretKeyLength'];
-    final macAlgorithm = json['macAlgorithm'] != null ? MacAlgorithmX.fromJson(json['macAlgorithm']) : Hmac.sha256();
-    final paddingAlgorithm = json['paddingAlgorithm'] != null ? PaddingAlgorithmX.fromString(json['paddingAlgorithm']) : PaddingAlgorithm.pkcs7;
+    final macAlgorithm = json['macAlgorithm'] != null
+        ? MacAlgorithmX.fromJson(json['macAlgorithm'])
+        : Hmac.sha256();
+    final paddingAlgorithm = json['paddingAlgorithm'] != null
+        ? PaddingAlgorithmX.fromString(json['paddingAlgorithm'])
+        : PaddingAlgorithm.pkcs7;
     return switch (secretKeyLength) {
-      16 => AesCbc.with128bits(macAlgorithm: macAlgorithm, paddingAlgorithm: paddingAlgorithm),
-      24 => AesCbc.with192bits(macAlgorithm: macAlgorithm, paddingAlgorithm: paddingAlgorithm),
-      32 => AesCbc.with256bits(macAlgorithm: macAlgorithm, paddingAlgorithm: paddingAlgorithm),
-      _ => throw UnsupportedError('Unsupported secret key length: $secretKeyLength'),
+      16 => AesCbc.with128bits(
+        macAlgorithm: macAlgorithm,
+        paddingAlgorithm: paddingAlgorithm,
+      ),
+      24 => AesCbc.with192bits(
+        macAlgorithm: macAlgorithm,
+        paddingAlgorithm: paddingAlgorithm,
+      ),
+      32 => AesCbc.with256bits(
+        macAlgorithm: macAlgorithm,
+        paddingAlgorithm: paddingAlgorithm,
+      ),
+      _ => throw UnsupportedError(
+        'Unsupported secret key length: $secretKeyLength',
+      ),
     };
   }
 
@@ -293,7 +323,7 @@ extension PaddingAlgorithmX on PaddingAlgorithm {
     return switch (string) {
       'PaddingAlgorithm.pkcs7' => PaddingAlgorithm.pkcs7,
       'PaddingAlgorithm.zero' => PaddingAlgorithm.zero,
-      _ => throw UnsupportedError('Unsupported padding algorithm: $string')
+      _ => throw UnsupportedError('Unsupported padding algorithm: $string'),
     };
   }
 }

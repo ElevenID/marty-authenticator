@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../widgets/push_request_listener.dart';
 import '../view_interface.dart';
 import 'settings_groups/settings_group_allow_screenshot/settings_group_allow_screenshot.dart';
@@ -31,6 +31,7 @@ import 'settings_groups/settings_group_general.dart';
 import 'settings_groups/settings_group_import_export_tokens.dart';
 import 'settings_groups/settings_group_language.dart';
 import 'settings_groups/settings_group_push_token/settings_group_push_token.dart';
+import 'settings_groups/settings_group_spruce_demo.dart';
 import 'settings_groups/settings_group_theme.dart';
 
 class SettingsView extends ConsumerView {
@@ -42,34 +43,35 @@ class SettingsView extends ConsumerView {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => PushRequestListener(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              AppLocalizations.of(context)!.settings,
-              overflow: TextOverflow.ellipsis, // maxLines: 2 only works like this.
-              maxLines: 2, // Title can be shown on small screens too.
-            ),
-          ),
-          body: SafeArea(
-            child: const SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SettingsGroupFeedback(),
-                  SettingsGroupImportExportTokens(),
-                  SettingsGroupPushToken(),
-                  SettingsGroupContainer(),
-                  SettingsGroupLanguage(),
-                  SettingsGroupTheme(),
-                  SettingsGroupBackroundImage(),
-                  SettingsGroupAllowScreenshot(),
-                  SettingsGroupErrorLog(),
-                  SettingsGroupGeneral(),
-                ],
-              ),
-            ),
+    child: Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.settings,
+          overflow: TextOverflow.ellipsis, // maxLines: 2 only works like this.
+          maxLines: 2, // Title can be shown on small screens too.
+        ),
+      ),
+      body: SafeArea(
+        child: const SingleChildScrollView(
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsGroupFeedback(),
+              SettingsGroupImportExportTokens(),
+              SettingsGroupPushToken(),
+              SettingsGroupContainer(),
+              SettingsGroupLanguage(),
+              SettingsGroupTheme(),
+              SettingsGroupBackroundImage(),
+              SettingsGroupAllowScreenshot(),
+              SettingsGroupErrorLog(),
+              SettingsGroupSpruceDemo(),
+              SettingsGroupGeneral(),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

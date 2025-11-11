@@ -1,69 +1,79 @@
 # Changelog
 
-## [4.6.0] - 
- - A few minor bugs have been resolved to improve app stability.
- - Internal components have been updated to maintain security and ensure compatibility with the latest devices.
+## [4.6.0] -
+
+- A few minor bugs have been resolved to improve app stability.
+- Internal components have been updated to maintain security and ensure compatibility with the latest devices.
 
 ## [4.5.3] - 2025.06.05
- - An issue has been fixed where the label of the push token was hidden when the token was locked.
- - The navigation bar is no longer superimposed over the app content on some devices.
+
+- An issue has been fixed where the label of the push token was hidden when the token was locked.
+- The navigation bar is no longer superimposed over the app content on some devices.
 
 ## [4.5.2] - 2025.04.25
- - Removed Push Token from the type selection of the "Add Token manually" scrren 
+
+- Removed Push Token from the type selection of the "Add Token manually" scrren
 
 ## [4.5.1] - 2025.04.07
- - Added setting to show/hide background image
- - Added setting to allow taking screenshots
- - TOTP token now changes color in the last 5 seconds to indicate end of period
- - Fixed some minor issues
+
+- Added setting to show/hide background image
+- Added setting to allow taking screenshots
+- TOTP token now changes color in the last 5 seconds to indicate end of period
+- Fixed some minor issues
 
 ## [4.5.0] - 2025.02.18
- - Now supports the privacyIDEA container system
- - Fixed some minor issues
+
+- Now supports the privacyIDEA container system
+- Fixed some minor issues
 
 ## [4.4.0] - 2024.11.22
- - It is now possible to export tokens where it can be ensured that they are not privacyIDEA tokens.
-   Currently, it cannot be ruled out that tokens added via the QR code scanner originate from privacyIDEA.
-   The differentiation will be improved in future versions.
- - Added support for privacyIDEA's "require presence".
- - Further import sources have been added.
- - Improved recognition of QR codes from image files.
+
+- It is now possible to export tokens where it can be ensured that they are not privacyIDEA tokens.
+  Currently, it cannot be ruled out that tokens added via the QR code scanner originate from privacyIDEA.
+  The differentiation will be improved in future versions.
+- Added support for privacyIDEA's "require presence".
+- Further import sources have been added.
+- Improved recognition of QR codes from image files.
 
 ## [4.3.0] - 2024-04-18
- - Support for importing tokens from Google, Aegis and 2FAS Authenticator has been added. More import sources will be added in the future.
- - Added feedback option to the settings.
- - Push tokens can now be moved to a separate list to not clutter the main list, because there is no interaction with them like with other token types.
- - Introductions have been added to help new users get started.
- - You can now search for tokens by tapping the magnifying glass in the upper right corner.
- - Added HomeWidget token for Android 12 and later.
+
+- Support for importing tokens from Google, Aegis and 2FAS Authenticator has been added. More import sources will be added in the future.
+- Added feedback option to the settings.
+- Push tokens can now be moved to a separate list to not clutter the main list, because there is no interaction with them like with other token types.
+- Introductions have been added to help new users get started.
+- You can now search for tokens by tapping the magnifying glass in the upper right corner.
+- Added HomeWidget token for Android 12 and later.
 
 ## [4.2.3] - 2023-12-11
- - Fixed some minor issues
- - Improved app stability
- - Added link to privacy policy
+
+- Fixed some minor issues
+- Improved app stability
+- Added link to privacy policy
 
 ## [4.2.2] - 2023-11-08
- - Fixed an issue that occurred when reordering a push token during rollout.
- - Fixed denying permissions throwing an error
- - Fixed camera issue with Android SDK 23 or lower
- - Fixed an error when launching a website
- - Implemented more unit tests
- - Implemented integration tests
- - Removed shadow in iOS due to flickering (workaroud)
- - Replaced misunderstood button in intro screen
- - Added a new status bar that appears when something has gone wrong that is not an application error.
+
+- Fixed an issue that occurred when reordering a push token during rollout.
+- Fixed denying permissions throwing an error
+- Fixed camera issue with Android SDK 23 or lower
+- Fixed an error when launching a website
+- Implemented more unit tests
+- Implemented integration tests
+- Removed shadow in iOS due to flickering (workaroud)
+- Replaced misunderstood button in intro screen
+- Added a new status bar that appears when something has gone wrong that is not an application error.
 
 ## [4.2.1] - Version skipped
 
 ## [4.2.0] - 2023-09-27
- - Support for daypasswordtokens
- - Added folders to group tokens
- - Added an errorlog menu to settings
- - Token can be sorted per drag and drop now to work with folders
- - Replaced the button to view the onboarding with a button to create a new folder
- - Replaced the splashscreen with a new one
- - Removed migration option from settings
- - Fixed a problem when the Image of a token could not be loaded (no internet connection or wrong url)
+
+- Support for daypasswordtokens
+- Added folders to group tokens
+- Added an errorlog menu to settings
+- Token can be sorted per drag and drop now to work with folders
+- Replaced the button to view the onboarding with a button to create a new folder
+- Replaced the splashscreen with a new one
+- Removed migration option from settings
+- Fixed a problem when the Image of a token could not be loaded (no internet connection or wrong url)
 
 ## [4.1.1] - 2023-05-12
 
@@ -74,16 +84,17 @@
 ## [4.1.0] - 2022-11-25
 
 ### Added
+
 - Push token can be locked
 - Polish translation
 - 'appimage' field in QR codes will be read and the image will be shown on the left side of the row
 
 ### Fixed
+
 - Fixed several causes for app crashes
 - Fixed scanning of QR codes which do not adhere strictly to the standard
 - Fixed cancellation of scanning process on iOS
 - Fixed a problem where each time the onboarding screen was closed, a new main screen was stacked on top the already existing one
-
 
 ## [4.0.0] - 2022-06-13
 
@@ -98,7 +109,6 @@
 - Improved error handling
 - Automatically enable poll on push token
 - Poll on app resume
-
 
 ### Changed
 
@@ -115,7 +125,6 @@
 ### Removed
 
 - Removed support for custom firebase projects
-
 
 ## [3.1.5] - 2021-10-21
 
@@ -150,7 +159,7 @@
 ### Added
 
 - Added support for poll-only tokens introduced in privacyIDEA v3.7.+
-- Added french translation, thanks to *NicolasB CD48*
+- Added french translation, thanks to _NicolasB CD48_
 
 ### Changed
 
@@ -261,25 +270,14 @@
 - parallel development of android and ios version
 
 [4.0.0]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.5...v4.0.0
-
 [3.1.5]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.4...v3.1.5
-
 [3.1.4]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.3...v3.1.4
-
 [3.1.3]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.2...v3.1.3
-
 [3.1.2]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.1...v3.1.2
-
 [3.1.1]: https://github.com/privacyidea/pi-authenticator/compare/v3.1.0...v3.1.1
-
 [3.1.0]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.12...v3.1.0
-
 [3.0.12]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.8...v3.0.12
-
 [3.0.8]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.7...v3.0.8
-
 [3.0.7]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.6...v3.0.7
-
 [3.0.6]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.4...v3.0.6
-
 [3.0.4]: https://github.com/privacyidea/pi-authenticator/compare/v3.0.0...v3.0.4

@@ -22,7 +22,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/tokens/token.dart';
 import '../../../../../utils/encryption/token_encryption.dart';
 import '../../../../../utils/riverpod/riverpod_providers/generated_providers/app_constraints_notifier.dart';
@@ -37,7 +37,9 @@ class ShowQrCodeDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appConstraits = ref.watch(appConstraintsNotifierProvider);
     final qrSize = min(appConstraits.maxWidth, appConstraits.maxHeight) * 0.85;
-    final qrImage = generateQrCodeImage(data: TokenEncryption.generateExportUri(token: token).toString());
+    final qrImage = generateQrCodeImage(
+      data: TokenEncryption.generateExportUri(token: token).toString(),
+    );
     return DefaultDialog(
       title: Text(AppLocalizations.of(context)!.asQrCode),
       content: Column(
@@ -47,7 +49,12 @@ class ShowQrCodeDialog extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: qrSize, maxHeight: qrSize, minHeight: qrSize, minWidth: qrSize),
+              constraints: BoxConstraints(
+                maxWidth: qrSize,
+                maxHeight: qrSize,
+                minHeight: qrSize,
+                minWidth: qrSize,
+              ),
               child: GestureDetector(
                 onTap: () => _showQrMaximized(context, qrImage),
                 child: qrImage,

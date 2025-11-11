@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../processors/mixins/token_import_processor.dart';
 import '../enums/token_import_type.dart';
 
@@ -26,5 +26,9 @@ class TokenImportSource {
   final TokenImportProcessor processor;
   final String Function(AppLocalizations localizations) importHint;
 
-  const TokenImportSource({required this.processor, required this.type, required this.importHint});
+  const TokenImportSource({
+    required this.processor,
+    required this.type,
+    required this.importHint,
+  });
 }

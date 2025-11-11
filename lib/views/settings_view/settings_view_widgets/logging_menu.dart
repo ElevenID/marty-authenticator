@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../../model/riverpod_states/settings_state.dart';
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import '../../../widgets/dialog_widgets/default_dialog.dart';
 import 'errorlog_buttons/delete_errorlog_button.dart';
@@ -33,47 +33,53 @@ class LoggingMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: DefaultDialog(
-          scrollable: true,
-          title: Text(
-            AppLocalizations.of(context)!.logMenu,
-            style: Theme.of(context).listTileTheme.titleTextStyle,
-          ),
-          content: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(
-                  AppLocalizations.of(context)!.verboseLogging,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                contentPadding: const EdgeInsets.all(0),
-                trailing: Switch(
-                  value: ref.watch(settingsProvider).whenOrNull(data: (data) => data.verboseLogging) ?? SettingsState.verboseLoggingDefault,
-                  onChanged: (value) => ref.read(settingsProvider.notifier).setVerboseLogging(value),
-                ),
-                style: ListTileStyle.list,
-                onTap: () => ref.read(settingsProvider.notifier).toggleVerboseLogging(),
-              ),
-              const Divider(),
-              const ShowErrorLogButton(),
-              const DeleteErrorlogButton(),
-              const SendErrorLogButton(),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                AppLocalizations.of(context)!.dismiss,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-              ),
-              onPressed: () => Navigator.pop(context),
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    child: DefaultDialog(
+      scrollable: true,
+      title: Text(
+        AppLocalizations.of(context)!.logMenu,
+        style: Theme.of(context).listTileTheme.titleTextStyle,
+      ),
+      content: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.verboseLogging,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
             ),
-          ],
+            contentPadding: const EdgeInsets.all(0),
+            trailing: Switch(
+              value:
+                  ref
+                      .watch(settingsProvider)
+                      .whenOrNull(data: (data) => data.verboseLogging) ??
+                  SettingsState.verboseLoggingDefault,
+              onChanged: (value) =>
+                  ref.read(settingsProvider.notifier).setVerboseLogging(value),
+            ),
+            style: ListTileStyle.list,
+            onTap: () =>
+                ref.read(settingsProvider.notifier).toggleVerboseLogging(),
+          ),
+          const Divider(),
+          const ShowErrorLogButton(),
+          const DeleteErrorlogButton(),
+          const SendErrorLogButton(),
+        ],
+      ),
+      actions: [
+        TextButton(
+          child: Text(
+            AppLocalizations.of(context)!.dismiss,
+            overflow: TextOverflow.fade,
+            softWrap: false,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
-      );
+      ],
+    ),
+  );
 }

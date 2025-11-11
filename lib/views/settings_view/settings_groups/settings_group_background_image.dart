@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/mains/main_netknights.dart';
 
-import '../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import '../settings_view_widgets/settings_group.dart';
 
@@ -30,21 +30,28 @@ class SettingsGroupBackroundImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (PrivacyIDEAAuthenticator.currentCustomization?.backgroundImage == null) return const SizedBox();
+    if (PrivacyIDEAAuthenticator.currentCustomization?.backgroundImage == null)
+      return const SizedBox();
     return SettingsGroup(
       title: AppLocalizations.of(context)!.backgroundImage,
-      onPressed: () => ref.read(settingsProvider.notifier).toggleShowBackgroundImage(),
+      onPressed: () =>
+          ref.read(settingsProvider.notifier).toggleShowBackgroundImage(),
       trailingWidget: FutureBuilder(
-          future: ref.watch(settingsProvider.selectAsync((v) => v.showBackgroundImage)),
-          builder: (context, snapshot) {
-            if (snapshot.hasError || snapshot.data == null) {
-              return const SizedBox();
-            }
-            return Switch(
-              value: snapshot.data!,
-              onChanged: (value) => ref.read(settingsProvider.notifier).setShowBackgroundImage(value),
-            );
-          }),
+        future: ref.watch(
+          settingsProvider.selectAsync((v) => v.showBackgroundImage),
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || snapshot.data == null) {
+            return const SizedBox();
+          }
+          return Switch(
+            value: snapshot.data!,
+            onChanged: (value) => ref
+                .read(settingsProvider.notifier)
+                .setShowBackgroundImage(value),
+          );
+        },
+      ),
     );
   }
 }

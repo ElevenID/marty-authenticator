@@ -46,10 +46,12 @@ class TokenFolderExpandable extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TokenFolderExpandable> createState() => _TokenFolderExpandableState();
+  ConsumerState<TokenFolderExpandable> createState() =>
+      _TokenFolderExpandableState();
 }
 
-class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable> with SingleTickerProviderStateMixin {
+class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable>
+    with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   late final ExpandableController expandableController;
 
@@ -61,7 +63,9 @@ class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable> w
       value: widget.expandOverride ?? widget.folder.isExpanded ? 0 : 1.0,
       vsync: this,
     );
-    expandableController = ExpandableController(initialExpanded: widget.expandOverride ?? widget.folder.isExpanded);
+    expandableController = ExpandableController(
+      initialExpanded: widget.expandOverride ?? widget.folder.isExpanded,
+    );
     expandableController.addListener(() {
       if (expandableController.expanded) {
         animationController.reverse();
@@ -71,7 +75,12 @@ class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable> w
       if (widget.expandOverride != null) return;
       if (widget.folder.isExpanded != expandableController.expanded) {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          globalRef?.read(tokenFolderProvider.notifier).updateFolder(widget.folder, (p0) => p0.copyWith(isExpanded: expandableController.expanded));
+          globalRef
+              ?.read(tokenFolderProvider.notifier)
+              .updateFolder(
+                widget.folder,
+                (p0) => p0.copyWith(isExpanded: expandableController.expanded),
+              );
         });
       }
     });
@@ -107,8 +116,12 @@ class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable> w
             padding: const EdgeInsets.symmetric(vertical: borderRadius),
             margin: const EdgeInsets.only(bottom: 8, left: 14, right: 14),
             decoration: BoxDecoration(
-              color: isExpanded ? Theme.of(context).scaffoldBackgroundColor : Colors.transparent,
-              borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
+              color: isExpanded
+                  ? Theme.of(context).scaffoldBackgroundColor
+                  : Colors.transparent,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(borderRadius),
+              ),
               boxShadow: [
                 if (isExpanded)
                   BoxShadow(
@@ -138,7 +151,10 @@ class _TokenFolderExpandableState extends ConsumerState<TokenFolderExpandable> w
               folder: widget.folder,
             ),
             collapsed: const SizedBox(),
-            expanded: tokensFiltered.isEmpty || (tokensFiltered.length == 1 && tokensFiltered.first == draggingSortable)
+            expanded:
+                tokensFiltered.isEmpty ||
+                    (tokensFiltered.length == 1 &&
+                        tokensFiltered.first == draggingSortable)
                 ? const SizedBox()
                 : TokenFolderExpandableBody(
                     tokens: tokensFiltered,

@@ -29,7 +29,12 @@ import 'package:pointycastle/export.dart';
 import '../model/enums/encodings.dart';
 import '../model/extensions/enums/encodings_extension.dart';
 
-Future<Uint8List> pbkdf2({required Uint8List salt, required int iterations, required int keyLength, required Uint8List password}) async {
+Future<Uint8List> pbkdf2({
+  required Uint8List salt,
+  required int iterations,
+  required int keyLength,
+  required Uint8List password,
+}) async {
   ArgumentError.checkNotNull(salt);
   ArgumentError.checkNotNull(iterations);
   ArgumentError.checkNotNull(keyLength);
@@ -49,9 +54,14 @@ Future<Uint8List> pbkdf2({required Uint8List salt, required int iterations, requ
 /// Computationally costly method to be run in an isolate.
 Uint8List _pbkdfIsolate(Map<String, dynamic> arguments) {
   // Setup algorithm (PBKDF2 - HMAC - SHA1).
-  PBKDF2KeyDerivator keyDerivator = KeyDerivator('SHA-1/HMAC/PBKDF2') as PBKDF2KeyDerivator;
+  PBKDF2KeyDerivator keyDerivator =
+      KeyDerivator('SHA-1/HMAC/PBKDF2') as PBKDF2KeyDerivator;
 
-  Pbkdf2Parameters pbkdf2parameters = Pbkdf2Parameters(arguments['salt'], arguments['iterations'], arguments['keyLength']);
+  Pbkdf2Parameters pbkdf2parameters = Pbkdf2Parameters(
+    arguments['salt'],
+    arguments['iterations'],
+    arguments['keyLength'],
+  );
   keyDerivator.init(pbkdf2parameters);
 
   return keyDerivator.process(arguments['password']);

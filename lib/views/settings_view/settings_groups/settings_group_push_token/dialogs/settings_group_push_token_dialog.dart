@@ -22,7 +22,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../l10n/app_localizations.dart';
+import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../../model/riverpod_states/settings_state.dart';
 import '../../../../../model/tokens/push_token.dart';
 import '../../../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
@@ -66,8 +66,9 @@ class SettingsGroupPushTokenDialog extends ConsumerWidget {
                   useRootNavigator: false,
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) =>
-                      UpdateFirebaseTokenDialog(AppLocalizations.of(context)!),
+                  builder: (context) => UpdateFirebaseTokenDialog(
+                    appLocalizations: AppLocalizations.of(context)!,
+                  ),
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.sync,
