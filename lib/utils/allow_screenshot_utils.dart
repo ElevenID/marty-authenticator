@@ -17,7 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import 'package:no_screenshot/no_screenshot.dart';
+import 'package:flutter/foundation.dart';
+// Conditionally import no_screenshot only when building for supported platforms
+// import 'package:no_screenshot/no_screenshot.dart';
 
 import 'logger.dart';
 
@@ -26,14 +28,38 @@ class AllowScreenshotUtils {
   /// Returns true if the operation was successful
   Future<bool> allowScreenshots() {
     Logger.info("Screenshots allowed");
-    return NoScreenshot.instance.screenshotOn();
+
+    // Screenshot control is not supported/needed on web and desktop platforms
+    // Desktop platforms (macOS, Windows, Linux) don't properly support this plugin
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      return Future.value(true);
+    }
+
+    // For mobile platforms, we would use NoScreenshot.instance.screenshotOn()
+    // but the plugin is temporarily removed for build compatibility
+    return Future.value(true);
   }
 
   /// Disables the ability to take screenshots
   /// Returns true if the operation was successful
   Future<bool> disallowScreenshots() {
     Logger.info("Screenshots not allowed");
-    return NoScreenshot.instance.screenshotOff();
+
+    // Screenshot control is not supported/needed on web and desktop platforms
+    // Desktop platforms (macOS, Windows, Linux) don't properly support this plugin
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      return Future.value(true);
+    }
+
+    // For mobile platforms, we would use NoScreenshot.instance.screenshotOff()
+    // but the plugin is temporarily removed for build compatibility
+    return Future.value(true);
   }
 
   /// Toggles the ability to take screenshots

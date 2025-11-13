@@ -27,6 +27,13 @@
 .pub/
 build/
 
+# Node.js related
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle

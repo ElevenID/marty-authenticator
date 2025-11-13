@@ -17,7 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
 
@@ -65,7 +68,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               Future.delayed(_splashScreenDuration),
               ref.read(tokenProvider.future),
               InfoUtils.init(),
-              HomeWidgetUtils().homeWidgetInit(),
+              (!kIsWeb && (Platform.isIOS || Platform.isAndroid))
+                  ? HomeWidgetUtils().homeWidgetInit()
+                  : Future<void>.value(),
               ref.read(allowScreenshotProvider.future),
               ref.read(tokenFolderProvider.notifier).initState,
             ],

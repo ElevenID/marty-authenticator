@@ -34,9 +34,9 @@ class HomeWidgetTokenStateListener extends TokenStateListener {
       );
 
   static void _onNewState(
+    WidgetRef ref,
     AsyncValue<TokenState>? previous,
     AsyncValue<TokenState> next,
-    WidgetRef ref,
   ) {
     final updateTokens = <Token>[];
     final previousTokens = previous?.value?.tokens ?? [];

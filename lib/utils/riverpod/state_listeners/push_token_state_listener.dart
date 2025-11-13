@@ -32,9 +32,9 @@ class PushProviderTokenStateListener extends TokenStateListener {
       );
 
   static void _onNewState(
+    WidgetRef ref,
     AsyncValue<TokenState>? previousValue,
     AsyncValue<TokenState> nextValue,
-    WidgetRef ref,
   ) {
     if (previousValue?.value?.needsFirebase == nextValue.value?.needsFirebase)
       return;

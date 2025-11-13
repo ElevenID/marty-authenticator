@@ -29,7 +29,6 @@ dependencies:
   async: ^2.11.0
   base32: ^2.1.3
   basic_utils: ^5.7.0
-  camera_android: ^0.10.10
   collection: ^1.18.0
   connectivity_plus: ^7.0.0
   crypto: ^3.0.6
@@ -37,8 +36,8 @@ dependencies:
   device_info_plus: ^12.2.0
   easy_dynamic_theme: ^2.3.1
   encrypt: ^5.0.3
-  expandable: ^5.0.1
   file_selector: ^1.0.3
+  expandable: ^5.0.1
   firebase_core: ^4.1.0
   firebase_messaging: ^16.0.1
   fixnum: ^1.1.1
@@ -71,7 +70,7 @@ dependencies:
   logger: ^2.4.0
   material_design_icons_flutter: ^7.0.7296
   mutex: ^3.1.0
-  no_screenshot: ^0.3.1
+  # no_screenshot: ^0.3.1  # Temporarily removed for macOS build compatibility
   otp: ^3.1.4
   package_info_plus: ^9.0.0
   path_provider: ^2.1.4
@@ -96,19 +95,27 @@ dependencies:
   bech32: ^0.2.2 # For did:key encoding
 
 dev_dependencies:
-  build_runner: ^2.4.7
+  build_runner: ^2.4.13
   dependency_validator: ^4.1.0
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  freezed: ^2.4.7
+  freezed: ^2.5.2
   integration_test:
     sdk: flutter
-  json_serializable: ^6.7.1
+  json_serializable: ^6.8.0
   mockito: ^5.4.4
   riverpod_generator: ^2.4.0
   riverpod_lint: ^2.3.10
+
+# Dependency overrides to address WASM compatibility issues
+dependency_overrides:
+  # Temporarily exclude flutter_secure_storage_web to resolve WASM compatibility
+  # This addresses dart:html, dart:js, and dart:js_util incompatibilities with WASM
+  flutter_secure_storage_web:
+    # Use a stub implementation or override to shared_preferences for WASM builds
+    path: ./local_wasm_overrides/flutter_secure_storage_web
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

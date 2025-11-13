@@ -1,0 +1,33 @@
+{
+  "originHash" : "49f1d2cdb63aca4076bc85125afe62c0b5e5ca5a513f6f4cc1eba0348c4173bf",
+  "pins" : [
+    {
+      "identity" : "sprucekit-mobile",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/spruceid/sprucekit-mobile.git",
+      "state" : {
+        "revision" : "d5c765b7096e0c03229a13829800841811a9da8c",
+        "version" : "0.12.11"
+      }
+    },
+    {
+      "identity" : "swift-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-algorithms",
+      "state" : {
+        "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
+        "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics.git",
+      "state" : {
+        "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
+        "version" : "1.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}

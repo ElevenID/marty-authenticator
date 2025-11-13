@@ -17,6 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// ignore_for_file: invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
 
 import 'package:flutter/material.dart' show WidgetsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,11 +26,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../utils/logger.dart';
 
 abstract class BuildlessStreamNotifierListener<
-  NotifierT extends $StreamNotifier<StateT>,
+  NotifierT extends BuildlessStreamNotifier<StateT>,
   StateT
 > {
   final String listenerName;
-  final $StreamNotifierProvider<NotifierT, StateT> provider;
+  final StreamNotifierProviderImpl<NotifierT, StateT> provider;
   final void Function(
     WidgetRef ref,
     AsyncValue<StateT>? previous,

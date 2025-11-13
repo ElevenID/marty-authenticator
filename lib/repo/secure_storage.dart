@@ -29,10 +29,18 @@ class SecureStorage implements SecureStorageInterface {
       accessibility: KeychainAccessibility.first_unlock_this_device,
       synchronizable: false,
     ),
+    webOptions: WebOptions(
+      dbName: 'privacyidea_secure_storage',
+      publicKey: 'privacyidea_public_key',
+    ),
   );
 
   static const legacyStorage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    webOptions: WebOptions(
+      dbName: 'privacyidea_secure_storage_legacy',
+      publicKey: 'privacyidea_public_key_legacy',
+    ),
   );
 
   static final Mutex _m = Mutex();

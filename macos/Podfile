@@ -29,6 +29,15 @@ flutter_macos_podfile_setup
 target 'Runner' do
   use_frameworks!
 
+  # SpruceID SDK for macOS identity/credential management
+  # Note: Using local pods or cocoapods if available for macOS
+  # pod 'SpruceIDMobileSdk', '~> 0.0.1'
+  # pod 'SpruceIDMobileSdkRs', '~> 0.0.1'
+
+  # Alternative: Using Swift Package Manager (preferred for macOS)
+  # The actual SpruceID SDK will be added via Xcode project Swift Package Manager
+  # This placeholder shows where CocoaPods integration would go if available
+
   flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

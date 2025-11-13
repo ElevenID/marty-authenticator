@@ -19,6 +19,8 @@
   limitations under the License.
 */
 
+import 'dart:io';
+
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -42,12 +44,15 @@ import '../views/feedback_view/feedback_view.dart';
 import '../views/import_tokens_view/import_tokens_view.dart';
 import '../views/license_view/license_view.dart';
 import '../views/main_view/main_view.dart';
+import '../views/main_view/credential_first_main_view.dart';
+import '../views/credential_demo_view.dart';
 import '../views/push_token_view/push_tokens_view.dart';
 import '../views/qr_scanner_view/qr_scanner_view.dart';
 import '../views/settings_view/settings_view.dart';
 import '../views/splash_screen/splash_screen.dart';
 import '../views/spruce_demo_view/spruce_demo_view.dart';
 import '../views/separated_spruce_demo_view/separated_spruce_demo_view.dart';
+import '../views/main_view/wallet_landing_view.dart';
 import '../widgets/app_wrapper.dart';
 
 void main() async {
@@ -56,8 +61,9 @@ void main() async {
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Skip mobile-specific initialization on web
-      if (!kIsWeb) {
+      // Skip mobile-specific initialization on web and desktop platforms
+      // Home widgets are only supported on iOS and Android
+      if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
         await GmsCheck().checkGmsAvailability();
         await HomeWidgetUtils().registerInteractivityCallback(
           homeWidgetBackgroundCallback,
@@ -65,13 +71,19 @@ void main() async {
         await HomeWidgetUtils().setAppGroupId(appGroupId);
       }
 
-      appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
-        'netknights',
-      );
+      // Firebase is only configured for mobile and web platforms
+      if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
+        appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
+          'netknights',
+        );
+      }
       runApp(
-        AppWrapper(
-          child: PrivacyIDEAAuthenticator(
-            ApplicationCustomization.defaultCustomization,
+        EasyDynamicThemeWidget(
+          initialThemeMode: ThemeMode.system,
+          child: AppWrapper(
+            child: PrivacyIDEAAuthenticator(
+              ApplicationCustomization.defaultCustomization,
+            ),
           ),
         ),
       );
@@ -139,7 +151,9 @@ class PrivacyIDEAAuthenticator extends ConsumerWidget {
               appName: _customization.appName,
               websiteLink: _customization.websiteLink,
             ),
-            MainView.routeName: (context) => MainView(
+            MainView.routeName: (context) => const WalletLandingView(),
+            '/credentialDemoView': (context) => const CredentialDemoView(),
+            '/legacyMainView': (context) => MainView(
               appbarIcon: _customization.appbarIcon.getWidget,
               backgroundImage: _customization.backgroundImage?.getWidget,
               appName: _customization.appName,

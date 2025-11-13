@@ -17,38 +17,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../utils/logger.dart';
 
 abstract class BuildlessAsyncNotifierListener<
-  NotifierT extends $AsyncNotifier<StateT>,
-  StateT
+  NotifierT extends BuildlessAsyncNotifier<StateT>,
+  StateT extends Object?,
+  ProviderT extends AsyncNotifierProviderImpl<NotifierT, StateT>
 > {
   final String listenerName;
-  // ignore: invalid_use_of_visible_for_testing_member
-  final $AsyncNotifierProvider<NotifierT, StateT>? provider;
+  final ProviderT provider;
   final void Function(
+    WidgetRef ref,
     AsyncValue<StateT>? previous,
     AsyncValue<StateT> next,
-    WidgetRef ref,
-  )?
+  )
   onNewState;
+
   const BuildlessAsyncNotifierListener({
-    this.provider,
-    this.onNewState,
+    required this.provider,
+    required this.onNewState,
     required this.listenerName,
   });
+
   void buildListen(WidgetRef ref) {
     Logger.debug('("$listenerName") listening to provider ("$provider")');
-    if (provider == null || onNewState == null) return;
-    ref.listen(
-      provider!,
-      (AsyncValue<StateT>? previous, AsyncValue<StateT> next) =>
-          onNewState!(previous, next, ref),
-    );
+    ref.listen(provider, (previous, next) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => onNewState(ref, previous, next),
+      );
+    });
   }
 }

@@ -174,7 +174,7 @@ class HomeWidgetUtils {
   static bool? _isHomeWidgetSupported;
   static Future<bool> get isHomeWidgetSupported async {
     if (_isHomeWidgetSupported != null) return _isHomeWidgetSupported!;
-    if (kIsWeb || Platform.isIOS) {
+    if (kIsWeb || Platform.isIOS || Platform.isMacOS) {
       _isHomeWidgetSupported = false;
       return _isHomeWidgetSupported!;
     }
@@ -280,6 +280,7 @@ class HomeWidgetUtils {
   }
 
   Future<bool> hideAllOtps() async {
+    if (!await isHomeWidgetSupported) return false;
     final widgetIds = await _widgetIds;
     final futures = <Future>[];
     for (String widgetId in widgetIds) {

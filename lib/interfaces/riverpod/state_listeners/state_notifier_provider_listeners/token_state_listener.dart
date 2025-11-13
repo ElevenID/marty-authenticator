@@ -24,7 +24,12 @@ import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_
 import '../base_listeners/buildless_async_notifier_listener.dart';
 
 abstract class TokenStateListener
-    extends BuildlessAsyncNotifierListener<TokenNotifier, TokenState> {
+    extends
+        BuildlessAsyncNotifierListener<
+          TokenNotifier,
+          TokenState,
+          TokenNotifierProvider
+        > {
   // TODO: change dynamic to TokenState
   const TokenStateListener({
     required super.provider,

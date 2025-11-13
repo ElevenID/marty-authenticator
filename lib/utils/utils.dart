@@ -326,4 +326,5 @@ Image generateQrCodeImage({required String data}) {
 }
 
 bool get deviceHasFirebaseMessaging =>
-    !kIsWeb && (GmsCheck().isGmsAvailable || Platform.isIOS);
+    !kIsWeb &&
+    (Platform.isAndroid ? GmsCheck().isGmsAvailable : Platform.isIOS);

@@ -142,7 +142,33 @@ class MainViewNavigationBar extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const Expanded(child: SizedBox()),
+                      Expanded(
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: navHeight * 0.1,
+                              bottom: navHeight * 0.2,
+                            ),
+                            child: AppBarItem(
+                              a11y: 'Navigate to token management',
+                              onPressed: () {
+                                // Navigate to the legacy token list view
+                                Navigator.pushNamed(context, '/legacyMainView');
+                              },
+                              icon: FittedBox(
+                                child: Icon(
+                                  Icons.security,
+                                  color: Theme.of(context)
+                                      .navigationBarTheme
+                                      .iconTheme
+                                      ?.resolve({})
+                                      ?.color,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       Expanded(
                         child: Center(
                           child: Padding(

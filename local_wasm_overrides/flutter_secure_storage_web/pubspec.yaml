@@ -1,0 +1,24 @@
+name: flutter_secure_storage_web
+description: WASM-compatible override for flutter_secure_storage_web
+version: 1.2.1
+
+environment:
+  sdk: ">=3.8.0 < 4.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_secure_storage_platform_interface: ^1.1.2
+  shared_preferences: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: FlutterSecureStorageWebPlugin
+        fileName: flutter_secure_storage_web.dart

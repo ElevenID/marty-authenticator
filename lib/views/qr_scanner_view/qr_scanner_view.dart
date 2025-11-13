@@ -18,6 +18,7 @@
   limitations under the License.
 */
 
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -41,29 +42,28 @@ class QRScannerView extends StatefulView {
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
-  Future<PermissionStatus> _requestCameraPermission() => Permission.camera
-      .request()
-      .then(
-        (value) => _cameraPermission = value,
-        onError: (e) {
-          Logger.warning(
-            '.then(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
-          );
-          return _cameraPermission = PermissionStatus.permanentlyDenied;
-        },
-      )
-      .onError((e, stackTrace) {
-        Logger.warning(
-          '.onError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
-        );
-        return _cameraPermission = PermissionStatus.permanentlyDenied;
-      })
-      .catchError((e) {
-        Logger.warning(
-          '.catchError(): Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
-        );
-        return _cameraPermission = PermissionStatus.permanentlyDenied;
-      });
+  Future<PermissionStatus> _requestCameraPermission() async {
+    try {
+      // On macOS, permission handling might be different
+      // The camera package will handle most permission requests automatically
+      if (Platform.isMacOS) {
+        // For macOS, we assume permission is granted if the camera package can initialize
+        // The actual permission will be handled by the camera package itself
+        return PermissionStatus.granted;
+      }
+
+      // For mobile platforms, use permission_handler
+      final status = await Permission.camera.request();
+      _cameraPermission = status;
+      return status;
+    } catch (e) {
+      Logger.warning(
+        'Error while getting camera permission: $e, name: QRScannerView#_requestCameraPermission',
+      );
+      _cameraPermission = PermissionStatus.permanentlyDenied;
+      return PermissionStatus.permanentlyDenied;
+    }
+  }
 
   PermissionStatus? _cameraPermission;
 
