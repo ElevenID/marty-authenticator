@@ -4,8 +4,8 @@ Test script for OID4VC event handler
 Validates that the handler loads and initializes correctly with SSI bindings
 """
 
-import sys
 import os
+import sys
 
 # Add the plugins directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +19,8 @@ print()
 print("Test 1: Import OID4VC Handler")
 print("-" * 60)
 try:
-    from oid4vc_handler import OID4VCEventHandler, SSI_AVAILABLE
+    from oid4vc_handler import SSI_AVAILABLE, OID4VCEventHandler
+
     print("✓ Handler module imported successfully")
     print(f"  SSI Bindings Available: {SSI_AVAILABLE}")
 except Exception as e:
@@ -33,7 +34,8 @@ print("Test 2: Check SSI Python Bindings")
 print("-" * 60)
 if SSI_AVAILABLE:
     try:
-        from ssi_python import MdocIssuer, DidManager, Oid4VciIssuer
+        from ssi_python import DidManager, MdocIssuer, Oid4VciIssuer
+
         print("✓ SSI Python bindings loaded")
         print(f"  - MdocIssuer: {MdocIssuer}")
         print(f"  - DidManager: {DidManager}")
@@ -91,13 +93,7 @@ if SSI_AVAILABLE and handler.did_manager:
     print("-" * 60)
     try:
         # Simulate handler options for DID generation
-        test_options = {
-            "handler_def": {
-                "options": {
-                    "key_type": "p256"
-                }
-            }
-        }
+        test_options = {"handler_def": {"options": {"key_type": "p256"}}}
         result = handler._generate_issuer_did(test_options)
         if result:
             print("✓ DID generation successful")
@@ -123,7 +119,10 @@ for action in test_actions:
     # Note: We're not actually executing, just checking the action exists
     try:
         method_name = f"_{action}"
-        if hasattr(handler, method_name) or action in ["issue_credential", "send_credential_offer"]:
+        if hasattr(handler, method_name) or action in [
+            "issue_credential",
+            "send_credential_offer",
+        ]:
             print(f"✓ Action '{action}' is routed")
         else:
             print(f"⚠ Action '{action}' may not be implemented")
@@ -138,7 +137,7 @@ print()
 
 # Summary
 print("Summary:")
-print(f"  Handler Status: ✓ Operational")
+print("  Handler Status: ✓ Operational")
 print(f"  SSI Bindings: {'✓ Available' if SSI_AVAILABLE else '⚠ Not Available'}")
 print(f"  Actions: {len(handler.actions)} supported")
 print(f"  DID Manager: {'✓ Ready' if handler.did_manager else '✗ Not Available'}")

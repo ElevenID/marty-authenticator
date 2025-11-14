@@ -7,14 +7,14 @@ Uses SSI Python bindings for mDoc and verifiable credential issuance
 import logging
 import secrets
 import uuid
-import json
 from datetime import datetime, timedelta
 
 import requests
 from privacyidea.lib.eventhandler.base import BaseEventHandler
 
 try:
-    from ssi_python import MdocIssuer, DidManager, Oid4VciIssuer
+    from ssi_python import DidManager, MdocIssuer, Oid4VciIssuer
+
     SSI_AVAILABLE = True
 except ImportError:
     MdocIssuer = None
@@ -46,7 +46,7 @@ class OID4VCEventHandler(BaseEventHandler):
         self.did_manager = None
         self.mdoc_issuer = None
         self.oid4vci_issuer = None
-        
+
         # Initialize SSI components if available
         if SSI_AVAILABLE:
             try:
@@ -56,7 +56,9 @@ class OID4VCEventHandler(BaseEventHandler):
                 log.warning("Failed to initialize SSI components: %s", str(e))
                 self.did_manager = None
         else:
-            log.warning("SSI Python bindings not available. Install ssi-python for full functionality.")
+            log.warning(
+                "SSI Python bindings not available. Install ssi-python for full functionality."
+            )
 
     @property
     def allowed_positions(self):
@@ -74,14 +76,16 @@ class OID4VCEventHandler(BaseEventHandler):
             "send_credential_offer",
             "update_credential_status",
         ]
-        
+
         if SSI_AVAILABLE:
-            actions.extend([
-                "issue_mdoc_driver_license",
-                "issue_mdoc_identity",
-                "generate_issuer_did",
-            ])
-        
+            actions.extend(
+                [
+                    "issue_mdoc_driver_license",
+                    "issue_mdoc_identity",
+                    "generate_issuer_did",
+                ]
+            )
+
         return actions
 
     def check_condition(self, options=None):
@@ -124,7 +128,7 @@ class OID4VCEventHandler(BaseEventHandler):
         Execute the handler action.
         """
         options = options or {}
-        
+
         # Map actions to handler methods
         action_map = {
             "issue_credential": self._issue_credential,
@@ -137,7 +141,7 @@ class OID4VCEventHandler(BaseEventHandler):
             "update_credential_status": self._update_credential_status,
             "generate_issuer_did": self._generate_issuer_did,
         }
-        
+
         handler_method = action_map.get(action)
         if not handler_method:
             log.error("Unknown OID4VC action: %s", action)
@@ -232,16 +236,20 @@ class OID4VCEventHandler(BaseEventHandler):
 
         if offer_type == "mdoc" and SSI_AVAILABLE:
             # Use SSI bindings for mDoc offer
-            issuer_url = handler_def.get("options", {}).get("issuer_url", "https://issuer.example.com")
+            issuer_url = handler_def.get("options", {}).get(
+                "issuer_url", "https://issuer.example.com"
+            )
             oid4vci = Oid4VciIssuer(issuer_url)
 
-            doctype = handler_def.get("options", {}).get("credential_type", "org.iso.18013.5.1.mDL")
+            doctype = handler_def.get("options", {}).get(
+                "credential_type", "org.iso.18013.5.1.mDL"
+            )
             pre_auth_code = secrets.token_urlsafe(32)
 
             offer_url = oid4vci.generate_credential_offer(
                 credential_type=doctype,
                 pre_authorized_code=pre_auth_code,
-                user_pin_required=False
+                user_pin_required=False,
             )
 
             log.info("Generated mDoc credential offer: %s", doctype)
@@ -485,11 +493,7 @@ class OID4VCEventHandler(BaseEventHandler):
 
             # Store in handler config (in practice, save to database)
             # This is a simplified version
-            return {
-                "did": did,
-                "key": key,
-                "key_type": key_type
-            }
+            return {"did": did, "key": key, "key_type": key_type}
 
         except Exception as e:
             log.error("Failed to generate issuer DID: %s", str(e))
@@ -535,7 +539,9 @@ class OID4VCEventHandler(BaseEventHandler):
             return False
 
         # Initialize OID4VCI issuer
-        issuer_url = handler_def.get("options", {}).get("issuer_url", "https://issuer.example.com")
+        issuer_url = handler_def.get("options", {}).get(
+            "issuer_url", "https://issuer.example.com"
+        )
         oid4vci = Oid4VciIssuer(issuer_url)
 
         # Extract user information
@@ -562,7 +568,7 @@ class OID4VCEventHandler(BaseEventHandler):
                 doctype=doctype,
                 claims=claims,
                 holder_public_key=holder_public,
-                validity_days=validity_days
+                validity_days=validity_days,
             )
 
             log.info("Issued mDoc credential: %s", doctype)
@@ -572,23 +578,26 @@ class OID4VCEventHandler(BaseEventHandler):
             offer_url = oid4vci.generate_credential_offer(
                 credential_type=doctype,
                 pre_authorized_code=pre_auth_code,
-                user_pin_required=False
+                user_pin_required=False,
             )
 
             # Generate credential response
             response = oid4vci.generate_credential_response(
-                credential_data=mdoc,
-                format="mso_mdoc"
+                credential_data=mdoc, format="mso_mdoc"
             )
 
             log.info("mDoc credential offer created: %s", offer_url[:80])
 
             # Send offer to wallet (via configured delivery method)
-            delivery_method = handler_def.get("options", {}).get("delivery_method", "webhook")
+            delivery_method = handler_def.get("options", {}).get(
+                "delivery_method", "webhook"
+            )
             if delivery_method == "webhook":
                 webhook_url = handler_def.get("options", {}).get("webhook_url")
                 if webhook_url:
-                    self._send_offer_webhook({"offer": offer_url, "response": response}, handler_def)
+                    self._send_offer_webhook(
+                        {"offer": offer_url, "response": response}, handler_def
+                    )
 
             return True
 
@@ -631,8 +640,13 @@ class OID4VCEventHandler(BaseEventHandler):
         claims = {
             namespace: {
                 "issue_date": datetime.utcnow().isoformat(),
-                "expiry_date": (datetime.utcnow() + timedelta(days=int(mdoc_config.get("validity_days", 365)))).isoformat(),
-                "issuing_authority": mdoc_config.get("issuing_authority", "privacyIDEA"),
+                "expiry_date": (
+                    datetime.utcnow()
+                    + timedelta(days=int(mdoc_config.get("validity_days", 365)))
+                ).isoformat(),
+                "issuing_authority": mdoc_config.get(
+                    "issuing_authority", "privacyIDEA"
+                ),
             }
         }
 
@@ -641,11 +655,13 @@ class OID4VCEventHandler(BaseEventHandler):
         claims[namespace].update(user_claims)
 
         # Add authentication info
-        claims[namespace].update({
-            "authenticated_user": user_info.get("user_id", ""),
-            "authentication_time": user_info.get("auth_time", ""),
-            "authentication_method": user_info.get("token_type", ""),
-        })
+        claims[namespace].update(
+            {
+                "authenticated_user": user_info.get("user_id", ""),
+                "authentication_time": user_info.get("auth_time", ""),
+                "authentication_method": user_info.get("token_type", ""),
+            }
+        )
 
         return claims
 

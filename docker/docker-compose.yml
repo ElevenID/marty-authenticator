@@ -7,14 +7,14 @@ services:
     image: marty-firebase-emulator:latest
     container_name: firebase-emulator
     ports:
-      - "4000:4000"   # Emulator Suite UI
-      - "9099:9099"   # Auth emulator
-      - "8081:8081"   # Cloud Firestore emulator
-      - "9000:9000"   # Realtime Database emulator
-      - "5001:5001"   # Cloud Functions emulator
-      - "9199:9199"   # Cloud Storage emulator
-      - "8085:8085"   # Firebase Hosting emulator
-      - "9299:9299"   # Pub/Sub emulator
+      - "4000:4000" # Emulator Suite UI
+      - "9099:9099" # Auth emulator
+      - "8081:8081" # Cloud Firestore emulator
+      - "9000:9000" # Realtime Database emulator
+      - "5001:5001" # Cloud Functions emulator
+      - "9199:9199" # Cloud Storage emulator
+      - "8085:8085" # Firebase Hosting emulator
+      - "9299:9299" # Pub/Sub emulator
     environment:
       - FIREBASE_PROJECT=marty-authenticator-dev
     volumes:

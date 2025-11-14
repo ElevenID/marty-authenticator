@@ -27,18 +27,19 @@ Built Rust Python bindings for SpruceID SSI crate with UV package manager.
 
 ### Test Suite Summary
 
-| Test Category | Status | Details |
-|--------------|--------|---------|
-| DID Manager | ✅ PASS | P-256 & Ed25519 DID generation |
+| Test Category         | Status  | Details                             |
+| --------------------- | ------- | ----------------------------------- |
+| DID Manager           | ✅ PASS | P-256 & Ed25519 DID generation      |
 | Public Key Operations | ✅ PASS | Extraction & thumbprint computation |
-| mDoc Issuance | ✅ PASS | ISO 18013-5 credential creation |
-| MSO Creation | ✅ PASS | Mobile Security Object generation |
-| OID4VCI Protocol | ✅ PASS | Credential offers & responses |
-| End-to-End Flow | ✅ PASS | Complete issuance workflow |
+| mDoc Issuance         | ✅ PASS | ISO 18013-5 credential creation     |
+| MSO Creation          | ✅ PASS | Mobile Security Object generation   |
+| OID4VCI Protocol      | ✅ PASS | Credential offers & responses       |
+| End-to-End Flow       | ✅ PASS | Complete issuance workflow          |
 
 ### Detailed Test Results
 
 #### Test 1: DID Manager
+
 - ✅ Generated P-256 DID: `did:key:zR_Vij0vMR6zVL4CT3In0BM2hj6cOjsWMAVdWrrN3BFc`
 - ✅ Generated Ed25519 DID: `did:key:zc2yOMF3fpjSJWaNAM77ggrfb1NsUtAtcyFSoKtS46U0`
 - ✅ Extracted public key: 126 bytes
@@ -47,6 +48,7 @@ Built Rust Python bindings for SpruceID SSI crate with UV package manager.
 - ✅ Created verification method ID
 
 #### Test 2: mDoc Issuer
+
 - ✅ Created issuer with DID
 - ✅ Generated holder DID
 - ✅ Issued mDoc: 532 bytes (base64)
@@ -54,6 +56,7 @@ Built Rust Python bindings for SpruceID SSI crate with UV package manager.
 - ✅ Computed SHA-256 digest for claims
 
 #### Test 3: OID4VCI Protocol
+
 - ✅ Created OID4VCI issuer
 - ✅ Generated pre-authorized code offer: 354 chars
 - ✅ Generated authorization code offer: 265 chars
@@ -63,6 +66,7 @@ Built Rust Python bindings for SpruceID SSI crate with UV package manager.
 - ✅ Generated issuer metadata: 382 bytes
 
 #### Test 4: End-to-End Flow
+
 - ✅ Created issuer identity
 - ✅ Generated credential offer URL
 - ✅ Prepared holder with DID
@@ -89,17 +93,20 @@ These are benign warnings for future features and don't affect functionality.
 ## Usage
 
 ### Activate Environment
+
 ```bash
 cd docker/rust-bindings
 source .venv/bin/activate
 ```
 
 ### Import Module
+
 ```python
 from ssi_python import MdocIssuer, DidManager, Oid4VciIssuer
 ```
 
 ### Run Tests
+
 ```bash
 python test_bindings.py
 ```

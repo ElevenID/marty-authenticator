@@ -22,7 +22,7 @@ plugins/
 
 2. **Access the code server** for plugin development (if enabled):
    - URL: http://localhost:8443
-   - Password: `developer`
+   - Password: `developer` # pragma: allowlist secret
 
 3. **Develop plugins** in the mounted directories:
 

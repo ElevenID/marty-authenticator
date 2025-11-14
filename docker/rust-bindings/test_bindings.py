@@ -7,7 +7,7 @@ Tests mDoc issuance, DID management, and OID4VCI functionality
 import sys
 
 try:
-    from ssi_python import MdocIssuer, DidManager, Oid4VciIssuer
+    from ssi_python import DidManager, MdocIssuer, Oid4VciIssuer
 except ImportError:
     print("ERROR: ssi_python module not found!")
     print("Please build and install the module first:")
@@ -71,7 +71,7 @@ claims = {
         "expiry_date": "2030-11-12",
         "document_number": "DL123456789",
         "issuing_country": "US",
-        "issuing_authority": "State DMV"
+        "issuing_authority": "State DMV",
     }
 }
 
@@ -85,15 +85,13 @@ mdoc = issuer.issue_mdoc(
     doctype="org.iso.18013.5.1.mDL",
     claims=claims,
     holder_public_key=holder_public,
-    validity_days=1825  # 5 years
+    validity_days=1825,  # 5 years
 )
 print(f"✓ Issued mDoc: {len(mdoc)} bytes (base64)")
 
 # Create MSO
 mso = issuer.create_mso(
-    doctype="org.iso.18013.5.1.mDL",
-    claims=claims,
-    validity_days=1825
+    doctype="org.iso.18013.5.1.mDL", claims=claims, validity_days=1825
 )
 print(f"✓ Created MSO: {len(mso)} bytes (base64)")
 
@@ -114,35 +112,31 @@ print(f"✓ Created OID4VCI issuer: {oid4vci.get_issuer_url()}")
 offer_preauth = oid4vci.generate_credential_offer(
     credential_type="org.iso.18013.5.1.mDL",
     pre_authorized_code="test-code-12345",
-    user_pin_required=False
+    user_pin_required=False,
 )
 print(f"✓ Generated pre-auth offer: {len(offer_preauth)} chars")
 print(f"  {offer_preauth[:80]}...")
 
 # Generate credential offer with authorization code
 offer_authcode = oid4vci.generate_credential_offer_with_auth_code(
-    credential_type="org.iso.18013.5.1.mDL",
-    issuer_state="state-67890"
+    credential_type="org.iso.18013.5.1.mDL", issuer_state="state-67890"
 )
 print(f"✓ Generated auth code offer: {len(offer_authcode)} chars")
 
 # Generate credential response
-response = oid4vci.generate_credential_response(
-    credential_data=mdoc,
-    format="mso_mdoc"
-)
+response = oid4vci.generate_credential_response(credential_data=mdoc, format="mso_mdoc")
 print(f"✓ Generated credential response: {len(response)} bytes")
 
 # Generate deferred response
 deferred = oid4vci.generate_deferred_credential_response(
-    acceptance_token="deferred-token-xyz"
+    acceptance_token="deferred-token-xyz"  # pragma: allowlist secret
 )
 print(f"✓ Generated deferred response: {len(deferred)} bytes")
 
 # Validate token (placeholder)
 is_valid = oid4vci.validate_access_token(
     access_token="bearer-token-abc",
-    expected_scope="credential_issuance"
+    expected_scope="credential_issuance",  # pragma: allowlist secret
 )
 print(f"✓ Token validation: {is_valid}")
 
@@ -171,9 +165,9 @@ pre_auth_code = "secure-code-xyz123"
 offer = oid4vci.generate_credential_offer(
     credential_type="org.iso.18013.5.1.mDL",
     pre_authorized_code=pre_auth_code,
-    user_pin_required=False
+    user_pin_required=False,
 )
-print(f"   Offer URL generated")
+print("   Offer URL generated")
 
 # 3. Prepare holder
 print("3. Preparing holder...")
@@ -187,23 +181,20 @@ claims = {
     "org.iso.18013.5.1": {
         "family_name": "Smith",
         "given_name": "Alice",
-        "birth_date": "1985-03-15"
+        "birth_date": "1985-03-15",
     }
 }
 mdoc = issuer.issue_mdoc(
     doctype="org.iso.18013.5.1.mDL",
     claims=claims,
     holder_public_key=holder_public,
-    validity_days=365
+    validity_days=365,
 )
 print(f"   mDoc issued: {len(mdoc)} bytes")
 
 # 5. Generate response
 print("5. Generating credential response...")
-response = oid4vci.generate_credential_response(
-    credential_data=mdoc,
-    format="mso_mdoc"
-)
+response = oid4vci.generate_credential_response(credential_data=mdoc, format="mso_mdoc")
 print(f"   Response ready: {len(response)} bytes")
 
 print()
@@ -212,11 +203,11 @@ print("✓ All tests passed successfully!")
 print("=" * 60)
 print()
 print("Summary:")
-print(f"  - DID generation (P-256, Ed25519): ✓")
-print(f"  - Public key extraction: ✓")
-print(f"  - mDoc issuance: ✓")
-print(f"  - MSO creation: ✓")
-print(f"  - OID4VCI offers: ✓")
-print(f"  - End-to-end flow: ✓")
+print("  - DID generation (P-256, Ed25519): ✓")
+print("  - Public key extraction: ✓")
+print("  - mDoc issuance: ✓")
+print("  - MSO creation: ✓")
+print("  - OID4VCI offers: ✓")
+print("  - End-to-end flow: ✓")
 print()
 print("The SSI Python bindings are working correctly!")

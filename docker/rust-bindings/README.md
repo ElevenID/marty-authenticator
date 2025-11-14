@@ -179,6 +179,7 @@ python test_bindings.py
 ```
 
 This will demonstrate:
+
 1. Generating DIDs (P-256 and Ed25519)
 2. Creating an mDoc issuer
 3. Generating OID4VCI credential offers

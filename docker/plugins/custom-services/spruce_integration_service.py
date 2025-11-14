@@ -98,7 +98,7 @@ class SpruceIdIntegrationService:
                 # Fallback implementation
                 return {
                     "did": f"did:{method}:placeholder-{hash(method) % 10000}",
-                    "private_key": "placeholder-private-key",
+                    "private_key": "placeholder-private-key",  # pragma: allowlist secret
                     "status": "created (placeholder)",
                 }
 

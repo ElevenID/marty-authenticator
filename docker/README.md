@@ -13,12 +13,12 @@ This directory contains a complete Docker-based development environment for priv
 2. **Access the services:**
    - **privacyIDEA Admin Console**: http://localhost:8080
      - Username: `testadmin`
-     - Password: `admin123`
+     - Password: `admin123` # pragma: allowlist secret
    - **Plugin Development Environment**: http://localhost:8443
-     - Password: `development`
+     - Password: `development` # pragma: allowlist secret
    - **MySQL Database**: `localhost:3306`
      - Username: `privacyidea`
-     - Password: `privacyidea123`
+     - Password: `privacyidea123` # pragma: allowlist secret
 
 ## 🔧 Plugin Development
 

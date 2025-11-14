@@ -27,7 +27,7 @@ def __init__(self):
     self.did_manager = None
     self.mdoc_issuer = None
     self.oid4vci_issuer = None
-    
+
     if SSI_AVAILABLE:
         self.did_manager = DidManager()
 ```
@@ -63,23 +63,29 @@ def do(self, action, options=None):
 ### 5. **New mDoc Issuance Methods**
 
 #### `_generate_issuer_did(options)`
+
 Generates a new DID for the credential issuer using SSI bindings.
 
 **Supports:**
+
 - P-256 (default)
 - Ed25519 key types
 
 #### `_initialize_mdoc_issuer(handler_def)`
+
 Initializes an `MdocIssuer` instance with DID and keys.
 
 **Features:**
+
 - Auto-generates DID if not configured
 - Returns ready-to-use issuer instance
 
 #### `_issue_mdoc_credential(options)`
+
 Issues ISO 18013-5 compliant mDoc credentials.
 
 **Workflow:**
+
 1. Initialize mDoc issuer with DID
 2. Initialize OID4VCI issuer
 3. Extract user information
@@ -91,19 +97,23 @@ Issues ISO 18013-5 compliant mDoc credentials.
 9. Deliver offer to wallet
 
 #### `_issue_mdoc_driver_license(options)`
+
 Convenience method for issuing mobile driver's licenses (mDL).
 
 **Document Type:** `org.iso.18013.5.1.mDL`
 
 #### `_issue_mdoc_identity(options)`
+
 Convenience method for issuing identity credentials.
 
 **Document Type:** `org.iso.18013.5.1.identity`
 
 #### `_build_mdoc_claims(user_info, mdoc_config)`
+
 Constructs mDoc claims from user info and configuration.
 
 **Claims Include:**
+
 - Issue date
 - Expiry date
 - Issuing authority
@@ -114,10 +124,12 @@ Constructs mDoc claims from user info and configuration.
 ### 6. **Enhanced Credential Offer Generation**
 
 Updated `_send_credential_offer()` to support both:
+
 - Standard verifiable credentials
 - mDoc credentials using SSI bindings
 
 **Configuration:**
+
 ```python
 {
     "offer_type": "mdoc",  # or "standard"
@@ -197,6 +209,7 @@ The handler now fully implements:
 ## Integration with SSI Python Bindings
 
 ### DID Management
+
 ```python
 did_manager = DidManager()
 issuer_did, issuer_key = did_manager.generate_did_key()
@@ -204,6 +217,7 @@ holder_public = did_manager.get_public_key(holder_key)
 ```
 
 ### mDoc Issuance
+
 ```python
 mdoc_issuer = MdocIssuer(issuer_key, issuer_did)
 mdoc = mdoc_issuer.issue_mdoc(
@@ -215,6 +229,7 @@ mdoc = mdoc_issuer.issue_mdoc(
 ```
 
 ### OID4VCI Protocol
+
 ```python
 oid4vci = Oid4VciIssuer(issuer_url)
 offer_url = oid4vci.generate_credential_offer(
@@ -277,6 +292,7 @@ response = oid4vci.generate_credential_response(
 ## Testing
 
 Install the bindings:
+
 ```bash
 cd docker/rust-bindings
 ./build-uv.sh
@@ -285,6 +301,7 @@ python test_bindings.py
 ```
 
 Test the handler:
+
 ```bash
 # In PrivacyIDEA environment
 python -c "from oid4vc_handler import OID4VCEventHandler; h = OID4VCEventHandler(); print('✓ Handler loaded')"
@@ -309,6 +326,7 @@ python -c "from oid4vc_handler import OID4VCEventHandler; h = OID4VCEventHandler
 ## Documentation
 
 For more details see:
+
 - [SSI Python Bindings README](../../rust-bindings/README.md)
 - [OID4VCI Specification](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html)
 - [ISO 18013-5 mDL](https://www.iso.org/standard/69084.html)

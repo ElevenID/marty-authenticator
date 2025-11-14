@@ -37,11 +37,11 @@ This will start:
 **privacyIDEA Admin Interface**: http://localhost:8080/
 
 - Username: `admin`
-- Password: `admin123`
+- Password: `admin123` # pragma: allowlist secret
 
 **Plugin Development Environment**: http://localhost:8443/
 
-- Password: `developer`
+- Password: `developer` # pragma: allowlist secret
 - Web-based VS Code for plugin development
 
 ### 3. Develop Custom Plugins
@@ -68,12 +68,12 @@ The setup includes mounted directories for plugin development:
 
 1. **Access the privacyIDEA Admin Interface**:
    - Navigate to http://localhost:8080/
-   - Login with `admin` / `admin123`
+   - Login with `admin` / `admin123` # pragma: allowlist secret
 
 2. **Create a Test User**:
    - Go to Users → Create User
    - Username: `testuser`
-   - Password: `test123`
+   - Password: `test123` # pragma: allowlist secret
 
 3. **Enroll a TOTP Token**:
    - Go to Tokens → Enroll Token
@@ -166,7 +166,7 @@ If you need direct database access:
 - Host: `localhost:3306`
 - Database: `privacyidea`
 - Username: `pi_user`
-- Password: `pi_password`
+- Password: `pi_password` # pragma: allowlist secret
 
 ## API Testing
 

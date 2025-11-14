@@ -89,14 +89,20 @@ class FirebaseUtils {
 
   /// Configure Firebase emulators based on environment variables
   void _configureFirebaseEmulators() {
-    const useEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: false);
-    
+    const useEmulator = bool.fromEnvironment(
+      'USE_FIREBASE_EMULATOR',
+      defaultValue: false,
+    );
+
     if (useEmulator) {
-      const authEmulatorHost = String.fromEnvironment('FIREBASE_AUTH_EMULATOR_HOST', defaultValue: 'localhost:9099');
-      
+      const authEmulatorHost = String.fromEnvironment(
+        'FIREBASE_AUTH_EMULATOR_HOST',
+        defaultValue: 'localhost:9099',
+      );
+
       Logger.info('Firebase emulator configuration enabled');
       Logger.info('Auth emulator: $authEmulatorHost');
-      
+
       // Note: Firebase Auth emulator configuration would go here
       // However, FirebaseAuth emulator configuration requires firebase_auth package
       // which is not included in this app since it only uses FCM.
@@ -124,10 +130,10 @@ class FirebaseUtils {
         options: options,
       );
       await app.setAutomaticDataCollectionEnabled(false);
-      
+
       // Configure Firebase emulators if environment variables are set
       _configureFirebaseEmulators();
-      
+
       initializedFirebase = true;
       assert(
         app.isAutomaticDataCollectionEnabled == false,

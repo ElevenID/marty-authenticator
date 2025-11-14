@@ -5,6 +5,7 @@ This Docker Compose setup creates a complete development environment for the Mar
 ## Services
 
 ### 1. Firebase Emulator (`firebase`)
+
 - **Purpose**: Mock Firebase services for local development
 - **Ports**:
   - `4000`: Emulator Suite UI (http://localhost:4000)
@@ -17,6 +18,7 @@ This Docker Compose setup creates a complete development environment for the Mar
   - `9299`: Pub/Sub emulator
 
 ### 2. PrivacyIDEA Server (`privacyidea`)
+
 - **Purpose**: Token authentication server with SSI Python bindings
 - **Port**: `8080`
 - **Admin Login**: `admin` / `admin`
@@ -26,11 +28,13 @@ This Docker Compose setup creates a complete development environment for the Mar
   - Custom event handlers for credential issuance
 
 ### 3. MySQL Database (`mysql`)
+
 - **Purpose**: Backend database for PrivacyIDEA
 - **Port**: `3306`
 - **Credentials**: `pi_user` / `pi_password`
 
 ### 4. Authenticator Web App (`authenticator-web`)
+
 - **Purpose**: Flutter web app for the authenticator
 - **Port**: `8888` (http://localhost:8888)
 - **Configuration**:
@@ -39,6 +43,7 @@ This Docker Compose setup creates a complete development environment for the Mar
   - Network-accessible for testing credential flows
 
 ### 5. Plugin Development Server (`plugin-dev`)
+
 - **Purpose**: VS Code server for plugin development
 - **Port**: `8443` (http://localhost:8443)
 - **Password**: `developer`
@@ -95,9 +100,9 @@ docker compose exec privacyidea bash -c "
 ### 3. Access Services
 
 - **Authenticator App**: http://localhost:8888
-- **PrivacyIDEA Admin**: http://localhost:8080 (`admin` / `admin`)
+- **PrivacyIDEA Admin**: http://localhost:8080 (`admin` / `admin`) # pragma: allowlist secret
 - **Firebase Emulator UI**: http://localhost:4000
-- **Plugin Dev Server**: http://localhost:8443 (password: `developer`)
+- **Plugin Dev Server**: http://localhost:8443 (password: `developer`) # pragma: allowlist secret
 
 ## Development Workflow
 
@@ -215,6 +220,7 @@ The app receives these variables at build time:
 - `PRIVACYIDEA_URL=http://privacyidea:8080`
 
 Access them in Dart with:
+
 ```dart
 const bool useEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR');
 const String privacyideaUrl = String.fromEnvironment('PRIVACYIDEA_URL');
