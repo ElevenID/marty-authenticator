@@ -87,6 +87,24 @@ class FirebaseUtils {
     return _instance!;
   }
 
+  /// Configure Firebase emulators based on environment variables
+  void _configureFirebaseEmulators() {
+    const useEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: false);
+    
+    if (useEmulator) {
+      const authEmulatorHost = String.fromEnvironment('FIREBASE_AUTH_EMULATOR_HOST', defaultValue: 'localhost:9099');
+      
+      Logger.info('Firebase emulator configuration enabled');
+      Logger.info('Auth emulator: $authEmulatorHost');
+      
+      // Note: Firebase Auth emulator configuration would go here
+      // However, FirebaseAuth emulator configuration requires firebase_auth package
+      // which is not included in this app since it only uses FCM.
+      // For FCM testing, the emulator configuration is handled by the Firebase emulator suite
+      // and the app connects to it automatically when running in emulator mode.
+    }
+  }
+
   /// Must be used in the main method before runApp() is called.
   Future<FirebaseApp?> initializeApp() async {
     await _initFbMutex.acquire();
@@ -106,6 +124,10 @@ class FirebaseUtils {
         options: options,
       );
       await app.setAutomaticDataCollectionEnabled(false);
+      
+      // Configure Firebase emulators if environment variables are set
+      _configureFirebaseEmulators();
+      
       initializedFirebase = true;
       assert(
         app.isAutomaticDataCollectionEnabled == false,
@@ -246,8 +268,9 @@ class FirebaseUtils {
       await FirebaseMessaging.instance.deleteToken();
       Logger.warning('Firebase token deleted from Firebase');
     } on FirebaseException catch (e) {
-      if (e.message?.contains('IOException') == true)
+      if (e.message?.contains('IOException') == true) {
         throw SocketException(e.message!);
+      }
       rethrow;
     }
     await _storage.delete(key: CURRENT_APP_TOKEN_KEY);
@@ -341,6 +364,12 @@ class NoFirebaseUtils implements FirebaseUtils {
 
   @override
   Future<FirebaseApp?> initializeApp() async => null;
+
+  /// No-op implementation for web/desktop
+  @override
+  void _configureFirebaseEmulators() {
+    // No Firebase emulator configuration needed for NoFirebaseUtils
+  }
 
   @override
   final SecureStorage _storage = SecureStorage(

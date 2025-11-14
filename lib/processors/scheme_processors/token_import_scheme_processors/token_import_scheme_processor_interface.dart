@@ -27,6 +27,7 @@ import '../../../model/tokens/token.dart';
 import '../../mixins/token_import_processor.dart';
 import '../scheme_processor_interface.dart';
 import 'google_authenticator_qr_processor.dart';
+import 'oid4vc_scheme_processor.dart';
 import 'otp_auth_processor.dart';
 import 'pia_scheme_processor.dart';
 
@@ -41,12 +42,14 @@ abstract class TokenImportSchemeProcessor
     ...const OtpAuthProcessor().supportedSchemes,
     ...const GoogleAuthenticatorQrProcessor().supportedSchemes,
     ...const PiaSchemeProcessor().supportedSchemes,
+    ...const OID4VCSchemeProcessor().supportedSchemes,
   };
 
   static const Set<TokenImportSchemeProcessor> implementations = {
     OtpAuthProcessor(),
     GoogleAuthenticatorQrProcessor(),
     PiaSchemeProcessor(),
+    OID4VCSchemeProcessor(),
   };
 
   @override

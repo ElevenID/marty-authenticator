@@ -49,6 +49,10 @@
                 <data android:scheme="otpauth" />
                 <data android:scheme="otpauth-migration" />
                 <data android:scheme="pia" />
+                <!-- OID4VC Deep Links -->
+                <data android:scheme="openid-credential-offer" />
+                <data android:scheme="openid4vp" />
+                <data android:scheme="openid-credential" />
             </intent-filter>
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user

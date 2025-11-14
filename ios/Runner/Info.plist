@@ -39,6 +39,9 @@
 				<string>otpauth</string>
 				<string>otpauth-migration</string>
 				<string>pia</string>
+				<string>openid-credential-offer</string>
+				<string>openid4vp</string>
+				<string>openid-credential</string>
 			</array>
 		</dict>
 	</array>

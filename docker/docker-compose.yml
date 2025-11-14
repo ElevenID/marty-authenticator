@@ -1,4 +1,26 @@
 services:
+  # Firebase Emulator Suite for local development
+  firebase:
+    build:
+      context: .
+      dockerfile: Dockerfile.firebase
+    image: marty-firebase-emulator:latest
+    container_name: firebase-emulator
+    ports:
+      - "4000:4000"   # Emulator Suite UI
+      - "9099:9099"   # Auth emulator
+      - "8081:8081"   # Cloud Firestore emulator
+      - "9000:9000"   # Realtime Database emulator
+      - "5001:5001"   # Cloud Functions emulator
+      - "9199:9199"   # Cloud Storage emulator
+      - "8085:8085"   # Firebase Hosting emulator
+      - "9299:9299"   # Pub/Sub emulator
+    environment:
+      - FIREBASE_PROJECT=marty-authenticator-dev
+    volumes:
+      - ./firebase-emulator:/firebase
+    restart: unless-stopped
+
   mysql:
     image: mysql:8.0
     container_name: privacyidea-mysql
@@ -14,14 +36,17 @@ services:
       - "3306:3306"
 
   privacyidea:
-    image: khalibre/privacyidea:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.privacyidea
+    image: privacyidea-ssi:latest
     container_name: privacyidea-server
     depends_on:
       - mysql
     ports:
       - "8080:8080"
     environment:
-      - PI_SKIP_BOOTSTRAP=false
+      - PI_SKIP_BOOTSTRAP=true
       - PI_DB_VENDOR=mysql
       - PI_DB_HOST=mysql
       - PI_DB_PORT=3306
@@ -35,7 +60,8 @@ services:
       - PI_BIND_PORT=8080
       - PI_SECRET_KEY=changeme-secret-key-for-demo
       - PI_PEPPER=changeme-pepper-for-demo
-      - PI_ADMIN_PASSWORD=admin123
+      - PI_ADMIN_USER=admin
+      - PI_ADMIN_PASSWORD=admin
       # Load custom token modules - use PRIVACYIDEA prefix for from_prefixed_env()
       - PRIVACYIDEA_PI_TOKEN_MODULES=privacyidea.lib.tokens.custom.demotoken
     volumes:
@@ -56,6 +82,27 @@ services:
       timeout: 10s
       retries: 3
       start_period: 120s
+
+  # Flutter Authenticator App (Web)
+  authenticator-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.flutter.dev
+    image: marty-authenticator-web:latest
+    container_name: authenticator-web
+    depends_on:
+      - firebase
+      - privacyidea
+    ports:
+      - "8888:80"
+    environment:
+      - FIREBASE_USE_EMULATOR=true
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase:9099
+      - FIRESTORE_EMULATOR_HOST=firebase:8081
+      - FIREBASE_DATABASE_EMULATOR_HOST=firebase:9000
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase:9199
+      - PRIVACYIDEA_URL=http://privacyidea:8080
+    restart: unless-stopped
 
   # Development convenience - code server for plugin development
   plugin-dev:

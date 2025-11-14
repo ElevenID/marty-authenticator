@@ -51,7 +51,7 @@ class SettingsGroupPushTokenDialog extends ConsumerWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (deviceHasFirebaseMessaging && needsFirebaseMessaging)
+          if (deviceHasFirebaseMessaging)
             ListTile(
               title: Text(
                 AppLocalizations.of(context)!.synchronizePushTokens,

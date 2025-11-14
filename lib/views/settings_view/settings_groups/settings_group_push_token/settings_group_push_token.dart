@@ -23,6 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../../../../model/tokens/push_token.dart';
 import '../../../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
+import '../../../../utils/utils.dart';
 import '../../settings_view_widgets/settings_group.dart';
 import 'dialogs/settings_group_push_token_dialog.dart';
 
@@ -41,7 +42,7 @@ class SettingsGroupPushToken extends ConsumerWidget {
         .toList();
     return SettingsGroup(
       title: AppLocalizations.of(context)!.pushToken,
-      isActive: enrolledPushTokenList.isNotEmpty,
+      isActive: deviceHasFirebaseMessaging,
       onPressed: () => showDialog(
         useRootNavigator: false,
         context: context,
