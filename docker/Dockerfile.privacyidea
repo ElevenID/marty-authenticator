@@ -39,7 +39,11 @@ RUN python3 -c "import ssi_python; print('✓ SSI Python bindings installed succ
     print('  - DidManager available'); \
     print('  - Oid4VciIssuer available')"
 
+# Copy custom entrypoint script
+COPY --chown=nonroot:nonroot --chmod=755 entrypoint.sh /opt/privacyidea/entrypoint.sh
+
 # Return to original working directory
 WORKDIR /opt/privacyidea
 
-# The rest of the configuration comes from the base image
+# Use custom entrypoint that handles database initialization
+ENTRYPOINT ["/opt/privacyidea/entrypoint.sh"]

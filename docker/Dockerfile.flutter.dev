@@ -35,7 +35,7 @@ COPY . .
 RUN mkdir -p lib/firebase_options
 
 # Build for web with development configuration
-RUN flutter build web --target=lib/mains/main_netknights.dart \
+RUN flutter build web --target=lib/main_document.dart \
     --dart-define=USE_FIREBASE_EMULATOR=true \
     --dart-define=FIREBASE_AUTH_EMULATOR_HOST=firebase:9099 \
     --dart-define=FIRESTORE_EMULATOR_HOST=firebase:8081 \

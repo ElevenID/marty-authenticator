@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../interfaces/spruce_interfaces.dart';
 import '../utils/spruce_channels.dart';
 
 /// Exception thrown when SpruceID operations fail
@@ -16,7 +17,7 @@ class SpruceIdException implements Exception {
 }
 
 /// Service for managing SpruceID platform channels with separated technologies
-class SpruceIdPlatformService {
+class SpruceIdPlatformService implements ISpruceIdPlatformService {
   static final _instance = SpruceIdPlatformService._internal();
   factory SpruceIdPlatformService() => _instance;
   SpruceIdPlatformService._internal();
@@ -31,9 +32,11 @@ class SpruceIdPlatformService {
   );
 
   bool _initialized = false;
+  
+  @override
   bool get isInitialized => _initialized;
 
-  /// Initialize W3C DID-based system (only when required)
+  @override
   Future<void> initializeW3C() async {
     try {
       await _w3cChannel.invokeMethod(SpruceIdW3CMethods.initialize);
@@ -51,7 +54,7 @@ class SpruceIdPlatformService {
   // W3C VC Methods (DID-based - use sparingly)
   // ========================
 
-  /// Create a new DID (only for W3C compliance)
+  @override
   Future<Map<String, dynamic>> createDid({String method = 'key'}) async {
     if (!_initialized) await initializeW3C();
 
@@ -70,7 +73,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Resolve a DID document
+  @override
   Future<Map<String, dynamic>> resolveDid(String did) async {
     try {
       final result = await _w3cChannel.invokeMethod(
@@ -87,7 +90,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Sign a W3C Verifiable Credential
+  @override
   Future<Map<String, dynamic>> signVerifiableCredential(
     Map<String, dynamic> credential, {
     String? keyId,
@@ -107,7 +110,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Verify a W3C Verifiable Credential
+  @override
   Future<Map<String, dynamic>> verifyVerifiableCredential(
     Map<String, dynamic> credential,
   ) async {
@@ -130,7 +133,7 @@ class SpruceIdPlatformService {
   // PKI/X.509 Methods (Recommended for enterprise)
   // ========================
 
-  /// Generate an RSA key pair for X.509 operations
+  @override
   Future<Map<String, dynamic>> generateKeyPair({
     String keyType = 'RSA',
     int keySize = 2048,
@@ -150,7 +153,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Create a Certificate Signing Request
+  @override
   Future<Map<String, dynamic>> createCSR(
     String subject, {
     String? keyId,
@@ -170,7 +173,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Sign a document with X.509 certificate
+  @override
   Future<Map<String, dynamic>> signWithCertificate(
     Map<String, dynamic> document,
     String certificateId,
@@ -190,7 +193,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Verify X.509 certificate chain
+  @override
   Future<Map<String, dynamic>> verifyCertificateChain(
     List<String> certificateChain,
   ) async {
@@ -213,7 +216,7 @@ class SpruceIdPlatformService {
   // JWT Methods (URL issuer-based)
   // ========================
 
-  /// Create a JWT with URL-based issuer (no DIDs)
+  @override
   Future<Map<String, dynamic>> createJWT(
     String issuer,
     Map<String, dynamic> claims,
@@ -233,7 +236,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Verify a JWT with URL issuer
+  @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
     try {
       final result = await _jwtChannel.invokeMethod(
@@ -250,7 +253,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Create an SD-JWT with selective disclosure
+  @override
   Future<Map<String, dynamic>> createSdJwt(
     String issuer,
     Map<String, dynamic> claims,
@@ -273,7 +276,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Verify an SD-JWT
+  @override
   Future<Map<String, dynamic>> verifySdJwt(
     String sdJwt,
     List<String> requiredClaims,
@@ -297,7 +300,7 @@ class SpruceIdPlatformService {
   // mDoc Methods (X.509-based mobile documents)
   // ========================
 
-  /// Initialize mobile driver's license with X.509
+  @override
   Future<Map<String, dynamic>> initializeMdl(
     Map<String, dynamic> mdlData,
   ) async {
@@ -316,7 +319,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Present for age verification (21+)
+  @override
   Future<Map<String, dynamic>> presentForAgeVerification(int minimumAge) async {
     try {
       final result = await _mdocChannel.invokeMethod(
@@ -333,7 +336,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Create mDoc response with selective disclosure
+  @override
   Future<Map<String, dynamic>> createMdocResponse(
     List<String> requestedAttributes,
     List<String> hiddenAttributes,
@@ -358,7 +361,7 @@ class SpruceIdPlatformService {
   // Wallet Methods (Technology agnostic)
   // ========================
 
-  /// Store a credential (any format)
+  @override
   Future<void> storeCredential(Map<String, dynamic> credential) async {
     try {
       await _walletChannel.invokeMethod(SpruceIdWalletMethods.storeCredential, {
@@ -373,7 +376,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Get all stored credentials
+  @override
   Future<List<Map<String, dynamic>>> getStoredCredentials() async {
     try {
       final result = await _walletChannel.invokeMethod(
@@ -389,7 +392,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Get credentials by type
+  @override
   Future<List<Map<String, dynamic>>> getCredentialsByType(String type) async {
     try {
       final result = await _walletChannel.invokeMethod(
@@ -406,7 +409,7 @@ class SpruceIdPlatformService {
     }
   }
 
-  /// Delete a credential
+  @override
   Future<void> deleteCredential(String id) async {
     try {
       await _walletChannel.invokeMethod(
@@ -424,7 +427,7 @@ class SpruceIdPlatformService {
 }
 
 /// Provider for SpruceID platform service
-final spruceIdPlatformServiceProvider = Provider<SpruceIdPlatformService>((
+final spruceIdPlatformServiceProvider = Provider<ISpruceIdPlatformService>((
   ref,
 ) {
   return SpruceIdPlatformService();

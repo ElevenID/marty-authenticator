@@ -29,8 +29,8 @@ RUN flutter pub get
 # Copy source code
 COPY . .
 
-# Build for web (using the NetKnights main file)
-RUN flutter build web --target=lib/mains/main_netknights.dart \
+# Build for web (using the new production main file)
+RUN flutter build web --target=lib/main_document.dart \
     --dart-define=FLUTTER_WEB_USE_SKIA=true \
     --release
 

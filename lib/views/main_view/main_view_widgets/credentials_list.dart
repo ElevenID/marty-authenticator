@@ -23,143 +23,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card_widgets/verifiable_credential_card.dart';
 import 'card_widgets/mdoc_credential_card.dart';
+import 'card_widgets/grouped_credential_stack.dart';
+import 'placeholders/credential_placeholders.dart';
+import 'add_credential/add_credential_handler.dart';
 import '../../credential_detail_view.dart';
-
-/// Provider for managing the list of credentials
-final credentialsProvider =
-    StateNotifierProvider<CredentialsNotifier, CredentialsState>((ref) {
-      return CredentialsNotifier();
-    });
-
-/// State class for credentials
-class CredentialsState {
-  final List<VerifiableCredential> verifiableCredentials;
-  final List<MDocCredential> mDocCredentials;
-  final bool isLoading;
-  final String? error;
-
-  CredentialsState({
-    this.verifiableCredentials = const [],
-    this.mDocCredentials = const [],
-    this.isLoading = false,
-    this.error,
-  });
-
-  CredentialsState copyWith({
-    List<VerifiableCredential>? verifiableCredentials,
-    List<MDocCredential>? mDocCredentials,
-    bool? isLoading,
-    String? error,
-  }) {
-    return CredentialsState(
-      verifiableCredentials:
-          verifiableCredentials ?? this.verifiableCredentials,
-      mDocCredentials: mDocCredentials ?? this.mDocCredentials,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-    );
-  }
-
-  bool get hasCredentials =>
-      verifiableCredentials.isNotEmpty || mDocCredentials.isNotEmpty;
-  int get totalCredentials =>
-      verifiableCredentials.length + mDocCredentials.length;
-}
-
-/// Notifier for managing credentials state
-class CredentialsNotifier extends StateNotifier<CredentialsState> {
-  CredentialsNotifier() : super(CredentialsState()) {
-    _loadCredentials();
-  }
-
-  Future<void> _loadCredentials() async {
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      // TODO: Load real credentials from SpruceID wallet
-      // For now, add some sample credentials for demonstration
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final sampleVC = VerifiableCredential(
-        id: 'urn:uuid:sample-degree-1',
-        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-        issuer: {'id': 'did:web:university.edu', 'name': 'Example University'},
-        credentialSubject: {
-          'id': 'did:key:holder123',
-          'name': 'John Smith',
-          'degree': 'Bachelor of Computer Science',
-        },
-        issuanceDate: '2023-05-15T10:30:00Z',
-        expirationDate: '2028-05-15T10:30:00Z',
-        proof: {
-          'type': 'Ed25519Signature2018',
-          'verificationMethod': 'did:web:university.edu#key-1',
-        },
-      );
-
-      final sampleMDoc = MDocCredential(
-        docType: 'org.iso.18013.5.1.mDL',
-        issuerSigned: {
-          'nameSpaces': {
-            'org.iso.18013.5.1': [
-              {'elementIdentifier': 'given_name', 'elementValue': 'John'},
-              {'elementIdentifier': 'family_name', 'elementValue': 'Smith'},
-              {'elementIdentifier': 'birth_date', 'elementValue': '1990-01-15'},
-              {
-                'elementIdentifier': 'document_number',
-                'elementValue': 'DL123456789',
-              },
-              {
-                'elementIdentifier': 'issuing_authority',
-                'elementValue': 'State DMV',
-              },
-            ],
-          },
-        },
-        deviceSigned: {},
-        issueDate: DateTime(2023, 6, 1),
-        expiryDate: DateTime(2028, 6, 1),
-      );
-
-      state = state.copyWith(
-        verifiableCredentials: [sampleVC],
-        mDocCredentials: [sampleMDoc],
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Failed to load credentials: $e',
-      );
-    }
-  }
-
-  Future<void> refreshCredentials() async {
-    await _loadCredentials();
-  }
-
-  Future<void> addVerifiableCredential(VerifiableCredential credential) async {
-    final currentVCs = List<VerifiableCredential>.from(
-      state.verifiableCredentials,
-    );
-    currentVCs.add(credential);
-    state = state.copyWith(verifiableCredentials: currentVCs);
-  }
-
-  Future<void> addMDocCredential(MDocCredential credential) async {
-    final currentMDocs = List<MDocCredential>.from(state.mDocCredentials);
-    currentMDocs.add(credential);
-    state = state.copyWith(mDocCredentials: currentMDocs);
-  }
-
-  Future<void> removeVerifiableCredential(String credentialId) async {
-    final currentVCs = List<VerifiableCredential>.from(
-      state.verifiableCredentials,
-    );
-    currentVCs.removeWhere((vc) => vc.id == credentialId);
-    state = state.copyWith(verifiableCredentials: currentVCs);
-  }
-}
+import '../../../utils/riverpod/providers/credentials_provider.dart';
 
 /// Widget that displays the list of credentials as cards
 class CredentialsList extends ConsumerStatefulWidget {
@@ -170,7 +38,6 @@ class CredentialsList extends ConsumerStatefulWidget {
 }
 
 class _CredentialsListState extends ConsumerState<CredentialsList> {
-  String? _expandedCredentialId;
 
   @override
   Widget build(BuildContext context) {
@@ -181,31 +48,7 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
     }
 
     if (credentialsState.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading credentials',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              credentialsState.error!,
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () =>
-                  ref.read(credentialsProvider.notifier).refreshCredentials(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
+      return _buildErrorState(credentialsState.error!);
     }
 
     if (!credentialsState.hasCredentials) {
@@ -218,66 +61,83 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // Header
+          // Promotional Cards (first in the list)
+          if (credentialsState.groupedCredentials.isNotEmpty) ...[
+            ...credentialsState.groupedCredentials
+                .where((group) => group.isPromotional)
+                .map((group) => SliverToBoxAdapter(
+                      child: GroupedCredentialStack(
+                        group: group,
+                        onCredentialTap: _showCredentialDetail,
+                        onShare: _shareCredential,
+                        onVerify: _verifyCredential,
+                        onPresent: _presentMDoc,
+                        onAgeVerify: _performAgeVerification,
+                      ),
+                    )),
+          ],
+
+          // MDL Placeholder (right after promotional cards)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'My Credentials',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '${credentialsState.totalCredentials} items',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
+            child: MdlPlaceholder(
+              onTap: () => AddCredentialHandler.showAddMdlBottomSheet(context),
             ),
           ),
 
-          // Verifiable Credentials
-          if (credentialsState.verifiableCredentials.isNotEmpty) ...[
-            SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final credential =
-                    credentialsState.verifiableCredentials[index];
-                return VerifiableCredentialCard(
-                  credential: credential,
-                  isExpanded: _expandedCredentialId == credential.id,
-                  onTap: () => _showCredentialDetail(credential),
-                  onShare: () => _shareCredential(credential),
-                  onVerify: () => _verifyCredential(credential),
-                );
-              }, childCount: credentialsState.verifiableCredentials.length),
+          // Passport Placeholder (right after MDL placeholder)
+          SliverToBoxAdapter(
+            child: PassportPlaceholder(
+              onTap: () =>
+                  AddCredentialHandler.showAddPassportBottomSheet(context),
             ),
-          ],
+          ),
 
-          // mDoc Credentials
-          if (credentialsState.mDocCredentials.isNotEmpty) ...[
-            SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final credential = credentialsState.mDocCredentials[index];
-                final credentialId = 'mdoc_$index'; // Create unique ID
-                return MDocCredentialCard(
-                  credential: credential,
-                  isExpanded: _expandedCredentialId == credentialId,
-                  onTap: () => _showCredentialDetail(credential),
-                  onPresent: () => _presentMDoc(credential),
-                  onAgeVerify: (age) => _performAgeVerification(credential),
-                );
-              }, childCount: credentialsState.mDocCredentials.length),
-            ),
+          // Other Credentials (holder cards and regular credentials)
+          if (credentialsState.groupedCredentials.isNotEmpty) ...[
+            ...credentialsState.groupedCredentials
+                .where((group) => !group.isPromotional)
+                .map((group) => SliverToBoxAdapter(
+                      child: GroupedCredentialStack(
+                        group: group,
+                        onCredentialTap: _showCredentialDetail,
+                        onShare: _shareCredential,
+                        onVerify: _verifyCredential,
+                        onPresent: _presentMDoc,
+                        onAgeVerify: _performAgeVerification,
+                      ),
+                    )),
           ],
 
           // Bottom padding
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+          const SizedBox(height: 16),
+          Text(
+            'Error loading credentials',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () =>
+                ref.read(credentialsProvider.notifier).refreshCredentials(),
+            child: const Text('Retry'),
+          ),
         ],
       ),
     );
@@ -336,14 +196,6 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
     );
   }
 
-  void _toggleExpanded(String credentialId) {
-    setState(() {
-      _expandedCredentialId = _expandedCredentialId == credentialId
-          ? null
-          : credentialId;
-    });
-  }
-
   void _showCredentialDetail(dynamic credential) {
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -380,10 +232,10 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
     );
   }
 
-  void _performAgeVerification(MDocCredential credential) {
+  void _performAgeVerification(MDocCredential credential, int age) {
     // TODO: Implement age verification using SpruceID
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Starting age verification...')),
+      SnackBar(content: Text('Starting age verification for $age years...')),
     );
   }
 

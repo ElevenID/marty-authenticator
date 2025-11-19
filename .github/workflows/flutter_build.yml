@@ -33,7 +33,7 @@ jobs:
       - run: flutter doctor -v
       - run: flutter pub get
       - run: flutter gen-l10n
-      - run: flutter build ios -t "lib/mains/main_netknights.dart" --debug --flavor netknights --no-codesign
+      - run: flutter build ios -t "lib/main_document.dart" --debug --flavor netknights --no-codesign
 
   build_appbundle:
     name: (Android)
@@ -83,4 +83,4 @@ jobs:
 
       # Build the Android APK (Debug)
       - name: Build Android APK (Debug)
-        run: flutter build apk -t "lib/mains/main_netknights.dart" --debug --flavor netknights
+        run: flutter build apk -t "lib/main_document.dart" --debug --flavor netknights

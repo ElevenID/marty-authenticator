@@ -23,11 +23,17 @@ import 'app_wrappers/state_observer.dart';
 
 class AppWrapper extends StatelessWidget {
   final Widget child;
+  final List<Override> overrides;
 
-  const AppWrapper({required this.child, super.key});
+  const AppWrapper({
+    required this.child,
+    this.overrides = const [],
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => ProviderScope(
+    overrides: overrides,
     child: _AppWrapper(key: key, child: child),
   );
 }

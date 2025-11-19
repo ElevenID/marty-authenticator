@@ -26,6 +26,12 @@ import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 import '../model/enums/patch_note_type.dart';
 import '../model/version.dart';
 
+/// Get the default privacyIDEA server URL from environment variables
+String? getDefaultPrivacyideaServerUrl() {
+  const url = String.fromEnvironment('PRIVACYIDEA_URL');
+  return url.isNotEmpty ? url : null;
+}
+
 Map<Version, Map<PatchNoteType, List<String>>> getLocalizedPatchNotes(
   AppLocalizations localizations,
 ) => {

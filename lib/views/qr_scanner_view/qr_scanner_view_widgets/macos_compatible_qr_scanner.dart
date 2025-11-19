@@ -23,10 +23,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 
 /// A QR scanner widget that is compatible with macOS and other desktop platforms.
-/// Uses the flutter_zxing ReaderWidget which provides both camera and gallery functionality.
+/// On web, shows only an image uploader. On other platforms, uses camera with gallery functionality.
 class MacOSCompatibleQRScanner extends StatefulWidget {
   const MacOSCompatibleQRScanner({super.key});
 
@@ -38,10 +39,100 @@ class MacOSCompatibleQRScanner extends StatefulWidget {
 class _MacOSCompatibleQRScannerState extends State<MacOSCompatibleQRScanner> {
   bool isInitialized = false;
 
+  Widget _buildWebImageUploader() {
+    return Material(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.qr_code_scanner,
+              size: 120,
+              color: Colors.white70,
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Select QR Code Image',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Choose an image containing a QR code to scan',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 48),
+            ElevatedButton.icon(
+              onPressed: _pickAndProcessImage,
+              icon: Icon(Icons.upload_file),
+              label: Text('Upload Image'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(20),
+                textStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndProcessImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      
+      if (image != null) {
+        // For web, we'll use an alternative approach that doesn't rely on readBarcodeImagePath
+        // Since that function is not implemented on web, we'll show an error message
+        // explaining that the web platform doesn't support QR scanning from images
+        if (!mounted) return;
+        _showErrorDialog(
+          'QR code scanning from images is not supported in the web version. '
+          'Please use a mobile device or desktop application for this feature.'
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog('Error selecting image: ${e.toString()}');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Use flutter_zxing ReaderWidget for all platforms
-    // The ReaderWidget already handles gallery/file picker functionality
+    // For web/Chrome, show only the image uploader
+    if (kIsWeb) {
+      return _buildWebImageUploader();
+    }
+
+    // For other platforms, use the camera scanner with gallery functionality
     return Material(
       color: Colors.black,
       child: Semantics(
@@ -54,7 +145,7 @@ class _MacOSCompatibleQRScannerState extends State<MacOSCompatibleQRScanner> {
             setState(() => isInitialized = controller != null);
           },
           actionButtonsAlignment: Alignment.bottomRight,
-          showFlashlight: !kIsWeb && (Platform.isIOS || Platform.isAndroid),
+          showFlashlight: Platform.isIOS || Platform.isAndroid,
           flashOnIcon: Semantics(
             label: AppLocalizations.of(context)!.a11yScanQrCodeViewFlashlightOn,
             child: const Icon(Icons.flash_on),

@@ -74,7 +74,7 @@ Test the plugin:
 
 ```bash
 # Run against local backend
-flutter run -d chrome -t lib/mains/main_netknights.dart
+flutter run -d chrome -t lib/main_document.dart
 
 # App will connect to http://localhost:8080
 ```
@@ -132,7 +132,7 @@ open http://localhost:8080
 
 ```bash
 # Run app with backend connection
-flutter run -d chrome -t lib/mains/main_netknights.dart
+flutter run -d chrome -t lib/main_document.dart
 
 # App connects to localhost:8080 for:
 # - Token enrollment via QR codes

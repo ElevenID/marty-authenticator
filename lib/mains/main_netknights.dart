@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gms_check/gms_check.dart';
 import 'package:privacyidea_authenticator/firebase_options/default_firebase_options.dart';
+import 'package:privacyidea_authenticator/utils/firebase_utils.dart';
 import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/localization_notifier.dart';
 
 import '../../../../../../../model/riverpod_states/settings_state.dart';
@@ -44,7 +45,6 @@ import '../views/feedback_view/feedback_view.dart';
 import '../views/import_tokens_view/import_tokens_view.dart';
 import '../views/license_view/license_view.dart';
 import '../views/main_view/main_view.dart';
-import '../views/main_view/credential_first_main_view.dart';
 import '../views/credential_demo_view.dart';
 import '../views/push_token_view/push_tokens_view.dart';
 import '../views/qr_scanner_view/qr_scanner_view.dart';
@@ -61,6 +61,13 @@ void main() async {
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
 
+      // Enable verbose logging if environment variable is set
+      const verboseLogging = String.fromEnvironment('VERBOSE_LOGGING', defaultValue: 'false');
+      if (verboseLogging.toLowerCase() == 'true') {
+        Logger.setVerboseLogging(true);
+        Logger.info('Verbose logging enabled via environment variable');
+      }
+
       // Skip mobile-specific initialization on web and desktop platforms
       // Home widgets are only supported on iOS and Android
       if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
@@ -73,9 +80,28 @@ void main() async {
 
       // Firebase is only configured for mobile and web platforms
       if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
-        appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
-          'netknights',
-        );
+        // Check if Firebase should be enabled and validate configuration
+        DefaultFirebaseOptions.validateConfiguration();
+        
+        // Only proceed with Firebase initialization if it's enabled
+        if (DefaultFirebaseOptions.isFirebaseEnabled) {
+          Logger.info('🔥 Firebase is enabled - initializing with configuration');
+          
+          appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
+            'netknights',
+          );
+          
+          // Force Firebase initialization for testing FCM token retrieval
+          if (const String.fromEnvironment('VERBOSE_LOGGING', defaultValue: 'false').toLowerCase() == 'true') {
+            try {
+              await _initializeFirebaseForTesting();
+            } catch (e) {
+              Logger.warning('Failed to initialize Firebase for testing: $e');
+            }
+          }
+        } else {
+          Logger.info('🚫 Firebase is disabled - skipping initialization');
+        }
       }
       runApp(
         EasyDynamicThemeWidget(
@@ -174,5 +200,26 @@ class PrivacyIDEAAuthenticator extends ConsumerWidget {
         );
       },
     );
+  }
+}
+
+/// Initialize Firebase for testing FCM token retrieval
+Future<void> _initializeFirebaseForTesting() async {
+  try {
+    Logger.info('Initializing Firebase for testing FCM token retrieval...');
+    
+    // Create FirebaseUtils instance
+    final firebaseUtils = FirebaseUtils();
+    
+    // Initialize Firebase app
+    await firebaseUtils.initializeApp();
+    Logger.info('Firebase app initialized for testing');
+    
+    // Get FCM token (this should trigger our logging)
+    final fcmToken = await firebaseUtils.getFBToken();
+    Logger.info('FCM Token for testing: $fcmToken');
+    
+  } catch (e, stackTrace) {
+    Logger.error('Failed to initialize Firebase for testing', error: e, stackTrace: stackTrace);
   }
 }

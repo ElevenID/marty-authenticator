@@ -19,6 +19,7 @@
 */
 
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -44,6 +45,11 @@ class QRScannerView extends StatefulView {
 class _QRScannerViewState extends State<QRScannerView> {
   Future<PermissionStatus> _requestCameraPermission() async {
     try {
+      // On web, bypass camera permissions entirely since we use image upload
+      if (kIsWeb) {
+        return PermissionStatus.granted;
+      }
+      
       // On macOS, permission handling might be different
       // The camera package will handle most permission requests automatically
       if (Platform.isMacOS) {

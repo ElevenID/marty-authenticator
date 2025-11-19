@@ -37,6 +37,82 @@ import 'package:flutter/foundation.dart'
 /// );
 /// ```
 class DefaultFirebaseOptions {
+  /// Checks if Firebase should be enabled based on environment configuration.
+  /// Firebase is considered enabled if FIREBASE_ENABLED is explicitly set to 'true',
+  /// or if any core Firebase environment variables are provided.
+  static bool get isFirebaseEnabled {
+    // Check explicit enable flag first
+    const firebaseEnabled = String.fromEnvironment('FIREBASE_ENABLED', defaultValue: '');
+    if (firebaseEnabled.toLowerCase() == 'true') {
+      return true;
+    }
+    if (firebaseEnabled.toLowerCase() == 'false') {
+      return false;
+    }
+    
+    // Auto-detect based on presence of core Firebase variables
+    const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: '');
+    const messagingSenderId = String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '');
+    
+    // If we have the core identifiers, assume Firebase should be enabled
+    return projectId.isNotEmpty && messagingSenderId.isNotEmpty;
+  }
+
+  /// Validates that all required Firebase environment variables are set.
+  /// This should be called before Firebase initialization to ensure proper configuration.
+  /// Only validates if Firebase is enabled via [isFirebaseEnabled].
+  static void validateConfiguration() {
+    if (!isFirebaseEnabled) {
+      // Firebase is disabled, skip validation
+      return;
+    }
+    
+    final errors = <String>[];
+    
+    void checkRequired(String envVar, String value) {
+      if (value.isEmpty) {
+        errors.add('Missing required environment variable: $envVar');
+      }
+    }
+
+    // Check common Firebase variables
+    checkRequired('FIREBASE_PROJECT_ID', const String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''));
+    checkRequired('FIREBASE_MESSAGING_SENDER_ID', const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''));
+    checkRequired('FIREBASE_STORAGE_BUCKET', const String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''));
+
+    // Check platform-specific variables
+    if (!kIsWeb) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          checkRequired('FIREBASE_ANDROID_API_KEY', const String.fromEnvironment('FIREBASE_ANDROID_API_KEY', defaultValue: ''));
+          checkRequired('FIREBASE_ANDROID_APP_ID', const String.fromEnvironment('FIREBASE_ANDROID_APP_ID', defaultValue: ''));
+          break;
+        case TargetPlatform.iOS:
+          checkRequired('FIREBASE_IOS_API_KEY', const String.fromEnvironment('FIREBASE_IOS_API_KEY', defaultValue: ''));
+          checkRequired('FIREBASE_IOS_APP_ID', const String.fromEnvironment('FIREBASE_IOS_APP_ID', defaultValue: ''));
+          checkRequired('FIREBASE_IOS_CLIENT_ID', const String.fromEnvironment('FIREBASE_IOS_CLIENT_ID', defaultValue: ''));
+          checkRequired('FIREBASE_IOS_BUNDLE_ID', const String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: ''));
+          break;
+        default:
+          // Other platforms handled by existing code
+      }
+    } else {
+      // Web platform
+      checkRequired('FIREBASE_WEB_API_KEY', const String.fromEnvironment('FIREBASE_WEB_API_KEY', defaultValue: ''));
+      checkRequired('FIREBASE_WEB_APP_ID', const String.fromEnvironment('FIREBASE_WEB_APP_ID', defaultValue: ''));
+      checkRequired('FIREBASE_AUTH_DOMAIN', const String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''));
+    }
+
+    if (errors.isNotEmpty) {
+      throw Exception('Firebase configuration validation failed:\n${errors.join('\n')}\n\n'
+          'Please provide missing environment variables via:\n'
+          '  --dart-define=VARIABLE_NAME=value or\n'
+          '  --dart-define-from-file=.env.firebase\n\n'
+          'Alternatively, set --dart-define=FIREBASE_ENABLED=false to disable Firebase.\n\n'
+          'See docs/FIREBASE_SETUP.md for configuration instructions.');
+    }
+  }
+
   static FirebaseOptions currentPlatformOf(String? app) => switch (app) {
     // 'netknights' => NetknightsFirebaseOptions.currentPlatform,
     _ => defaultCurrentPlatform,
@@ -73,29 +149,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'DEFAULT_FIREBASE_API_KEY',
-    appId: 'DEFAULT_FIREBASE_APP_ID',
-    messagingSenderId: 'DEFAULT_FIREBASE_MESSAGING_SENDER_ID',
-    projectId: 'DEFAULT_FIREBASE_PROJECT_ID',
-    storageBucket: 'DEFAULT_FIREBASE_STORAGE_BUCKET',
+    apiKey: String.fromEnvironment('FIREBASE_ANDROID_API_KEY'),
+    appId: String.fromEnvironment('FIREBASE_ANDROID_APP_ID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'DEFAULT_FIREBASE_API_KEY',
-    appId: 'DEFAULT_FIREBASE_APP_ID',
-    messagingSenderId: 'DEFAULT_FIREBASE_MESSAGING_SENDER_ID',
-    projectId: 'DEFAULT_FIREBASE_PROJECT_ID',
-    storageBucket: 'DEFAULT_FIREBASE_STORAGE_BUCKET',
-    iosClientId: 'DEFAULT_FIREBASE_IOS_CLIENT_ID',
-    iosBundleId: 'DEFAULT_FIREBASE_IOS_BUNDLE_ID',
+    apiKey: String.fromEnvironment('FIREBASE_IOS_API_KEY'),
+    appId: String.fromEnvironment('FIREBASE_IOS_APP_ID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
+    iosClientId: String.fromEnvironment('FIREBASE_IOS_CLIENT_ID'),
+    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID'),
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'DEFAULT_FIREBASE_API_KEY',
-    appId: 'DEFAULT_FIREBASE_APP_ID',
-    messagingSenderId: 'DEFAULT_FIREBASE_MESSAGING_SENDER_ID',
-    projectId: 'DEFAULT_FIREBASE_PROJECT_ID',
-    storageBucket: 'DEFAULT_FIREBASE_STORAGE_BUCKET',
-    authDomain: 'DEFAULT_FIREBASE_AUTH_DOMAIN',
+    apiKey: String.fromEnvironment('FIREBASE_WEB_API_KEY'),
+    appId: String.fromEnvironment('FIREBASE_WEB_APP_ID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN'),
   );
 }

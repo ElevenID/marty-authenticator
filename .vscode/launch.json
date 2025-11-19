@@ -1,0 +1,65 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Demo: MDL Only",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_demo_mdl.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "Demo: MDL + Passport",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_demo_mdl_passport.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "Demo: All mDoc Types",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_demo_all_mdocs.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "Demo: mDocs Multiple States",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_demo_mdocs_states.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "Main (with Mocks)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "Production",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_document.dart",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    }
+  ]
+}
