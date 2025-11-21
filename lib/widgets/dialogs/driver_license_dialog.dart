@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../models/document_verification_config.dart';
+import '../../views/document_verification/document_scanning_view.dart';
 
 class DriverLicenseDialog {
   static void show(BuildContext context) {
@@ -73,6 +75,22 @@ class DriverLicenseDialog {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  _buildStateOption(
+                    context,
+                    'Digital ID (Passport)',
+                    Colors.indigo,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DocumentScanningView(
+                            config: DocumentVerificationConfig.passport,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 32),
                   const Text(
                     'United States',
                     style: TextStyle(
@@ -117,14 +135,17 @@ class DriverLicenseDialog {
   static Widget _buildStateOption(
     BuildContext context,
     String stateName,
-    Color accentColor,
-  ) {
+    Color accentColor, {
+    VoidCallback? onTap,
+  }) {
     return InkWell(
-      onTap: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$stateName selected')));
-      },
+      onTap:
+          onTap ??
+          () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('$stateName selected')));
+          },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16.0),

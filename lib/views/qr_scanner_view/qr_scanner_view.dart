@@ -49,7 +49,7 @@ class _QRScannerViewState extends State<QRScannerView> {
       if (kIsWeb) {
         return PermissionStatus.granted;
       }
-      
+
       // On macOS, permission handling might be different
       // The camera package will handle most permission requests automatically
       if (Platform.isMacOS) {

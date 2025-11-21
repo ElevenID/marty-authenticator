@@ -88,15 +88,13 @@ class W3CCredentialFixtures {
       ],
       'id': 'urn:uuid:3978344f-8596-4c3a-a978-8fcaba3903c5',
       'type': ['VerifiableCredential', 'UniversityDegreeCredential'],
-      'issuer': {
-        'id': 'did:web:university.edu',
-        'name': 'Example University',
-      },
+      'issuer': {'id': 'did:web:university.edu', 'name': 'Example University'},
       'issuanceDate': issuanceDate.toIso8601String(),
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'name': 'Alice Johnson',
         'givenName': 'Alice',
         'familyName': 'Johnson',
@@ -112,7 +110,8 @@ class W3CCredentialFixtures {
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:university.edu#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z58DAdFfa9SkqZMVPxAQpic7ndSayn1PzZs6ZjWp1CktyGesjuTSwRdoWhAfGFCF5bppETSTojQCrfFPP2oumHKtz',
+        'proofValue':
+            'z58DAdFfa9SkqZMVPxAQpic7ndSayn1PzZs6ZjWp1CktyGesjuTSwRdoWhAfGFCF5bppETSTojQCrfFPP2oumHKtz; // pragma: allowlist secret',
       },
     };
 
@@ -121,7 +120,8 @@ class W3CCredentialFixtures {
         'id': 'https://university.edu/credentials/status/3#94567',
         'type': 'RevocationList2020Status',
         'revocationListIndex': '94567',
-        'revocationListCredential': 'https://university.edu/credentials/status/3',
+        'revocationListCredential':
+            'https://university.edu/credentials/status/3',
       };
     }
 
@@ -160,7 +160,8 @@ class W3CCredentialFixtures {
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'name': 'Bob Smith',
         'birthDate': '1985-03-21',
         'licenseNumber': 'DL-123456789',
@@ -168,14 +169,16 @@ class W3CCredentialFixtures {
         'restrictions': 'CORRECTIVE LENSES',
         'endorsements': [],
         if (state != CredentialState.missingOptionalFields)
-          'portrait': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+          'portrait':
+              'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
       },
       'proof': {
         'type': 'Ed25519Signature2020',
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:dmv.state.gov#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z3hBWwmeoDDW8CvQqEKwPSWJSUXDUqTXHYJVyM3vRjqAK5dLvPxwR8LFdRXBpvqzE4HGC',
+        'proofValue':
+            'z3hBWwmeoDDW8CvQqEKwPSWJSUXDUqTXHYJVyM3vRjqAK5dLvPxwR8LFdRXBpvqzE4HGC; // pragma: allowlist secret',
       },
     };
   }
@@ -188,9 +191,7 @@ class W3CCredentialFixtures {
     final expirationDate = CredentialDateHelper.getExpirationDate(state);
 
     return {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-      ],
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
       'id': 'urn:uuid:identity-001',
       'type': ['VerifiableCredential', 'IdentityCredential'],
       'issuer': {
@@ -201,7 +202,8 @@ class W3CCredentialFixtures {
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'givenName': 'Carol',
         'familyName': 'Williams',
         'birthDate': '1992-07-14',
@@ -213,7 +215,8 @@ class W3CCredentialFixtures {
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:government.example#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z2F9pqBG4HmeRjZmQvZkC3DqPxwR8LFdRXBpvqzE4HGCK5dLvPxwR8LFdRXBpvqzE4HGC',
+        'proofValue':
+            'z2F9pqBG4HmeRjZmQvZkC3DqPxwR8LFdRXBpvqzE4HGCK5dLvPxwR8LFdRXBpvqzE4HGC; // pragma: allowlist secret',
       },
     };
   }
@@ -226,9 +229,7 @@ class W3CCredentialFixtures {
     final expirationDate = CredentialDateHelper.getExpirationDate(state);
 
     return {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-      ],
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
       'id': 'urn:uuid:cert-001',
       'type': ['VerifiableCredential', 'CertificateCredential'],
       'issuer': {
@@ -239,7 +240,8 @@ class W3CCredentialFixtures {
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'name': 'David Brown',
         'certification': 'Certified Information Systems Security Professional',
         'certificationNumber': 'CISSP-123456',
@@ -250,7 +252,8 @@ class W3CCredentialFixtures {
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:certification-body.org#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z3mBWwmeoDDW8CvQqEKwPSWJSUXDUqTXHYJVyM3vRjqAK5dLvPxwR8LFdRXBpvqzE4HGC',
+        'proofValue':
+            'z3mBWwmeoDDW8CvQqEKwPSWJSUXDUqTXHYJVyM3vRjqAK5dLvPxwR8LFdRXBpvqzE4HGC; // pragma: allowlist secret',
       },
     };
   }
@@ -263,9 +266,7 @@ class W3CCredentialFixtures {
     final expirationDate = CredentialDateHelper.getExpirationDate(state);
 
     return {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-      ],
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
       'id': 'urn:uuid:member-001',
       'type': ['VerifiableCredential', 'MembershipCredential'],
       'issuer': {
@@ -276,7 +277,8 @@ class W3CCredentialFixtures {
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'name': 'Eve Martinez',
         'membershipType': 'Professional',
         'memberNumber': 'TPA-789012',
@@ -287,7 +289,8 @@ class W3CCredentialFixtures {
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:professional-association.org#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z4nCXxnfPEEX9DwRrFLhSXKJTVZMN4IKLMpccOTRskBL6eMwQyS9MWhBgGEDG6cG6brrFUUVpkRDsgUTTqPppKLuz',
+        'proofValue':
+            'z4nCXxnfPEEX9DwRrFLhSXKJTVZMN4IKLMpccOTRskBL6eMwQyS9MWhBgGEDG6cG6brrFUUVpkRDsgUTTqPppKLuz; // pragma: allowlist secret',
       },
     };
   }
@@ -300,9 +303,7 @@ class W3CCredentialFixtures {
     final expirationDate = CredentialDateHelper.getExpirationDate(state);
 
     return {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-      ],
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
       'id': 'urn:uuid:emp-001',
       'type': ['VerifiableCredential', 'EmploymentCredential'],
       'issuer': {
@@ -313,7 +314,8 @@ class W3CCredentialFixtures {
       if (expirationDate != null)
         'expirationDate': expirationDate.toIso8601String(),
       'credentialSubject': {
-        'id': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+        'id':
+            'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK; // pragma: allowlist secret',
         'name': 'Frank Anderson',
         'jobTitle': 'Senior Software Engineer',
         'department': 'Engineering',
@@ -325,7 +327,8 @@ class W3CCredentialFixtures {
         'created': issuanceDate.toIso8601String(),
         'verificationMethod': 'did:web:techcorp.example#key-1',
         'proofPurpose': 'assertionMethod',
-        'proofValue': 'z5oDYyofQFFY0ExSsGMiTYLKUWaNO5JLMNqddPUSltCM7fNxRzT0NXiChHFEH7dH7cssGVVWqlSEthVUUqQrrLMv',
+        'proofValue':
+            'z5oDYyofQFFY0ExSsGMiTYLKUWaNO5JLMNqddPUSltCM7fNxRzT0NXiChHFEH7dH7cssGVVWqlSEthVUUqQrrLMv; // pragma: allowlist secret',
       },
     };
   }
@@ -376,18 +379,18 @@ class MDocFixtures {
                 'issue_date': issuanceDate.toIso8601String().split('T')[0],
                 if (expirationDate != null)
                   'expiry_date': expirationDate.toIso8601String().split('T')[0],
-              }
+              },
             ],
             if (state != CredentialState.missingOptionalFields)
               'portrait': base64Encode([0, 0, 0, 1]), // Minimal valid image
             'signature_usual_mark': base64Encode([0, 0, 0, 1]),
-          }
+          },
         },
         'issuerAuth': {
           'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
           'payload': base64Encode(utf8.encode('{}')),
           'signature': base64Encode(List.generate(64, (i) => i % 256)),
-        }
+        },
       },
       'deviceSigned': {
         'nameSpaces': {},
@@ -396,9 +399,9 @@ class MDocFixtures {
             'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
             'payload': base64Encode(utf8.encode('{}')),
             'signature': base64Encode(List.generate(64, (i) => i % 256)),
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
@@ -427,13 +430,13 @@ class MDocFixtures {
             if (state != CredentialState.missingOptionalFields)
               'portrait': base64Encode([0, 0, 0, 1]),
             'sex': 'F',
-          }
+          },
         },
         'issuerAuth': {
           'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
           'payload': base64Encode(utf8.encode('{}')),
           'signature': base64Encode(List.generate(64, (i) => i % 256)),
-        }
+        },
       },
       'deviceSigned': {
         'nameSpaces': {},
@@ -442,9 +445,9 @@ class MDocFixtures {
             'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
             'payload': base64Encode(utf8.encode('{}')),
             'signature': base64Encode(List.generate(64, (i) => i % 256)),
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
@@ -473,14 +476,15 @@ class MDocFixtures {
             'sex': 'F',
             if (state != CredentialState.missingOptionalFields)
               'portrait': base64Encode([0, 0, 0, 1]),
-            'machine_readable_zone': 'P<USAJOHNSON<<ALICE<<<<<<<<<<<<<<<<<<<<<<<\nP1234567890USA9005155F2512314<<<<<<<<<<<<<<06',
-          }
+            'machine_readable_zone':
+                'P<USAJOHNSON<<ALICE<<<<<<<<<<<<<<<<<<<<<<<\nP1234567890USA9005155F2512314<<<<<<<<<<<<<<06',
+          },
         },
         'issuerAuth': {
           'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
           'payload': base64Encode(utf8.encode('{}')),
           'signature': base64Encode(List.generate(64, (i) => i % 256)),
-        }
+        },
       },
       'deviceSigned': {
         'nameSpaces': {},
@@ -489,9 +493,9 @@ class MDocFixtures {
             'protected': base64Encode(utf8.encode('{"alg":"ES256"}')),
             'payload': base64Encode(utf8.encode('{}')),
             'signature': base64Encode(List.generate(64, (i) => i % 256)),
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
@@ -518,55 +522,50 @@ class SdJwtFixtures {
     final expirationDate = CredentialDateHelper.getExpirationDate(state);
 
     // JWT Header
-    final header = {
-      'alg': 'ES256',
-      'typ': 'vc+sd-jwt',
-      'kid': 'issuer-key-1',
-    };
+    final header = {'alg': 'ES256', 'typ': 'vc+sd-jwt', 'kid': 'issuer-key-1'};
 
     // JWT Payload
     final payload = {
       'iss': 'https://issuer.example.com',
-      'sub': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+      'sub':
+          'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK', // pragma: allowlist secret
       'iat': (issuanceDate.millisecondsSinceEpoch / 1000).floor(),
       if (expirationDate != null)
         'exp': (expirationDate.millisecondsSinceEpoch / 1000).floor(),
       'vct': credentialType,
       '_sd': [
         // Selective disclosure hashes (in real implementation these would be actual hashes)
-        'WyJzYWx0MSIsICJnaXZlbl9uYW1lIiwgIkpvaG4iXQ',
-        'WyJzYWx0MiIsICJmYW1pbHlfbmFtZSIsICJEb2UiXQ',
-        'WyJzYWx0MyIsICJlbWFpbCIsICJqb2huLmRvZUBleGFtcGxlLmNvbSJd',
+        'WyJzYWx0MSIsICJnaXZlbl9uYW1lIiwgIkpvaG4iXQ', // pragma: allowlist secret
+        'WyJzYWx0MiIsICJmYW1pbHlfbmFtZSIsICJEb2UiXQ', // pragma: allowlist secret
+        'WyJzYWx0MyIsICJlbWFpbCIsICJqb2huLmRvZUBleGFtcGxlLmNvbSJd', // pragma: allowlist secret
       ],
       '_sd_alg': 'sha-256',
     };
 
     // Create JWT (simplified - not cryptographically valid)
-    final headerEncoded = base64Encode(utf8.encode(jsonEncode(header)))
-        .replaceAll('+', '-')
-        .replaceAll('/', '_')
-        .replaceAll('=', '');
-    final payloadEncoded = base64Encode(utf8.encode(jsonEncode(payload)))
-        .replaceAll('+', '-')
-        .replaceAll('/', '_')
-        .replaceAll('=', '');
-    final signature = base64Encode(List.generate(64, (i) => i % 256))
-        .replaceAll('+', '-')
-        .replaceAll('/', '_')
-        .replaceAll('=', '');
+    final headerEncoded = base64Encode(
+      utf8.encode(jsonEncode(header)),
+    ).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+    final payloadEncoded = base64Encode(
+      utf8.encode(jsonEncode(payload)),
+    ).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+    final signature = base64Encode(
+      List.generate(64, (i) => i % 256),
+    ).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 
     final jwt = '$headerEncoded.$payloadEncoded.$signature';
 
     // Disclosures (actual claim values)
     final disclosures = [
-      'WyJzYWx0MSIsICJnaXZlbl9uYW1lIiwgIkpvaG4iXQ', // given_name: John
-      'WyJzYWx0MiIsICJmYW1pbHlfbmFtZSIsICJEb2UiXQ', // family_name: Doe
+      'WyJzYWx0MSIsICJnaXZlbl9uYW1lIiwgIkpvaG4iXQ', // pragma: allowlist secret // given_name: John
+      'WyJzYWx0MiIsICJmYW1pbHlfbmFtZSIsICJEb2UiXQ', // pragma: allowlist secret // family_name: Doe
       if (state != CredentialState.missingOptionalFields)
-        'WyJzYWx0MyIsICJlbWFpbCIsICJqb2huLmRvZUBleGFtcGxlLmNvbSJd', // email
+        'WyJzYWx0MyIsICJlbWFpbCIsICJqb2huLmRvZUBleGFtcGxlLmNvbSJd', // pragma: allowlist secret // email
     ];
 
     // Key Binding JWT (holder binding)
-    final kbJwt = 'eyJhbGciOiJFUzI1NiIsInR5cCI6ImtiK2p3dCJ9.eyJub25jZSI6IjEyMzQ1Njc4OTAiLCJhdWQiOiJodHRwczovL3ZlcmlmaWVyLmV4YW1wbGUuY29tIiwiaWF0IjoxNjc4ODg2NDAwfQ.signature';
+    final kbJwt =
+        'eyJhbGciOiJFUzI1NiIsInR5cCI6ImtiK2p3dCJ9.eyJub25jZSI6IjEyMzQ1Njc4OTAiLCJhdWQiOiJodHRwczovL3ZlcmlmaWVyLmV4YW1wbGUuY29tIiwiaWF0IjoxNjc4ODg2NDAwfQ.signature'; // pragma: allowlist secret
 
     // SD-JWT format: <Issuer-signed JWT>~<Disclosure 1>~<Disclosure 2>~...~<KB-JWT>
     return '$jwt~${disclosures.join('~')}~$kbJwt';
@@ -583,9 +582,7 @@ class SdJwtFixtures {
   }
 
   /// Identity credential as SD-JWT
-  static String identity({
-    CredentialState state = CredentialState.valid,
-  }) {
+  static String identity({CredentialState state = CredentialState.valid}) {
     return credential(
       state: state,
       credentialType: 'https://credentials.example.com/identity',
@@ -593,12 +590,11 @@ class SdJwtFixtures {
   }
 
   /// Professional certificate as SD-JWT
-  static String certificate({
-    CredentialState state = CredentialState.valid,
-  }) {
+  static String certificate({CredentialState state = CredentialState.valid}) {
     return credential(
       state: state,
-      credentialType: 'https://credentials.example.com/professional-certificate',
+      credentialType:
+          'https://credentials.example.com/professional-certificate',
     );
   }
 
@@ -635,12 +631,8 @@ class SpruceCredentialFixtures {
           W3CCredentialFixtures.universityDegree(state: CredentialState.valid),
           W3CCredentialFixtures.driverLicense(state: CredentialState.valid),
         ],
-        'mdoc': [
-          MDocFixtures.mobileId(state: CredentialState.valid),
-        ],
-        'sdJwt': [
-          SdJwtFixtures.identity(state: CredentialState.valid),
-        ],
+        'mdoc': [MDocFixtures.mobileId(state: CredentialState.valid)],
+        'sdJwt': [SdJwtFixtures.identity(state: CredentialState.valid)],
       },
       'nearExpiry': {
         'w3c': [
@@ -652,7 +644,9 @@ class SpruceCredentialFixtures {
       },
       'expired': {
         'w3c': [
-          W3CCredentialFixtures.membership(state: CredentialState.expiredRecently),
+          W3CCredentialFixtures.membership(
+            state: CredentialState.expiredRecently,
+          ),
         ],
       },
       'revoked': {

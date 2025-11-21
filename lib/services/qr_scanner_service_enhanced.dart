@@ -19,7 +19,7 @@
  */
 
 /// Enhanced QR scanner service with SDK credential handling
-/// 
+///
 /// This service provides:
 /// - Advanced QR code processing with SDK integration
 /// - Credential offer/request parsing and validation
@@ -37,11 +37,15 @@ import '../utils/spruce_channels.dart';
 import 'spruce_sdk_services.dart';
 
 /// Enhanced QR scanner service provider
-final qrScannerServiceEnhancedProvider = Provider<QRScannerServiceEnhanced>((ref) {
+final qrScannerServiceEnhancedProvider = Provider<QRScannerServiceEnhanced>((
+  ref,
+) {
   return QRScannerServiceEnhanced(
     spruceClientExtended: ref.read(spruceIdClientExtendedProvider),
     walletManagerExtended: ref.read(spruceIdWalletManagerExtendedProvider),
-    credentialManagerExtended: ref.read(spruceIdCredentialManagerExtendedProvider),
+    credentialManagerExtended: ref.read(
+      spruceIdCredentialManagerExtendedProvider,
+    ),
   );
 });
 
@@ -62,24 +66,30 @@ class QRScannerServiceEnhanced {
   /// Process scanned QR code with SDK-enhanced capabilities
   Future<ProcessedQRResult> processQRCode(String rawData) async {
     try {
-      Logger.info('Processing QR code with SDK enhancement', name: 'QRScannerServiceEnhanced');
+      Logger.info(
+        'Processing QR code with SDK enhancement',
+        name: 'QRScannerServiceEnhanced',
+      );
 
       // Step 1: Parse the raw QR data
       final parseResult = await _parseQRData(rawData);
-      
+
       // Step 2: Validate using SDK capabilities
       final validationResult = await _validateWithSDK(parseResult);
-      
+
       // Step 3: Enrich with credential matching if applicable
       final enrichedResult = await _enrichWithCredentialData(validationResult);
-      
+
       // Step 4: Optimize for presentation workflow
       final optimizedResult = await _optimizeForWorkflow(enrichedResult);
 
       return optimizedResult;
-
     } catch (e) {
-      Logger.error('QR code processing failed', error: e, name: 'QRScannerServiceEnhanced');
+      Logger.error(
+        'QR code processing failed',
+        error: e,
+        name: 'QRScannerServiceEnhanced',
+      );
       return ProcessedQRResult.error('Failed to process QR code: $e');
     }
   }
@@ -91,7 +101,7 @@ class QRScannerServiceEnhanced {
       if (rawData.startsWith('http') || rawData.startsWith('https')) {
         return await _parseURLQR(rawData);
       }
-      
+
       // Try JSON parsing
       try {
         final jsonData = jsonDecode(rawData) as Map<String, dynamic>;
@@ -118,7 +128,6 @@ class QRScannerServiceEnhanced {
         rawData: rawData,
         metadata: {'original_format': 'raw_text'},
       );
-
     } catch (e) {
       throw Exception('Failed to parse QR data: $e');
     }
@@ -127,9 +136,9 @@ class QRScannerServiceEnhanced {
   /// Parse URL-based QR codes
   Future<ParsedQRData> _parseURLQR(String url) async {
     final uri = Uri.parse(url);
-    
+
     // Check for credential offer URLs
-    if (uri.path.contains('credential-offer') || 
+    if (uri.path.contains('credential-offer') ||
         uri.queryParameters.containsKey('credential_offer_uri')) {
       return ParsedQRData(
         type: QRType.credentialOffer,
@@ -177,9 +186,12 @@ class QRScannerServiceEnhanced {
   }
 
   /// Parse JSON-based QR codes
-  Future<ParsedQRData> _parseJSONQR(Map<String, dynamic> jsonData, String rawData) async {
+  Future<ParsedQRData> _parseJSONQR(
+    Map<String, dynamic> jsonData,
+    String rawData,
+  ) async {
     final type = jsonData['type'] as String? ?? '';
-    
+
     switch (type.toLowerCase()) {
       case 'presentationrequest':
       case 'presentation_request':
@@ -191,7 +203,8 @@ class QRScannerServiceEnhanced {
           metadata: {
             'version': jsonData['version'],
             'verifier': jsonData['verifier'],
-            'requested_attributes_count': (jsonData['requested_attributes'] as List?)?.length ?? 0,
+            'requested_attributes_count':
+                (jsonData['requested_attributes'] as List?)?.length ?? 0,
           },
         );
 
@@ -205,7 +218,8 @@ class QRScannerServiceEnhanced {
           metadata: {
             'version': jsonData['version'],
             'issuer': jsonData['issuer'],
-            'credentials_count': (jsonData['credentials'] as List?)?.length ?? 0,
+            'credentials_count':
+                (jsonData['credentials'] as List?)?.length ?? 0,
           },
         );
 
@@ -236,28 +250,25 @@ class QRScannerServiceEnhanced {
   /// Parse OpenID-based QR codes
   Future<ParsedQRData> _parseOpenIDQR(String data) async {
     final uri = Uri.parse(data);
-    
+
     return ParsedQRData(
-      type: data.contains('credential-offer') ? 
-            QRType.credentialOffer : 
-            QRType.presentationRequest,
+      type: data.contains('credential-offer')
+          ? QRType.credentialOffer
+          : QRType.presentationRequest,
       format: QRFormat.openid,
       rawData: data,
       parsedContent: {
         'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
         'issuer_state': uri.queryParameters['issuer_state'],
       },
-      metadata: {
-        'protocol': 'openid',
-        'query_params': uri.queryParameters,
-      },
+      metadata: {'protocol': 'openid', 'query_params': uri.queryParameters},
     );
   }
 
   /// Parse DIDComm-based QR codes
   Future<ParsedQRData> _parseDIDCommQR(String data) async {
     final jsonData = jsonDecode(data) as Map<String, dynamic>;
-    
+
     return ParsedQRData(
       type: QRType.didcommMessage,
       format: QRFormat.didcomm,
@@ -284,30 +295,43 @@ class QRScannerServiceEnhanced {
       return ValidatedQRResult(
         parsedData: parsedData,
         isValid: validationResult['valid'] as bool? ?? false,
-        validationErrors: (validationResult['errors'] as List?)?.cast<String>() ?? [],
-        securityLevel: SecurityLevel.fromString(validationResult['security_level'] as String? ?? 'unknown'),
-        recommendedActions: (validationResult['recommended_actions'] as List?)?.cast<String>() ?? [],
-        sdkCapabilities: validationResult['sdk_capabilities'] as Map<String, dynamic>? ?? {},
+        validationErrors:
+            (validationResult['errors'] as List?)?.cast<String>() ?? [],
+        securityLevel: SecurityLevel.fromString(
+          validationResult['security_level'] as String? ?? 'unknown',
+        ),
+        recommendedActions:
+            (validationResult['recommended_actions'] as List?)
+                ?.cast<String>() ??
+            [],
+        sdkCapabilities:
+            validationResult['sdk_capabilities'] as Map<String, dynamic>? ?? {},
       );
-
     } catch (e) {
-      Logger.warning('SDK validation failed, using fallback validation', error: e);
+      Logger.warning(
+        'SDK validation failed, using fallback validation',
+        error: e,
+      );
       return ValidatedQRResult(
         parsedData: parsedData,
         isValid: true, // Fallback to basic validation
         validationErrors: [],
         securityLevel: SecurityLevel.medium,
-        recommendedActions: ['SDK validation unavailable - using basic validation'],
+        recommendedActions: [
+          'SDK validation unavailable - using basic validation',
+        ],
         sdkCapabilities: {},
       );
     }
   }
 
   /// Enrich validation result with credential data matching
-  Future<EnrichedQRResult> _enrichWithCredentialData(ValidatedQRResult validatedResult) async {
+  Future<EnrichedQRResult> _enrichWithCredentialData(
+    ValidatedQRResult validatedResult,
+  ) async {
     try {
       final parsedData = validatedResult.parsedData;
-      
+
       if (parsedData.type == QRType.presentationRequest) {
         return await _enrichPresentationRequest(validatedResult);
       } else if (parsedData.type == QRType.credentialOffer) {
@@ -332,39 +356,51 @@ class QRScannerServiceEnhanced {
   }
 
   /// Enrich presentation request with matching credentials
-  Future<EnrichedQRResult> _enrichPresentationRequest(ValidatedQRResult validatedResult) async {
+  Future<EnrichedQRResult> _enrichPresentationRequest(
+    ValidatedQRResult validatedResult,
+  ) async {
     final requestContent = validatedResult.parsedData.parsedContent!;
-    final requestedAttributes = (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
-    
+    final requestedAttributes =
+        (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
+
     // Get all available credentials
     final allCredentials = await _walletManager.getAllCredentials();
-    
+
     // Find matching credentials
     final matchingCredentials = <MatchingCredential>[];
-    
+
     for (final credential in allCredentials) {
-      final credentialSubject = credential['credentialSubject'] as Map<String, dynamic>? ?? {};
+      final credentialSubject =
+          credential['credentialSubject'] as Map<String, dynamic>? ?? {};
       final availableAttributes = credentialSubject.keys.toList();
-      
+
       final matchingAttributes = requestedAttributes
           .where((attr) => availableAttributes.contains(attr))
           .toList();
-      
+
       if (matchingAttributes.isNotEmpty) {
         // Get credential capabilities from SDK
-        final capabilities = await _spruceClient.getCredentialCapabilitiesSDK(credential['id'] as String);
-        
-        matchingCredentials.add(MatchingCredential(
-          credentialId: credential['id'] as String,
-          credentialName: credential['name'] as String? ?? 'Unknown Credential',
-          issuer: credential['issuer'] as String? ?? 'Unknown Issuer',
-          matchingAttributes: matchingAttributes,
-          totalAttributes: availableAttributes.length,
-          matchScore: (matchingAttributes.length / requestedAttributes.length * 100).round(),
-          capabilities: capabilities,
-          securityLevel: capabilities['hardware_backed'] == true ? 
-                       SecurityLevel.high : SecurityLevel.medium,
-        ));
+        final capabilities = await _spruceClient.getCredentialCapabilitiesSDK(
+          credential['id'] as String,
+        );
+
+        matchingCredentials.add(
+          MatchingCredential(
+            credentialId: credential['id'] as String,
+            credentialName:
+                credential['name'] as String? ?? 'Unknown Credential',
+            issuer: credential['issuer'] as String? ?? 'Unknown Issuer',
+            matchingAttributes: matchingAttributes,
+            totalAttributes: availableAttributes.length,
+            matchScore:
+                (matchingAttributes.length / requestedAttributes.length * 100)
+                    .round(),
+            capabilities: capabilities,
+            securityLevel: capabilities['hardware_backed'] == true
+                ? SecurityLevel.high
+                : SecurityLevel.medium,
+          ),
+        );
       }
     }
 
@@ -372,10 +408,16 @@ class QRScannerServiceEnhanced {
     matchingCredentials.sort((a, b) => b.matchScore.compareTo(a.matchScore));
 
     // Generate privacy analysis
-    final privacyAnalysis = await _generatePrivacyAnalysis(requestContent, matchingCredentials);
+    final privacyAnalysis = await _generatePrivacyAnalysis(
+      requestContent,
+      matchingCredentials,
+    );
 
     // Generate available actions
-    final availableActions = _generatePresentationActions(matchingCredentials, requestContent);
+    final availableActions = _generatePresentationActions(
+      matchingCredentials,
+      requestContent,
+    );
 
     return EnrichedQRResult(
       validatedResult: validatedResult,
@@ -386,20 +428,27 @@ class QRScannerServiceEnhanced {
   }
 
   /// Enrich credential offer with compatibility analysis
-  Future<EnrichedQRResult> _enrichCredentialOffer(ValidatedQRResult validatedResult) async {
+  Future<EnrichedQRResult> _enrichCredentialOffer(
+    ValidatedQRResult validatedResult,
+  ) async {
     final offerContent = validatedResult.parsedData.parsedContent!;
     final credentials = (offerContent['credentials'] as List?) ?? [];
-    
+
     // Analyze credential compatibility
     final compatibilityResults = <CredentialCompatibility>[];
-    
+
     for (final credentialDef in credentials) {
-      final compatibility = await _analyzeCredentialCompatibility(credentialDef as Map<String, dynamic>);
+      final compatibility = await _analyzeCredentialCompatibility(
+        credentialDef as Map<String, dynamic>,
+      );
       compatibilityResults.add(compatibility);
     }
 
     // Generate available actions
-    final availableActions = _generateOfferActions(compatibilityResults, offerContent);
+    final availableActions = _generateOfferActions(
+      compatibilityResults,
+      offerContent,
+    );
 
     return EnrichedQRResult(
       validatedResult: validatedResult,
@@ -415,25 +464,35 @@ class QRScannerServiceEnhanced {
     Map<String, dynamic> requestContent,
     List<MatchingCredential> matchingCredentials,
   ) async {
-    final requestedAttributes = (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
-    final optionalAttributes = (requestContent['optional_attributes'] as List?)?.cast<String>() ?? [];
-    
+    final requestedAttributes =
+        (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
+    final optionalAttributes =
+        (requestContent['optional_attributes'] as List?)?.cast<String>() ?? [];
+
     // Analyze privacy implications of each attribute
     final attributePrivacyScores = <String, double>{};
-    
+
     for (final attr in requestedAttributes) {
       attributePrivacyScores[attr] = _calculateAttributePrivacyScore(attr);
     }
 
     // Calculate overall privacy risk
-    final overallRiskScore = attributePrivacyScores.values.isNotEmpty ? 
-        attributePrivacyScores.values.reduce((a, b) => a + b) / attributePrivacyScores.length : 0.0;
+    final overallRiskScore = attributePrivacyScores.values.isNotEmpty
+        ? attributePrivacyScores.values.reduce((a, b) => a + b) /
+              attributePrivacyScores.length
+        : 0.0;
 
     return PrivacyAnalysis(
       overallRiskLevel: _riskLevelFromScore(overallRiskScore),
       attributeRisks: attributePrivacyScores,
-      recommendations: _generatePrivacyRecommendations(overallRiskScore, requestedAttributes),
-      dataMinimizationOpportunities: _identifyDataMinimizationOpportunities(requestedAttributes, optionalAttributes),
+      recommendations: _generatePrivacyRecommendations(
+        overallRiskScore,
+        requestedAttributes,
+      ),
+      dataMinimizationOpportunities: _identifyDataMinimizationOpportunities(
+        requestedAttributes,
+        optionalAttributes,
+      ),
       verifierTrustScore: await _calculateVerifierTrustScore(requestContent),
     );
   }
@@ -442,22 +501,37 @@ class QRScannerServiceEnhanced {
   double _calculateAttributePrivacyScore(String attribute) {
     // High privacy risk attributes
     const highRiskAttributes = {
-      'ssn', 'social_security_number', 'passport_number', 'driver_license',
-      'credit_card', 'bank_account', 'biometric_data', 'medical_records'
+      'ssn',
+      'social_security_number',
+      'passport_number',
+      'driver_license',
+      'credit_card',
+      'bank_account',
+      'biometric_data',
+      'medical_records',
     };
-    
-    // Medium privacy risk attributes  
+
+    // Medium privacy risk attributes
     const mediumRiskAttributes = {
-      'date_of_birth', 'phone_number', 'address', 'email', 'id_number'
+      'date_of_birth',
+      'phone_number',
+      'address',
+      'email',
+      'id_number',
     };
 
     // Low privacy risk attributes
     const lowRiskAttributes = {
-      'name', 'first_name', 'last_name', 'age_over_18', 'age_over_21', 'country'
+      'name',
+      'first_name',
+      'last_name',
+      'age_over_18',
+      'age_over_21',
+      'country',
     };
 
     final lowerAttr = attribute.toLowerCase();
-    
+
     if (highRiskAttributes.any((risk) => lowerAttr.contains(risk))) {
       return 0.9; // High risk
     } else if (mediumRiskAttributes.any((risk) => lowerAttr.contains(risk))) {
@@ -478,25 +552,39 @@ class QRScannerServiceEnhanced {
   }
 
   /// Generate privacy recommendations
-  List<String> _generatePrivacyRecommendations(double overallRisk, List<String> requestedAttributes) {
+  List<String> _generatePrivacyRecommendations(
+    double overallRisk,
+    List<String> requestedAttributes,
+  ) {
     final recommendations = <String>[];
-    
+
     if (overallRisk >= 0.8) {
-      recommendations.add('High privacy risk detected - consider declining this request');
-      recommendations.add('If you must share, verify the verifier\'s identity thoroughly');
+      recommendations.add(
+        'High privacy risk detected - consider declining this request',
+      );
+      recommendations.add(
+        'If you must share, verify the verifier\'s identity thoroughly',
+      );
     } else if (overallRisk >= 0.6) {
-      recommendations.add('Medium privacy risk - review what information you\'re sharing');
-      recommendations.add('Consider using selective disclosure to share only necessary attributes');
+      recommendations.add(
+        'Medium privacy risk - review what information you\'re sharing',
+      );
+      recommendations.add(
+        'Consider using selective disclosure to share only necessary attributes',
+      );
     } else if (overallRisk >= 0.3) {
       recommendations.add('Low privacy risk - standard precautions apply');
     }
 
     // Specific attribute recommendations
-    final sensitiveAttrs = requestedAttributes.where((attr) => 
-      _calculateAttributePrivacyScore(attr) >= 0.8).toList();
-    
+    final sensitiveAttrs = requestedAttributes
+        .where((attr) => _calculateAttributePrivacyScore(attr) >= 0.8)
+        .toList();
+
     if (sensitiveAttrs.isNotEmpty) {
-      recommendations.add('Highly sensitive attributes requested: ${sensitiveAttrs.join(', ')}');
+      recommendations.add(
+        'Highly sensitive attributes requested: ${sensitiveAttrs.join(', ')}',
+      );
     }
 
     return recommendations;
@@ -504,21 +592,27 @@ class QRScannerServiceEnhanced {
 
   /// Identify data minimization opportunities
   List<String> _identifyDataMinimizationOpportunities(
-    List<String> required, 
+    List<String> required,
     List<String> optional,
   ) {
     final opportunities = <String>[];
-    
+
     if (optional.isNotEmpty) {
-      opportunities.add('${optional.length} optional attributes can be excluded');
+      opportunities.add(
+        '${optional.length} optional attributes can be excluded',
+      );
     }
 
     // Suggest alternatives for high-risk attributes
     for (final attr in required) {
       if (attr.toLowerCase().contains('date_of_birth')) {
-        opportunities.add('Consider sharing age verification instead of full date of birth');
+        opportunities.add(
+          'Consider sharing age verification instead of full date of birth',
+        );
       } else if (attr.toLowerCase().contains('address')) {
-        opportunities.add('Consider sharing only city/state instead of full address');
+        opportunities.add(
+          'Consider sharing only city/state instead of full address',
+        );
       }
     }
 
@@ -526,15 +620,17 @@ class QRScannerServiceEnhanced {
   }
 
   /// Calculate verifier trust score
-  Future<double> _calculateVerifierTrustScore(Map<String, dynamic> requestContent) async {
+  Future<double> _calculateVerifierTrustScore(
+    Map<String, dynamic> requestContent,
+  ) async {
     // This would integrate with a trust registry in production
     final verifier = requestContent['verifier'] as Map<String, dynamic>?;
-    
+
     if (verifier == null) return 0.5; // Unknown verifier
-    
+
     final did = verifier['did'] as String?;
     final name = verifier['name'] as String?;
-    
+
     // Check against known verifiers
     if (did != null) {
       try {
@@ -555,18 +651,30 @@ class QRScannerServiceEnhanced {
   }
 
   /// Analyze credential compatibility for offers
-  Future<CredentialCompatibility> _analyzeCredentialCompatibility(Map<String, dynamic> credentialDef) async {
+  Future<CredentialCompatibility> _analyzeCredentialCompatibility(
+    Map<String, dynamic> credentialDef,
+  ) async {
     try {
-      final compatibility = await _spruceClient.analyzeCredentialCompatibilitySDK(credentialDef);
-      
+      final compatibility = await _spruceClient
+          .analyzeCredentialCompatibilitySDK(credentialDef);
+
       return CredentialCompatibility(
         credentialType: credentialDef['type'] as String? ?? 'Unknown',
         format: credentialDef['format'] as String? ?? 'jwt_vc',
         isSupported: compatibility['supported'] as bool? ?? false,
-        supportLevel: CompatibilityLevel.fromString(compatibility['support_level'] as String? ?? 'unknown'),
-        requiredCapabilities: (compatibility['required_capabilities'] as List?)?.cast<String>() ?? [],
-        availableCapabilities: (compatibility['available_capabilities'] as List?)?.cast<String>() ?? [],
-        missingCapabilities: (compatibility['missing_capabilities'] as List?)?.cast<String>() ?? [],
+        supportLevel: CompatibilityLevel.fromString(
+          compatibility['support_level'] as String? ?? 'unknown',
+        ),
+        requiredCapabilities:
+            (compatibility['required_capabilities'] as List?)?.cast<String>() ??
+            [],
+        availableCapabilities:
+            (compatibility['available_capabilities'] as List?)
+                ?.cast<String>() ??
+            [],
+        missingCapabilities:
+            (compatibility['missing_capabilities'] as List?)?.cast<String>() ??
+            [],
       );
     } catch (e) {
       Logger.warning('Failed to analyze credential compatibility', error: e);
@@ -590,49 +698,59 @@ class QRScannerServiceEnhanced {
     final actions = <QRAction>[];
 
     if (matchingCredentials.isNotEmpty) {
-      actions.add(QRAction(
-        id: 'create_presentation',
-        title: 'Share Credentials',
-        description: 'Create presentation with selected credentials',
-        type: ActionType.presentation,
-        priority: ActionPriority.high,
-        requiresUserConsent: true,
-        metadata: {
-          'matching_credentials_count': matchingCredentials.length,
-          'best_match_score': matchingCredentials.first.matchScore,
-        },
-      ));
+      actions.add(
+        QRAction(
+          id: 'create_presentation',
+          title: 'Share Credentials',
+          description: 'Create presentation with selected credentials',
+          type: ActionType.presentation,
+          priority: ActionPriority.high,
+          requiresUserConsent: true,
+          metadata: {
+            'matching_credentials_count': matchingCredentials.length,
+            'best_match_score': matchingCredentials.first.matchScore,
+          },
+        ),
+      );
 
-      actions.add(QRAction(
-        id: 'selective_disclosure',
-        title: 'Advanced Privacy Controls',
-        description: 'Fine-tune what information to share',
-        type: ActionType.selectiveDisclosure,
-        priority: ActionPriority.medium,
-        requiresUserConsent: true,
-        metadata: {'total_attributes': matchingCredentials.first.totalAttributes},
-      ));
+      actions.add(
+        QRAction(
+          id: 'selective_disclosure',
+          title: 'Advanced Privacy Controls',
+          description: 'Fine-tune what information to share',
+          type: ActionType.selectiveDisclosure,
+          priority: ActionPriority.medium,
+          requiresUserConsent: true,
+          metadata: {
+            'total_attributes': matchingCredentials.first.totalAttributes,
+          },
+        ),
+      );
     } else {
-      actions.add(QRAction(
-        id: 'no_matching_credentials',
-        title: 'No Matching Credentials',
-        description: 'You don\'t have credentials that match this request',
-        type: ActionType.information,
-        priority: ActionPriority.low,
-        requiresUserConsent: false,
-        metadata: {'can_fulfill': false},
-      ));
+      actions.add(
+        QRAction(
+          id: 'no_matching_credentials',
+          title: 'No Matching Credentials',
+          description: 'You don\'t have credentials that match this request',
+          type: ActionType.information,
+          priority: ActionPriority.low,
+          requiresUserConsent: false,
+          metadata: {'can_fulfill': false},
+        ),
+      );
     }
 
-    actions.add(QRAction(
-      id: 'decline_request',
-      title: 'Decline Request',
-      description: 'Refuse to share any information',
-      type: ActionType.decline,
-      priority: ActionPriority.medium,
-      requiresUserConsent: false,
-      metadata: {},
-    ));
+    actions.add(
+      QRAction(
+        id: 'decline_request',
+        title: 'Decline Request',
+        description: 'Refuse to share any information',
+        type: ActionType.decline,
+        priority: ActionPriority.medium,
+        requiresUserConsent: false,
+        metadata: {},
+      ),
+    );
 
     return actions;
   }
@@ -644,57 +762,72 @@ class QRScannerServiceEnhanced {
   ) {
     final actions = <QRAction>[];
 
-    final supportedCredentials = compatibilityResults.where((c) => c.isSupported).length;
+    final supportedCredentials = compatibilityResults
+        .where((c) => c.isSupported)
+        .length;
     final totalCredentials = compatibilityResults.length;
 
     if (supportedCredentials > 0) {
-      actions.add(QRAction(
-        id: 'accept_credentials',
-        title: 'Accept Credentials',
-        description: 'Add ${supportedCredentials} credential${supportedCredentials == 1 ? '' : 's'} to wallet',
-        type: ActionType.credentialAcceptance,
-        priority: ActionPriority.high,
-        requiresUserConsent: true,
-        metadata: {
-          'supported_count': supportedCredentials,
-          'total_count': totalCredentials,
-        },
-      ));
+      actions.add(
+        QRAction(
+          id: 'accept_credentials',
+          title: 'Accept Credentials',
+          description:
+              'Add ${supportedCredentials} credential${supportedCredentials == 1 ? '' : 's'} to wallet',
+          type: ActionType.credentialAcceptance,
+          priority: ActionPriority.high,
+          requiresUserConsent: true,
+          metadata: {
+            'supported_count': supportedCredentials,
+            'total_count': totalCredentials,
+          },
+        ),
+      );
     }
 
     if (supportedCredentials < totalCredentials) {
-      actions.add(QRAction(
-        id: 'partial_support_warning',
-        title: 'Partial Compatibility',
-        description: '${totalCredentials - supportedCredentials} credential${totalCredentials - supportedCredentials == 1 ? '' : 's'} not fully supported',
-        type: ActionType.warning,
-        priority: ActionPriority.medium,
-        requiresUserConsent: false,
-        metadata: {'unsupported_count': totalCredentials - supportedCredentials},
-      ));
+      actions.add(
+        QRAction(
+          id: 'partial_support_warning',
+          title: 'Partial Compatibility',
+          description:
+              '${totalCredentials - supportedCredentials} credential${totalCredentials - supportedCredentials == 1 ? '' : 's'} not fully supported',
+          type: ActionType.warning,
+          priority: ActionPriority.medium,
+          requiresUserConsent: false,
+          metadata: {
+            'unsupported_count': totalCredentials - supportedCredentials,
+          },
+        ),
+      );
     }
 
-    actions.add(QRAction(
-      id: 'decline_offer',
-      title: 'Decline Offer',
-      description: 'Don\'t add any credentials',
-      type: ActionType.decline,
-      priority: ActionPriority.low,
-      requiresUserConsent: false,
-      metadata: {},
-    ));
+    actions.add(
+      QRAction(
+        id: 'decline_offer',
+        title: 'Decline Offer',
+        description: 'Don\'t add any credentials',
+        type: ActionType.decline,
+        priority: ActionPriority.low,
+        requiresUserConsent: false,
+        metadata: {},
+      ),
+    );
 
     return actions;
   }
 
   /// Optimize result for specific workflow patterns
-  Future<ProcessedQRResult> _optimizeForWorkflow(EnrichedQRResult enrichedResult) async {
+  Future<ProcessedQRResult> _optimizeForWorkflow(
+    EnrichedQRResult enrichedResult,
+  ) async {
     try {
       // Apply workflow-specific optimizations
       final optimizations = <String, dynamic>{};
 
       // Preload credential data for presentation workflows
-      if (enrichedResult.validatedResult.parsedData.type == QRType.presentationRequest) {
+      if (enrichedResult.validatedResult.parsedData.type ==
+          QRType.presentationRequest) {
         optimizations['preloaded_credentials'] = await _preloadCredentialData(
           enrichedResult.matchingCredentials,
         );
@@ -709,9 +842,10 @@ class QRScannerServiceEnhanced {
 
       // Pre-generate presentation templates
       if (enrichedResult.matchingCredentials.isNotEmpty) {
-        optimizations['presentation_templates'] = await _generatePresentationTemplates(
-          enrichedResult.matchingCredentials,
-        );
+        optimizations['presentation_templates'] =
+            await _generatePresentationTemplates(
+              enrichedResult.matchingCredentials,
+            );
       }
 
       return ProcessedQRResult.success(
@@ -723,7 +857,6 @@ class QRScannerServiceEnhanced {
         },
         optimizations: optimizations,
       );
-
     } catch (e) {
       Logger.error('Failed to optimize workflow', error: e);
       return ProcessedQRResult.success(
@@ -735,15 +868,23 @@ class QRScannerServiceEnhanced {
   }
 
   /// Preload credential data for faster access
-  Future<Map<String, dynamic>> _preloadCredentialData(List<MatchingCredential> credentials) async {
+  Future<Map<String, dynamic>> _preloadCredentialData(
+    List<MatchingCredential> credentials,
+  ) async {
     final preloadedData = <String, dynamic>{};
-    
-    for (final cred in credentials.take(3)) { // Preload top 3 matches
+
+    for (final cred in credentials.take(3)) {
+      // Preload top 3 matches
       try {
-        final fullCredential = await _walletManager.getCredentialById(cred.credentialId);
+        final fullCredential = await _walletManager.getCredentialById(
+          cred.credentialId,
+        );
         preloadedData[cred.credentialId] = fullCredential;
       } catch (e) {
-        Logger.warning('Failed to preload credential ${cred.credentialId}', error: e);
+        Logger.warning(
+          'Failed to preload credential ${cred.credentialId}',
+          error: e,
+        );
       }
     }
 
@@ -751,7 +892,9 @@ class QRScannerServiceEnhanced {
   }
 
   /// Cache verifier data for performance
-  Future<Map<String, dynamic>> _cacheVerifierData(Map<String, dynamic> requestContent) async {
+  Future<Map<String, dynamic>> _cacheVerifierData(
+    Map<String, dynamic> requestContent,
+  ) async {
     final verifier = requestContent['verifier'] as Map<String, dynamic>?;
     if (verifier == null) return {};
 
@@ -768,8 +911,9 @@ class QRScannerServiceEnhanced {
     List<MatchingCredential> credentials,
   ) async {
     final templates = <Map<String, dynamic>>[];
-    
-    for (final cred in credentials.take(2)) { // Generate templates for top matches
+
+    for (final cred in credentials.take(2)) {
+      // Generate templates for top matches
       try {
         final template = await _spruceClient.generatePresentationTemplateSDK(
           credentialId: cred.credentialId,
@@ -777,7 +921,10 @@ class QRScannerServiceEnhanced {
         );
         templates.add(template);
       } catch (e) {
-        Logger.warning('Failed to generate presentation template for ${cred.credentialId}', error: e);
+        Logger.warning(
+          'Failed to generate presentation template for ${cred.credentialId}',
+          error: e,
+        );
       }
     }
 
@@ -787,9 +934,11 @@ class QRScannerServiceEnhanced {
   /// Generate performance optimization hints
   List<String> _generatePerformanceHints(EnrichedQRResult result) {
     final hints = <String>[];
-    
+
     if (result.matchingCredentials.length > 5) {
-      hints.add('Many matching credentials found - consider credential filtering');
+      hints.add(
+        'Many matching credentials found - consider credential filtering',
+      );
     }
 
     if (result.availableActions.length > 10) {
@@ -799,7 +948,7 @@ class QRScannerServiceEnhanced {
     final highSecurityCredentials = result.matchingCredentials
         .where((c) => c.securityLevel == SecurityLevel.high)
         .length;
-    
+
     if (highSecurityCredentials > 0) {
       hints.add('Hardware-backed credentials available for enhanced security');
     }
@@ -822,13 +971,7 @@ enum QRType {
 }
 
 /// QR code data formats
-enum QRFormat {
-  json,
-  url,
-  openid,
-  didcomm,
-  raw,
-}
+enum QRFormat { json, url, openid, didcomm, raw }
 
 /// Security levels for QR content
 enum SecurityLevel {
@@ -846,12 +989,7 @@ enum SecurityLevel {
 }
 
 /// Risk levels for privacy analysis
-enum RiskLevel {
-  minimal,
-  low,
-  medium,
-  high,
-}
+enum RiskLevel { minimal, low, medium, high }
 
 /// Action types available for QR processing results
 enum ActionType {
@@ -864,11 +1002,7 @@ enum ActionType {
 }
 
 /// Priority levels for actions
-enum ActionPriority {
-  low,
-  medium,
-  high,
-}
+enum ActionPriority { low, medium, high }
 
 /// Compatibility levels for credentials
 enum CompatibilityLevel {
@@ -1051,9 +1185,6 @@ class ProcessedQRResult {
   }
 
   factory ProcessedQRResult.error(String errorMessage) {
-    return ProcessedQRResult._(
-      isSuccess: false,
-      errorMessage: errorMessage,
-    );
+    return ProcessedQRResult._(isSuccess: false, errorMessage: errorMessage);
   }
 }

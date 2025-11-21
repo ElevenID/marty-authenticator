@@ -19,7 +19,7 @@
  */
 
 /// Integration demonstration showing QR scanner working with credential selection
-/// 
+///
 /// This demonstrates the complete flow:
 /// 1. QR scanner detects presentation request
 /// 2. Parse request to extract required attributes
@@ -33,19 +33,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../views/credential_selection_view.dart';
-import '../services/spruce_sdk_services.dart';
-import '../utils/logger.dart';
-import '../widgets/qr_scanner.dart';
 
 /// Demo integration showing QR scanner -> Credential selection workflow
 class QrScannerIntegrationDemo extends ConsumerStatefulWidget {
   const QrScannerIntegrationDemo({super.key});
 
   @override
-  ConsumerState<QrScannerIntegrationDemo> createState() => _QrScannerIntegrationDemoState();
+  ConsumerState<QrScannerIntegrationDemo> createState() =>
+      _QrScannerIntegrationDemoState();
 }
 
-class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationDemo> {
+class _QrScannerIntegrationDemoState
+    extends ConsumerState<QrScannerIntegrationDemo> {
   String? _lastScannedCode;
   Map<String, dynamic>? _parsedRequest;
   bool _isProcessing = false;
@@ -148,7 +147,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.qr_code_scanner),
                         label: const Text('Simulate Presentation Request'),
-                        onPressed: _isProcessing ? null : _simulatePresentationRequest,
+                        onPressed: _isProcessing
+                            ? null
+                            : _simulatePresentationRequest,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -156,7 +157,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.credit_card),
                         label: const Text('Simulate Credential Offer'),
-                        onPressed: _isProcessing ? null : _simulateCredentialOffer,
+                        onPressed: _isProcessing
+                            ? null
+                            : _simulateCredentialOffer,
                       ),
                     ),
                   ],
@@ -201,11 +204,7 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
               _error!,
@@ -238,11 +237,7 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.qr_code_scanner,
-                    size: 64,
-                    color: Colors.blue,
-                  ),
+                  Icon(Icons.qr_code_scanner, size: 64, color: Colors.blue),
                   SizedBox(height: 16),
                   Text(
                     'QR Scanner Area',
@@ -254,10 +249,7 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                   SizedBox(height: 8),
                   Text(
                     'Camera would be active here',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ],
               ),
@@ -266,9 +258,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           const SizedBox(height: 24),
           Text(
             'Use demo buttons below to simulate QR code scanning',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
         ],
       ),
@@ -293,21 +285,20 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           'email',
           'date_of_birth',
           'address',
-          'phone_number'
+          'phone_number',
         ],
-        'optional_attributes': [
-          'profile_picture',
-          'emergency_contact'
-        ],
+        'optional_attributes': ['profile_picture', 'emergency_contact'],
         'purpose': 'Identity verification for secure access',
         'verifier': {
           'name': 'Demo Verifier Service',
           'did': 'did:example:123456789abcdefghi',
-          'logo': 'https://example.com/logo.png'
+          'logo': 'https://example.com/logo.png',
         },
         'presentation_definition': {
           'format': {
-            'jwt_vc': {'alg': ['EdDSA', 'ES256K']}
+            'jwt_vc': {
+              'alg': ['EdDSA', 'ES256K'],
+            },
           },
           'input_descriptors': [
             {
@@ -315,19 +306,22 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
               'purpose': 'We need to verify your identity',
               'constraints': {
                 'fields': [
-                  {'path': ['\$.credentialSubject.name']},
-                  {'path': ['\$.credentialSubject.email']},
-                ]
-              }
-            }
-          ]
-        }
+                  {
+                    'path': ['\$.credentialSubject.name'],
+                  },
+                  {
+                    'path': ['\$.credentialSubject.email'],
+                  },
+                ],
+              },
+            },
+          ],
+        },
       };
 
       final qrCodeContent = jsonEncode(mockPresentationRequest);
-      
+
       await _handleScannedCode(qrCodeContent);
-      
     } catch (e) {
       setState(() {
         _error = 'Failed to simulate presentation request: $e';
@@ -353,7 +347,7 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
         'issuer': {
           'name': 'Demo Identity Issuer',
           'did': 'did:example:issuer123',
-          'logo': 'https://issuer.example.com/logo.png'
+          'logo': 'https://issuer.example.com/logo.png',
         },
         'credentials': [
           {
@@ -367,26 +361,26 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                 'name': 'John Doe',
                 'email': 'john.doe@example.com',
                 'date_of_birth': '1990-01-01',
-                'id_number': '123456789'
-              }
-            }
-          }
+                'id_number': '123456789',
+              },
+            },
+          },
         ],
         'grants': {
           'authorization_code': {
-            'issuer_state': 'state-${DateTime.now().millisecondsSinceEpoch}'
+            'issuer_state': 'state-${DateTime.now().millisecondsSinceEpoch}',
           },
           'urn:ietf:params:oauth:grant-type:pre-authorized_code': {
-            'pre-authorized_code': 'code-${DateTime.now().millisecondsSinceEpoch}',
-            'user_pin_required': false
-          }
-        }
+            'pre-authorized_code':
+                'code-${DateTime.now().millisecondsSinceEpoch}',
+            'user_pin_required': false,
+          },
+        },
       };
 
       final qrCodeContent = jsonEncode(mockCredentialOffer);
-      
+
       await _handleScannedCode(qrCodeContent);
-      
     } catch (e) {
       setState(() {
         _error = 'Failed to simulate credential offer: $e';
@@ -406,14 +400,14 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
     try {
       // Parse the QR code content
       final parsedData = jsonDecode(qrCodeContent) as Map<String, dynamic>;
-      
+
       setState(() {
         _parsedRequest = parsedData;
       });
 
       // Handle based on type
       final type = parsedData['type'] as String?;
-      
+
       if (type == 'PresentationRequest') {
         await _handlePresentationRequest(parsedData);
       } else if (type == 'CredentialOffer') {
@@ -421,7 +415,6 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
       } else {
         throw Exception('Unknown QR code type: $type');
       }
-      
     } catch (e) {
       setState(() {
         _error = 'Failed to parse QR code: $e';
@@ -430,9 +423,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
   }
 
   Future<void> _handlePresentationRequest(Map<String, dynamic> request) async {
-    final requestedAttributes = (request['requested_attributes'] as List?)
-        ?.cast<String>() ?? [];
-    
+    final requestedAttributes =
+        (request['requested_attributes'] as List?)?.cast<String>() ?? [];
+
     if (requestedAttributes.isEmpty) {
       throw Exception('No requested attributes found in presentation request');
     }
@@ -452,18 +445,24 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${request['verifier']?['name'] ?? 'Unknown verifier'} is requesting:'),
+            Text(
+              '${request['verifier']?['name'] ?? 'Unknown verifier'} is requesting:',
+            ),
             const SizedBox(height: 12),
-            ...requestedAttributes.take(3).map((attr) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  const Icon(Icons.check, size: 16, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(attr),
-                ],
-              ),
-            )),
+            ...requestedAttributes
+                .take(3)
+                .map(
+                  (attr) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check, size: 16, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(attr),
+                      ],
+                    ),
+                  ),
+                ),
             if (requestedAttributes.length > 3)
               Text('... and ${requestedAttributes.length - 3} more attributes'),
             const SizedBox(height: 12),
@@ -537,18 +536,29 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${offer['issuer']?['name'] ?? 'Unknown issuer'} is offering credentials:'),
+            Text(
+              '${offer['issuer']?['name'] ?? 'Unknown issuer'} is offering credentials:',
+            ),
             const SizedBox(height: 12),
-            ...(offer['credentials'] as List?)?.take(3).map((cred) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  const Icon(Icons.verified, size: 16, color: Colors.green),
-                  const SizedBox(width: 8),
-                  Text(cred['type'] ?? 'Unknown credential'),
-                ],
-              ),
-            )) ?? [],
+            ...(offer['credentials'] as List?)
+                    ?.take(3)
+                    .map(
+                      (cred) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.verified,
+                              size: 16,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(cred['type'] ?? 'Unknown credential'),
+                          ],
+                        ),
+                      ),
+                    ) ??
+                [],
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -580,7 +590,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _showInfo('Credential offer would be processed using SDK wallet manager');
+              _showInfo(
+                'Credential offer would be processed using SDK wallet manager',
+              );
             },
             child: const Text('Accept'),
           ),
@@ -604,7 +616,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Presentation created successfully with SDK-enhanced security.'),
+            const Text(
+              'Presentation created successfully with SDK-enhanced security.',
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -625,8 +639,7 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                   const SizedBox(height: 8),
                   Text('ID: ${presentation['id'] ?? 'N/A'}'),
                   Text('Type: ${presentation['type'] ?? 'N/A'}'),
-                  if (presentation['proof'] != null)
-                    Text('Signed: ✓'),
+                  if (presentation['proof'] != null) Text('Signed: ✓'),
                   if (presentation['selectiveDisclosure'] != null)
                     Text('Selective Disclosure: ✓'),
                 ],
@@ -654,10 +667,12 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
   Future<void> _sharePresentation(Map<String, dynamic> presentation) async {
     // In a real implementation, this would generate a QR code or use other sharing mechanisms
     final presentationJson = jsonEncode(presentation);
-    
+
     await Clipboard.setData(ClipboardData(text: presentationJson));
-    
-    _showInfo('Presentation copied to clipboard. In production, this would be shared via QR code or NFC.');
+
+    _showInfo(
+      'Presentation copied to clipboard. In production, this would be shared via QR code or NFC.',
+    );
   }
 
   void _showSdkSecurityFeatures() {
@@ -745,9 +760,9 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -773,9 +788,13 @@ class _QrScannerIntegrationDemoState extends ConsumerState<QrScannerIntegrationD
               ),
               const SizedBox(height: 12),
               const Text('1. QR codes are scanned and parsed'),
-              const Text('2. Presentation requests launch credential selection'),
+              const Text(
+                '2. Presentation requests launch credential selection',
+              ),
               const Text('3. Users choose credentials and attributes to share'),
-              const Text('4. SDK creates secure presentations with selective disclosure'),
+              const Text(
+                '4. SDK creates secure presentations with selective disclosure',
+              ),
               const Text('5. Results can be shared back via QR codes'),
               const SizedBox(height: 16),
               Container(

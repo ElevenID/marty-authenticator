@@ -23,6 +23,7 @@ import 'home_widget_processor.dart';
 import 'navigation_scheme_processors/navigation_scheme_processor_interface.dart';
 import 'token_container_processor.dart';
 import 'token_import_scheme_processors/token_import_scheme_processor_interface.dart';
+import 'spruce_id_scheme_processor.dart';
 
 /// On new impelementations, add them to the [SchemeProcessor.implementations] list
 abstract class SchemeProcessor {
@@ -35,6 +36,7 @@ abstract class SchemeProcessor {
 
   static final List<SchemeProcessor> implementations = [
     const HomeWidgetProcessor(),
+    const SpruceIdSchemeProcessor(),
     ...NavigationSchemeProcessor.implementations,
     ...TokenImportSchemeProcessor.implementations,
     const TokenContainerProcessor(),

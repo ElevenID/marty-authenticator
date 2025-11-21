@@ -187,13 +187,6 @@ class VerifiableCredentialCard extends StatelessWidget {
     );
   }
 
-  List<Color> _getGradientColors(BuildContext context) {
-    // Fallback - should now use the theme
-    return context.credentialCardTheme.getGradientForCredentialType(
-      credential.credentialType,
-    );
-  }
-
   IconData _getCredentialIcon() {
     final credType = credential.credentialType.toLowerCase();
 

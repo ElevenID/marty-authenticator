@@ -38,6 +38,7 @@ import '../../../widgets/pi_slidable.dart';
 import 'drag_target_divider.dart';
 import 'folder_widgets/token_folder_widget.dart';
 import 'no_token_screen.dart';
+import 'card_widgets/passport_placeholder_card.dart';
 
 class MainViewTokensList extends ConsumerStatefulWidget {
   final GlobalKey<NestedScrollViewState> nestedScrollViewKey;
@@ -66,8 +67,11 @@ class MainViewTokensList extends ConsumerStatefulWidget {
     required SortableMixin? draggingSortable,
   }) {
     List<Widget> widgets = [];
+    widgets.add(const PassportPlaceholderCard());
+
     sortables = sortables.toList();
-    if (sortables.isEmpty) return [];
+    if (sortables.isEmpty)
+      return widgets; // Return widgets instead of empty list to show placeholder
     sortables.sort((a, b) => a.compareTo(b));
 
     Map<TokenFolder, List<Token>> folderTokensMap = {};

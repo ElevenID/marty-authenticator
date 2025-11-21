@@ -38,10 +38,12 @@ class PromotionalCredentialCard extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PromotionalCredentialCard> createState() => _PromotionalCredentialCardState();
+  ConsumerState<PromotionalCredentialCard> createState() =>
+      _PromotionalCredentialCardState();
 }
 
-class _PromotionalCredentialCardState extends ConsumerState<PromotionalCredentialCard>
+class _PromotionalCredentialCardState
+    extends ConsumerState<PromotionalCredentialCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _dismissController;
   late Animation<double> _heightAnimation;
@@ -55,19 +57,13 @@ class _PromotionalCredentialCardState extends ConsumerState<PromotionalCredentia
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     _heightAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _dismissController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _dismissController, curve: Curves.easeInOut),
     );
-    
+
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _dismissController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _dismissController, curve: Curves.easeInOut),
     );
   }
 
@@ -99,38 +95,38 @@ class _PromotionalCredentialCardState extends ConsumerState<PromotionalCredentia
                     children: [
                       Icon(
                         widget.credential.icon,
-                color: Colors.white,
-                size: 24,
-              ),
+                        color: Colors.white,
+                        size: 24,
+                      ),
                       const Spacer(),
                       IconButton(
                         onPressed: _isDismissing ? null : () => _dismissCard(),
-                icon: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 24,
-                  minHeight: 24,
-                ),
-                tooltip: 'Dismiss',
-              ),
-            ],
-          ),
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 24,
+                          minHeight: 24,
+                        ),
+                        tooltip: 'Dismiss',
+                      ),
+                    ],
+                  ),
 
-          const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Title and subtitle
                   Text(
                     widget.credential.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
 
                   Text(
                     widget.credential.subtitle,
@@ -146,12 +142,12 @@ class _PromotionalCredentialCardState extends ConsumerState<PromotionalCredentia
                   // Description
                   Text(
                     widget.credential.description,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              height: 1.3,
-            ),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                    ),
                     maxLines: widget.isExpanded ? null : 2,
                     overflow: widget.isExpanded ? null : TextOverflow.ellipsis,
                   ),
@@ -193,17 +189,19 @@ class _PromotionalCredentialCardState extends ConsumerState<PromotionalCredentia
 
   void _dismissCard() async {
     if (_isDismissing) return;
-    
+
     setState(() {
       _isDismissing = true;
     });
-    
+
     // Start dismiss animation
     await _dismissController.forward();
-    
+
     // Dismiss the card from the provider
     if (mounted) {
-      ref.read(credentialsProvider.notifier).dismissPromotionalCard(widget.credential.id);
+      ref
+          .read(credentialsProvider.notifier)
+          .dismissPromotionalCard(widget.credential.id);
     }
   }
 }

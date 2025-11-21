@@ -20,7 +20,7 @@
 
 /// Central export for SDK-enhanced SpruceID services
 /// Provides easy access to all extended functionality
-/// 
+///
 /// This file exports the complete SDK integration layer that leverages
 /// the refactored Android and iOS handlers for enhanced functionality
 

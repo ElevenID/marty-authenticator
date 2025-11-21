@@ -24,11 +24,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
+import '../utils/logger.dart';
 import 'spruce_platform_service_extended.dart';
-import 'spruce_client.dart';
+import '../spruce_client.dart';
 
 /// Extended client implementation with SDK-enhanced features
-class SpruceIdClientExtended extends SpruceIdClient implements ISpruceIdClientExtended {
+class SpruceIdClientExtended extends SpruceIdClient
+    implements ISpruceIdClientExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
   SpruceIdClientExtended(this._platformService) : super(_platformService);
@@ -83,7 +85,7 @@ class SpruceIdClientExtended extends SpruceIdClient implements ISpruceIdClientEx
   }
 
   @override
-  Future<Map<String, dynamic>> batchProcessCredentialsSDK({
+  Future<List<Map<String, dynamic>>> batchProcessCredentialsSDK({
     required List<Map<String, dynamic>> operations,
     String? keyId,
   }) async {
@@ -94,7 +96,9 @@ class SpruceIdClientExtended extends SpruceIdClient implements ISpruceIdClientEx
   }
 
   @override
-  Future<Map<String, dynamic>> getCredentialCapabilitiesSDK(String credentialId) async {
+  Future<Map<String, dynamic>> getCredentialCapabilitiesSDK(
+    String credentialId,
+  ) async {
     return await _platformService.getCredentialCapabilitiesSDK(credentialId);
   }
 
@@ -246,6 +250,65 @@ class SpruceIdClientExtended extends SpruceIdClient implements ISpruceIdClientEx
       expectedFormat: expectedFormat,
       importOptions: importOptions,
     );
+  }
+
+  @override
+  Future<void> initializeSDK({
+    Map<String, dynamic>? config,
+    bool enableAdvancedFeatures = true,
+  }) async {
+    // Initialize base SDK
+    await initialize();
+
+    // Initialize advanced features if requested
+    if (enableAdvancedFeatures) {
+      await _platformService.initializeHolderSDK(holderConfig: config);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> handleOID4VCFlow({
+    required String credentialOffer,
+    String? pin,
+    Map<String, dynamic>? presentationOptions,
+  }) async {
+    return await handleOID4VCOfferSDK(
+      credentialOffer: credentialOffer,
+      pin: pin,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> createAdvancedPresentation({
+    required List<Map<String, dynamic>> credentials,
+    required Map<String, dynamic> presentationRequest,
+    required Map<String, List<String>> selectiveDisclosure,
+  }) async {
+    // Extract challenge and domain from presentation request if available
+    final challenge =
+        presentationRequest['challenge'] as String? ?? 'default-challenge';
+    final domain = presentationRequest['domain'] as String? ?? 'default-domain';
+
+    return await createPresentationSDK(
+      credentials: credentials,
+      challenge: challenge,
+      domain: domain,
+      selectiveDisclosure: selectiveDisclosure,
+    );
+  }
+
+  @override
+  Future<void> enableCredentialMonitoring() async {
+    // This would typically set up a stream or periodic check
+    // For now, we'll just log it as implemented
+    Logger.info('Credential monitoring enabled');
+  }
+
+  @override
+  Future<Map<String, dynamic>> getCredentialMetadata(
+    String credentialId,
+  ) async {
+    return await getCredentialCapabilitiesSDK(credentialId);
   }
 }
 

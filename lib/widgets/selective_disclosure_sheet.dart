@@ -19,10 +19,10 @@
  */
 
 /// Advanced selective disclosure sheet for fine-grained privacy control
-/// 
+///
 /// This widget provides detailed control over attribute disclosure with:
 /// - Visual privacy impact indicators
-/// - Compliance recommendations  
+/// - Compliance recommendations
 /// - Advanced disclosure patterns
 /// - Hardware security status
 /// - Data minimization guidance
@@ -97,7 +97,7 @@ class SelectiveDisclosureSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SelectiveDisclosureSheet> createState() => 
+  ConsumerState<SelectiveDisclosureSheet> createState() =>
       _SelectiveDisclosureSheetState();
 
   /// Show the selective disclosure sheet
@@ -125,7 +125,8 @@ class SelectiveDisclosureSheet extends ConsumerStatefulWidget {
   }
 }
 
-class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSheet> {
+class _SelectiveDisclosureSheetState
+    extends ConsumerState<SelectiveDisclosureSheet> {
   List<AttributeDisclosureConfig> _attributeConfigs = [];
   bool _isLoading = false;
   String? _error;
@@ -146,9 +147,12 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
 
     try {
       _attributeConfigs = widget.credential.claims.entries.map((entry) {
-        final isRequired = widget.credential.requiredAttributes.contains(entry.key);
-        final isCurrentlyDisclosed = widget.credential.attributeSelections[entry.key] ?? false;
-        
+        final isRequired = widget.credential.requiredAttributes.contains(
+          entry.key,
+        );
+        final isCurrentlyDisclosed =
+            widget.credential.attributeSelections[entry.key] ?? false;
+
         return AttributeDisclosureConfig(
           attributeName: entry.key,
           attributeValue: entry.value,
@@ -249,7 +253,7 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
   void _applyPrivacyMode(PrivacyMode mode) {
     setState(() {
       _privacyMode = mode;
-      
+
       for (int i = 0; i < _attributeConfigs.length; i++) {
         final config = _attributeConfigs[i];
         bool shouldDisclose = false;
@@ -259,8 +263,8 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
             shouldDisclose = config.isRequired;
             break;
           case PrivacyMode.balanced:
-            shouldDisclose = config.isRequired || 
-                           config.riskLevel == DisclosureRisk.low;
+            shouldDisclose =
+                config.isRequired || config.riskLevel == DisclosureRisk.low;
             break;
           case PrivacyMode.permissive:
             shouldDisclose = config.riskLevel != DisclosureRisk.critical;
@@ -272,7 +276,7 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
 
         _attributeConfigs[i] = config.copyWith(isDisclosed: shouldDisclose);
       }
-      
+
       _updateCurrentDisclosure();
     });
   }
@@ -294,7 +298,7 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
         children: [
           _buildHeader(),
           if (_error != null) _buildErrorWidget(),
-          if (_isLoading) 
+          if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
           else
             Expanded(
@@ -378,10 +382,7 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
           const Icon(Icons.error, color: Colors.red),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              _error!,
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: Text(_error!, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -394,9 +395,9 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
       children: [
         Text(
           'Privacy Mode',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         SingleChildScrollView(
@@ -426,9 +427,9 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
         const SizedBox(height: 8),
         Text(
           _privacyMode.description,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
         ),
       ],
     );
@@ -436,9 +437,11 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
 
   Widget _buildPrivacyOverview() {
     final totalAttributes = _attributeConfigs.length;
-    final disclosedAttributes = _attributeConfigs.where((c) => c.isDisclosed).length;
-    final privacyScore = totalAttributes > 0 
-        ? (totalAttributes - disclosedAttributes) / totalAttributes 
+    final disclosedAttributes = _attributeConfigs
+        .where((c) => c.isDisclosed)
+        .length;
+    final privacyScore = totalAttributes > 0
+        ? (totalAttributes - disclosedAttributes) / totalAttributes
         : 1.0;
 
     return Container(
@@ -457,12 +460,15 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
             children: [
               Text(
                 'Privacy Impact',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _getPrivacyScoreColor(privacyScore),
                   borderRadius: BorderRadius.circular(16),
@@ -516,14 +522,11 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
         const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -534,9 +537,9 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
       children: [
         Text(
           'Attributes',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         ...List.generate(_attributeConfigs.length, (index) {
@@ -551,13 +554,13 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
 
   Widget _buildAttributeCard(int index) {
     final config = _attributeConfigs[index];
-    
+
     return Card(
       elevation: config.isDisclosed ? 3 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: config.isDisclosed 
+          color: config.isDisclosed
               ? config.riskLevel.color.withOpacity(0.5)
               : Colors.grey.withOpacity(0.3),
           width: config.isDisclosed ? 2 : 1,
@@ -572,9 +575,10 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
               children: [
                 Checkbox(
                   value: config.isDisclosed,
-                  onChanged: config.isRequired 
-                      ? null 
-                      : (value) => _updateAttributeDisclosure(index, value ?? false),
+                  onChanged: config.isRequired
+                      ? null
+                      : (value) =>
+                            _updateAttributeDisclosure(index, value ?? false),
                 ),
                 Expanded(
                   child: Column(
@@ -584,9 +588,8 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
                         children: [
                           Text(
                             config.attributeName,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
                           if (config.isRequired)
@@ -598,7 +601,9 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
                               decoration: BoxDecoration(
                                 color: Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                border: Border.all(
+                                  color: Colors.red.withOpacity(0.3),
+                                ),
                               ),
                               child: const Text(
                                 'Required',
@@ -668,27 +673,28 @@ class _SelectiveDisclosureSheetState extends ConsumerState<SelectiveDisclosureSh
             ),
             if (config.usageRestrictions.isNotEmpty) ...[
               const SizedBox(height: 8),
-              ...config.usageRestrictions.map((restriction) => Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 12,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        restriction,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+              ...config.usageRestrictions.map(
+                (restriction) => Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 12,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          restriction,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
           ],
         ),

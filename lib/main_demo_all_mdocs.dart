@@ -20,7 +20,7 @@
 
 /// Demo main entry point with all mDoc credential types
 /// Includes: MDL, Passport, and Mobile ID
-/// 
+///
 /// Run with:
 ///   flutter run -t lib/main_demo_all_mdocs.dart -d chrome
 ///   flutter run -t lib/main_demo_all_mdocs.dart -d macos
@@ -39,14 +39,12 @@ void main() async {
       final passport = MDocFixtures.mobilePassport(
         state: CredentialState.valid,
       );
-      final mobileId = MDocFixtures.mobileId(
-        state: CredentialState.valid,
-      );
-      
+      final mobileId = MDocFixtures.mobileId(state: CredentialState.valid);
+
       await mockServices.platformService.storeCredential(mdl);
       await mockServices.platformService.storeCredential(passport);
       await mockServices.platformService.storeCredential(mobileId);
-      
+
       return [
         'Mobile Driver License (mDL)',
         'Mobile Passport (mPassport)',

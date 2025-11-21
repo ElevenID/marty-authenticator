@@ -40,24 +40,24 @@ import '../utils/riverpod/providers/spruce_providers.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import '../views/add_token_manually_view/add_token_manually_view.dart';
 import '../views/container_view/container_view.dart';
-import '../views/credential_demo_view.dart';
 import '../views/feedback_view/feedback_view.dart';
 import '../views/import_tokens_view/import_tokens_view.dart';
 import '../views/license_view/license_view.dart';
 import '../views/main_view/main_view.dart';
-import '../views/main_view/wallet_landing_view.dart';
 import '../views/push_token_view/push_tokens_view.dart';
 import '../views/qr_scanner_view/qr_scanner_view.dart';
-import '../views/separated_spruce_demo_view/separated_spruce_demo_view.dart';
 import '../views/settings_view/settings_view.dart';
 import '../views/splash_screen/splash_screen.dart';
 import '../views/spruce_demo_view/spruce_demo_view.dart';
+import '../views/separated_spruce_demo_view/separated_spruce_demo_view.dart';
+import '../views/main_view/document_view.dart';
 import '../widgets/app_wrapper.dart';
 import '../mocks/mock_spruce_services.dart';
 import '../mocks/mock_qr_scanner_service.dart';
 
 /// Function type for loading demo credentials
-typedef CredentialsLoader = Future<List<String>> Function(MockSpruceIdServices mockServices);
+typedef CredentialsLoader =
+    Future<List<String>> Function(MockSpruceIdServices mockServices);
 
 /// Run the demo app with specified credentials
 Future<void> runDemoApp({
@@ -83,10 +83,12 @@ Future<void> runDemoApp({
       // Firebase configuration
       if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
         DefaultFirebaseOptions.validateConfiguration();
-        
+
         if (DefaultFirebaseOptions.isFirebaseEnabled) {
           Logger.info('🔥 Firebase is enabled');
-          appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf('netknights');
+          appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
+            'netknights',
+          );
         } else {
           Logger.info('🚫 Firebase is disabled');
         }
@@ -114,11 +116,19 @@ Future<void> runDemoApp({
           child: AppWrapper(
             overrides: [
               // Override SpruceID providers with mock implementations
-              spruceIdPlatformServiceProvider.overrideWithValue(mockServices.platformService),
+              spruceIdPlatformServiceProvider.overrideWithValue(
+                mockServices.platformService,
+              ),
               spruceIdClientProvider.overrideWithValue(mockServices.client),
-              spruceIdWalletManagerProvider.overrideWithValue(mockServices.walletManager),
-              spruceIdMdocManagerProvider.overrideWithValue(mockServices.mdocManager),
-              spruceIdSdJwtManagerProvider.overrideWithValue(mockServices.sdJwtManager),
+              spruceIdWalletManagerProvider.overrideWithValue(
+                mockServices.walletManager,
+              ),
+              spruceIdMdocManagerProvider.overrideWithValue(
+                mockServices.mdocManager,
+              ),
+              spruceIdSdJwtManagerProvider.overrideWithValue(
+                mockServices.sdJwtManager,
+              ),
             ],
             child: PrivacyIDEAAuthenticatorDemo(
               customization: ApplicationCustomization.defaultCustomization,
@@ -147,8 +157,7 @@ class PrivacyIDEAAuthenticatorDemo extends ConsumerWidget {
       title: '${_customization.appName} - $demoName',
       navigatorKey: globalNavigatorKey,
       navigatorObservers: [
-        if (getMockQrScannerConfig() != null)
-          MockQrScannerNavigatorObserver(),
+        if (getMockQrScannerConfig() != null) MockQrScannerNavigatorObserver(),
       ],
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -167,15 +176,15 @@ class PrivacyIDEAAuthenticatorDemo extends ConsumerWidget {
         AddTokenManuallyView.routeName: (context) =>
             const AddTokenManuallyView(),
         FeedbackView.routeName: (context) => const FeedbackView(),
-        MainView.routeName: (context) => const WalletLandingView(),
+        MainView.routeName: (context) => const DocumentView(),
         ImportTokensView.routeName: (context) => const ImportTokensView(),
         LicenseView.routeName: (context) => LicenseView(
-          appImage: _customization.licensesViewImage?.getWidget ??
+          appImage:
+              _customization.licensesViewImage?.getWidget ??
               _customization.splashScreenImage.getWidget,
           appName: _customization.appName,
           websiteLink: _customization.websiteLink,
         ),
-        '/credentialDemoView': (context) => const CredentialDemoView(),
         '/legacyMainView': (context) => MainView(
           appbarIcon: _customization.appbarIcon.getWidget,
           backgroundImage: _customization.backgroundImage?.getWidget,

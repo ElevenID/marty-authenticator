@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../interfaces/spruce_interfaces.dart';
 import '../utils/spruce_channels.dart';
+import '../mocks/mock_spruce_services.dart';
+import '../utils/logger.dart';
 
 /// Exception thrown when SpruceID operations fail
 class SpruceIdException implements Exception {
@@ -31,10 +34,20 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
     SpruceIdChannels.wallet,
   );
 
+  // Expose channels for subclasses
+  MethodChannel get w3cChannel => _w3cChannel;
+  MethodChannel get pkiChannel => _pkiChannel;
+  MethodChannel get jwtChannel => _jwtChannel;
+  MethodChannel get mdocChannel => _mdocChannel;
+  MethodChannel get walletChannel => _walletChannel;
+
   bool _initialized = false;
-  
+
   @override
   bool get isInitialized => _initialized;
+
+  /// Protected constructor for subclasses
+  SpruceIdPlatformService.protected();
 
   @override
   Future<void> initializeW3C() async {
@@ -430,6 +443,18 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
 final spruceIdPlatformServiceProvider = Provider<ISpruceIdPlatformService>((
   ref,
 ) {
+  // Use Mock service for Web (Chrome) and Desktop development
+  // Force Mock for debugging
+  if (true ||
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.linux) {
+    Logger.debug('DEBUG: Using MockSpruceIdPlatformService');
+    return MockSpruceIdPlatformService();
+  }
+
+  Logger.debug('DEBUG: Using Real SpruceIdPlatformService');
   return SpruceIdPlatformService();
 });
 

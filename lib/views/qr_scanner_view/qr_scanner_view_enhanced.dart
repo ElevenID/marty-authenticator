@@ -19,14 +19,13 @@
  */
 
 /// Enhanced QR scanner view with SpruceID SDK integration
-/// 
+///
 /// This view replaces the standard QR scanner with enhanced capabilities:
 /// - Real-time credential processing during scan
 /// - Privacy analysis and risk assessment
 /// - Intelligent credential matching
 /// - Optimized performance for SSI workflows
 
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,11 +63,9 @@ class QRScannerViewEnhanced extends StatefulView {
 
 class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
     with TickerProviderStateMixin {
-  
   bool _isPermissionGranted = false;
   bool _isCheckingPermissions = true;
-  ProcessedQRResult? _lastProcessedResult;
-  
+
   // Animation controllers for enhanced UX
   late AnimationController _permissionCheckController;
   late Animation<double> _permissionCheckAnimation;
@@ -86,13 +83,12 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
       vsync: this,
     )..repeat();
 
-    _permissionCheckAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _permissionCheckController,
-      curve: Curves.easeInOut,
-    ));
+    _permissionCheckAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _permissionCheckController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -113,7 +109,11 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
         await _showPermissionDialog();
       }
     } catch (e) {
-      Logger.error('Permission check failed', error: e, name: 'QRScannerViewEnhanced');
+      Logger.error(
+        'Permission check failed',
+        error: e,
+        name: 'QRScannerViewEnhanced',
+      );
       setState(() {
         _isCheckingPermissions = false;
         _isPermissionGranted = false;
@@ -135,7 +135,7 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
       }
 
       // Request permission if not already granted
-      if (currentStatus == PermissionStatus.denied || 
+      if (currentStatus == PermissionStatus.denied ||
           currentStatus == PermissionStatus.restricted) {
         final requestedStatus = await Permission.camera.request();
         return requestedStatus;
@@ -143,14 +143,18 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
 
       return currentStatus;
     } catch (e) {
-      Logger.error('Failed to request camera permission', error: e, name: 'QRScannerViewEnhanced');
+      Logger.error(
+        'Failed to request camera permission',
+        error: e,
+        name: 'QRScannerViewEnhanced',
+      );
       return PermissionStatus.denied;
     }
   }
 
   Future<void> _showPermissionDialog() async {
     final localizations = AppLocalizations.of(context)!;
-    
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -181,7 +185,7 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
 
   Widget _buildPermissionDialogContent() {
     final localizations = AppLocalizations.of(context)!;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,14 +212,18 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
           ),
           child: Row(
             children: [
-              const Icon(Icons.enhanced_encryption, color: Colors.blue, size: 20),
+              const Icon(
+                Icons.enhanced_encryption,
+                color: Colors.blue,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Enhanced QR scanner with SDK-powered credential processing',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.blue[800],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.blue[800]),
                 ),
               ),
             ],
@@ -226,19 +234,15 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
   }
 
   void _handleScanResult(ProcessedQRResult result) {
-    setState(() {
-      _lastProcessedResult = result;
-    });
-    
     // Log scan result for debugging
     Logger.info(
       'Enhanced QR scan completed: ${result.enrichedResult?.validatedResult.parsedData.type ?? 'unknown'}',
-      name: 'QRScannerViewEnhanced'
+      name: 'QRScannerViewEnhanced',
     );
-    
+
     // Call external callback if provided
     widget.onScanResult?.call(result);
-    
+
     // Auto-navigate back for successful processing
     if (result.isSuccess && result.enrichedResult != null) {
       _handleSuccessfulResult(result);
@@ -248,7 +252,7 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
   Future<void> _handleSuccessfulResult(ProcessedQRResult result) async {
     final enrichedResult = result.enrichedResult!;
     final qrType = enrichedResult.validatedResult.parsedData.type;
-    
+
     // Show success feedback
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -267,9 +271,9 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
     }
 
     // For certain QR types, stay on the scanner for multiple scans
-    final shouldStayOpen = qrType == QRType.credentialData || 
-                          qrType == QRType.didcommMessage;
-    
+    final shouldStayOpen =
+        qrType == QRType.credentialData || qrType == QRType.didcommMessage;
+
     if (!shouldStayOpen) {
       // Auto-close after short delay for presentation requests and offers
       Future.delayed(const Duration(seconds: 2), () {
@@ -282,18 +286,23 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
 
   String _getQRTypeLabel(QRType type) {
     switch (type) {
-      case QRType.presentationRequest: return 'presentation request';
-      case QRType.credentialOffer: return 'credential offer';
-      case QRType.credentialData: return 'credential';
-      case QRType.didcommMessage: return 'DIDComm message';
-      default: return 'QR code';
+      case QRType.presentationRequest:
+        return 'presentation request';
+      case QRType.credentialOffer:
+        return 'credential offer';
+      case QRType.credentialData:
+        return 'credential';
+      case QRType.didcommMessage:
+        return 'DIDComm message';
+      default:
+        return 'QR code';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -361,16 +370,16 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
             const SizedBox(height: 24),
             Text(
               'Checking camera permissions...',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
               'Enhanced scanner requires camera access',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: 32),
             const SizedBox(
@@ -388,7 +397,7 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
 
   Widget _buildPermissionDeniedView() {
     final localizations = AppLocalizations.of(context)!;
-    
+
     return Container(
       color: Colors.black,
       padding: const EdgeInsets.all(24),
@@ -413,9 +422,9 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
             const SizedBox(height: 16),
             Text(
               localizations.cameraPermissionDialogPermanentlyDenied,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -428,7 +437,11 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.enhanced_encryption, color: Colors.blue, size: 32),
+                  const Icon(
+                    Icons.enhanced_encryption,
+                    color: Colors.blue,
+                    size: 32,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Enhanced QR Scanner',
@@ -440,9 +453,9 @@ class _QRScannerViewEnhancedState extends State<QRScannerViewEnhanced>
                   const SizedBox(height: 4),
                   Text(
                     'SDK-powered credential processing\nwith privacy analysis',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.blue[300],
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.blue[300]),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -497,7 +510,7 @@ class QRScannerViewEnhancedConsumer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize enhanced QR scanner service
     ref.watch(qrScannerServiceEnhancedProvider);
-    
+
     return QRScannerViewEnhanced(
       onScanResult: onScanResult,
       enableBackgroundProcessing: enableBackgroundProcessing,

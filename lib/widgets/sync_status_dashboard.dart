@@ -19,7 +19,7 @@
  */
 
 /// Sync status dashboard widget for monitoring background synchronization
-/// 
+///
 /// This widget provides:
 /// - Real-time sync status visualization
 /// - Credential-specific sync information
@@ -46,12 +46,12 @@ class SyncStatusDashboard extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SyncStatusDashboard> createState() => _SyncStatusDashboardState();
+  ConsumerState<SyncStatusDashboard> createState() =>
+      _SyncStatusDashboardState();
 }
 
 class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
     with TickerProviderStateMixin {
-  
   // Animation controllers
   late AnimationController _syncAnimationController;
   late AnimationController _fadeController;
@@ -85,46 +85,34 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
       vsync: this,
     );
 
-    _syncRotation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _syncAnimationController,
-      curve: Curves.linear,
-    ));
+    _syncRotation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _syncAnimationController, curve: Curves.linear),
+    );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
     _fadeController.forward();
   }
 
   void _subscribeToSyncUpdates() {
     final syncService = ref.read(backgroundSyncServiceProvider);
-    
-    _syncStatusSubscription = syncService.syncStatusStream.listen(
-      (syncInfo) {
-        setState(() {
-          _syncStatusMap[syncInfo.credentialId] = syncInfo;
-        });
-      },
-    );
 
-    _syncResultSubscription = syncService.syncResultStream.listen(
-      (result) {
-        setState(() {
-          _syncHistory.insert(0, result);
-          if (_syncHistory.length > 10) {
-            _syncHistory.removeLast();
-          }
-        });
-      },
-    );
+    _syncStatusSubscription = syncService.syncStatusStream.listen((syncInfo) {
+      setState(() {
+        _syncStatusMap[syncInfo.credentialId] = syncInfo;
+      });
+    });
+
+    _syncResultSubscription = syncService.syncResultStream.listen((result) {
+      setState(() {
+        _syncHistory.insert(0, result);
+        if (_syncHistory.length > 10) {
+          _syncHistory.removeLast();
+        }
+      });
+    });
 
     // Load initial state
     _loadInitialState();
@@ -150,12 +138,12 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
   @override
   Widget build(BuildContext context) {
     final syncService = ref.watch(backgroundSyncServiceProvider);
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Card(
         margin: const EdgeInsets.all(16),
-        child: widget.showDetailedView 
+        child: widget.showDetailedView
             ? _buildDetailedView(syncService)
             : _buildCompactView(syncService),
       ),
@@ -190,9 +178,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
       ),
       title: Text(
         isActive ? 'Syncing...' : 'Background Sync',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,9 +192,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
           if (lastSyncTime != null)
             Text(
               'Last sync: ${_formatRelativeTime(lastSyncTime)}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
         ],
       ),
@@ -217,7 +205,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
                 _buildSyncButton(syncService),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
+                  icon: Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                  ),
                   onPressed: () {
                     setState(() {
                       _isExpanded = !_isExpanded;
@@ -256,7 +246,7 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
 
   Widget _buildHeader(BackgroundSyncService syncService) {
     final isActive = syncService.isSyncActive;
-    
+
     return Row(
       children: [
         AnimatedBuilder(
@@ -264,11 +254,7 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
           builder: (context, child) {
             return Transform.rotate(
               angle: isActive ? _syncRotation.value * 2 * 3.14159 : 0,
-              child: Icon(
-                Icons.sync,
-                color: _getSyncStatusColor(),
-                size: 32,
-              ),
+              child: Icon(Icons.sync, color: _getSyncStatusColor(), size: 32),
             );
           },
         ),
@@ -279,15 +265,15 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
             children: [
               Text(
                 'Background Synchronization',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 isActive ? 'Sync in progress...' : 'Monitoring credentials',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: _getSyncStatusColor(),
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: _getSyncStatusColor()),
               ),
             ],
           ),
@@ -314,9 +300,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
             children: [
               Text(
                 'Sync Overview',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '$totalCredentials total',
@@ -366,7 +352,12 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
     );
   }
 
-  Widget _buildStatusIndicator(String label, int count, Color color, IconData icon) {
+  Widget _buildStatusIndicator(
+    String label,
+    int count,
+    Color color,
+    IconData icon,
+  ) {
     return Column(
       children: [
         Icon(icon, color: color, size: 24),
@@ -399,9 +390,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
               const SizedBox(height: 16),
               Text(
                 'No credentials to sync',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
               ),
             ],
           ),
@@ -410,16 +401,18 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
     }
 
     final sortedEntries = _syncStatusMap.entries.toList()
-      ..sort((a, b) => b.value.lastSyncAttempt.compareTo(a.value.lastSyncAttempt));
+      ..sort(
+        (a, b) => b.value.lastSyncAttempt.compareTo(a.value.lastSyncAttempt),
+      );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Credential Status',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Container(
@@ -437,7 +430,10 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
     );
   }
 
-  Widget _buildCredentialSyncTile(String credentialId, CredentialSyncInfo syncInfo) {
+  Widget _buildCredentialSyncTile(
+    String credentialId,
+    CredentialSyncInfo syncInfo,
+  ) {
     return ListTile(
       dense: true,
       leading: Icon(
@@ -462,10 +458,7 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
           if (syncInfo.lastError != null)
             Text(
               'Error: ${syncInfo.lastError}',
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.red,
-              ),
+              style: const TextStyle(fontSize: 11, color: Colors.red),
             ),
         ],
       ),
@@ -482,9 +475,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
       children: [
         Text(
           'Recent Sync Activity',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Container(
@@ -511,7 +504,7 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
         size: 16,
       ),
       title: Text(
-        result.success 
+        result.success
             ? '${result.credentialsUpdated} credentials updated'
             : 'Sync failed',
         style: Theme.of(context).textTheme.bodySmall,
@@ -519,10 +512,7 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
       subtitle: result.revocationsDetected > 0
           ? Text(
               '${result.revocationsDetected} revocations detected',
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.red,
-              ),
+              style: const TextStyle(fontSize: 11, color: Colors.red),
             )
           : null,
       trailing: Text(
@@ -537,7 +527,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: syncService.isSyncActive ? null : () => _performManualSync(syncService),
+            onPressed: syncService.isSyncActive
+                ? null
+                : () => _performManualSync(syncService),
             icon: const Icon(Icons.sync),
             label: const Text('Sync Now'),
           ),
@@ -608,7 +600,11 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
           ),
           ListTile(
             title: const Text('Auto Sync'),
-            subtitle: Text(syncService.configuration.enableBackgroundSync ? 'Enabled' : 'Disabled'),
+            subtitle: Text(
+              syncService.configuration.enableBackgroundSync
+                  ? 'Enabled'
+                  : 'Disabled',
+            ),
             trailing: Switch(
               value: syncService.configuration.enableBackgroundSync,
               onChanged: (value) {
@@ -618,7 +614,9 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
           ),
           ListTile(
             title: const Text('WiFi Only'),
-            subtitle: Text(syncService.configuration.wifiOnlySync ? 'Enabled' : 'Disabled'),
+            subtitle: Text(
+              syncService.configuration.wifiOnlySync ? 'Enabled' : 'Disabled',
+            ),
             trailing: Switch(
               value: syncService.configuration.wifiOnlySync,
               onChanged: (value) {
@@ -661,46 +659,69 @@ class _SyncStatusDashboardState extends ConsumerState<SyncStatusDashboard>
   Color _getSyncStatusColor() {
     final syncService = ref.read(backgroundSyncServiceProvider);
     if (syncService.isSyncActive) return Colors.blue;
-    
-    final hasErrors = _syncStatusMap.values.any((info) => info.failureCount > 0);
+
+    final hasErrors = _syncStatusMap.values.any(
+      (info) => info.failureCount > 0,
+    );
     if (hasErrors) return Colors.orange;
-    
+
     return Colors.green;
   }
 
   IconData _getStatusIcon(CredentialSyncStatus status) {
     switch (status) {
-      case CredentialSyncStatus.upToDate: return Icons.check_circle;
-      case CredentialSyncStatus.updating: return Icons.sync;
-      case CredentialSyncStatus.needsUpdate: return Icons.warning;
-      case CredentialSyncStatus.revoked: return Icons.block;
-      case CredentialSyncStatus.expired: return Icons.schedule;
-      case CredentialSyncStatus.invalid: return Icons.error;
-      default: return Icons.help;
+      case CredentialSyncStatus.upToDate:
+        return Icons.check_circle;
+      case CredentialSyncStatus.updating:
+        return Icons.sync;
+      case CredentialSyncStatus.needsUpdate:
+        return Icons.warning;
+      case CredentialSyncStatus.revoked:
+        return Icons.block;
+      case CredentialSyncStatus.expired:
+        return Icons.schedule;
+      case CredentialSyncStatus.invalid:
+        return Icons.error;
+      default:
+        return Icons.help;
     }
   }
 
   Color _getStatusColor(CredentialSyncStatus status) {
     switch (status) {
-      case CredentialSyncStatus.upToDate: return Colors.green;
-      case CredentialSyncStatus.updating: return Colors.blue;
-      case CredentialSyncStatus.needsUpdate: return Colors.orange;
-      case CredentialSyncStatus.revoked: return Colors.red;
-      case CredentialSyncStatus.expired: return Colors.red;
-      case CredentialSyncStatus.invalid: return Colors.red;
-      default: return Colors.grey;
+      case CredentialSyncStatus.upToDate:
+        return Colors.green;
+      case CredentialSyncStatus.updating:
+        return Colors.blue;
+      case CredentialSyncStatus.needsUpdate:
+        return Colors.orange;
+      case CredentialSyncStatus.revoked:
+        return Colors.red;
+      case CredentialSyncStatus.expired:
+        return Colors.red;
+      case CredentialSyncStatus.invalid:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   String _getStatusDescription(CredentialSyncStatus status) {
     switch (status) {
-      case CredentialSyncStatus.upToDate: return 'Up-to-date';
-      case CredentialSyncStatus.updating: return 'Syncing...';
-      case CredentialSyncStatus.needsUpdate: return 'Needs update';
-      case CredentialSyncStatus.revoked: return 'Revoked';
-      case CredentialSyncStatus.expired: return 'Expired';
-      case CredentialSyncStatus.invalid: return 'Invalid';
-      default: return 'Unknown';
+      case CredentialSyncStatus.upToDate:
+        return 'Up-to-date';
+      case CredentialSyncStatus.updating:
+        return 'Syncing...';
+      case CredentialSyncStatus.needsUpdate:
+        return 'Needs update';
+      case CredentialSyncStatus.revoked:
+        return 'Revoked';
+      case CredentialSyncStatus.expired:
+        return 'Expired';
+      case CredentialSyncStatus.invalid:
+        return 'Invalid';
+      default:
+        return 'Unknown';
     }
   }
 

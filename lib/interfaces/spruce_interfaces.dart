@@ -90,9 +90,7 @@ abstract class ISpruceIdPlatformService {
 abstract class ISpruceIdClient {
   Future<void> initialize();
   Future<String> createDid({String method = 'key'});
-  Future<Map<String, dynamic>> signCredential(
-    Map<String, dynamic> credential,
-  );
+  Future<Map<String, dynamic>> signCredential(Map<String, dynamic> credential);
   Future<Map<String, dynamic>> verifyCredential(
     Map<String, dynamic> credential,
   );

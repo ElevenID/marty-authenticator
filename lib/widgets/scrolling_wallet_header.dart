@@ -3,8 +3,15 @@ import '../widgets/dialogs/add_to_wallet_dialog.dart';
 
 class ScrollingWalletHeader extends StatelessWidget {
   final double opacity;
+  final VoidCallback? onScanPressed;
+  final VoidCallback? onAddPressed;
 
-  const ScrollingWalletHeader({super.key, required this.opacity});
+  const ScrollingWalletHeader({
+    super.key,
+    required this.opacity,
+    this.onScanPressed,
+    this.onAddPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +39,11 @@ class ScrollingWalletHeader extends StatelessWidget {
       actions: [
         _buildActionButton(
           icon: Icons.qr_code_scanner,
-          onPressed: () => _showQRScanner(context),
+          onPressed: onScanPressed ?? () => _showQRScanner(context),
         ),
         _buildActionButton(
           icon: Icons.add,
-          onPressed: () => AddToWalletDialog.show(context),
+          onPressed: onAddPressed ?? () => AddToWalletDialog.show(context),
         ),
       ],
     );

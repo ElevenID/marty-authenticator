@@ -32,16 +32,23 @@ void main() {
           latestStartedVersion: Version.parse('999.999.999'),
         ),
       );
-      when(mockSettingsRepository.saveSettings(any)).thenAnswer((_) async => true);
+      when(
+        mockSettingsRepository.saveSettings(any),
+      ).thenAnswer((_) async => true);
 
       mockTokenRepository = MockTokenRepository();
       when(mockTokenRepository.loadTokens()).thenAnswer((_) async => []);
-      when(mockTokenRepository.saveOrReplaceTokens(any)).thenAnswer((_) async => []);
+      when(
+        mockTokenRepository.saveOrReplaceTokens(any),
+      ).thenAnswer((_) async => []);
 
       mockTokenFolderRepository = MockTokenFolderRepository();
-      when(mockTokenFolderRepository.loadState())
-          .thenAnswer((_) async => const TokenFolderState(folders: []));
-      when(mockTokenFolderRepository.saveState(any)).thenAnswer((_) async => true);
+      when(
+        mockTokenFolderRepository.loadState(),
+      ).thenAnswer((_) async => const TokenFolderState(folders: []));
+      when(
+        mockTokenFolderRepository.saveState(any),
+      ).thenAnswer((_) async => true);
 
       mockIntroductionRepository = MockIntroductionRepository();
       when(mockIntroductionRepository.loadCompletedIntroductions()).thenAnswer(
@@ -51,7 +58,9 @@ void main() {
       );
     });
 
-    testWidgets('App launches without Firebase and handles deep links', (WidgetTester tester) async {
+    testWidgets('App launches without Firebase and handles deep links', (
+      WidgetTester tester,
+    ) async {
       // Set environment variables to skip Firebase
       const Map<String, String> testEnvironment = {
         'VERBOSE_LOGGING': 'false',
@@ -60,7 +69,7 @@ void main() {
 
       // This test verifies that the app can start and handle deep links
       // without requiring Firebase configuration
-      
+
       // Note: In a real integration test, you would:
       // 1. Build the app without Firebase env vars
       // 2. Install on device
@@ -70,10 +79,12 @@ void main() {
       expect(true, isTrue); // Placeholder - implement actual deep link testing
     });
 
-    testWidgets('Deep link URL schemes are properly registered', (WidgetTester tester) async {
+    testWidgets('Deep link URL schemes are properly registered', (
+      WidgetTester tester,
+    ) async {
       // This would test that the AndroidManifest.xml contains the correct intent filters
       // for all supported URL schemes without requiring Firebase
-      
+
       // Verify these schemes are registered:
       const expectedSchemes = [
         'otpauth',

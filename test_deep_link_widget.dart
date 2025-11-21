@@ -8,10 +8,7 @@ class DeepLinkTestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Deep Link Test',
-      home: const DeepLinkTestPage(),
-    );
+    return MaterialApp(title: 'Deep Link Test', home: const DeepLinkTestPage());
   }
 }
 

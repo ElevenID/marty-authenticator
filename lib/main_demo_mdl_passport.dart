@@ -19,7 +19,7 @@
 */
 
 /// Demo main entry point with Mobile Driver License (mDL) and Passport
-/// 
+///
 /// Run with:
 ///   flutter run -t lib/main_demo_mdl_passport.dart -d chrome
 ///   flutter run -t lib/main_demo_mdl_passport.dart -d macos
@@ -38,14 +38,11 @@ void main() async {
       final passport = MDocFixtures.mobilePassport(
         state: CredentialState.valid,
       );
-      
+
       await mockServices.platformService.storeCredential(mdl);
       await mockServices.platformService.storeCredential(passport);
-      
-      return [
-        'Mobile Driver License (mDL)',
-        'Mobile Passport (mPassport)',
-      ];
+
+      return ['Mobile Driver License (mDL)', 'Mobile Passport (mPassport)'];
     },
   );
 }

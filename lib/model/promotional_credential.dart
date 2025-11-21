@@ -99,7 +99,8 @@ class DefaultPromotionalCredentials {
       id: 'welcome',
       title: 'Welcome to Your',
       subtitle: 'Digital Wallet',
-      description: 'Store your digital credentials securely and access them anywhere.',
+      description:
+          'Store your digital credentials securely and access them anywhere.',
       icon: Icons.wallet_outlined,
       gradientColors: [Color(0xFF4A90E2), Color(0xFF357ABD)],
     ),
@@ -107,7 +108,8 @@ class DefaultPromotionalCredentials {
       id: 'security',
       title: 'Enhanced Security',
       subtitle: 'End-to-End Encryption',
-      description: 'Your data is protected with military-grade encryption and biometric authentication.',
+      description:
+          'Your data is protected with military-grade encryption and biometric authentication.',
       icon: Icons.security_outlined,
       gradientColors: [Color(0xFF50C878), Color(0xFF3A9B5C)],
     ),
@@ -115,7 +117,8 @@ class DefaultPromotionalCredentials {
       id: 'features',
       title: 'New Features',
       subtitle: 'Mobile Driver\'s License',
-      description: 'Add your driver\'s license and use it for quick verification at participating locations.',
+      description:
+          'Add your driver\'s license and use it for quick verification at participating locations.',
       icon: Icons.credit_card_outlined,
       gradientColors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
     ),
@@ -123,7 +126,8 @@ class DefaultPromotionalCredentials {
       id: 'qr_scan',
       title: 'Quick Setup',
       subtitle: 'Scan QR Codes',
-      description: 'Easily add new credentials by scanning QR codes from trusted issuers.',
+      description:
+          'Easily add new credentials by scanning QR codes from trusted issuers.',
       icon: Icons.qr_code_scanner_outlined,
       gradientColors: [Color(0xFFFF6B6B), Color(0xFFE55A5A)],
     ),

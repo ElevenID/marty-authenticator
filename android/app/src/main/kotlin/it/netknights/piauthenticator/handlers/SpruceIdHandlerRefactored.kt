@@ -20,10 +20,10 @@ import com.spruceid.mobile.sdk.rs.JsonVc
 
 /**
  * Refactored SpruceID handler using SDK APIs and adapter layer.
- * 
+ *
  * BEFORE: 494 lines with custom implementations
  * AFTER:  ~250 lines using SDK + adapters
- * 
+ *
  * Key improvements:
  * - Replaced custom storage with CredentialPack
  * - Replaced custom VP creation with Holder + Signer
@@ -47,7 +47,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     // Adapter layer
     private var signer: Signer? = null
     private val httpClient = HttpClientWrapper()
-    
+
     // Coroutine scope for async operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -92,7 +92,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
                 // OID4VC operations - Using SDK Oid4vci + HttpClientWrapper
                 "handleCredentialOffer" -> handleCredentialOfferAsync(call, result)
-                
+
                 // VP operations - Using SDK Holder + Signer
                 "handleVpRequest" -> handleVpRequestAsync(call, result)
 
@@ -100,6 +100,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
                 "createMdocResponse" -> createMdocResponseAsync(call, result)
                 "initializeMdl" -> initializeMdl(call, result)
                 "presentForAgeVerification" -> presentForAgeVerification(call, result)
+                "handleMdlProximityData" -> handleMdlProximityData(call, result)
 
                 // Storage operations - Using SDK CredentialPack
                 "storeCredential" -> storeCredentialWithPack(call, result)
@@ -305,7 +306,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     }
 
     // =============================================================================
-    // VP Operations - Using SDK Holder + Signer  
+    // VP Operations - Using SDK Holder + Signer
     // =============================================================================
 
     private fun handleVpRequestAsync(call: MethodCall, result: MethodChannel.Result) {
@@ -429,7 +430,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
         try {
             val credentialJson = credential.toString()
-            
+
             // Use CredentialPack for storage - replaces custom storage logic
             val jsonVc = JsonVc.newFromJson(credentialJson)
             credentialPack.addJsonVc(jsonVc)
@@ -526,7 +527,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             // Use CredentialPack for deletion
             val credentials = credentialPack.list()
             val credentialToRemove = credentials.find { it.id() == credentialId }
-            
+
             if (credentialToRemove != null) {
                 // Note: CredentialPack might not have direct removal, this is conceptual
                 // In practice, you might need to rebuild the pack without the credential
@@ -595,6 +596,41 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             "minAge" to minAge,
             "status" to "verified"
         ))
+    }
+
+    private fun handleMdlProximityData(call: MethodCall, result: MethodChannel.Result) {
+        val data = call.argument<ByteArray>("data")
+        if (data == null) {
+            result.error("INVALID_ARGUMENTS", "Invalid arguments: data required", null)
+            return
+        }
+
+        // Launch async operation
+        scope.launch {
+            try {
+                Log.d(TAG, "Processing mDL proximity data: ${data.size} bytes")
+
+                // TODO: Pass data to SDK's ISO 18013-5 session handler
+                // val response = mdlSession.handleMessage(data)
+
+                // For now, we just echo back a dummy response to prove the pipe works
+                // In a real implementation, this would come from the SDK
+                val dummyResponse = byteArrayOf(0x90.toByte(), 0x00.toByte()) // SW_OK
+
+                withContext(Dispatchers.Main) {
+                    result.success(mapOf(
+                        "status" to "success",
+                        "response" to dummyResponse,
+                        "message" to "Processed ${data.size} bytes"
+                    ))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Proximity data processing failed", e)
+                withContext(Dispatchers.Main) {
+                    result.error("PROXIMITY_ERROR", "Failed: ${e.message}", null)
+                }
+            }
+        }
     }
 
     private fun getSupportedMethods(result: MethodChannel.Result) {

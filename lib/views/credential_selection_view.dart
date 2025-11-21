@@ -19,7 +19,7 @@
  */
 
 /// Comprehensive credential selection view with SDK-enhanced capabilities
-/// 
+///
 /// This view demonstrates the complete integration of SDK-enhanced services with:
 /// - Advanced credential selection and filtering
 /// - Privacy-preserving presentation creation
@@ -34,7 +34,6 @@ import '../services/spruce_sdk_services.dart';
 import '../widgets/spruce_credential_selection_widget.dart';
 import '../widgets/selective_disclosure_sheet.dart';
 import '../utils/logger.dart';
-import '../utils/spruce_channels.dart';
 
 /// Main credential selection view
 class CredentialSelectionView extends ConsumerStatefulWidget {
@@ -52,16 +51,16 @@ class CredentialSelectionView extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CredentialSelectionView> createState() => 
+  ConsumerState<CredentialSelectionView> createState() =>
       _CredentialSelectionViewState();
 }
 
-class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionView> {
+class _CredentialSelectionViewState
+    extends ConsumerState<CredentialSelectionView> {
   List<Map<String, dynamic>> _availableCredentials = [];
   List<SelectableCredential> _selectedCredentials = [];
   Map<String, List<String>> _currentSelectiveDisclosure = {};
   bool _isLoading = false;
-  bool _isCreatingPresentation = false;
   String? _error;
   SecurityAssessment? _securityAssessment;
 
@@ -80,13 +79,13 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
     try {
       // Use SDK-enhanced wallet manager to get credentials
       final walletManager = ref.read(spruceIdWalletManagerExtendedProvider);
-      
+
       // Get all stored credentials
       final credentials = await walletManager.getAllCredentials();
-      
+
       // Filter credentials that match the request
       _availableCredentials = _filterRelevantCredentials(credentials);
-      
+
       // Perform security assessment
       await _performSecurityAssessment();
 
@@ -102,16 +101,19 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
     }
   }
 
-  List<Map<String, dynamic>> _filterRelevantCredentials(List<Map<String, dynamic>> credentials) {
+  List<Map<String, dynamic>> _filterRelevantCredentials(
+    List<Map<String, dynamic>> credentials,
+  ) {
     // Filter credentials based on requested attributes and compatibility
     return credentials.where((credential) {
-      final claims = credential['credentialSubject'] as Map<String, dynamic>? ?? {};
-      
+      final claims =
+          credential['credentialSubject'] as Map<String, dynamic>? ?? {};
+
       // Check if credential contains any of the requested attributes
       final hasRelevantAttributes = widget.requestedAttributes.any(
         (attr) => claims.containsKey(attr),
       );
-      
+
       return hasRelevantAttributes;
     }).toList();
   }
@@ -119,20 +121,22 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
   Future<void> _performSecurityAssessment() async {
     try {
       final client = ref.read(spruceIdClientExtendedProvider);
-      
+
       // Assess each credential's security capabilities
       final assessments = <String, Map<String, dynamic>>{};
-      
+
       for (final credential in _availableCredentials) {
         final credentialId = credential['id'] as String;
         try {
-          final capabilities = await client.getCredentialCapabilitiesSDK(credentialId);
+          final capabilities = await client.getCredentialCapabilitiesSDK(
+            credentialId,
+          );
           assessments[credentialId] = capabilities;
         } catch (e) {
           Logger.warning('Failed to assess credential $credentialId: $e');
         }
       }
-      
+
       _securityAssessment = SecurityAssessment(
         credentialAssessments: assessments,
         overallSecurityLevel: _calculateOverallSecurityLevel(assessments),
@@ -143,42 +147,55 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
     }
   }
 
-  SecurityLevel _calculateOverallSecurityLevel(Map<String, Map<String, dynamic>> assessments) {
+  SecurityLevel _calculateOverallSecurityLevel(
+    Map<String, Map<String, dynamic>> assessments,
+  ) {
     if (assessments.isEmpty) return SecurityLevel.unknown;
-    
+
     // Calculate based on hardware backing and key security
     final hasHardwareBacking = assessments.values.any(
       (assessment) => assessment['hardware_backed'] == true,
     );
-    
+
     final hasStrongCrypto = assessments.values.any(
-      (assessment) => assessment['algorithm'] == 'Ed25519' || assessment['algorithm'] == 'P-256',
+      (assessment) =>
+          assessment['algorithm'] == 'Ed25519' ||
+          assessment['algorithm'] == 'P-256',
     );
-    
+
     if (hasHardwareBacking && hasStrongCrypto) return SecurityLevel.high;
     if (hasStrongCrypto) return SecurityLevel.medium;
     return SecurityLevel.low;
   }
 
-  List<String> _generateSecurityRecommendations(Map<String, Map<String, dynamic>> assessments) {
+  List<String> _generateSecurityRecommendations(
+    Map<String, Map<String, dynamic>> assessments,
+  ) {
     final recommendations = <String>[];
-    
-    final softwareBackedCount = assessments.values.where(
-      (assessment) => assessment['hardware_backed'] != true,
-    ).length;
-    
+
+    final softwareBackedCount = assessments.values
+        .where((assessment) => assessment['hardware_backed'] != true)
+        .length;
+
     if (softwareBackedCount > 0) {
-      recommendations.add('Consider using hardware-backed credentials for enhanced security');
+      recommendations.add(
+        'Consider using hardware-backed credentials for enhanced security',
+      );
     }
-    
-    final weakCryptoCount = assessments.values.where(
-      (assessment) => !['Ed25519', 'P-256'].contains(assessment['algorithm']),
-    ).length;
-    
+
+    final weakCryptoCount = assessments.values
+        .where(
+          (assessment) =>
+              !['Ed25519', 'P-256'].contains(assessment['algorithm']),
+        )
+        .length;
+
     if (weakCryptoCount > 0) {
-      recommendations.add('Some credentials use legacy cryptography - consider regenerating with modern algorithms');
+      recommendations.add(
+        'Some credentials use legacy cryptography - consider regenerating with modern algorithms',
+      );
     }
-    
+
     return recommendations;
   }
 
@@ -196,13 +213,9 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
     List<SelectableCredential> selectedCredentials,
     Map<String, List<String>> selectiveDisclosure,
   ) async {
-    setState(() {
-      _isCreatingPresentation = true;
-    });
-
     try {
       final client = ref.read(spruceIdClientExtendedProvider);
-      
+
       // Generate secure key for presentation if needed
       final keyResult = await client.generateSecureKeySDK(
         algorithm: 'Ed25519',
@@ -212,20 +225,20 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
           'purpose': 'presentation_signing',
         },
       );
-      
+
       final keyId = keyResult['keyId'] as String;
-      
+
       // Prepare credential data for presentation
       final credentialData = selectedCredentials.map((cred) {
         final disclosedClaims = <String, dynamic>{};
         final disclosedAttributes = selectiveDisclosure[cred.id] ?? [];
-        
+
         for (final attr in disclosedAttributes) {
           if (cred.claims.containsKey(attr)) {
             disclosedClaims[attr] = cred.claims[attr];
           }
         }
-        
+
         return {
           'id': cred.id,
           'type': cred.type,
@@ -233,7 +246,7 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
           'issuer': cred.issuer,
         };
       }).toList();
-      
+
       // Create presentation using SDK
       final presentation = await client.createPresentationSDK(
         credentials: credentialData,
@@ -242,21 +255,18 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
         selectiveDisclosure: selectiveDisclosure,
         keyId: keyId,
       );
-      
+
       // Show success and return result
       _showPresentationSuccess(presentation);
-      
     } catch (e) {
       _showError('Failed to create presentation: $e');
       Logger.error('Presentation creation failed', error: e);
-    } finally {
-      setState(() {
-        _isCreatingPresentation = false;
-      });
     }
   }
 
-  Future<void> _showAdvancedDisclosureSheet(SelectableCredential credential) async {
+  Future<void> _showAdvancedDisclosureSheet(
+    SelectableCredential credential,
+  ) async {
     final result = await SelectiveDisclosureSheet.show(
       context: context,
       credential: credential,
@@ -276,7 +286,9 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
         return cred;
       }).toList();
 
-      final updatedDisclosure = Map<String, List<String>>.from(_currentSelectiveDisclosure);
+      final updatedDisclosure = Map<String, List<String>>.from(
+        _currentSelectiveDisclosure,
+      );
       updatedDisclosure[credential.id] = result.entries
           .where((entry) => entry.value)
           .map((entry) => entry.key)
@@ -301,13 +313,15 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Verifiable presentation created successfully with selective disclosure.'),
+            const Text(
+              'Verifiable presentation created successfully with selective disclosure.',
+            ),
             const SizedBox(height: 16),
             Text(
               'Presentation ID: ${presentation['id'] ?? 'N/A'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
             ),
             const SizedBox(height: 8),
             Text(
@@ -340,19 +354,13 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showInfo(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 
@@ -395,11 +403,7 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
               _error!,
@@ -421,11 +425,7 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.folder_open,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No suitable credentials found',
@@ -434,9 +434,9 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
             const SizedBox(height: 8),
             Text(
               'No credentials contain the requested attributes',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -488,9 +488,9 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
               const SizedBox(width: 8),
               Text(
                 'Presentation Request',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -500,21 +500,28 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: widget.requestedAttributes.map((attr) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                attr,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            )).toList(),
+            children: widget.requestedAttributes
+                .map(
+                  (attr) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      attr,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
           if (widget.domain != null) ...[
             const SizedBox(height: 12),
@@ -540,7 +547,9 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
         color: _securityAssessment!.overallSecurityLevel.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _securityAssessment!.overallSecurityLevel.color.withOpacity(0.3),
+          color: _securityAssessment!.overallSecurityLevel.color.withOpacity(
+            0.3,
+          ),
         ),
       ),
       child: Column(
@@ -555,13 +564,16 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
               const SizedBox(width: 8),
               Text(
                 'Security Assessment',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _securityAssessment!.overallSecurityLevel.color,
                   borderRadius: BorderRadius.circular(16),
@@ -579,26 +591,30 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
           ),
           if (_securityAssessment!.recommendations.isNotEmpty) ...[
             const SizedBox(height: 12),
-            ...(_securityAssessment!.recommendations.take(2).map((rec) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 16,
-                    color: Colors.orange,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      rec,
-                      style: Theme.of(context).textTheme.bodySmall,
+            ...(_securityAssessment!.recommendations
+                .take(2)
+                .map(
+                  (rec) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline,
+                          size: 16,
+                          color: Colors.orange,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            rec,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ))),
+                )),
           ],
         ],
       ),
@@ -611,20 +627,24 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
       children: [
         Text(
           'Advanced Controls',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        ...(_selectedCredentials.map((credential) => Card(
-          child: ListTile(
-            leading: Icon(Icons.tune, color: Theme.of(context).primaryColor),
-            title: Text('Fine-tune ${credential.name}'),
-            subtitle: Text('${credential.disclosedAttributes.length} attributes disclosed'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () => _showAdvancedDisclosureSheet(credential),
+        ...(_selectedCredentials.map(
+          (credential) => Card(
+            child: ListTile(
+              leading: Icon(Icons.tune, color: Theme.of(context).primaryColor),
+              title: Text('Fine-tune ${credential.name}'),
+              subtitle: Text(
+                '${credential.disclosedAttributes.length} attributes disclosed',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () => _showAdvancedDisclosureSheet(credential),
+            ),
           ),
-        ))),
+        )),
       ],
     );
   }
@@ -657,22 +677,24 @@ class _CredentialSelectionViewState extends ConsumerState<CredentialSelectionVie
               const SizedBox(height: 16),
               Text(
                 'Recommendations:',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...(_securityAssessment!.recommendations.map((rec) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.check_circle_outline, size: 16),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(rec)),
-                  ],
+              ...(_securityAssessment!.recommendations.map(
+                (rec) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.check_circle_outline, size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(rec)),
+                    ],
+                  ),
                 ),
-              ))),
+              )),
             ],
           ),
         ),

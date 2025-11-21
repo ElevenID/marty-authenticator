@@ -17,7 +17,7 @@ class SpruceIdClient implements ISpruceIdClient {
   final ISpruceIdPlatformService _platformService;
 
   SpruceIdClient([ISpruceIdPlatformService? platformService])
-      : _platformService = platformService ?? SpruceIdPlatformService();
+    : _platformService = platformService ?? SpruceIdPlatformService();
 
   @override
   Future<void> initialize() async {
@@ -80,7 +80,7 @@ class SpruceIdMdocManager implements ISpruceIdMdocManager {
   final ISpruceIdPlatformService _platformService;
 
   SpruceIdMdocManager([ISpruceIdPlatformService? platformService])
-      : _platformService = platformService ?? SpruceIdPlatformService();
+    : _platformService = platformService ?? SpruceIdPlatformService();
 
   @override
   Future<Map<String, dynamic>> initializeMdl(
@@ -113,7 +113,7 @@ class SpruceIdSdJwtManager implements ISpruceIdSdJwtManager {
   final ISpruceIdPlatformService _platformService;
 
   SpruceIdSdJwtManager([ISpruceIdPlatformService? platformService])
-      : _platformService = platformService ?? SpruceIdPlatformService();
+    : _platformService = platformService ?? SpruceIdPlatformService();
 
   @override
   Future<Map<String, dynamic>> createSdJwt({
@@ -143,7 +143,7 @@ class SpruceIdWalletManager implements ISpruceIdWalletManager {
   final ISpruceIdPlatformService _platformService;
 
   SpruceIdWalletManager([ISpruceIdPlatformService? platformService])
-      : _platformService = platformService ?? SpruceIdPlatformService();
+    : _platformService = platformService ?? SpruceIdPlatformService();
 
   @override
   Future<void> storeCredential(Map<String, dynamic> credential) async {

@@ -9,7 +9,8 @@ import '../../../services/spruce_platform_service.dart';
 
 /// Provider for SpruceID platform service (already defined in spruce_platform_service.dart)
 /// This is re-exported here for convenience
-export '../../../services/spruce_platform_service.dart' show spruceIdPlatformServiceProvider;
+export '../../../services/spruce_platform_service.dart'
+    show spruceIdPlatformServiceProvider;
 
 /// Provider for SpruceIdClient
 /// Override this in tests to provide mock implementation

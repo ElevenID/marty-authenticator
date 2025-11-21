@@ -21,6 +21,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../interfaces/spruce_interfaces.dart';
+import '../../logger.dart';
+import '../../../services/spruce_client_extended.dart';
+import '../../../model/processor_result.dart';
 import '../../../model/promotional_credential.dart';
 import '../../../views/main_view/main_view_widgets/card_widgets/verifiable_credential_card.dart';
 import '../../../views/main_view/main_view_widgets/card_widgets/mdoc_credential_card.dart';
@@ -60,16 +63,21 @@ class CredentialsState {
       verifiableCredentials:
           verifiableCredentials ?? this.verifiableCredentials,
       mDocCredentials: mDocCredentials ?? this.mDocCredentials,
-      promotionalCredentials: promotionalCredentials ?? this.promotionalCredentials,
+      promotionalCredentials:
+          promotionalCredentials ?? this.promotionalCredentials,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
   }
 
   bool get hasCredentials =>
-      verifiableCredentials.isNotEmpty || mDocCredentials.isNotEmpty || promotionalCredentials.isNotEmpty;
+      verifiableCredentials.isNotEmpty ||
+      mDocCredentials.isNotEmpty ||
+      promotionalCredentials.isNotEmpty;
   int get totalCredentials =>
-      verifiableCredentials.length + mDocCredentials.length + promotionalCredentials.length;
+      verifiableCredentials.length +
+      mDocCredentials.length +
+      promotionalCredentials.length;
 
   /// Get active (non-expired) credentials grouped by issuer
   List<CredentialGroup> get groupedCredentials {
@@ -80,13 +88,15 @@ class CredentialsState {
     final activePromotionalCredentials = promotionalCredentials
         .where((promo) => promo.isActive)
         .toList();
-    
+
     if (activePromotionalCredentials.isNotEmpty) {
-      result.add(CredentialGroup(
-        issuerName: activePromotionalCredentials.first.issuerName,
-        promotionalCredentials: activePromotionalCredentials,
-        isPromotional: true,
-      ));
+      result.add(
+        CredentialGroup(
+          issuerName: activePromotionalCredentials.first.issuerName,
+          promotionalCredentials: activePromotionalCredentials,
+          isPromotional: true,
+        ),
+      );
     }
 
     // Group active verifiable credentials by issuer
@@ -117,10 +127,7 @@ class CredentialsState {
         groups[issuerName] = CredentialGroup(
           issuerName: issuerName,
           verifiableCredentials: groups[issuerName]!.verifiableCredentials,
-          mDocCredentials: [
-            ...groups[issuerName]!.mDocCredentials,
-            mdoc,
-          ],
+          mDocCredentials: [...groups[issuerName]!.mDocCredentials, mdoc],
         );
       }
     }
@@ -128,25 +135,27 @@ class CredentialsState {
     // Separate holder cards (mDL/passport) from other credentials
     final holderCards = <CredentialGroup>[];
     final otherCards = <CredentialGroup>[];
-    
+
     for (final group in groups.values) {
       // Check if this group contains holder documents (mDL or passport)
-      final hasHolderDocs = group.mDocCredentials.any((mdoc) => 
-          mdoc.docType == 'org.iso.18013.5.1.mDL' || 
-          mdoc.docType == 'org.iso.18013.5.1.mID' ||
-          mdoc.docType == 'org.iso.18013.5.1.mPassport');
-      
+      final hasHolderDocs = group.mDocCredentials.any(
+        (mdoc) =>
+            mdoc.docType == 'org.iso.18013.5.1.mDL' ||
+            mdoc.docType == 'org.iso.18013.5.1.mID' ||
+            mdoc.docType == 'org.iso.18013.5.1.mPassport',
+      );
+
       if (hasHolderDocs) {
         holderCards.add(group);
       } else {
         otherCards.add(group);
       }
     }
-    
+
     // Sort each category separately
     holderCards.sort((a, b) => a.issuerName.compareTo(b.issuerName));
     otherCards.sort((a, b) => a.issuerName.compareTo(b.issuerName));
-    
+
     // Add holder cards first, then other cards
     result.addAll(holderCards);
     result.addAll(otherCards);
@@ -162,7 +171,8 @@ class CredentialsState {
 }
 
 /// Notifier for managing credentials state
-class CredentialsNotifier extends StateNotifier<CredentialsState> {
+class CredentialsNotifier extends StateNotifier<CredentialsState>
+    with ResultHandler {
   late final ISpruceIdWalletManager _walletManager;
   final Ref _ref;
 
@@ -171,47 +181,136 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
     _loadCredentials();
   }
 
+  @override
+  Future<bool> handleProcessorResult(
+    ProcessorResult result, {
+    Map<String, dynamic> args = const {},
+  }) async {
+    return handleProcessorResults([result], args: args);
+  }
+
+  @override
+  Future<bool> handleProcessorResults(
+    List<ProcessorResult> results, {
+    Map<String, dynamic> args = const {},
+  }) async {
+    bool handled = false;
+    for (final result in results) {
+      if (result.isSuccess) {
+        final data = result.asSuccess!.resultData;
+        if (data is Uri) {
+          // Handle URI
+          await _handleSpruceUri(data);
+          handled = true;
+        }
+      }
+    }
+    return handled;
+  }
+
+  Future<void> _handleSpruceUri(Uri uri) async {
+    Logger.info('CredentialsNotifier: Handling SpruceID URI: $uri');
+
+    try {
+      // Check if it is a credential offer
+      if (uri.scheme == 'openid-credential-offer') {
+        state = state.copyWith(isLoading: true);
+
+        // Get the extended client
+        // We cast to SpruceIdClientExtended because the interface definition might be out of sync
+        // with the implementation regarding handleOID4VCOfferSDK vs handleOID4VCFlow
+        final client = _ref.read(spruceIdClientExtendedProvider);
+
+        Logger.info(
+          'CredentialsNotifier: Processing credential offer with SpruceID SDK...',
+        );
+
+        if (client is SpruceIdClientExtended) {
+          await client.handleOID4VCOfferSDK(credentialOffer: uri.toString());
+        } else {
+          // Fallback if we can't access the specific method, though this shouldn't happen
+          // with the current provider setup
+          Logger.warning(
+            'Warning: Client is not SpruceIdClientExtended, attempting to use interface method if available',
+          );
+          // Note: handleOID4VCFlow is in the interface but might not be implemented by the class
+          // This is a safety check
+          try {
+            await client.handleOID4VCFlow(credentialOffer: uri.toString());
+          } catch (e) {
+            throw Exception(
+              'Client does not support OID4VC offer handling: $e',
+            );
+          }
+        }
+
+        Logger.info(
+          'CredentialsNotifier: Credential offer processed successfully. Reloading credentials...',
+        );
+        await _loadCredentials();
+      }
+    } catch (e) {
+      Logger.error('Error handling SpruceID URI: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to process credential offer: $e',
+      );
+    }
+  }
+
   Future<void> _loadCredentials() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      print('CredentialsNotifier: Loading credentials from SpruceID wallet...');
-      
+      Logger.info(
+        'CredentialsNotifier: Loading credentials from SpruceID wallet...',
+      );
+
       // Load real credentials from SpruceID wallet
       final walletCredentials = await _walletManager.getAllCredentials();
-      print('CredentialsNotifier: Received ${walletCredentials.length} credentials from wallet');
-      
+      Logger.info(
+        'CredentialsNotifier: Received ${walletCredentials.length} credentials from wallet',
+      );
+
       List<VerifiableCredential> verifiableCredentials = [];
       List<MDocCredential> mDocCredentials = [];
-      
+
       // Parse and categorize credentials from wallet
       for (final credData in walletCredentials) {
         try {
           if (_isVerifiableCredential(credData)) {
             final vc = _parseVerifiableCredential(credData);
             if (vc != null) {
-              print('CredentialsNotifier: Parsed VerifiableCredential: ${vc.id}');
+              Logger.debug(
+                'CredentialsNotifier: Parsed VerifiableCredential: ${vc.id}',
+              );
               verifiableCredentials.add(vc);
             }
           } else if (_isMDocCredential(credData)) {
             final mdoc = _parseMDocCredential(credData);
             if (mdoc != null) {
-              print('CredentialsNotifier: Parsed MDocCredential: ${mdoc.docType}');
+              Logger.debug(
+                'CredentialsNotifier: Parsed MDocCredential: ${mdoc.docType}',
+              );
               mDocCredentials.add(mdoc);
             }
           }
         } catch (e) {
           // Log error but continue processing other credentials
-          print('Error parsing credential: $e');
+          Logger.error('Error parsing credential: $e');
         }
       }
 
       // Always add sample credentials for demo to show stacking feature
-      print('CredentialsNotifier: Adding sample stacked credentials for demo');
+      Logger.debug(
+        'CredentialsNotifier: Adding sample stacked credentials for demo',
+      );
       verifiableCredentials.addAll(_createSampleVCs());
       mDocCredentials.addAll(_createSampleMDocs());
 
-      print('CredentialsNotifier: Final credential counts - VC: ${verifiableCredentials.length}, mDoc: ${mDocCredentials.length}');
+      Logger.debug(
+        'CredentialsNotifier: Final credential counts - VC: ${verifiableCredentials.length}, mDoc: ${mDocCredentials.length}',
+      );
 
       state = state.copyWith(
         verifiableCredentials: verifiableCredentials,
@@ -221,54 +320,68 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
       );
     } catch (e) {
       // If wallet fails, fall back to sample credentials
-      print('Failed to load from SpruceID wallet, using sample data: $e');
+      Logger.error(
+        'Failed to load from SpruceID wallet, using sample data: $e',
+      );
       state = state.copyWith(
         verifiableCredentials: _createSampleVCs(),
         mDocCredentials: _createSampleMDocs(),
         promotionalCredentials: DefaultPromotionalCredentials.all,
         isLoading: false,
-        error: 'Using demo credentials with stacked examples - SpruceID wallet: $e',
+        error:
+            'Using demo credentials with stacked examples - SpruceID wallet: $e',
       );
     }
   }
 
   /// Check if credential data represents a W3C Verifiable Credential
   bool _isVerifiableCredential(Map<String, dynamic> credData) {
-    return credData.containsKey('type') && 
-           credData.containsKey('credentialSubject') &&
-           credData.containsKey('@context') ||
-           credData.containsKey('context') ||
-           (credData['type'] is List && (credData['type'] as List).contains('VerifiableCredential'));
+    return credData.containsKey('type') &&
+            credData.containsKey('credentialSubject') &&
+            credData.containsKey('@context') ||
+        credData.containsKey('context') ||
+        (credData['type'] is List &&
+            (credData['type'] as List).contains('VerifiableCredential'));
   }
 
   /// Check if credential data represents an mDoc credential
   bool _isMDocCredential(Map<String, dynamic> credData) {
     return credData.containsKey('docType') ||
-           credData.containsKey('issuerSigned') ||
-           credData.containsKey('deviceSigned') ||
-           credData['docType']?.toString().contains('.mDL') == true ||
-           credData['docType']?.toString().contains('18013') == true;
+        credData.containsKey('issuerSigned') ||
+        credData.containsKey('deviceSigned') ||
+        credData['docType']?.toString().contains('.mDL') == true ||
+        credData['docType']?.toString().contains('18013') == true;
   }
 
   /// Parse SpruceID wallet data into VerifiableCredential
-  VerifiableCredential? _parseVerifiableCredential(Map<String, dynamic> credData) {
+  VerifiableCredential? _parseVerifiableCredential(
+    Map<String, dynamic> credData,
+  ) {
     try {
       return VerifiableCredential(
-        id: credData['id']?.toString() ?? 'urn:uuid:${DateTime.now().millisecondsSinceEpoch}',
+        id:
+            credData['id']?.toString() ??
+            'urn:uuid:${DateTime.now().millisecondsSinceEpoch}',
         type: _parseCredentialTypes(credData['type']),
         issuer: _parseIssuer(credData['issuer']),
-        credentialSubject: Map<String, dynamic>.from(credData['credentialSubject'] ?? {}),
-        issuanceDate: credData['issuanceDate']?.toString() ?? DateTime.now().toIso8601String(),
+        credentialSubject: Map<String, dynamic>.from(
+          credData['credentialSubject'] ?? {},
+        ),
+        issuanceDate:
+            credData['issuanceDate']?.toString() ??
+            DateTime.now().toIso8601String(),
         expirationDate: credData['expirationDate']?.toString(),
-        proof: credData['proof'] != null ? Map<String, dynamic>.from(credData['proof']) : null,
+        proof: credData['proof'] != null
+            ? Map<String, dynamic>.from(credData['proof'])
+            : null,
       );
     } catch (e) {
-      print('Error parsing verifiable credential: $e');
+      Logger.error('Error parsing verifiable credential: $e');
       return null;
     }
   }
 
-  /// Parse SpruceID wallet data into MDocCredential  
+  /// Parse SpruceID wallet data into MDocCredential
   MDocCredential? _parseMDocCredential(Map<String, dynamic> credData) {
     try {
       return MDocCredential(
@@ -280,7 +393,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
         expiryDate: _parseDateTime(credData['expiryDate']),
       );
     } catch (e) {
-      print('Error parsing mDoc credential: $e'); 
+      Logger.error('Error parsing mDoc credential: $e');
       return null;
     }
   }
@@ -351,7 +464,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
           'verificationMethod': 'did:web:stanford.edu#key-2',
         },
       ),
-      
+
       // Corporate credentials (3 from same issuer - will be stacked)
       VerifiableCredential(
         id: 'urn:uuid:employee-id-1',
@@ -406,7 +519,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
           'verificationMethod': 'did:web:techcorp.com#training-key',
         },
       ),
-      
+
       // Single credential from different issuer
       VerifiableCredential(
         id: 'urn:uuid:health-card-1',
@@ -449,10 +562,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
                 'elementIdentifier': 'issuing_authority',
                 'elementValue': 'State DMV',
               },
-              {
-                'elementIdentifier': 'issue_date',
-                'elementValue': '2023-06-01',
-              },
+              {'elementIdentifier': 'issue_date', 'elementValue': '2023-06-01'},
               {
                 'elementIdentifier': 'expiry_date',
                 'elementValue': '2028-06-01',
@@ -480,10 +590,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
                 'elementIdentifier': 'issuing_authority',
                 'elementValue': 'State DMV',
               },
-              {
-                'elementIdentifier': 'issue_date',
-                'elementValue': '2024-01-15',
-              },
+              {'elementIdentifier': 'issue_date', 'elementValue': '2024-01-15'},
               {
                 'elementIdentifier': 'expiry_date',
                 'elementValue': '2029-01-15',
@@ -495,7 +602,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
         issueDate: DateTime(2024, 1, 15),
         expiryDate: DateTime(2029, 1, 15),
       ),
-      
+
       // Federal documents (single from different issuer)
       MDocCredential(
         docType: 'org.iso.18013.5.1.mPassport',
@@ -513,18 +620,12 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
                 'elementIdentifier': 'issuing_authority',
                 'elementValue': 'US State Department',
               },
-              {
-                'elementIdentifier': 'issue_date',
-                'elementValue': '2023-03-10',
-              },
+              {'elementIdentifier': 'issue_date', 'elementValue': '2023-03-10'},
               {
                 'elementIdentifier': 'expiry_date',
                 'elementValue': '2033-03-10',
               },
-              {
-                'elementIdentifier': 'nationality',
-                'elementValue': 'US',
-              },
+              {'elementIdentifier': 'nationality', 'elementValue': 'US'},
             ],
           },
         },
@@ -566,17 +667,18 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
     final currentPromotionalCredentials = List<PromotionalCredential>.from(
       state.promotionalCredentials,
     );
-    
+
     // Find and update the promotional credential to mark it as dismissed
     for (int i = 0; i < currentPromotionalCredentials.length; i++) {
       if (currentPromotionalCredentials[i].id == cardId) {
-        currentPromotionalCredentials[i] = currentPromotionalCredentials[i].copyWith(
-          isDismissed: true,
-        );
+        currentPromotionalCredentials[i] = currentPromotionalCredentials[i]
+            .copyWith(isDismissed: true);
         break;
       }
     }
-    
-    state = state.copyWith(promotionalCredentials: currentPromotionalCredentials);
+
+    state = state.copyWith(
+      promotionalCredentials: currentPromotionalCredentials,
+    );
   }
 }

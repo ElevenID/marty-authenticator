@@ -43,9 +43,6 @@ class SettingsGroupPushTokenDialog extends ConsumerWidget {
     final settingsState = ref
         .watch(settingsProvider)
         .whenOrNull(data: (data) => data);
-    final needsFirebaseMessaging =
-        ref.watch(tokenProvider).value?.pushTokensNotPollOnly.isNotEmpty ??
-        false;
     return DefaultDialog(
       title: Text(AppLocalizations.of(context)!.pushToken),
       content: Column(

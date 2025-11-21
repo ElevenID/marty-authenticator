@@ -74,37 +74,19 @@ class CardDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Employee/Card holder information
-            const Text(
-              'CARD HOLDER NAME',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Adam Burdett',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Additional details in rows
-            Row(
-              children: [
-                Expanded(
+            // Dynamic fields from privateData
+            if (cardData['privateData'] != null)
+              ...(cardData['privateData'] as Map<String, dynamic>).entries.map((
+                entry,
+              ) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'ISSUER NAME',
-                        style: TextStyle(
+                      Text(
+                        entry.key.toUpperCase().replaceAll('_', ' '),
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey,
@@ -113,58 +95,110 @@ class CardDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        cardData['title'] as String,
+                        entry.value.toString(),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                     ],
                   ),
+                );
+              }).toList()
+            else ...[
+              // Employee/Card holder information
+              const Text(
+                'CARD HOLDER NAME',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                  letterSpacing: 1.0,
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'CARD ID',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${(cardData['title'] as String).hashCode.abs().toString().substring(0, 6)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-
-            // Additional information
-            const Text(
-              'ADDITIONAL DETAILS',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-                letterSpacing: 1.0,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              cardData['subtitle'] as String,
-              style: const TextStyle(fontSize: 16, color: Colors.black),
-            ),
+              const SizedBox(height: 8),
+              const Text(
+                'Adam Burdett',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Additional details in rows
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'ISSUER NAME',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          cardData['title'] as String,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'CARD ID',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${(cardData['title'] as String).hashCode.abs().toString().substring(0, 6)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Additional information
+              const Text(
+                'ADDITIONAL DETAILS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                cardData['subtitle'] as String,
+                style: const TextStyle(fontSize: 16, color: Colors.black),
+              ),
+            ],
           ],
         ),
       ),

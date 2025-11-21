@@ -106,6 +106,38 @@ class CardDataProvider {
           },
         ],
       },
+      {
+        'title': 'Expired Passes',
+        'cards': [
+          {
+            'title': 'Spanish Fork October',
+            'subtitle': 'Event Ticket, Spanish Fork, UT',
+            'icon': Icons.event,
+            'color': Colors.indigo,
+            'gradient': [Colors.indigo.shade300, Colors.indigo.shade600],
+            'isExpired': true,
+          },
+          {
+            'title': 'Spanish Fork Farm',
+            'subtitle': 'Event Ticket, Spanish Fork, UT',
+            'icon': Icons.event,
+            'color': Colors.teal,
+            'gradient': [Colors.teal.shade300, Colors.teal.shade600],
+            'isExpired': true,
+          },
+          {
+            'title': 'Movie Ticket',
+            'subtitle': 'Cinema 8, Orem, UT',
+            'icon': Icons.movie,
+            'color': Colors.deepPurple,
+            'gradient': [
+              Colors.deepPurple.shade300,
+              Colors.deepPurple.shade600,
+            ],
+            'isExpired': true,
+          },
+        ],
+      },
     ];
   }
 

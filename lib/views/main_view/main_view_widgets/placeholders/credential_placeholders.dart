@@ -26,10 +26,7 @@ import '../card_widgets/base_credential_card.dart';
 class MdlPlaceholder extends StatelessWidget {
   final VoidCallback onTap;
 
-  const MdlPlaceholder({
-    super.key,
-    required this.onTap,
-  });
+  const MdlPlaceholder({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +67,7 @@ class MdlPlaceholder extends StatelessWidget {
 class PassportPlaceholder extends StatelessWidget {
   final VoidCallback onTap;
 
-  const PassportPlaceholder({
-    super.key,
-    required this.onTap,
-  });
+  const PassportPlaceholder({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

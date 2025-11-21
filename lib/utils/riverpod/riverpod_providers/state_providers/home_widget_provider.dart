@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../model/tokens/otp_token.dart';
 import '../../../home_widget_utils.dart';

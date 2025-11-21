@@ -19,7 +19,7 @@
  */
 
 /// Advanced credential selection widget with selective disclosure capabilities
-/// 
+///
 /// This widget leverages the SDK-enhanced services to provide:
 /// - Interactive credential selection with privacy controls
 /// - Granular attribute disclosure options
@@ -81,8 +81,12 @@ class SelectableCredential {
   /// Calculate privacy score based on disclosed attributes
   double get privacyScore {
     final totalAttributes = claims.length;
-    final disclosedAttributes = attributeSelections.values.where((v) => v).length;
-    return totalAttributes > 0 ? 1.0 - (disclosedAttributes / totalAttributes) : 1.0;
+    final disclosedAttributes = attributeSelections.values
+        .where((v) => v)
+        .length;
+    return totalAttributes > 0
+        ? 1.0 - (disclosedAttributes / totalAttributes)
+        : 1.0;
   }
 
   /// Get list of attributes that will be disclosed
@@ -111,8 +115,10 @@ class SpruceCredentialSelectionWidget extends ConsumerStatefulWidget {
   final List<Map<String, dynamic>> availableCredentials;
   final List<String> requestedAttributes;
   final String? presentationRequest;
-  final Function(List<SelectableCredential>, Map<String, List<String>>) onSelectionChanged;
-  final Function(List<SelectableCredential>, Map<String, List<String>>) onPresentationCreate;
+  final Function(List<SelectableCredential>, Map<String, List<String>>)
+  onSelectionChanged;
+  final Function(List<SelectableCredential>, Map<String, List<String>>)
+  onPresentationCreate;
 
   const SpruceCredentialSelectionWidget({
     super.key,
@@ -124,11 +130,12 @@ class SpruceCredentialSelectionWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SpruceCredentialSelectionWidget> createState() => 
+  ConsumerState<SpruceCredentialSelectionWidget> createState() =>
       _SpruceCredentialSelectionWidgetState();
 }
 
-class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredentialSelectionWidget> {
+class _SpruceCredentialSelectionWidgetState
+    extends ConsumerState<SpruceCredentialSelectionWidget> {
   List<SelectableCredential> _credentials = [];
   bool _isLoading = false;
   String? _error;
@@ -157,9 +164,11 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
 
     try {
       _credentials = widget.availableCredentials.map((credential) {
-        final claims = Map<String, dynamic>.from(credential['credentialSubject'] ?? {});
+        final claims = Map<String, dynamic>.from(
+          credential['credentialSubject'] ?? {},
+        );
         final attributeSelections = <String, bool>{};
-        
+
         // Initialize attribute selections based on request
         for (final attribute in claims.keys) {
           final isRequired = widget.requestedAttributes.contains(attribute);
@@ -176,7 +185,10 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
 
         return SelectableCredential(
           id: credential['id'] ?? '',
-          name: credential['name'] ?? credential['type']?.toString() ?? 'Unknown Credential',
+          name:
+              credential['name'] ??
+              credential['type']?.toString() ??
+              'Unknown Credential',
           type: credential['type']?.toString() ?? '',
           issuer: credential['issuer'] ?? 'Unknown Issuer',
           claims: claims,
@@ -206,9 +218,9 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
   PrivacyLevel _calculatePrivacyLevel(Map<String, bool> attributeSelections) {
     final disclosedCount = attributeSelections.values.where((v) => v).length;
     final totalCount = attributeSelections.length;
-    
+
     if (totalCount == 0) return PrivacyLevel.minimal;
-    
+
     final ratio = disclosedCount / totalCount;
     if (ratio <= 0.3) return PrivacyLevel.minimal;
     if (ratio <= 0.7) return PrivacyLevel.moderate;
@@ -216,75 +228,95 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
   }
 
   void _updatePrivacyAssessment() {
-    final selectedCredentials = _credentials.where((c) => c.isSelected).toList();
+    final selectedCredentials = _credentials
+        .where((c) => c.isSelected)
+        .toList();
     final totalAttributes = selectedCredentials.fold<int>(
-      0, (sum, cred) => sum + cred.claims.length,
+      0,
+      (sum, cred) => sum + cred.claims.length,
     );
     final disclosedAttributes = selectedCredentials.fold<int>(
-      0, (sum, cred) => sum + cred.disclosedAttributes.length,
+      0,
+      (sum, cred) => sum + cred.disclosedAttributes.length,
     );
 
     _privacyAssessment = PrivacyAssessment(
       totalCredentials: selectedCredentials.length,
       totalAttributes: totalAttributes,
       disclosedAttributes: disclosedAttributes,
-      privacyScore: totalAttributes > 0 ? 1.0 - (disclosedAttributes / totalAttributes) : 1.0,
+      privacyScore: totalAttributes > 0
+          ? 1.0 - (disclosedAttributes / totalAttributes)
+          : 1.0,
       recommendations: _generatePrivacyRecommendations(selectedCredentials),
     );
   }
 
-  List<String> _generatePrivacyRecommendations(List<SelectableCredential> credentials) {
+  List<String> _generatePrivacyRecommendations(
+    List<SelectableCredential> credentials,
+  ) {
     final recommendations = <String>[];
-    
+
     for (final credential in credentials) {
       if (credential.privacyLevel == PrivacyLevel.full) {
-        recommendations.add('Consider reducing disclosure for ${credential.name}');
+        recommendations.add(
+          'Consider reducing disclosure for ${credential.name}',
+        );
       }
-      
+
       final unnecessaryDisclosures = credential.disclosedAttributes
           .where((attr) => !credential.requiredAttributes.contains(attr))
           .toList();
-      
+
       if (unnecessaryDisclosures.isNotEmpty) {
         recommendations.add(
-          'Optional attributes disclosed in ${credential.name}: ${unnecessaryDisclosures.join(', ')}'
+          'Optional attributes disclosed in ${credential.name}: ${unnecessaryDisclosures.join(', ')}',
         );
       }
     }
-    
+
     return recommendations;
   }
 
   void _notifySelectionChanged() {
-    final selectedCredentials = _credentials.where((c) => c.isSelected).toList();
+    final selectedCredentials = _credentials
+        .where((c) => c.isSelected)
+        .toList();
     final selectiveDisclosure = <String, List<String>>{};
-    
+
     for (final credential in selectedCredentials) {
       selectiveDisclosure[credential.id] = credential.disclosedAttributes;
     }
-    
+
     widget.onSelectionChanged(selectedCredentials, selectiveDisclosure);
   }
 
   void _updateCredentialSelection(int index, bool isSelected) {
     setState(() {
-      _credentials[index] = _credentials[index].copyWith(isSelected: isSelected);
+      _credentials[index] = _credentials[index].copyWith(
+        isSelected: isSelected,
+      );
       _updatePrivacyAssessment();
       _notifySelectionChanged();
     });
   }
 
-  void _updateAttributeSelection(int credentialIndex, String attribute, bool isSelected) {
+  void _updateAttributeSelection(
+    int credentialIndex,
+    String attribute,
+    bool isSelected,
+  ) {
     setState(() {
       final credential = _credentials[credentialIndex];
-      final newSelections = Map<String, bool>.from(credential.attributeSelections);
+      final newSelections = Map<String, bool>.from(
+        credential.attributeSelections,
+      );
       newSelections[attribute] = isSelected;
-      
+
       _credentials[credentialIndex] = credential.copyWith(
         attributeSelections: newSelections,
         privacyLevel: _calculatePrivacyLevel(newSelections),
       );
-      
+
       _updatePrivacyAssessment();
       _notifySelectionChanged();
     });
@@ -301,14 +333,19 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
     });
 
     try {
-      final selectedCredentials = _credentials.where((c) => c.isSelected).toList();
+      final selectedCredentials = _credentials
+          .where((c) => c.isSelected)
+          .toList();
       final selectiveDisclosure = <String, List<String>>{};
-      
+
       for (final credential in selectedCredentials) {
         selectiveDisclosure[credential.id] = credential.disclosedAttributes;
       }
-      
-      await widget.onPresentationCreate(selectedCredentials, selectiveDisclosure);
+
+      await widget.onPresentationCreate(
+        selectedCredentials,
+        selectiveDisclosure,
+      );
     } catch (e) {
       _showError('Failed to create presentation: $e');
     } finally {
@@ -320,10 +357,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -362,9 +396,9 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
               children: [
                 Text(
                   'Credential Selection',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -398,9 +432,9 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
               const SizedBox(width: 8),
               Text(
                 'Privacy Assessment',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               _buildPrivacyScore(),
@@ -440,9 +474,18 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildPrivacyMetric('Credentials', _privacyAssessment!.totalCredentials.toString()),
-        _buildPrivacyMetric('Total Attributes', _privacyAssessment!.totalAttributes.toString()),
-        _buildPrivacyMetric('Disclosed', _privacyAssessment!.disclosedAttributes.toString()),
+        _buildPrivacyMetric(
+          'Credentials',
+          _privacyAssessment!.totalCredentials.toString(),
+        ),
+        _buildPrivacyMetric(
+          'Total Attributes',
+          _privacyAssessment!.totalAttributes.toString(),
+        ),
+        _buildPrivacyMetric(
+          'Disclosed',
+          _privacyAssessment!.disclosedAttributes.toString(),
+        ),
       ],
     );
   }
@@ -457,10 +500,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
             color: _getPrivacyColor(),
           ),
         ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -471,27 +511,29 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
       children: [
         Text(
           'Privacy Recommendations:',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        ...(_privacyAssessment!.recommendations.map((rec) => Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.lightbulb_outline, size: 16, color: Colors.orange),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  rec,
-                  style: Theme.of(context).textTheme.bodySmall,
+        ...(_privacyAssessment!.recommendations.map(
+          (rec) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.lightbulb_outline, size: 16, color: Colors.orange),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    rec,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ))),
+        )),
       ],
     );
   }
@@ -523,10 +565,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
           const Icon(Icons.error, color: Colors.red),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              _error!,
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: Text(_error!, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -546,9 +585,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
     if (_credentials.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(32),
-        child: const Center(
-          child: Text('No credentials available'),
-        ),
+        child: const Center(child: Text('No credentials available')),
       );
     }
 
@@ -565,14 +602,14 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
 
   Widget _buildCredentialCard(int index) {
     final credential = _credentials[index];
-    
+
     return Card(
       elevation: credential.isSelected ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: credential.isSelected 
-              ? Theme.of(context).primaryColor 
+          color: credential.isSelected
+              ? Theme.of(context).primaryColor
               : Colors.grey.withOpacity(0.3),
           width: credential.isSelected ? 2 : 1,
         ),
@@ -580,13 +617,14 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
       child: ExpansionTile(
         leading: Checkbox(
           value: credential.isSelected,
-          onChanged: (value) => _updateCredentialSelection(index, value ?? false),
+          onChanged: (value) =>
+              _updateCredentialSelection(index, value ?? false),
         ),
         title: Text(
           credential.name,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,16 +651,14 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
             ),
           ],
         ),
-        children: [
-          if (credential.isSelected) _buildAttributeSelection(index),
-        ],
+        children: [if (credential.isSelected) _buildAttributeSelection(index)],
       ),
     );
   }
 
   Widget _buildAttributeSelection(int credentialIndex) {
     final credential = _credentials[credentialIndex];
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -630,28 +666,31 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
         children: [
           Text(
             'Select attributes to share:',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           ...credential.claims.entries.map((entry) {
-            final isRequired = credential.requiredAttributes.contains(entry.key);
-            final isSelected = credential.attributeSelections[entry.key] ?? false;
-            
+            final isRequired = credential.requiredAttributes.contains(
+              entry.key,
+            );
+            final isSelected =
+                credential.attributeSelections[entry.key] ?? false;
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
                   Checkbox(
                     value: isSelected,
-                    onChanged: isRequired 
-                        ? null 
+                    onChanged: isRequired
+                        ? null
                         : (value) => _updateAttributeSelection(
-                              credentialIndex, 
-                              entry.key, 
-                              value ?? false,
-                            ),
+                            credentialIndex,
+                            entry.key,
+                            value ?? false,
+                          ),
                   ),
                   Expanded(
                     child: Column(
@@ -661,9 +700,8 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
                           children: [
                             Text(
                               entry.key,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             if (isRequired) ...[
                               const SizedBox(width: 8),
@@ -693,9 +731,8 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
                         ),
                         Text(
                           entry.value.toString(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -711,7 +748,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
 
   Widget _buildActionButtons() {
     final hasSelection = _credentials.any((c) => c.isSelected);
-    
+
     return Row(
       children: [
         Expanded(
@@ -724,7 +761,7 @@ class _SpruceCredentialSelectionWidgetState extends ConsumerState<SpruceCredenti
         Expanded(
           child: ElevatedButton(
             onPressed: hasSelection && !_isLoading ? _createPresentation : null,
-            child: _isLoading 
+            child: _isLoading
                 ? const SizedBox(
                     width: 16,
                     height: 16,

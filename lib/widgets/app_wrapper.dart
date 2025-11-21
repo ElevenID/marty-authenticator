@@ -25,11 +25,7 @@ class AppWrapper extends StatelessWidget {
   final Widget child;
   final List<Override> overrides;
 
-  const AppWrapper({
-    required this.child,
-    this.overrides = const [],
-    super.key,
-  });
+  const AppWrapper({required this.child, this.overrides = const [], super.key});
 
   @override
   Widget build(BuildContext context) => ProviderScope(

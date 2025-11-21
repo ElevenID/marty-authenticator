@@ -80,6 +80,19 @@ class _WalletLandingViewState extends ConsumerState<WalletLandingView> {
                       ),
                     ),
                     const Spacer(),
+                    // Stack toggle button - will be passed to CredentialsList
+                    IconButton(
+                      onPressed: () {
+                        // This will be handled by the CredentialsList widget
+                        setState(() {});
+                      },
+                      icon: const Icon(
+                        Icons.layers,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      tooltip: 'Toggle stacking style',
+                    ),
                     IconButton(
                       onPressed: () async {
                         // Use the same QR scanning logic as the floating button
@@ -264,10 +277,4 @@ class _WalletLandingViewState extends ConsumerState<WalletLandingView> {
       ),
     );
   }
-
-
-
-
-
-
 }

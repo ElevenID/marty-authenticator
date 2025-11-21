@@ -30,16 +30,15 @@ import 'spruce_platform_service.dart';
 
 /// Extended platform service implementation with SDK capabilities
 /// Uses the refactored Android and iOS handlers with SDK integration
-class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService 
+class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     implements ISpruceIdPlatformServiceExtended {
-  
   static final _instance = SpruceIdPlatformServiceExtended._internal();
   factory SpruceIdPlatformServiceExtended() => _instance;
-  SpruceIdPlatformServiceExtended._internal();
+  SpruceIdPlatformServiceExtended._internal() : super.protected();
 
   // Additional SDK-enabled channels
   final MethodChannel _sdkChannel = const MethodChannel('spruce_id_sdk');
-  
+
   // ========================
   // SDK-Enhanced OID4VC Operations
   // ========================
@@ -52,12 +51,11 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }) async {
     try {
       // Use refactored Android/iOS handlers with SDK integration
-      final result = await _w3cChannel.invokeMethod('handleOID4VCOfferRefactored', {
-        'offer': credentialOffer,
-        'pin': pin,
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await w3cChannel.invokeMethod(
+        'handleOID4VCOfferRefactored',
+        {'offer': credentialOffer, 'pin': pin, 'keyId': keyId ?? 'default-key'},
+      );
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -77,13 +75,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }) async {
     try {
       // Use refactored Android/iOS handlers with SDK integration
-      final result = await _w3cChannel.invokeMethod('handleOID4VPRequestRefactored', {
-        'request': presentationRequest,
-        'selectedCredentials': selectedCredentials,
-        'disclosureOptions': disclosureOptions,
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await w3cChannel
+          .invokeMethod('handleOID4VPRequestRefactored', {
+            'request': presentationRequest,
+            'selectedCredentials': selectedCredentials,
+            'disclosureOptions': disclosureOptions,
+            'keyId': keyId ?? 'default-key',
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -104,14 +103,15 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }) async {
     try {
       // Use refactored Android/iOS handlers with SDK integration
-      final result = await _w3cChannel.invokeMethod('createPresentationRefactored', {
-        'credentials': credentials,
-        'challenge': challenge,
-        'domain': domain,
-        'selectiveDisclosure': selectiveDisclosure,
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await w3cChannel
+          .invokeMethod('createPresentationRefactored', {
+            'credentials': credentials,
+            'challenge': challenge,
+            'domain': domain,
+            'selectiveDisclosure': selectiveDisclosure,
+            'keyId': keyId ?? 'default-key',
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -136,7 +136,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         'keyId': keyId ?? 'default-key',
         'config': holderConfig ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -157,15 +157,16 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final result = await _sdkChannel.invokeMethod('createVerifiablePresentationSDK', {
-        'credentials': credentials,
-        'challenge': challenge,
-        'domain': domain ?? '',
-        'selectiveDisclosure': selectiveDisclosure ?? {},
-        'presentationFormat': presentationFormat ?? 'jwt_vp',
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await _sdkChannel
+          .invokeMethod('createVerifiablePresentationSDK', {
+            'credentials': credentials,
+            'challenge': challenge,
+            'domain': domain ?? '',
+            'selectiveDisclosure': selectiveDisclosure ?? {},
+            'presentationFormat': presentationFormat ?? 'jwt_vp',
+            'keyId': keyId ?? 'default-key',
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -190,7 +191,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         'verificationMethod': verificationMethod,
         'proofPurpose': proofPurpose ?? 'authentication',
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -211,11 +212,11 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final result = await _sdkChannel.invokeMethod('batchProcessCredentialsSDK', {
-        'operations': operations,
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await _sdkChannel.invokeMethod(
+        'batchProcessCredentialsSDK',
+        {'operations': operations, 'keyId': keyId ?? 'default-key'},
+      );
+
       return List<Map<String, dynamic>>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -227,12 +228,15 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }
 
   @override
-  Future<Map<String, dynamic>> getCredentialCapabilitiesSDK(String credentialId) async {
+  Future<Map<String, dynamic>> getCredentialCapabilitiesSDK(
+    String credentialId,
+  ) async {
     try {
-      final result = await _sdkChannel.invokeMethod('getCredentialCapabilitiesSDK', {
-        'credentialId': credentialId,
-      });
-      
+      final result = await _sdkChannel.invokeMethod(
+        'getCredentialCapabilitiesSDK',
+        {'credentialId': credentialId},
+      );
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -255,7 +259,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         'schemaId': schemaId,
         'policies': policies ?? [],
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -282,7 +286,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         'useHardwareModule': useHardwareModule,
         'keyPolicies': keyPolicies ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -301,13 +305,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? options,
   }) async {
     try {
-      final result = await _sdkChannel.invokeMethod('performCryptoOperationSDK', {
-        'operation': operation,
-        'keyId': keyId,
-        'payload': payload,
-        'options': options ?? {},
-      });
-      
+      final result = await _sdkChannel
+          .invokeMethod('performCryptoOperationSDK', {
+            'operation': operation,
+            'keyId': keyId,
+            'payload': payload,
+            'options': options ?? {},
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -325,12 +330,13 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? channelOptions,
   }) async {
     try {
-      final result = await _sdkChannel.invokeMethod('establishSecureChannelSDK', {
-        'peerDid': peerDid,
-        'keyId': keyId ?? 'default-key',
-        'channelOptions': channelOptions ?? {},
-      });
-      
+      final result = await _sdkChannel
+          .invokeMethod('establishSecureChannelSDK', {
+            'peerDid': peerDid,
+            'keyId': keyId ?? 'default-key',
+            'channelOptions': channelOptions ?? {},
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -354,14 +360,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final result = await _jwtChannel.invokeMethod('createAdvancedSdJwtSDK', {
+      final result = await jwtChannel.invokeMethod('createAdvancedSdJwtSDK', {
         'issuer': issuer,
         'claims': claims,
         'disclosureTree': disclosureTree,
         'alwaysDisclose': alwaysDisclose ?? [],
         'keyId': keyId ?? 'default-key',
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -380,13 +386,13 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final result = await _jwtChannel.invokeMethod('presentSdJwtSDK', {
+      final result = await jwtChannel.invokeMethod('presentSdJwtSDK', {
         'sdJwt': sdJwt,
         'disclosureRequest': disclosureRequest,
         'challenge': challenge,
         'keyId': keyId ?? 'default-key',
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -404,12 +410,13 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     List<String>? policies,
   }) async {
     try {
-      final result = await _jwtChannel.invokeMethod('verifySdJwtPresentationSDK', {
-        'presentation': presentation,
-        'requiredClaims': requiredClaims,
-        'policies': policies ?? [],
-      });
-      
+      final result = await jwtChannel
+          .invokeMethod('verifySdJwtPresentationSDK', {
+            'presentation': presentation,
+            'requiredClaims': requiredClaims,
+            'policies': policies ?? [],
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -431,12 +438,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? deviceConfig,
   }) async {
     try {
-      final result = await _mdocChannel.invokeMethod('initializeMdocSDK', {
+      final result = await mdocChannel.invokeMethod('initializeMdocSDK', {
         'mdocData': mdocData,
         'enableProximityDetection': enableProximityDetection,
         'deviceConfig': deviceConfig ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -456,14 +463,15 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final result = await _mdocChannel.invokeMethod('createMdocPresentationSDK', {
-        'docType': docType,
-        'requestedAttributes': requestedAttributes,
-        'ageVerificationOptions': ageVerificationOptions ?? {},
-        'hiddenAttributes': hiddenAttributes ?? [],
-        'keyId': keyId ?? 'default-key',
-      });
-      
+      final result = await mdocChannel
+          .invokeMethod('createMdocPresentationSDK', {
+            'docType': docType,
+            'requestedAttributes': requestedAttributes,
+            'ageVerificationOptions': ageVerificationOptions,
+            'hiddenAttributes': hiddenAttributes ?? [],
+            'keyId': keyId ?? 'default-key',
+          });
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -481,12 +489,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? securityOptions,
   }) async {
     try {
-      final result = await _mdocChannel.invokeMethod('establishMdocSessionSDK', {
+      final result = await mdocChannel.invokeMethod('establishMdocSessionSDK', {
         'sessionRequest': sessionRequest,
         'keyId': keyId ?? 'default-key',
         'securityOptions': securityOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -502,38 +510,49 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   // ========================
 
   @override
-  Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(String credentialId) async {
-    final StreamController<Map<String, dynamic>> controller = StreamController();
-    
+  Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(
+    String credentialId,
+  ) async {
+    final StreamController<Map<String, dynamic>> controller =
+        StreamController();
+
     try {
       // Set up platform channel stream for credential monitoring
-      const EventChannel eventChannel = EventChannel('spruce_id_credential_monitor');
-      
+      const EventChannel eventChannel = EventChannel(
+        'spruce_id_credential_monitor',
+      );
+
       await _sdkChannel.invokeMethod('startCredentialMonitoring', {
         'credentialId': credentialId,
       });
-      
-      eventChannel.receiveBroadcastStream(credentialId).listen(
-        (data) {
-          controller.add(Map<String, dynamic>.from(data));
-        },
-        onError: (error) {
-          controller.addError(SpruceIdException(
-            'MONITOR_ERROR',
-            'Credential monitoring error: $error',
-          ));
-        },
-        onDone: () {
-          controller.close();
-        },
-      );
-      
+
+      eventChannel
+          .receiveBroadcastStream(credentialId)
+          .listen(
+            (data) {
+              controller.add(Map<String, dynamic>.from(data));
+            },
+            onError: (error) {
+              controller.addError(
+                SpruceIdException(
+                  'MONITOR_ERROR',
+                  'Credential monitoring error: $error',
+                ),
+              );
+            },
+            onDone: () {
+              controller.close();
+            },
+          );
+
       return controller.stream;
     } catch (e) {
-      controller.addError(SpruceIdException(
-        'MONITOR_SETUP_ERROR',
-        'Failed to setup credential monitoring: $e',
-      ));
+      controller.addError(
+        SpruceIdException(
+          'MONITOR_SETUP_ERROR',
+          'Failed to setup credential monitoring: $e',
+        ),
+      );
       return controller.stream;
     }
   }
@@ -545,12 +564,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? refreshOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('refreshCredentialSDK', {
+      final result = await walletChannel.invokeMethod('refreshCredentialSDK', {
         'credentialId': credentialId,
         'keyId': keyId ?? 'default-key',
         'refreshOptions': refreshOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -568,12 +587,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? backupOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('backupCredentialsSDK', {
-        'credentialIds': credentialIds,
+      final result = await walletChannel.invokeMethod('backupCredentialsSDK', {
+        'credentialIds': credentialIds ?? [],
         'backupPassphrase': backupPassphrase,
         'backupOptions': backupOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -591,12 +610,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? restoreOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('restoreCredentialsSDK', {
+      final result = await walletChannel.invokeMethod('restoreCredentialsSDK', {
         'backupData': backupData,
         'backupPassphrase': backupPassphrase,
         'restoreOptions': restoreOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -618,12 +637,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? syncOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('syncCredentialsSDK', {
+      final result = await walletChannel.invokeMethod('syncCredentialsSDK', {
         'syncEndpoint': syncEndpoint,
         'syncToken': syncToken,
         'syncOptions': syncOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -641,12 +660,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? exportOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('exportCredentialsSDK', {
+      final result = await walletChannel.invokeMethod('exportCredentialsSDK', {
         'credentialIds': credentialIds,
         'exportFormat': exportFormat,
         'exportOptions': exportOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -664,12 +683,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     Map<String, dynamic>? importOptions,
   }) async {
     try {
-      final result = await _walletChannel.invokeMethod('importCredentialsSDK', {
+      final result = await walletChannel.invokeMethod('importCredentialsSDK', {
         'credentialData': credentialData,
         'expectedFormat': expectedFormat,
         'importOptions': importOptions ?? {},
       });
-      
+
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
@@ -682,7 +701,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 }
 
 /// Riverpod provider for extended platform service
-final spruceIdPlatformServiceExtendedProvider = 
+final spruceIdPlatformServiceExtendedProvider =
     Provider<ISpruceIdPlatformServiceExtended>((ref) {
-  return SpruceIdPlatformServiceExtended();
-});
+      return SpruceIdPlatformServiceExtended();
+    });

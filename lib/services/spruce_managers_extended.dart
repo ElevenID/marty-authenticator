@@ -34,7 +34,7 @@ import 'spruce_wallet_manager.dart';
 // ========================
 
 /// Extended mDoc manager with SDK-enhanced operations
-class SpruceIdMdocManagerExtended extends SpruceIdMdocManager 
+class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     implements ISpruceIdMdocManagerExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
@@ -119,7 +119,7 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
 // ========================
 
 /// Extended SD-JWT manager with SDK-enhanced selective disclosure
-class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager 
+class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     implements ISpruceIdSdJwtManagerExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
@@ -180,10 +180,7 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     return await _platformService.performCryptoOperationSDK(
       operation: 'create_disclosure_schema',
       keyId: schemaId ?? 'default-schema',
-      payload: {
-        'schema': schema,
-        'disclosureRules': disclosureRules,
-      },
+      payload: {'schema': schema, 'disclosureRules': disclosureRules},
     );
   }
 
@@ -207,14 +204,17 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
 // ========================
 
 /// Extended wallet manager with SDK-enhanced credential lifecycle
-class SpruceIdWalletManagerExtended extends SpruceIdWalletManager 
+class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     implements ISpruceIdWalletManagerExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
-  SpruceIdWalletManagerExtended(this._platformService) : super(_platformService);
+  SpruceIdWalletManagerExtended(this._platformService)
+    : super(_platformService);
 
   @override
-  Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(String credentialId) async {
+  Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(
+    String credentialId,
+  ) async {
     return await _platformService.monitorCredentialStatusSDK(credentialId);
   }
 
@@ -306,10 +306,7 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     return await _platformService.performCryptoOperationSDK(
       operation: 'setup_automatic_renewal',
       keyId: keyId ?? 'renewal-key',
-      payload: {
-        'credentialIds': credentialIds,
-        'renewalPolicy': renewalPolicy,
-      },
+      payload: {'credentialIds': credentialIds, 'renewalPolicy': renewalPolicy},
     );
   }
 
@@ -319,10 +316,9 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
   }) async {
     // Custom logic for wallet health analysis
     return await _platformService.batchProcessCredentialsSDK(
-      operations: [{
-        'operation': 'health_check',
-        'options': healthCheckOptions ?? {},
-      }],
+      operations: [
+        {'operation': 'health_check', 'options': healthCheckOptions ?? {}},
+      ],
     );
   }
 
@@ -344,19 +340,28 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
 // ========================
 
 /// Provider for extended mDoc manager
-final spruceIdMdocManagerExtendedProvider = Provider<ISpruceIdMdocManagerExtended>((ref) {
-  final platformService = ref.watch(spruceIdPlatformServiceExtendedProvider);
-  return SpruceIdMdocManagerExtended(platformService);
-});
+final spruceIdMdocManagerExtendedProvider =
+    Provider<ISpruceIdMdocManagerExtended>((ref) {
+      final platformService = ref.watch(
+        spruceIdPlatformServiceExtendedProvider,
+      );
+      return SpruceIdMdocManagerExtended(platformService);
+    });
 
 /// Provider for extended SD-JWT manager
-final spruceIdSdJwtManagerExtendedProvider = Provider<ISpruceIdSdJwtManagerExtended>((ref) {
-  final platformService = ref.watch(spruceIdPlatformServiceExtendedProvider);
-  return SpruceIdSdJwtManagerExtended(platformService);
-});
+final spruceIdSdJwtManagerExtendedProvider =
+    Provider<ISpruceIdSdJwtManagerExtended>((ref) {
+      final platformService = ref.watch(
+        spruceIdPlatformServiceExtendedProvider,
+      );
+      return SpruceIdSdJwtManagerExtended(platformService);
+    });
 
 /// Provider for extended wallet manager
-final spruceIdWalletManagerExtendedProvider = Provider<ISpruceIdWalletManagerExtended>((ref) {
-  final platformService = ref.watch(spruceIdPlatformServiceExtendedProvider);
-  return SpruceIdWalletManagerExtended(platformService);
-});
+final spruceIdWalletManagerExtendedProvider =
+    Provider<ISpruceIdWalletManagerExtended>((ref) {
+      final platformService = ref.watch(
+        spruceIdPlatformServiceExtendedProvider,
+      );
+      return SpruceIdWalletManagerExtended(platformService);
+    });

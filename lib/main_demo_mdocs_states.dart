@@ -21,7 +21,7 @@
 /// Demo main entry point with mDoc credentials in different states
 /// Includes: Valid, Near Expiry, and Expired credentials
 /// Useful for testing UI handling of different credential states
-/// 
+///
 /// Run with:
 ///   flutter run -t lib/main_demo_mdocs_states.dart -d chrome
 ///   flutter run -t lib/main_demo_mdocs_states.dart -d macos
@@ -41,7 +41,7 @@ void main() async {
       final passportValid = MDocFixtures.mobilePassport(
         state: CredentialState.valid,
       );
-      
+
       // Near expiry
       final mdlNearExpiry = MDocFixtures.mobileDriverLicense(
         state: CredentialState.nearExpiry,
@@ -49,18 +49,18 @@ void main() async {
       final midNearExpiry = MDocFixtures.mobileId(
         state: CredentialState.nearExpiry,
       );
-      
+
       // Expired
       final passportExpired = MDocFixtures.mobilePassport(
         state: CredentialState.expiredRecently,
       );
-      
+
       await mockServices.platformService.storeCredential(mdlValid);
       await mockServices.platformService.storeCredential(passportValid);
       await mockServices.platformService.storeCredential(mdlNearExpiry);
       await mockServices.platformService.storeCredential(midNearExpiry);
       await mockServices.platformService.storeCredential(passportExpired);
-      
+
       return [
         'MDL (Valid)',
         'Passport (Valid)',

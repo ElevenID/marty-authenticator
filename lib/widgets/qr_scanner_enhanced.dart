@@ -19,7 +19,7 @@
  */
 
 /// Enhanced QR scanner widget with SDK-integrated processing
-/// 
+///
 /// This widget provides:
 /// - Real-time QR code scanning with SDK processing
 /// - Intelligent credential matching during scan
@@ -34,7 +34,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 
 import '../services/qr_scanner_service_enhanced.dart';
-import '../views/credential_selection_view.dart';
+import '../views/credential_selection_view.dart' hide SecurityLevel;
 import '../utils/logger.dart';
 
 /// Enhanced QR scanner widget with SDK integration
@@ -58,18 +58,17 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
 
 class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     with TickerProviderStateMixin {
-  
   // Scanner state
   bool _isScanning = false;
   bool _isProcessing = false;
   String? _lastScannedCode;
   ProcessedQRResult? _currentResult;
-  
+
   // Performance tracking
   DateTime? _scanStartTime;
   int _totalScans = 0;
   int _successfulScans = 0;
-  
+
   // Animation controllers
   late AnimationController _processingAnimationController;
   late AnimationController _resultPreviewController;
@@ -87,27 +86,26 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat();
-    
+
     _resultPreviewController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
-    _processingAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _processingAnimationController,
-      curve: Curves.linear,
-    ));
+    _processingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _processingAnimationController,
+        curve: Curves.linear,
+      ),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _resultPreviewController,
-      curve: Curves.elasticOut,
-    ));
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _resultPreviewController,
+            curve: Curves.elasticOut,
+          ),
+        );
   }
 
   @override
@@ -135,20 +133,23 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
     try {
       _totalScans++;
-      
+
       // Process QR code with enhanced service
       final qrService = ref.read(qrScannerServiceEnhancedProvider);
       final result = await qrService.processQRCode(scannedData);
-      
+
       if (result.isSuccess) {
         _successfulScans++;
         await _handleSuccessfulScan(result);
       } else {
         await _handleScanError(result.errorMessage ?? 'Unknown error');
       }
-
     } catch (e) {
-      Logger.error('QR scan processing failed', error: e, name: 'QRScannerEnhanced');
+      Logger.error(
+        'QR scan processing failed',
+        error: e,
+        name: 'QRScannerEnhanced',
+      );
       await _handleScanError('Failed to process QR code: $e');
     } finally {
       if (mounted) {
@@ -178,7 +179,7 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Future<void> _handleScanError(String error) async {
     Logger.warning('QR scan error: $error', name: 'QRScannerEnhanced');
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -198,7 +199,7 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Future<void> _showLivePreview(ProcessedQRResult result) async {
     await _resultPreviewController.forward();
-    
+
     // Auto-hide preview after delay
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
@@ -214,28 +215,31 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     final qrType = enrichedResult.validatedResult.parsedData.type;
 
     // Auto-navigate for presentation requests with matching credentials
-    if (qrType == QRType.presentationRequest && 
+    if (qrType == QRType.presentationRequest &&
         enrichedResult.matchingCredentials.isNotEmpty) {
-      
       await _handlePresentationRequest(enrichedResult);
     }
     // Auto-process credential offers if fully compatible
     else if (qrType == QRType.credentialOffer &&
-             _isFullyCompatibleOffer(enrichedResult)) {
-      
+        _isFullyCompatibleOffer(enrichedResult)) {
       await _handleCredentialOffer(enrichedResult);
     }
   }
 
-  Future<void> _handlePresentationRequest(EnrichedQRResult enrichedResult) async {
-    final requestContent = enrichedResult.validatedResult.parsedData.parsedContent!;
-    final requestedAttributes = (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
+  Future<void> _handlePresentationRequest(
+    EnrichedQRResult enrichedResult,
+  ) async {
+    final requestContent =
+        enrichedResult.validatedResult.parsedData.parsedContent!;
+    final requestedAttributes =
+        (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
 
     // Navigate to credential selection view
     final presentation = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (context) => CredentialSelectionView(
-          presentationRequest: enrichedResult.validatedResult.parsedData.rawData,
+          presentationRequest:
+              enrichedResult.validatedResult.parsedData.rawData,
           requestedAttributes: requestedAttributes,
           challenge: requestContent['challenge'] as String?,
           domain: requestContent['domain'] as String?,
@@ -336,14 +340,14 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       children: [
         // Main scanner interface
         _buildScannerInterface(),
-        
+
         // Processing overlay
         if (_isProcessing) _buildProcessingOverlay(),
-        
+
         // Live preview
         if (widget.showLivePreview && _currentResult != null)
           _buildLivePreview(),
-        
+
         // Performance overlay (debug mode)
         if (kDebugMode) _buildPerformanceOverlay(),
       ],
@@ -379,11 +383,7 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.qr_code_scanner,
-              size: 120,
-              color: Colors.white70,
-            ),
+            Icon(Icons.qr_code_scanner, size: 120, color: Colors.white70),
             const SizedBox(height: 32),
             Text(
               'Enhanced QR Scanner',
@@ -395,9 +395,9 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             const SizedBox(height: 16),
             Text(
               'SDK-powered credential processing',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
@@ -462,9 +462,9 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             const SizedBox(height: 8),
             Text(
               'Analyzing credentials and privacy implications',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -539,7 +539,7 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           ],
         ),
         const SizedBox(height: 12),
-        
+
         if (qrType == QRType.presentationRequest) ...[
           Text(
             '${result.matchingCredentials.length} matching credential${result.matchingCredentials.length == 1 ? '' : 's'} found',
@@ -552,13 +552,17 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                 Icon(
                   Icons.privacy_tip,
                   size: 16,
-                  color: _getRiskColor(result.privacyAnalysis!.overallRiskLevel),
+                  color: _getRiskColor(
+                    result.privacyAnalysis!.overallRiskLevel,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'Privacy Risk: ${result.privacyAnalysis!.overallRiskLevel.name}',
                   style: TextStyle(
-                    color: _getRiskColor(result.privacyAnalysis!.overallRiskLevel),
+                    color: _getRiskColor(
+                      result.privacyAnalysis!.overallRiskLevel,
+                    ),
                     fontSize: 12,
                   ),
                 ),
@@ -568,12 +572,18 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         ],
 
         if (qrType == QRType.credentialOffer) ...[
-          final compatibilityResults = result.credentialCompatibility ?? [];
-          final supportedCount = compatibilityResults.where((c) => c.isSupported).length;
-          
-          Text(
-            '$supportedCount of ${compatibilityResults.length} credential${compatibilityResults.length == 1 ? '' : 's'} supported',
-            style: const TextStyle(color: Colors.white70),
+          Builder(
+            builder: (context) {
+              final compatibilityResults = result.credentialCompatibility ?? [];
+              final supportedCount = compatibilityResults
+                  .where((c) => c.isSupported)
+                  .length;
+
+              return Text(
+                '$supportedCount of ${compatibilityResults.length} credential${compatibilityResults.length == 1 ? '' : 's'} supported',
+                style: const TextStyle(color: Colors.white70),
+              );
+            },
           ),
         ],
 
@@ -596,8 +606,9 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   Widget _buildPerformanceOverlay() {
-    final processingTime = _scanStartTime != null ? 
-        DateTime.now().difference(_scanStartTime!).inMilliseconds : 0;
+    final processingTime = _scanStartTime != null
+        ? DateTime.now().difference(_scanStartTime!).inMilliseconds
+        : 0;
 
     return Positioned(
       top: 50,
@@ -631,7 +642,8 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   Widget _buildCredentialOfferDialog(EnrichedQRResult enrichedResult) {
-    final offerContent = enrichedResult.validatedResult.parsedData.parsedContent!;
+    final offerContent =
+        enrichedResult.validatedResult.parsedData.parsedContent!;
     final issuer = offerContent['issuer'] as Map<String, dynamic>?;
     final credentials = offerContent['credentials'] as List? ?? [];
 
@@ -650,12 +662,20 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           children: [
             Text('${issuer?['name'] ?? 'Unknown issuer'} is offering:'),
             const SizedBox(height: 16),
-            ...credentials.take(3).map((cred) => ListTile(
-              dense: true,
-              leading: const Icon(Icons.verified, color: Colors.green, size: 20),
-              title: Text(cred['type'] ?? 'Unknown credential'),
-              contentPadding: EdgeInsets.zero,
-            )),
+            ...credentials
+                .take(3)
+                .map(
+                  (cred) => ListTile(
+                    dense: true,
+                    leading: const Icon(
+                      Icons.verified,
+                      color: Colors.green,
+                      size: 20,
+                    ),
+                    title: Text(cred['type'] ?? 'Unknown credential'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
             if (credentials.length > 3)
               Text('... and ${credentials.length - 3} more'),
           ],
@@ -676,59 +696,80 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   void _handleResultAction(EnrichedQRResult result) {
     final qrType = result.validatedResult.parsedData.type;
-    
+
     if (qrType == QRType.presentationRequest) {
       _handlePresentationRequest(result);
     } else if (qrType == QRType.credentialOffer) {
       _handleCredentialOffer(result);
     }
-    
+
     _resultPreviewController.reverse();
   }
 
   IconData _getQRTypeIcon(QRType type) {
     switch (type) {
-      case QRType.presentationRequest: return Icons.request_page;
-      case QRType.credentialOffer: return Icons.card_membership;
-      case QRType.credentialData: return Icons.verified;
-      case QRType.didcommMessage: return Icons.message;
-      default: return Icons.qr_code;
+      case QRType.presentationRequest:
+        return Icons.request_page;
+      case QRType.credentialOffer:
+        return Icons.card_membership;
+      case QRType.credentialData:
+        return Icons.verified;
+      case QRType.didcommMessage:
+        return Icons.message;
+      default:
+        return Icons.qr_code;
     }
   }
 
   String _getQRTypeLabel(QRType type) {
     switch (type) {
-      case QRType.presentationRequest: return 'Presentation Request';
-      case QRType.credentialOffer: return 'Credential Offer';
-      case QRType.credentialData: return 'Credential Data';
-      case QRType.didcommMessage: return 'DIDComm Message';
-      default: return 'QR Code';
+      case QRType.presentationRequest:
+        return 'Presentation Request';
+      case QRType.credentialOffer:
+        return 'Credential Offer';
+      case QRType.credentialData:
+        return 'Credential Data';
+      case QRType.didcommMessage:
+        return 'DIDComm Message';
+      default:
+        return 'QR Code';
     }
   }
 
   Color _getSecurityColor(SecurityLevel level) {
     switch (level) {
-      case SecurityLevel.high: return Colors.green;
-      case SecurityLevel.medium: return Colors.orange;
-      case SecurityLevel.low: return Colors.red;
-      default: return Colors.grey;
+      case SecurityLevel.high:
+        return Colors.green;
+      case SecurityLevel.medium:
+        return Colors.orange;
+      case SecurityLevel.low:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   Color _getRiskColor(RiskLevel level) {
     switch (level) {
-      case RiskLevel.high: return Colors.red;
-      case RiskLevel.medium: return Colors.orange;
-      case RiskLevel.low: return Colors.yellow;
-      default: return Colors.green;
+      case RiskLevel.high:
+        return Colors.red;
+      case RiskLevel.medium:
+        return Colors.orange;
+      case RiskLevel.low:
+        return Colors.yellow;
+      default:
+        return Colors.green;
     }
   }
 
   String _getPrimaryActionLabel(QRType type) {
     switch (type) {
-      case QRType.presentationRequest: return 'Share';
-      case QRType.credentialOffer: return 'Accept';
-      default: return 'Process';
+      case QRType.presentationRequest:
+        return 'Share';
+      case QRType.credentialOffer:
+        return 'Accept';
+      default:
+        return 'Process';
     }
   }
 }
@@ -738,10 +779,8 @@ class ScannerOverlayPainter extends CustomPainter {
   final bool isProcessing;
   final Animation<double> animation;
 
-  ScannerOverlayPainter({
-    required this.isProcessing,
-    required this.animation,
-  }) : super(repaint: animation);
+  ScannerOverlayPainter({required this.isProcessing, required this.animation})
+    : super(repaint: animation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -768,27 +807,59 @@ class ScannerOverlayPainter extends CustomPainter {
 
   void _drawCornerBrackets(Canvas canvas, Rect rect, Paint paint) {
     const bracketLength = 30.0;
-    
+
     // Top-left
-    canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(bracketLength, 0), paint);
-    canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(0, bracketLength), paint);
-    
+    canvas.drawLine(
+      rect.topLeft,
+      rect.topLeft + const Offset(bracketLength, 0),
+      paint,
+    );
+    canvas.drawLine(
+      rect.topLeft,
+      rect.topLeft + const Offset(0, bracketLength),
+      paint,
+    );
+
     // Top-right
-    canvas.drawLine(rect.topRight, rect.topRight + const Offset(-bracketLength, 0), paint);
-    canvas.drawLine(rect.topRight, rect.topRight + const Offset(0, bracketLength), paint);
-    
+    canvas.drawLine(
+      rect.topRight,
+      rect.topRight + const Offset(-bracketLength, 0),
+      paint,
+    );
+    canvas.drawLine(
+      rect.topRight,
+      rect.topRight + const Offset(0, bracketLength),
+      paint,
+    );
+
     // Bottom-left
-    canvas.drawLine(rect.bottomLeft, rect.bottomLeft + const Offset(bracketLength, 0), paint);
-    canvas.drawLine(rect.bottomLeft, rect.bottomLeft + const Offset(0, -bracketLength), paint);
-    
+    canvas.drawLine(
+      rect.bottomLeft,
+      rect.bottomLeft + const Offset(bracketLength, 0),
+      paint,
+    );
+    canvas.drawLine(
+      rect.bottomLeft,
+      rect.bottomLeft + const Offset(0, -bracketLength),
+      paint,
+    );
+
     // Bottom-right
-    canvas.drawLine(rect.bottomRight, rect.bottomRight + const Offset(-bracketLength, 0), paint);
-    canvas.drawLine(rect.bottomRight, rect.bottomRight + const Offset(0, -bracketLength), paint);
+    canvas.drawLine(
+      rect.bottomRight,
+      rect.bottomRight + const Offset(-bracketLength, 0),
+      paint,
+    );
+    canvas.drawLine(
+      rect.bottomRight,
+      rect.bottomRight + const Offset(0, -bracketLength),
+      paint,
+    );
   }
 
   void _drawScanningLine(Canvas canvas, Rect rect, Paint paint) {
     final lineY = rect.top + (rect.height * animation.value);
-    
+
     final linePaint = Paint()
       ..color = Colors.blue.withOpacity(0.8)
       ..strokeWidth = 2;
@@ -803,6 +874,6 @@ class ScannerOverlayPainter extends CustomPainter {
   @override
   bool shouldRepaint(ScannerOverlayPainter oldDelegate) {
     return isProcessing != oldDelegate.isProcessing ||
-           animation.value != oldDelegate.animation.value;
+        animation.value != oldDelegate.animation.value;
   }
 }

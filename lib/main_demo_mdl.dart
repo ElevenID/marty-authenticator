@@ -19,7 +19,7 @@
 */
 
 /// Demo main entry point with Mobile Driver License (mDL) only
-/// 
+///
 /// Run with:
 ///   flutter run -t lib/main_demo_mdl.dart -d chrome
 ///   flutter run -t lib/main_demo_mdl.dart -d macos
@@ -35,9 +35,9 @@ void main() async {
       final mdl = MDocFixtures.mobileDriverLicense(
         state: CredentialState.valid,
       );
-      
+
       await mockServices.platformService.storeCredential(mdl);
-      
+
       return ['Mobile Driver License (mDL)'];
     },
   );

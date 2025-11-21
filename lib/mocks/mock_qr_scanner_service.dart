@@ -110,7 +110,10 @@ class MockQrScannerNavigatorObserver extends NavigatorObserver {
     });
   }
 
-  void _showQrSelectionDialog(Route<dynamic> route, MockQrScannerConfig config) {
+  void _showQrSelectionDialog(
+    Route<dynamic> route,
+    MockQrScannerConfig config,
+  ) {
     final context = navigator?.context;
     if (context == null || !context.mounted) return;
 

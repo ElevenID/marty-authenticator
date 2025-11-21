@@ -121,15 +121,17 @@ class FirebaseUtils {
         _initFbMutex.release();
         return null;
       }
-      
+
       // Check if Firebase is configured and enabled
       if (appFirebaseOptions == null) {
-        Logger.info('Firebase is disabled - skipping Firebase app initialization');
+        Logger.info(
+          'Firebase is disabled - skipping Firebase app initialization',
+        );
         initializedFirebase = true; // Mark as "initialized" to prevent retries
         _initFbMutex.release();
         return null;
       }
-      
+
       final FirebaseOptions options = appFirebaseOptions!;
       final app = await Firebase.initializeApp(
         name: "fb-${options.projectId}",
@@ -171,7 +173,7 @@ class FirebaseUtils {
       _initFbMutex.release();
       return;
     }
-    
+
     // Check if Firebase is actually configured and available
     if (appFirebaseOptions == null) {
       Logger.info('Firebase is disabled - skipping handler setup');
@@ -252,7 +254,7 @@ class FirebaseUtils {
       Logger.info('Firebase is disabled - returning NO_FIREBASE_TOKEN');
       return NoFirebaseUtils.NO_FIREBASE_TOKEN;
     }
-    
+
     String? firebaseToken;
     try {
       firebaseToken = await FirebaseMessaging.instance.getToken();

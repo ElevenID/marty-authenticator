@@ -42,18 +42,27 @@ class DefaultFirebaseOptions {
   /// or if any core Firebase environment variables are provided.
   static bool get isFirebaseEnabled {
     // Check explicit enable flag first
-    const firebaseEnabled = String.fromEnvironment('FIREBASE_ENABLED', defaultValue: '');
+    const firebaseEnabled = String.fromEnvironment(
+      'FIREBASE_ENABLED',
+      defaultValue: '',
+    );
     if (firebaseEnabled.toLowerCase() == 'true') {
       return true;
     }
     if (firebaseEnabled.toLowerCase() == 'false') {
       return false;
     }
-    
+
     // Auto-detect based on presence of core Firebase variables
-    const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: '');
-    const messagingSenderId = String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '');
-    
+    const projectId = String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: '',
+    );
+    const messagingSenderId = String.fromEnvironment(
+      'FIREBASE_MESSAGING_SENDER_ID',
+      defaultValue: '',
+    );
+
     // If we have the core identifiers, assume Firebase should be enabled
     return projectId.isNotEmpty && messagingSenderId.isNotEmpty;
   }
@@ -66,9 +75,9 @@ class DefaultFirebaseOptions {
       // Firebase is disabled, skip validation
       return;
     }
-    
+
     final errors = <String>[];
-    
+
     void checkRequired(String envVar, String value) {
       if (value.isEmpty) {
         errors.add('Missing required environment variable: $envVar');
@@ -76,40 +85,99 @@ class DefaultFirebaseOptions {
     }
 
     // Check common Firebase variables
-    checkRequired('FIREBASE_PROJECT_ID', const String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''));
-    checkRequired('FIREBASE_MESSAGING_SENDER_ID', const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''));
-    checkRequired('FIREBASE_STORAGE_BUCKET', const String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''));
+    checkRequired(
+      'FIREBASE_PROJECT_ID',
+      const String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
+    );
+    checkRequired(
+      'FIREBASE_MESSAGING_SENDER_ID',
+      const String.fromEnvironment(
+        'FIREBASE_MESSAGING_SENDER_ID',
+        defaultValue: '',
+      ),
+    );
+    checkRequired(
+      'FIREBASE_STORAGE_BUCKET',
+      const String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    );
 
     // Check platform-specific variables
     if (!kIsWeb) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
-          checkRequired('FIREBASE_ANDROID_API_KEY', const String.fromEnvironment('FIREBASE_ANDROID_API_KEY', defaultValue: ''));
-          checkRequired('FIREBASE_ANDROID_APP_ID', const String.fromEnvironment('FIREBASE_ANDROID_APP_ID', defaultValue: ''));
+          checkRequired(
+            'FIREBASE_ANDROID_API_KEY',
+            const String.fromEnvironment(
+              'FIREBASE_ANDROID_API_KEY',
+              defaultValue: '',
+            ),
+          );
+          checkRequired(
+            'FIREBASE_ANDROID_APP_ID',
+            const String.fromEnvironment(
+              'FIREBASE_ANDROID_APP_ID',
+              defaultValue: '',
+            ),
+          );
           break;
         case TargetPlatform.iOS:
-          checkRequired('FIREBASE_IOS_API_KEY', const String.fromEnvironment('FIREBASE_IOS_API_KEY', defaultValue: ''));
-          checkRequired('FIREBASE_IOS_APP_ID', const String.fromEnvironment('FIREBASE_IOS_APP_ID', defaultValue: ''));
-          checkRequired('FIREBASE_IOS_CLIENT_ID', const String.fromEnvironment('FIREBASE_IOS_CLIENT_ID', defaultValue: ''));
-          checkRequired('FIREBASE_IOS_BUNDLE_ID', const String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: ''));
+          checkRequired(
+            'FIREBASE_IOS_API_KEY',
+            const String.fromEnvironment(
+              'FIREBASE_IOS_API_KEY',
+              defaultValue: '',
+            ),
+          );
+          checkRequired(
+            'FIREBASE_IOS_APP_ID',
+            const String.fromEnvironment(
+              'FIREBASE_IOS_APP_ID',
+              defaultValue: '',
+            ),
+          );
+          checkRequired(
+            'FIREBASE_IOS_CLIENT_ID',
+            const String.fromEnvironment(
+              'FIREBASE_IOS_CLIENT_ID',
+              defaultValue: '',
+            ),
+          );
+          checkRequired(
+            'FIREBASE_IOS_BUNDLE_ID',
+            const String.fromEnvironment(
+              'FIREBASE_IOS_BUNDLE_ID',
+              defaultValue: '',
+            ),
+          );
           break;
         default:
-          // Other platforms handled by existing code
+        // Other platforms handled by existing code
       }
     } else {
       // Web platform
-      checkRequired('FIREBASE_WEB_API_KEY', const String.fromEnvironment('FIREBASE_WEB_API_KEY', defaultValue: ''));
-      checkRequired('FIREBASE_WEB_APP_ID', const String.fromEnvironment('FIREBASE_WEB_APP_ID', defaultValue: ''));
-      checkRequired('FIREBASE_AUTH_DOMAIN', const String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''));
+      checkRequired(
+        'FIREBASE_WEB_API_KEY',
+        const String.fromEnvironment('FIREBASE_WEB_API_KEY', defaultValue: ''),
+      );
+      checkRequired(
+        'FIREBASE_WEB_APP_ID',
+        const String.fromEnvironment('FIREBASE_WEB_APP_ID', defaultValue: ''),
+      );
+      checkRequired(
+        'FIREBASE_AUTH_DOMAIN',
+        const String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''),
+      );
     }
 
     if (errors.isNotEmpty) {
-      throw Exception('Firebase configuration validation failed:\n${errors.join('\n')}\n\n'
-          'Please provide missing environment variables via:\n'
-          '  --dart-define=VARIABLE_NAME=value or\n'
-          '  --dart-define-from-file=.env.firebase\n\n'
-          'Alternatively, set --dart-define=FIREBASE_ENABLED=false to disable Firebase.\n\n'
-          'See docs/FIREBASE_SETUP.md for configuration instructions.');
+      throw Exception(
+        'Firebase configuration validation failed:\n${errors.join('\n')}\n\n'
+        'Please provide missing environment variables via:\n'
+        '  --dart-define=VARIABLE_NAME=value or\n'
+        '  --dart-define-from-file=.env.firebase\n\n'
+        'Alternatively, set --dart-define=FIREBASE_ENABLED=false to disable Firebase.\n\n'
+        'See docs/FIREBASE_SETUP.md for configuration instructions.',
+      );
     }
   }
 

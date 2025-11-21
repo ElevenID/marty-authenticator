@@ -43,6 +43,9 @@ import 'riverpod/riverpod_providers/state_providers/status_message_provider.dart
 import 'rsa_utils.dart';
 import 'utils.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/verification_state_provider.dart';
+
 /// This class bundles all logic that is needed to handle incomig PushRequests, e.g.,
 /// firebase, polling, notifications.
 class PushProvider {
@@ -182,6 +185,17 @@ class PushProvider {
   Future<void> _foregroundHandler(RemoteMessage remoteMessage) async {
     Logger.info('Foreground message received.');
 
+    // Check for passport issuance
+    if (remoteMessage.data['type'] == 'document_verification_result' &&
+        remoteMessage.data['status'] == 'approved') {
+      if (globalRef != null) {
+        globalRef!
+            .read(verificationStateProvider.notifier)
+            .setStatus(VerificationStatus.issued);
+      }
+      return;
+    }
+
     Map<String, dynamic> data;
     try {
       data = _getAndValidateDataFromRemoteMessage(remoteMessage);
@@ -208,6 +222,22 @@ class PushProvider {
   @pragma('vm:entry-point')
   static Future<void> _backgroundHandler(RemoteMessage remoteMessage) async {
     Logger.info('Background message received.');
+
+    // Check for passport issuance
+    if (remoteMessage.data['type'] == 'document_verification_result' &&
+        remoteMessage.data['status'] == 'approved') {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'verification_status',
+        VerificationStatus.issued.toString(),
+      );
+
+      PiNotifications.show(
+        'Digital ID Issued',
+        'Your passport has been verified and added to your wallet.',
+      );
+      return;
+    }
 
     Map<String, dynamic> data;
     try {

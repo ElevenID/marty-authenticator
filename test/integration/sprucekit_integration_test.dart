@@ -19,7 +19,7 @@
  */
 
 /// Comprehensive SpruceID SDK integration test suite
-/// 
+///
 /// This test suite validates:
 /// - End-to-end SDK integration workflows
 /// - Performance benchmarks for critical operations
@@ -57,7 +57,7 @@ import 'sprucekit_integration_test.mocks.dart';
 void main() {
   group('SpruceID SDK Integration Tests', () {
     late ProviderContainer container;
-    
+
     // Mock services
     late MockSpruceKitServiceExtended mockSpruceKitService;
     late MockWalletManagerExtended mockWalletManager;
@@ -77,7 +77,7 @@ void main() {
         'id': 'did:example:subject456',
         'degree': 'Bachelor of Science',
         'institution': 'Example University',
-        'graduationDate': '2023-05-15'
+        'graduationDate': '2023-05-15',
       },
       'issuanceDate': '2023-05-16T00:00:00Z',
       'proof': {
@@ -85,8 +85,8 @@ void main() {
         'created': '2023-05-16T00:00:00Z',
         'verificationMethod': 'did:example:issuer123#key-1',
         'proofPurpose': 'assertionMethod',
-        'jws': 'example-signature'
-      }
+        'jws': 'example-signature',
+      },
     };
 
     final testPresentationRequest = {
@@ -96,8 +96,8 @@ void main() {
       'purpose': 'Academic verification for job application',
       'verifier': {
         'name': 'Example Corporation',
-        'did': 'did:example:verifier789'
-      }
+        'did': 'did:example:verifier789',
+      },
     };
 
     setUp(() async {
@@ -114,12 +114,20 @@ void main() {
       // Create provider container with mocked services
       container = ProviderContainer(
         overrides: [
-          spruceKitServiceExtendedProvider.overrideWithValue(mockSpruceKitService),
+          spruceKitServiceExtendedProvider.overrideWithValue(
+            mockSpruceKitService,
+          ),
           walletManagerExtendedProvider.overrideWithValue(mockWalletManager),
-          presentationBuilderServiceProvider.overrideWithValue(mockPresentationBuilder),
-          credentialVerificationServiceProvider.overrideWithValue(mockVerificationService),
+          presentationBuilderServiceProvider.overrideWithValue(
+            mockPresentationBuilder,
+          ),
+          credentialVerificationServiceProvider.overrideWithValue(
+            mockVerificationService,
+          ),
           privacyAnalysisServiceProvider.overrideWithValue(mockPrivacyAnalysis),
-          didManagementServiceExtendedProvider.overrideWithValue(mockDIDManagement),
+          didManagementServiceExtendedProvider.overrideWithValue(
+            mockDIDManagement,
+          ),
           qrScannerServiceEnhancedProvider.overrideWithValue(mockQRScanner),
           backgroundSyncServiceProvider.overrideWithValue(mockBackgroundSync),
         ],
@@ -136,9 +144,10 @@ void main() {
     group('End-to-End Workflow Tests', () {
       testWidgets('Complete credential presentation workflow', (tester) async {
         // Test the full workflow from QR scan to presentation creation
-        
+
         // 1. Mock QR code scanning
-        const qrData = 'https://verifier.example.com/presentation-request?challenge=test-challenge';
+        const qrData =
+            'https://verifier.example.com/presentation-request?challenge=test-challenge';
         when(mockQRScanner.processQRCode(qrData)).thenAnswer((_) async {
           return ProcessedQRResult(
             isSuccess: true,
@@ -170,9 +179,9 @@ void main() {
         });
 
         // 2. Mock credential selection and privacy analysis
-        when(mockPrivacyAnalysis.analyzeAttributeDisclosure(
-          any, any, any
-        )).thenAnswer((_) async {
+        when(
+          mockPrivacyAnalysis.analyzeAttributeDisclosure(any, any, any),
+        ).thenAnswer((_) async {
           return PrivacyAnalysisResult(
             overallRiskLevel: RiskLevel.low,
             attributeRisks: {
@@ -205,11 +214,13 @@ void main() {
         });
 
         // 3. Mock presentation creation
-        when(mockPresentationBuilder.createPresentation(
-          credentials: anyNamed('credentials'),
-          presentationRequest: anyNamed('presentationRequest'),
-          selectedAttributes: anyNamed('selectedAttributes'),
-        )).thenAnswer((_) async {
+        when(
+          mockPresentationBuilder.createPresentation(
+            credentials: anyNamed('credentials'),
+            presentationRequest: anyNamed('presentationRequest'),
+            selectedAttributes: anyNamed('selectedAttributes'),
+          ),
+        ).thenAnswer((_) async {
           return PresentationCreationResult(
             success: true,
             presentation: {
@@ -220,7 +231,7 @@ void main() {
                 'created': DateTime.now().toIso8601String(),
                 'challenge': 'test-challenge',
                 'domain': 'example-verifier.com',
-              }
+              },
             },
             metadata: PresentationMetadata(
               credentialCount: 1,
@@ -236,37 +247,49 @@ void main() {
         expect(qrResult.isSuccess, true);
         expect(qrResult.enrichedResult?.matchingCredentials, isNotEmpty);
 
-        final privacyResult = await mockPrivacyAnalysis.analyzeAttributeDisclosure(
-          testPresentationRequest['requested_attributes'] as List<String>,
-          [testCredential],
-          testPresentationRequest,
-        );
+        final privacyResult = await mockPrivacyAnalysis
+            .analyzeAttributeDisclosure(
+              testPresentationRequest['requested_attributes'] as List<String>,
+              [testCredential],
+              testPresentationRequest,
+            );
         expect(privacyResult.overallRiskLevel, RiskLevel.low);
 
-        final presentationResult = await mockPresentationBuilder.createPresentation(
-          credentials: [testCredential],
-          presentationRequest: testPresentationRequest,
-          selectedAttributes: ['degree', 'institution', 'graduationDate'],
-        );
+        final presentationResult = await mockPresentationBuilder
+            .createPresentation(
+              credentials: [testCredential],
+              presentationRequest: testPresentationRequest,
+              selectedAttributes: ['degree', 'institution', 'graduationDate'],
+            );
         expect(presentationResult.success, true);
         expect(presentationResult.presentation, isNotNull);
 
         // Verify all services were called with correct parameters
         verify(mockQRScanner.processQRCode(qrData)).called(1);
-        verify(mockPrivacyAnalysis.analyzeAttributeDisclosure(any, any, any)).called(1);
-        verify(mockPresentationBuilder.createPresentation(
-          credentials: anyNamed('credentials'),
-          presentationRequest: anyNamed('presentationRequest'),
-          selectedAttributes: anyNamed('selectedAttributes'),
-        )).called(1);
+        verify(
+          mockPrivacyAnalysis.analyzeAttributeDisclosure(any, any, any),
+        ).called(1);
+        verify(
+          mockPresentationBuilder.createPresentation(
+            credentials: anyNamed('credentials'),
+            presentationRequest: anyNamed('presentationRequest'),
+            selectedAttributes: anyNamed('selectedAttributes'),
+          ),
+        ).called(1);
       });
 
-      testWidgets('Credential verification and storage workflow', (tester) async {
+      testWidgets('Credential verification and storage workflow', (
+        tester,
+      ) async {
         // Test credential verification and secure storage workflow
-        
+
         // Mock credential verification
-        when(mockVerificationService.verifyCredential(any, options: anyNamed('options')))
-            .thenAnswer((_) async {
+        when(
+          mockVerificationService.verifyCredential(
+            any,
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async {
           return CredentialVerificationResult(
             isValid: true,
             verificationLevel: VerificationLevel.full,
@@ -306,7 +329,8 @@ void main() {
         });
 
         // Execute workflow
-        final verificationResult = await mockVerificationService.verifyCredential(testCredential);
+        final verificationResult = await mockVerificationService
+            .verifyCredential(testCredential);
         expect(verificationResult.isValid, true);
         expect(verificationResult.trustScore, greaterThan(0.9));
 
@@ -318,16 +342,20 @@ void main() {
         expect(storageResult.encryptionLevel, EncryptionLevel.hardware);
 
         // Verify service calls
-        verify(mockVerificationService.verifyCredential(testCredential)).called(1);
-        verify(mockWalletManager.storeCredential(
-          testCredential['id'] as String,
-          testCredential,
-        )).called(1);
+        verify(
+          mockVerificationService.verifyCredential(testCredential),
+        ).called(1);
+        verify(
+          mockWalletManager.storeCredential(
+            testCredential['id'] as String,
+            testCredential,
+          ),
+        ).called(1);
       });
 
       testWidgets('Background synchronization workflow', (tester) async {
         // Test background sync functionality
-        
+
         // Mock sync configuration
         final syncConfig = SyncConfiguration(
           strategy: SyncStrategy.balanced,
@@ -335,14 +363,17 @@ void main() {
           enableBackgroundSync: true,
         );
 
-        when(mockBackgroundSync.initialize(configuration: syncConfig))
-            .thenAnswer((_) async {});
+        when(
+          mockBackgroundSync.initialize(configuration: syncConfig),
+        ).thenAnswer((_) async {});
 
-        when(mockBackgroundSync.performSync(
-          credentialIds: anyNamed('credentialIds'),
-          priority: anyNamed('priority'),
-          force: anyNamed('force'),
-        )).thenAnswer((_) async {
+        when(
+          mockBackgroundSync.performSync(
+            credentialIds: anyNamed('credentialIds'),
+            priority: anyNamed('priority'),
+            force: anyNamed('force'),
+          ),
+        ).thenAnswer((_) async {
           return SyncResult(
             success: true,
             credentialsUpdated: 1,
@@ -357,7 +388,7 @@ void main() {
 
         // Execute sync workflow
         await mockBackgroundSync.initialize(configuration: syncConfig);
-        
+
         final syncResult = await mockBackgroundSync.performSync(
           priority: SyncPriority.high,
         );
@@ -369,8 +400,12 @@ void main() {
         expect(revokedCredentials, isEmpty);
 
         // Verify calls
-        verify(mockBackgroundSync.initialize(configuration: syncConfig)).called(1);
-        verify(mockBackgroundSync.performSync(priority: SyncPriority.high)).called(1);
+        verify(
+          mockBackgroundSync.initialize(configuration: syncConfig),
+        ).called(1);
+        verify(
+          mockBackgroundSync.performSync(priority: SyncPriority.high),
+        ).called(1);
         verify(mockBackgroundSync.checkRevocations()).called(1);
       });
     });
@@ -394,17 +429,26 @@ void main() {
         stopwatch.stop();
 
         final avgProcessingTime = stopwatch.elapsedMilliseconds / iterations;
-        expect(avgProcessingTime, lessThan(100)); // Should process in under 100ms
-        
-        print('QR Processing Average Time: ${avgProcessingTime.toStringAsFixed(2)}ms');
+        expect(
+          avgProcessingTime,
+          lessThan(100),
+        ); // Should process in under 100ms
+
+        print(
+          'QR Processing Average Time: ${avgProcessingTime.toStringAsFixed(2)}ms',
+        );
       });
 
       test('Credential verification performance benchmark', () async {
         const iterations = 50;
         final stopwatch = Stopwatch();
 
-        when(mockVerificationService.verifyCredential(any, options: anyNamed('options')))
-            .thenAnswer((_) async {
+        when(
+          mockVerificationService.verifyCredential(
+            any,
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async {
           await Future.delayed(const Duration(milliseconds: 200));
           return CredentialVerificationResult(
             isValid: true,
@@ -424,20 +468,27 @@ void main() {
         stopwatch.stop();
 
         final avgVerificationTime = stopwatch.elapsedMilliseconds / iterations;
-        expect(avgVerificationTime, lessThan(300)); // Should verify in under 300ms
-        
-        print('Verification Average Time: ${avgVerificationTime.toStringAsFixed(2)}ms');
+        expect(
+          avgVerificationTime,
+          lessThan(300),
+        ); // Should verify in under 300ms
+
+        print(
+          'Verification Average Time: ${avgVerificationTime.toStringAsFixed(2)}ms',
+        );
       });
 
       test('Presentation creation performance benchmark', () async {
         const iterations = 25;
         final stopwatch = Stopwatch();
 
-        when(mockPresentationBuilder.createPresentation(
-          credentials: anyNamed('credentials'),
-          presentationRequest: anyNamed('presentationRequest'),
-          selectedAttributes: anyNamed('selectedAttributes'),
-        )).thenAnswer((_) async {
+        when(
+          mockPresentationBuilder.createPresentation(
+            credentials: anyNamed('credentials'),
+            presentationRequest: anyNamed('presentationRequest'),
+            selectedAttributes: anyNamed('selectedAttributes'),
+          ),
+        ).thenAnswer((_) async {
           await Future.delayed(const Duration(milliseconds: 300));
           return PresentationCreationResult(
             success: true,
@@ -463,15 +514,18 @@ void main() {
 
         final avgCreationTime = stopwatch.elapsedMilliseconds / iterations;
         expect(avgCreationTime, lessThan(500)); // Should create in under 500ms
-        
-        print('Presentation Creation Average Time: ${avgCreationTime.toStringAsFixed(2)}ms');
+
+        print(
+          'Presentation Creation Average Time: ${avgCreationTime.toStringAsFixed(2)}ms',
+        );
       });
     });
 
     group('Error Handling and Edge Cases', () {
       test('Invalid QR code handling', () async {
-        when(mockQRScanner.processQRCode('invalid-qr-code'))
-            .thenAnswer((_) async {
+        when(mockQRScanner.processQRCode('invalid-qr-code')).thenAnswer((
+          _,
+        ) async {
           return ProcessedQRResult(
             isSuccess: false,
             errorMessage: 'Invalid QR code format',
@@ -484,8 +538,12 @@ void main() {
       });
 
       test('Network failure during verification', () async {
-        when(mockVerificationService.verifyCredential(any, options: anyNamed('options')))
-            .thenThrow(Exception('Network timeout'));
+        when(
+          mockVerificationService.verifyCredential(
+            any,
+            options: anyNamed('options'),
+          ),
+        ).thenThrow(Exception('Network timeout'));
 
         expect(
           () => mockVerificationService.verifyCredential(testCredential),
@@ -510,44 +568,60 @@ void main() {
           );
         });
 
-        final result = await mockWalletManager.storeCredential('test', testCredential);
+        final result = await mockWalletManager.storeCredential(
+          'test',
+          testCredential,
+        );
         expect(result.success, false);
-        expect(result.errorMessage, contains('Encryption hardware unavailable'));
+        expect(
+          result.errorMessage,
+          contains('Encryption hardware unavailable'),
+        );
       });
     });
 
     group('Cross-Service Integration', () {
       test('Service coordination during presentation creation', () async {
         // Test that multiple services work together correctly
-        
-        // Setup service chain
-        when(mockWalletManager.getAllCredentials()).thenAnswer((_) async => [testCredential]);
-        
-        when(mockPrivacyAnalysis.analyzeAttributeDisclosure(any, any, any))
-            .thenAnswer((_) async => PrivacyAnalysisResult(
-              overallRiskLevel: RiskLevel.low,
-              attributeRisks: {},
-              recommendations: [],
-            ));
 
-        when(mockPresentationBuilder.createPresentation(
-          credentials: anyNamed('credentials'),
-          presentationRequest: anyNamed('presentationRequest'),
-          selectedAttributes: anyNamed('selectedAttributes'),
-        )).thenAnswer((_) async => PresentationCreationResult(
-          success: true,
-          presentation: {'test': 'presentation'},
-        ));
+        // Setup service chain
+        when(
+          mockWalletManager.getAllCredentials(),
+        ).thenAnswer((_) async => [testCredential]);
+
+        when(
+          mockPrivacyAnalysis.analyzeAttributeDisclosure(any, any, any),
+        ).thenAnswer(
+          (_) async => PrivacyAnalysisResult(
+            overallRiskLevel: RiskLevel.low,
+            attributeRisks: {},
+            recommendations: [],
+          ),
+        );
+
+        when(
+          mockPresentationBuilder.createPresentation(
+            credentials: anyNamed('credentials'),
+            presentationRequest: anyNamed('presentationRequest'),
+            selectedAttributes: anyNamed('selectedAttributes'),
+          ),
+        ).thenAnswer(
+          (_) async => PresentationCreationResult(
+            success: true,
+            presentation: {'test': 'presentation'},
+          ),
+        );
 
         // Execute coordinated workflow
         final credentials = await mockWalletManager.getAllCredentials();
         expect(credentials, isNotEmpty);
 
-        final privacyAnalysis = await mockPrivacyAnalysis.analyzeAttributeDisclosure(
-          ['degree', 'institution'],
-          credentials,
-          testPresentationRequest,
-        );
+        final privacyAnalysis = await mockPrivacyAnalysis
+            .analyzeAttributeDisclosure(
+              ['degree', 'institution'],
+              credentials,
+              testPresentationRequest,
+            );
         expect(privacyAnalysis.overallRiskLevel, RiskLevel.low);
 
         final presentation = await mockPresentationBuilder.createPresentation(
@@ -573,27 +647,41 @@ void main() {
     group('Data Flow Validation', () {
       test('Credential data integrity through workflow', () async {
         // Test that credential data remains intact through the entire workflow
-        
+
         final originalCredential = Map<String, dynamic>.from(testCredential);
-        
-        when(mockVerificationService.verifyCredential(any, options: anyNamed('options')))
-            .thenAnswer((_) async => CredentialVerificationResult(isValid: true));
+
+        when(
+          mockVerificationService.verifyCredential(
+            any,
+            options: anyNamed('options'),
+          ),
+        ).thenAnswer((_) async => CredentialVerificationResult(isValid: true));
 
         when(mockWalletManager.storeCredential(any, any)).thenAnswer((_) async {
-          return CredentialStorageResult(success: true, credentialId: 'stored-123');
+          return CredentialStorageResult(
+            success: true,
+            credentialId: 'stored-123',
+          );
         });
 
-        when(mockWalletManager.getCredential('stored-123'))
-            .thenAnswer((_) async => testCredential);
+        when(
+          mockWalletManager.getCredential('stored-123'),
+        ).thenAnswer((_) async => testCredential);
 
         // Workflow: verify -> store -> retrieve
-        final verificationResult = await mockVerificationService.verifyCredential(originalCredential);
+        final verificationResult = await mockVerificationService
+            .verifyCredential(originalCredential);
         expect(verificationResult.isValid, true);
 
-        final storageResult = await mockWalletManager.storeCredential('test-123', originalCredential);
+        final storageResult = await mockWalletManager.storeCredential(
+          'test-123',
+          originalCredential,
+        );
         expect(storageResult.success, true);
 
-        final retrievedCredential = await mockWalletManager.getCredential('stored-123');
+        final retrievedCredential = await mockWalletManager.getCredential(
+          'stored-123',
+        );
         expect(retrievedCredential, equals(originalCredential));
       });
     });

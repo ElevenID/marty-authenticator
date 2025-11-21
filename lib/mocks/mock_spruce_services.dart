@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:privacyidea_authenticator/interfaces/spruce_interfaces.dart';
 import '../fixtures/spruce_credentials_fixtures.dart';
+import '../utils/logger.dart';
 
 /// Configuration for mock SpruceID services
 class MockSpruceIdConfig {
@@ -104,7 +105,7 @@ abstract class MockServiceBase {
     String? errorMessage,
   }) async {
     if (config.verboseLogging) {
-      print('[MockSpruceId] Executing: $operationName');
+      Logger.info('[MockSpruceId] Executing: $operationName');
     }
 
     await _simulateDelay();
@@ -112,7 +113,7 @@ abstract class MockServiceBase {
     if (_shouldFail()) {
       final error = errorMessage ?? 'Mock error in $operationName';
       if (config.verboseLogging) {
-        print('[MockSpruceId] Failed: $operationName - $error');
+        Logger.error('[MockSpruceId] Failed: $operationName - $error');
       }
       throw Exception(error);
     }
@@ -120,12 +121,12 @@ abstract class MockServiceBase {
     try {
       final result = await operation();
       if (config.verboseLogging) {
-        print('[MockSpruceId] Success: $operationName');
+        Logger.info('[MockSpruceId] Success: $operationName');
       }
       return result;
     } catch (e) {
       if (config.verboseLogging) {
-        print('[MockSpruceId] Error: $operationName - $e');
+        Logger.error('[MockSpruceId] Error: $operationName - $e');
       }
       rethrow;
     }
@@ -148,7 +149,81 @@ class MockSpruceIdPlatformService extends MockServiceBase
   bool _w3cInitialized = false;
 
   MockSpruceIdPlatformService([MockSpruceIdConfig? config])
-      : super(config ?? MockSpruceIdConfig());
+    : super(config ?? MockSpruceIdConfig()) {
+    Logger.debug('DEBUG: MockSpruceIdPlatformService constructor called');
+    // Pre-populate with some dummy credentials for development
+    _credentials['mock-mdl-1'] = {
+      'id': 'mock-mdl-1',
+      'type': 'mDL',
+      'issuer': 'State of Utopia',
+      'data': {
+        'given_name': 'John',
+        'family_name': 'Doe',
+        'birth_date': '1980-01-01',
+      },
+    };
+
+    _credentials['mock-mdl-2'] = {
+      'id': 'mock-mdl-2',
+      'type': 'mDL',
+      'issuer': 'State of Utopia',
+      'data': {
+        'given_name': 'Jane',
+        'family_name': 'Doe',
+        'birth_date': '1985-05-15',
+      },
+    };
+
+    _credentials['mock-vc-1'] = {
+      'id': 'mock-vc-1',
+      'type': 'VerifiableId',
+      'issuer': 'Acme Corp',
+      'data': {'employee_id': '12345', 'role': 'Developer'},
+    };
+
+    _credentials['mock-vc-2'] = {
+      'id': 'mock-vc-2',
+      'type': 'VerifiableId',
+      'issuer': 'Acme Corp',
+      'data': {'employee_id': '67890', 'role': 'Designer'},
+    };
+
+    _credentials['mock-gym-1'] = {
+      'id': 'mock-gym-1',
+      'type': 'VerifiableId',
+      'issuer': 'Gold\'s Gym',
+      'data': {'member_id': 'GG-999', 'level': 'Platinum'},
+    };
+
+    // Add some expired credentials for testing
+    _credentials['mock-expired-1'] = {
+      'id': 'mock-expired-1',
+      'type': 'VerifiableId',
+      'issuer': 'Metro Transit',
+      'expirationDate': '2024-12-31T23:59:59Z', // Expired
+      'data': {'pass_type': 'Monthly', 'zone': 'City Center'},
+    };
+
+    _credentials['mock-expired-2'] = {
+      'id': 'mock-expired-2',
+      'type': 'VerifiableId',
+      'issuer': 'Movie Theater',
+      'expirationDate': '2024-11-15T23:59:59Z', // Expired
+      'data': {'membership': 'Premium', 'benefits': 'Free popcorn'},
+    };
+
+    _credentials['mock-expired-3'] = {
+      'id': 'mock-expired-3',
+      'type': 'mDL',
+      'issuer': 'State of Utopia',
+      'expirationDate': '2024-10-01T23:59:59Z', // Expired
+      'data': {
+        'given_name': 'Bob',
+        'family_name': 'Smith',
+        'birth_date': '1975-03-20',
+      },
+    };
+  }
 
   @override
   bool get isInitialized => _w3cInitialized;
@@ -181,10 +256,7 @@ class MockSpruceIdPlatformService extends MockServiceBase
       return {
         'did': did,
         'method': _dids[did],
-        'document': {
-          '@context': 'https://www.w3.org/ns/did/v1',
-          'id': did,
-        }
+        'document': {'@context': 'https://www.w3.org/ns/did/v1', 'id': did},
       };
     });
   }
@@ -252,7 +324,10 @@ class MockSpruceIdPlatformService extends MockServiceBase
   }
 
   @override
-  Future<Map<String, dynamic>> createCSR(String subject, {String? keyId}) async {
+  Future<Map<String, dynamic>> createCSR(
+    String subject, {
+    String? keyId,
+  }) async {
     return execute('createCSR', () async {
       return {
         'csr': 'mock-csr-${DateTime.now().millisecondsSinceEpoch}',
@@ -271,7 +346,8 @@ class MockSpruceIdPlatformService extends MockServiceBase
       final signed = Map<String, dynamic>.from(document);
       signed['signature'] = {
         'certificateId': certificateId,
-        'signature': 'mock-cert-signature-${DateTime.now().millisecondsSinceEpoch}',
+        'signature':
+            'mock-cert-signature-${DateTime.now().millisecondsSinceEpoch}',
         'timestamp': DateTime.now().toIso8601String(),
       };
       return signed;
@@ -283,10 +359,7 @@ class MockSpruceIdPlatformService extends MockServiceBase
     List<String> certificateChain,
   ) async {
     return execute('verifyCertificateChain', () async {
-      return {
-        'valid': true,
-        'chainLength': certificateChain.length,
-      };
+      return {'valid': true, 'chainLength': certificateChain.length};
     });
   }
 
@@ -297,21 +370,16 @@ class MockSpruceIdPlatformService extends MockServiceBase
     Map<String, dynamic> claims,
   ) async {
     return execute('createJWT', () async {
-      final jwt = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.${base64Encode(utf8.encode(jsonEncode(claims)))}.mock-signature';
-      return {
-        'jwt': jwt,
-        'issuer': issuer,
-      };
+      final jwt =
+          'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.${base64Encode(utf8.encode(jsonEncode(claims)))}.mock-signature';
+      return {'jwt': jwt, 'issuer': issuer};
     });
   }
 
   @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
     return execute('verifyJWT', () async {
-      return {
-        'valid': true,
-        'issuer': issuer,
-      };
+      return {'valid': true, 'issuer': issuer};
     });
   }
 
@@ -337,16 +405,15 @@ class MockSpruceIdPlatformService extends MockServiceBase
     List<String> requiredClaims,
   ) async {
     return execute('verifySdJwt', () async {
-      return {
-        'valid': true,
-        'requiredClaims': requiredClaims,
-      };
+      return {'valid': true, 'requiredClaims': requiredClaims};
     });
   }
 
   // mDoc Methods
   @override
-  Future<Map<String, dynamic>> initializeMdl(Map<String, dynamic> mdlData) async {
+  Future<Map<String, dynamic>> initializeMdl(
+    Map<String, dynamic> mdlData,
+  ) async {
     return execute('initializeMdl', () async {
       final id = 'mdl-${DateTime.now().millisecondsSinceEpoch}';
       _credentials[id] = mdlData;
@@ -385,7 +452,9 @@ class MockSpruceIdPlatformService extends MockServiceBase
   @override
   Future<void> storeCredential(Map<String, dynamic> credential) async {
     return execute('storeCredential', () async {
-      final id = credential['id'] as String? ?? 'cred-${DateTime.now().millisecondsSinceEpoch}';
+      final id =
+          credential['id'] as String? ??
+          'cred-${DateTime.now().millisecondsSinceEpoch}';
       _credentials[id] = credential;
       notifyStateChange('credential_stored', {'id': id});
     });
@@ -401,15 +470,13 @@ class MockSpruceIdPlatformService extends MockServiceBase
   @override
   Future<List<Map<String, dynamic>>> getCredentialsByType(String type) async {
     return execute('getCredentialsByType', () async {
-      return _credentials.values
-          .where((cred) {
-            final types = cred['type'];
-            if (types is List) {
-              return types.contains(type);
-            }
-            return types == type;
-          })
-          .toList();
+      return _credentials.values.where((cred) {
+        final types = cred['type'];
+        if (types is List) {
+          return types.contains(type);
+        }
+        return types == type;
+      }).toList();
     });
   }
 
@@ -428,9 +495,7 @@ class MockSpruceIdPlatformService extends MockServiceBase
     _w3cInitialized = false;
   }
 
-  void preloadFixtures({
-    CredentialState state = CredentialState.valid,
-  }) {
+  void preloadFixtures({CredentialState state = CredentialState.valid}) {
     // Preload W3C credentials
     final w3cCreds = W3CCredentialFixtures.allTypes(state: state);
     for (final cred in w3cCreds) {
@@ -453,7 +518,7 @@ class MockSpruceIdClient extends MockServiceBase implements ISpruceIdClient {
   final ISpruceIdPlatformService platformService;
 
   MockSpruceIdClient(this.platformService, [MockSpruceIdConfig? config])
-      : super(config ?? MockSpruceIdConfig());
+    : super(config ?? MockSpruceIdConfig());
 
   @override
   Future<void> initialize() async {
@@ -517,7 +582,7 @@ class MockSpruceIdMdocManager extends MockServiceBase
   final ISpruceIdPlatformService platformService;
 
   MockSpruceIdMdocManager(this.platformService, [MockSpruceIdConfig? config])
-      : super(config ?? MockSpruceIdConfig());
+    : super(config ?? MockSpruceIdConfig());
 
   @override
   Future<Map<String, dynamic>> initializeMdl(Map<String, dynamic> mdlData) {
@@ -549,7 +614,7 @@ class MockSpruceIdSdJwtManager extends MockServiceBase
   final ISpruceIdPlatformService platformService;
 
   MockSpruceIdSdJwtManager(this.platformService, [MockSpruceIdConfig? config])
-      : super(config ?? MockSpruceIdConfig());
+    : super(config ?? MockSpruceIdConfig());
 
   @override
   Future<Map<String, dynamic>> createSdJwt({
@@ -580,7 +645,7 @@ class MockSpruceIdWalletManager extends MockServiceBase
   final ISpruceIdPlatformService platformService;
 
   MockSpruceIdWalletManager(this.platformService, [MockSpruceIdConfig? config])
-      : super(config ?? MockSpruceIdConfig());
+    : super(config ?? MockSpruceIdConfig());
 
   @override
   Future<void> storeCredential(Map<String, dynamic> credential) {
@@ -613,18 +678,20 @@ class MockSpruceIdServices {
   late final MockSpruceIdWalletManager walletManager;
 
   MockSpruceIdServices({MockSpruceIdConfig? config})
-      : config = config ?? MockSpruceIdConfig() {
+    : config = config ?? MockSpruceIdConfig() {
     platformService = MockSpruceIdPlatformService(this.config);
     client = MockSpruceIdClient(platformService, this.config);
     mdocManager = MockSpruceIdMdocManager(platformService, this.config);
     sdJwtManager = MockSpruceIdSdJwtManager(platformService, this.config);
     walletManager = MockSpruceIdWalletManager(platformService, this.config);
   }
+
   /// Create services with default/realistic config (alias for realistic())
   factory MockSpruceIdServices.createDefault({MockSpruceIdConfig? config}) {
-    return MockSpruceIdServices(config: config ?? MockSpruceIdConfig.realistic());
+    return MockSpruceIdServices(
+      config: config ?? MockSpruceIdConfig.realistic(),
+    );
   }
-
 
   /// Create services with fast config (no delays)
   factory MockSpruceIdServices.fast() {

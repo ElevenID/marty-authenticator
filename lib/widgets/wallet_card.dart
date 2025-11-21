@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:getwidget/getwidget.dart';
 import '../models/card_data.dart';
+import '../providers/card_state_provider.dart';
 import '../views/card_details_screen.dart';
+import '../utils/layout_constants.dart';
 
-class WalletCard extends StatelessWidget {
+class WalletCard extends ConsumerWidget {
   final CardData cardData;
   final bool isDragging;
   final VoidCallback? onLongPress;
@@ -18,36 +21,66 @@ class WalletCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap ?? () => _navigateToCardDetails(context),
-      onLongPress: onLongPress,
-      child: Container(
-        height: 220,
-        width: 480,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: cardData.gradient,
-          ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cardContent = _buildCardContent(context);
+
+    return LongPressDraggable<CardData>(
+      data: cardData,
+      feedback: Material(
+        color: Colors.transparent,
+        child: Transform.scale(scale: 1.05, child: cardContent),
+      ),
+      childWhenDragging: Opacity(opacity: 0.3, child: cardContent),
+      onDragStarted: () {
+        ref.read(draggingCardProvider.notifier).state = cardData;
+        onLongPress?.call();
+      },
+      onDraggableCanceled: (_, __) {
+        ref.read(draggingCardProvider.notifier).state = null;
+      },
+      onDragCompleted: () {
+        ref.read(draggingCardProvider.notifier).state = null;
+      },
+      child: GestureDetector(
+        onTap: onTap ?? () => _navigateToCardDetails(context),
+        child: cardContent,
+      ),
+    );
+  }
+
+  Widget _buildCardContent(BuildContext context) {
+    return Container(
+      height: LayoutConstants.cardHeight,
+      width: LayoutConstants.cardWidth,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(LayoutConstants.cardBorderRadius),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: cardData.gradient,
         ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader(),
-                const SizedBox(height: 20),
-                _buildCardTitle(),
-                const SizedBox(height: 4),
-                _buildCardSubtitle(),
-                const Spacer(),
-                _buildCardIndicator(),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCardHeader(),
+              const SizedBox(height: 20),
+              _buildCardTitle(),
+              const SizedBox(height: 4),
+              _buildCardSubtitle(),
+              const Spacer(),
+              _buildCardIndicator(),
+            ],
           ),
         ),
       ),

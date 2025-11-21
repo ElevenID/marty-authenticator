@@ -273,13 +273,6 @@ class MDocCredentialCard extends StatelessWidget {
     );
   }
 
-  List<Color> _getGradientColors(BuildContext context) {
-    // Fallback - should now use the theme
-    return context.credentialCardTheme.getGradientForCredentialType(
-      credential.docType,
-    );
-  }
-
   Widget _buildStatusIndicator(CredentialCardTheme cardTheme) {
     Color statusColor = cardTheme.getStatusColor(
       credential.isExpired

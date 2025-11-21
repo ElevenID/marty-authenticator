@@ -42,7 +42,10 @@ class CredentialGroup {
     this.isPromotional = false,
   });
 
-  int get totalCount => verifiableCredentials.length + mDocCredentials.length + promotionalCredentials.length;
+  int get totalCount =>
+      verifiableCredentials.length +
+      mDocCredentials.length +
+      promotionalCredentials.length;
   bool get hasSingle => totalCount == 1;
   bool get hasMultiple => totalCount > 1;
 
@@ -107,7 +110,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
     if (credential == null) return [Colors.grey.shade200, Colors.grey.shade300];
 
     final theme = context.credentialCardTheme;
-    
+
     if (credential is VerifiableCredential) {
       return theme.getGradientForCredentialType(credential.type.first);
     } else if (credential is MDocCredential) {
@@ -131,7 +134,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
     if (credential == null) return const SizedBox.shrink();
 
     Widget credentialCard;
-    
+
     if (credential is VerifiableCredential) {
       credentialCard = VerifiableCredentialCard(
         credential: credential,
@@ -152,9 +155,9 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
       return const SizedBox.shrink();
     }
 
-    // Ensure consistent height and left alignment
+    // Ensure consistent minimum height and left alignment
     return Container(
-      height: 220, // Fixed height for consistency with stacked cards
+      constraints: BoxConstraints(minHeight: 180, maxHeight: 220),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: credentialCard,
     );
@@ -163,7 +166,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
   Widget _buildStackedCredentials() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      height: 220, // Fixed height for consistency with padding
+      constraints: BoxConstraints(minHeight: 180, maxHeight: 220),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Column(
@@ -173,20 +176,13 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
               // Stack indicator and issuer info
               _buildStackHeader(),
               const SizedBox(height: 4),
-              
+
               // Horizontally scrollable stacked card view
-              Expanded(
-                child: ClipRect(
-                  child: _buildScrollableStack(),
-                ),
-              ),
-              
+              Expanded(child: ClipRect(child: _buildScrollableStack())),
+
               // Page indicators
               const SizedBox(height: 3),
-              SizedBox(
-                height: 12,
-                child: _buildPageIndicators(),
-              ),
+              SizedBox(height: 12, child: _buildPageIndicators()),
             ],
           );
         },
@@ -225,7 +221,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
           ),
         ),
         const SizedBox(width: 8),
-        
+
         // Issuer name
         Expanded(
           child: Text(
@@ -238,13 +234,9 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        
+
         // Swipe hint icon
-        Icon(
-          Icons.swipe,
-          color: Colors.grey.withOpacity(0.6),
-          size: 20,
-        ),
+        Icon(Icons.swipe, color: Colors.grey.withOpacity(0.6), size: 20),
       ],
     );
   }
@@ -255,7 +247,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
         final gradientColors = _getPrimaryCredentialColors(context);
         final stackColor = gradientColors.first.withOpacity(0.15);
         final borderColor = gradientColors.last.withOpacity(0.25);
-        
+
         return Stack(
           children: [
             // Background cards to create stack effect (reduced for side scroll)
@@ -267,14 +259,11 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
                   decoration: BoxDecoration(
                     color: stackColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: borderColor,
-                      width: 1,
-                    ),
+                    border: Border.all(color: borderColor, width: 1),
                   ),
                 ),
               ),
-            
+
             // Scrollable credentials
             PageView.builder(
               controller: _pageController,
@@ -302,7 +291,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
     if (credential == null) return const SizedBox.shrink();
 
     Widget credentialCard;
-    
+
     if (credential is PromotionalCredential) {
       credentialCard = PromotionalCredentialCard(
         credential: credential,
@@ -329,11 +318,8 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
       return const SizedBox.shrink();
     }
 
-    // Use SizedBox to enforce consistent height for all cards
-    return SizedBox(
-      height: 170, // Fixed height for credential cards in stack
-      child: credentialCard,
-    );
+    // Allow flexible height while maintaining consistent layout
+    return credentialCard;
   }
 
   Widget _buildPageIndicators() {

@@ -23,7 +23,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card_widgets/verifiable_credential_card.dart';
 import 'card_widgets/mdoc_credential_card.dart';
-import 'card_widgets/grouped_credential_stack.dart';
+
+import 'card_widgets/vertical_stacked_credentials.dart';
+import 'card_widgets/horizontal_stacked_credentials.dart';
 import 'placeholders/credential_placeholders.dart';
 import 'add_credential/add_credential_handler.dart';
 import '../../credential_detail_view.dart';
@@ -38,6 +40,9 @@ class CredentialsList extends ConsumerStatefulWidget {
 }
 
 class _CredentialsListState extends ConsumerState<CredentialsList> {
+  // Landing page uses vertical stacking by default
+  // Grouped cards use horizontal stacking
+  bool useVerticalStacking = true;
 
   @override
   Widget build(BuildContext context) {
@@ -61,20 +66,96 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // Promotional Cards (first in the list)
+          // Stacking style toggle
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Card stacking: ',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        useVerticalStacking = !useVerticalStacking;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: useVerticalStacking
+                            ? Colors.blue[100]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: useVerticalStacking
+                              ? Colors.blue
+                              : Colors.grey,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            useVerticalStacking
+                                ? Icons.layers
+                                : Icons.view_carousel,
+                            size: 16,
+                            color: useVerticalStacking
+                                ? Colors.blue[700]
+                                : Colors.grey[700],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            useVerticalStacking ? 'Vertical' : 'Horizontal',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: useVerticalStacking
+                                  ? Colors.blue[700]
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Promotional Cards (first in the list) - use vertical stacking
           if (credentialsState.groupedCredentials.isNotEmpty) ...[
             ...credentialsState.groupedCredentials
                 .where((group) => group.isPromotional)
-                .map((group) => SliverToBoxAdapter(
-                      child: GroupedCredentialStack(
-                        group: group,
-                        onCredentialTap: _showCredentialDetail,
-                        onShare: _shareCredential,
-                        onVerify: _verifyCredential,
-                        onPresent: _presentMDoc,
-                        onAgeVerify: _performAgeVerification,
-                      ),
-                    )),
+                .map(
+                  (group) => SliverToBoxAdapter(
+                    child: useVerticalStacking
+                        ? VerticalStackedCredentials(
+                            group: group,
+                            onCredentialTap: _showCredentialDetail,
+                            onShare: _shareCredential,
+                            onVerify: _verifyCredential,
+                            onPresent: _presentMDoc,
+                            onAgeVerify: _performAgeVerification,
+                          )
+                        : HorizontalStackedCredentials(
+                            group: group,
+                            onCredentialTap: _showCredentialDetail,
+                            onShare: _shareCredential,
+                            onVerify: _verifyCredential,
+                            onPresent: _presentMDoc,
+                            onAgeVerify: _performAgeVerification,
+                          ),
+                  ),
+                ),
           ],
 
           // MDL Placeholder (right after promotional cards)
@@ -92,20 +173,31 @@ class _CredentialsListState extends ConsumerState<CredentialsList> {
             ),
           ),
 
-          // Other Credentials (holder cards and regular credentials)
+          // Other Credentials (holder cards and regular credentials) - use stacking for all groups
           if (credentialsState.groupedCredentials.isNotEmpty) ...[
             ...credentialsState.groupedCredentials
                 .where((group) => !group.isPromotional)
-                .map((group) => SliverToBoxAdapter(
-                      child: GroupedCredentialStack(
-                        group: group,
-                        onCredentialTap: _showCredentialDetail,
-                        onShare: _shareCredential,
-                        onVerify: _verifyCredential,
-                        onPresent: _presentMDoc,
-                        onAgeVerify: _performAgeVerification,
-                      ),
-                    )),
+                .map(
+                  (group) => SliverToBoxAdapter(
+                    child: useVerticalStacking
+                        ? VerticalStackedCredentials(
+                            group: group,
+                            onCredentialTap: _showCredentialDetail,
+                            onShare: _shareCredential,
+                            onVerify: _verifyCredential,
+                            onPresent: _presentMDoc,
+                            onAgeVerify: _performAgeVerification,
+                          )
+                        : HorizontalStackedCredentials(
+                            group: group,
+                            onCredentialTap: _showCredentialDetail,
+                            onShare: _shareCredential,
+                            onVerify: _verifyCredential,
+                            onPresent: _presentMDoc,
+                            onAgeVerify: _performAgeVerification,
+                          ),
+                  ),
+                ),
           ],
 
           // Bottom padding

@@ -19,10 +19,10 @@
  */
 
 /// SpruceID SDK Integration Demonstration
-/// 
+///
 /// This file demonstrates how to use the SDK-enhanced services that leverage
 /// the refactored Android and iOS handlers for advanced functionality.
-/// 
+///
 /// Key Benefits Achieved:
 /// - 45% code reduction in Android handlers through SDK integration
 /// - 62% code reduction in iOS handlers through SDK integration
@@ -35,13 +35,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Import SDK-enhanced services
 import '../services/spruce_sdk_services.dart';
+import '../utils/logger.dart';
 
 /// Usage example for developers:
-/// 
+///
 /// ```dart
 /// // Use SDK-enhanced client with advanced capabilities
 /// final client = ref.watch(spruceIdClientExtendedProvider);
-/// 
+///
 /// // Handle OID4VC credential offer with hardware-backed security
 /// final result = await client.handleOID4VCOfferSDK(
 ///   credentialOffer: credentialOfferJson,
@@ -50,7 +51,7 @@ import '../services/spruce_sdk_services.dart';
 ///     useHardwareModule: true,
 ///   ).then((r) => r['keyId']),
 /// );
-/// 
+///
 /// // Create presentation with selective disclosure
 /// final presentation = await client.createPresentationSDK(
 ///   credentials: credentials,
@@ -63,7 +64,7 @@ import '../services/spruce_sdk_services.dart';
 /// ```
 
 /// Step 6 Completion Summary:
-/// 
+///
 /// ✅ Extended interfaces created (280+ lines) with comprehensive SDK capabilities
 /// ✅ Extended platform service implemented (450+ lines) using refactored handlers
 /// ✅ Extended client implemented with all SDK methods delegated
@@ -71,7 +72,7 @@ import '../services/spruce_sdk_services.dart';
 /// ✅ Central export file created for easy SDK service access
 /// ✅ Comprehensive demonstration file with usage patterns
 /// ✅ Riverpod providers configured for dependency injection
-/// 
+///
 /// The Dart platform interface extension is now complete and ready for Step 7!
 
 const String _stepCompletionSummary = '''
@@ -95,6 +96,6 @@ const String _stepCompletionSummary = '''
 ''';
 
 void main() {
-  print(_stepCompletionSummary);
+  Logger.info(_stepCompletionSummary);
   runApp(const SDKIntegrationDemoApp());
 }
