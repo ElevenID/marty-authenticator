@@ -29,7 +29,7 @@ class ScrollingWalletHeader extends StatelessWidget {
       title: Opacity(
         opacity: opacity,
         child: Text(
-          'Wallet',
+          'Documents',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,

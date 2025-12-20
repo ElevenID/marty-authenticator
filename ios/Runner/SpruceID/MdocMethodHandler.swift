@@ -71,7 +71,58 @@ extension SpruceIdChannelHandler {
   }
 
   private func createMdocResponse(call: FlutterMethodCall, result: @escaping FlutterResult) {
-    print("mDoc: Creating mDoc response using X.509 certificate chain")
+    guard let args = call.arguments as? [String: Any] else {
+      result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+      return
+    }
+
+    let requestUrl = args["requestUrl"] as? String ?? args["request"] as? String
+    let sessionId = args["sessionId"] as? String
+
+    if let sessionId = sessionId {
+        // Phase 2: Complete request
+        completeMdocResponse(sessionId: sessionId, result: result)
+    } else if let requestUrl = requestUrl {
+        // Phase 1: Initiate request
+        initiateMdocResponse(requestUrl: requestUrl, result: result)
+    } else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "requestUrl or sessionId required", details: nil))
+    }
+  }
+
+  private func initiateMdocResponse(requestUrl: String, result: @escaping FlutterResult) {
+    print("mDoc: Initiating mDoc response for \(requestUrl)")
+
+    // Generate session ID
+    let sessionId = UUID().uuidString
+    SpruceIdChannelHandler.pendingMdocRequests[sessionId] = requestUrl // Store request URL or object
+
+    // Return matches for UI selection
+    // Simplified: returning mock matches
+    let matches: [[String: Any]] = [
+        [
+            "id": "mdoc_mock_1",
+            "type": "mDL",
+            "requestedFields": ["org.iso.18013.5.1": ["family_name", "given_name", "birth_date", "age_over_18"]]
+        ]
+    ]
+
+    result([
+        "status": "user_selection_required",
+        "sessionId": sessionId,
+        "matches": matches,
+        "verifier": "Unknown Verifier",
+        "purpose": "Age Verification"
+    ])
+  }
+
+  private func completeMdocResponse(sessionId: String, result: @escaping FlutterResult) {
+    guard let _ = SpruceIdChannelHandler.pendingMdocRequests.removeValue(forKey: sessionId) else {
+        result(FlutterError(code: "SESSION_ERROR", message: "Session expired or invalid", details: nil))
+        return
+    }
+
+    print("mDoc: Completing mDoc response for session \(sessionId)")
     result(["response": "mdoc_response_data", "status": "created", "signingMethod": "x509"])
   }
 

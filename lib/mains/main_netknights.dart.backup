@@ -83,11 +83,11 @@ void main() async {
       if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
         // Validate Firebase environment variables before initialization
         DefaultFirebaseOptions.validateConfiguration();
-        
+
         appFirebaseOptions = DefaultFirebaseOptions.currentPlatformOf(
           'netknights',
         );
-        
+
         // Force Firebase initialization for testing FCM token retrieval
         if (const String.fromEnvironment('VERBOSE_LOGGING', defaultValue: 'false').toLowerCase() == 'true') {
           try {
@@ -201,18 +201,18 @@ class PrivacyIDEAAuthenticator extends ConsumerWidget {
 Future<void> _initializeFirebaseForTesting() async {
   try {
     Logger.info('Initializing Firebase for testing FCM token retrieval...');
-    
+
     // Create FirebaseUtils instance
     final firebaseUtils = FirebaseUtils();
-    
+
     // Initialize Firebase app
     await firebaseUtils.initializeApp();
     Logger.info('Firebase app initialized for testing');
-    
+
     // Get FCM token (this should trigger our logging)
     final fcmToken = await firebaseUtils.getFBToken();
     Logger.info('FCM Token for testing: $fcmToken');
-    
+
   } catch (e, stackTrace) {
     Logger.error('Failed to initialize Firebase for testing', error: e, stackTrace: stackTrace);
   }

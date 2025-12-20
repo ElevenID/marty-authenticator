@@ -19,7 +19,6 @@ marty-authenticator/
 ├── scripts/
 │   ├── plugin-dev.sh           # Development helper script
 │   └── ...                     # Other utility scripts
-├── DEMO_TOKEN_TESTING.md       # Demo token testing guide
 └── ...                        # Other Flutter project files
 ```
 
@@ -107,8 +106,6 @@ Includes a fully functional demo token plugin that demonstrates:
 - QR code generation for mobile enrollment
 - Challenge-response authentication
 - Flutter app integration patterns
-
-**Test the demo token**: Follow the guide in [`DEMO_TOKEN_TESTING.md`](./DEMO_TOKEN_TESTING.md)
 
 ## 🔄 **Development Workflow**
 
@@ -198,9 +195,8 @@ flutter run -d chrome -t lib/main_document.dart
 
 ## 📚 **Documentation**
 
-- [`DEMO_TOKEN_TESTING.md`](./DEMO_TOKEN_TESTING.md) - Test the demo token plugin
 - [`docker/plugins/development-README.md`](./docker/plugins/development-README.md) - Plugin development guide
-- [`ENHANCED_SETUP_SUMMARY.md`](./ENHANCED_SETUP_SUMMARY.md) - Detailed setup information
+- [`DEMO_README.md`](./DEMO_README.md) - Demo mode documentation
 
 ## 🎉 **Ready to Use**
 

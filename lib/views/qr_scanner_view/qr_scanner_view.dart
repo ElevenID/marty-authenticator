@@ -44,6 +44,12 @@ class QRScannerView extends StatefulView {
 
 class _QRScannerViewState extends State<QRScannerView> {
   Future<PermissionStatus> _requestCameraPermission() async {
+    // Bypass permission check for integration tests
+    const qrCode = String.fromEnvironment('QR_CODE');
+    if (qrCode.isNotEmpty) {
+      return PermissionStatus.granted;
+    }
+
     try {
       // On web, bypass camera permissions entirely since we use image upload
       if (kIsWeb) {

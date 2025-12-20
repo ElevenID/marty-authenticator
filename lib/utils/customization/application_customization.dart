@@ -30,14 +30,13 @@ import '../../model/widget_image.dart';
 
 class ApplicationCustomization {
   static final defaultCustomization = ApplicationCustomization();
-  static const _defaultAppName = 'privacyIDEA Authenticator';
+  static const _defaultAppName = 'digiDoc';
   static const _defaultWebsiteLink = 'https://netknights.it/';
   static const _defaultCrashRecipient = 'app-crash@netknights.it';
-  static const _defaultCrashSubjectPrefix =
-      '(\$version) privacyIDEA Authenticator >>>';
+  static const _defaultCrashSubjectPrefix = '(\$version) digiDoc >>>';
   static const _defaultFeedbackRecipient = 'app-crash@netknights.it';
   static const _defaultFeedbackSubjectPrefix =
-      '(\$version) privacyIDEA Authenticator >>> Feedback';
+      '(\$version) digiDoc >>> Feedback';
   static const prefixVersionVariable = '\$version';
 
   static const String defaultFontName = 'defaultFont';

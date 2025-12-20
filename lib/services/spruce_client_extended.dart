@@ -310,6 +310,28 @@ class SpruceIdClientExtended extends SpruceIdClient
   ) async {
     return await getCredentialCapabilitiesSDK(credentialId);
   }
+
+  @override
+  Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
+    required String presentationRequest,
+  }) async {
+    return await _platformService.initiateOID4VPRequestSDK(
+      presentationRequest: presentationRequest,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeOID4VPRequestSDK({
+    required String sessionId,
+    required String selectedCredentialId,
+    List<String>? selectedFields,
+  }) async {
+    return await _platformService.completeOID4VPRequestSDK(
+      sessionId: sessionId,
+      selectedCredentialId: selectedCredentialId,
+      selectedFields: selectedFields,
+    );
+  }
 }
 
 /// Riverpod provider for extended client

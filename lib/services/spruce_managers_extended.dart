@@ -25,9 +25,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
 import 'spruce_platform_service_extended.dart';
-import 'spruce_mdoc_manager.dart';
-import 'spruce_sdjwt_manager.dart';
-import 'spruce_wallet_manager.dart';
+import '../spruce_client.dart';
+// import 'spruce_mdoc_manager.dart';
+// import 'spruce_sdjwt_manager.dart';
+// import 'spruce_wallet_manager.dart';
 
 // ========================
 // Extended mDoc Manager
@@ -41,13 +42,50 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
   SpruceIdMdocManagerExtended(this._platformService) : super(_platformService);
 
   @override
+  Future<Map<String, dynamic>> initializeMdocAdvanced({
+    required Map<String, dynamic> mdlData,
+    bool enableProximityDetection = true,
+    Map<String, dynamic>? deviceConfig,
+  }) async {
+    return await _platformService.initializeMdocSDK(
+      mdocData: mdlData,
+      enableProximityDetection: enableProximityDetection,
+      deviceConfig: deviceConfig,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> presentWithAdvancedDisclosure({
+    required List<String> requestedAttributes,
+    Map<String, List<String>>? selectiveDisclosure,
+    List<String>? hiddenAttributes,
+  }) async {
+    return await _platformService.createMdocPresentationSDK(
+      docType: 'org.iso.18013.5.1.mDL', // Default doc type
+      requestedAttributes: requestedAttributes,
+      hiddenAttributes: hiddenAttributes,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> establishSecureSession({
+    required Map<String, dynamic> sessionRequest,
+    Map<String, dynamic>? securityOptions,
+  }) async {
+    return await _platformService.establishMdocSessionSDK(
+      sessionRequest: sessionRequest,
+      securityOptions: securityOptions,
+    );
+  }
+
+  @override
   Future<Map<String, dynamic>> initializeMdocSDK({
     required Map<String, dynamic> mdocData,
     bool enableProximityDetection = true,
     Map<String, dynamic>? deviceConfig,
   }) async {
-    return await _platformService.initializeMdocSDK(
-      mdocData: mdocData,
+    return initializeMdocAdvanced(
+      mdlData: mdocData,
       enableProximityDetection: enableProximityDetection,
       deviceConfig: deviceConfig,
     );
@@ -112,6 +150,13 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
       },
     );
   }
+
+  @override
+  Future<Map<String, dynamic>> handleOid4vpRequest(String requestUrl) async {
+    return await _platformService.handleMdocOid4vpRequestSDK(
+      requestUrl: requestUrl,
+    );
+  }
 }
 
 // ========================
@@ -126,6 +171,47 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
   SpruceIdSdJwtManagerExtended(this._platformService) : super(_platformService);
 
   @override
+  Future<Map<String, dynamic>> createAdvancedSdJwt({
+    required String issuer,
+    required Map<String, dynamic> claims,
+    required Map<String, dynamic> disclosureTree,
+    List<String>? alwaysDisclose,
+  }) async {
+    return await _platformService.createAdvancedSdJwtSDK(
+      issuer: issuer,
+      claims: claims,
+      disclosureTree: disclosureTree,
+      alwaysDisclose: alwaysDisclose,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> presentWithPrivacy({
+    required String sdJwt,
+    required Map<String, dynamic> disclosureRequest,
+    required String challenge,
+  }) async {
+    return await _platformService.presentSdJwtSDK(
+      sdJwt: sdJwt,
+      disclosureRequest: disclosureRequest,
+      challenge: challenge,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyWithPolicies({
+    required String presentation,
+    required List<String> requiredClaims,
+    List<String>? policies,
+  }) async {
+    return await _platformService.verifySdJwtPresentationSDK(
+      presentation: presentation,
+      requiredClaims: requiredClaims,
+      policies: policies,
+    );
+  }
+
+  @override
   Future<Map<String, dynamic>> createAdvancedSdJwtSDK({
     required String issuer,
     required Map<String, dynamic> claims,
@@ -133,12 +219,11 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     List<String>? alwaysDisclose,
     String? keyId,
   }) async {
-    return await _platformService.createAdvancedSdJwtSDK(
+    return createAdvancedSdJwt(
       issuer: issuer,
       claims: claims,
       disclosureTree: disclosureTree,
       alwaysDisclose: alwaysDisclose,
-      keyId: keyId,
     );
   }
 
@@ -212,6 +297,62 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     : super(_platformService);
 
   @override
+  Future<void> storeCredentialSecure({
+    required Map<String, dynamic> credential,
+    String? encryptionKey,
+    Map<String, dynamic>? securityOptions,
+  }) async {
+    await _platformService.performCryptoOperationSDK(
+      operation: 'store_credential',
+      keyId: encryptionKey ?? 'default-storage-key',
+      payload: {'credential': credential, 'options': securityOptions ?? {}},
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCredentialsWithMetadata() async {
+    final result = await _platformService.batchProcessCredentialsSDK(
+      operations: [
+        {'operation': 'get_all_credentials'},
+      ],
+    );
+    return result;
+  }
+
+  @override
+  Future<Map<String, dynamic>> backupCredentials({
+    List<String>? credentialIds,
+    required String passphrase,
+  }) async {
+    return await _platformService.backupCredentialsSDK(
+      credentialIds: credentialIds,
+      backupPassphrase: passphrase,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> restoreCredentials({
+    required String backupData,
+    required String passphrase,
+  }) async {
+    return await _platformService.restoreCredentialsSDK(
+      backupData: backupData,
+      backupPassphrase: passphrase,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> syncCredentials({
+    required String syncEndpoint,
+    String? syncToken,
+  }) async {
+    return await _platformService.syncCredentialsSDK(
+      syncEndpoint: syncEndpoint,
+      syncToken: syncToken,
+    );
+  }
+
+  @override
   Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(
     String credentialId,
   ) async {
@@ -237,10 +378,9 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     required String backupPassphrase,
     Map<String, dynamic>? backupOptions,
   }) async {
-    return await _platformService.backupCredentialsSDK(
+    return backupCredentials(
       credentialIds: credentialIds,
-      backupPassphrase: backupPassphrase,
-      backupOptions: backupOptions,
+      passphrase: backupPassphrase,
     );
   }
 
@@ -250,10 +390,9 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     required String backupPassphrase,
     Map<String, dynamic>? restoreOptions,
   }) async {
-    return await _platformService.restoreCredentialsSDK(
+    return restoreCredentials(
       backupData: backupData,
-      backupPassphrase: backupPassphrase,
-      restoreOptions: restoreOptions,
+      passphrase: backupPassphrase,
     );
   }
 
@@ -263,11 +402,7 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     String? syncToken,
     Map<String, dynamic>? syncOptions,
   }) async {
-    return await _platformService.syncCredentialsSDK(
-      syncEndpoint: syncEndpoint,
-      syncToken: syncToken,
-      syncOptions: syncOptions,
-    );
+    return syncCredentials(syncEndpoint: syncEndpoint, syncToken: syncToken);
   }
 
   @override
@@ -315,11 +450,12 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     Map<String, dynamic>? healthCheckOptions,
   }) async {
     // Custom logic for wallet health analysis
-    return await _platformService.batchProcessCredentialsSDK(
+    final results = await _platformService.batchProcessCredentialsSDK(
       operations: [
         {'operation': 'health_check', 'options': healthCheckOptions ?? {}},
       ],
     );
+    return results.isNotEmpty ? results.first : {};
   }
 
   @override

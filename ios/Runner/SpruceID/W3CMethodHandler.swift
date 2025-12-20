@@ -34,6 +34,37 @@ extension SpruceIdChannelHandler {
       handleOID4VCOffer(call: call, result: result)
     case "handleOID4VPRequest":
       handleOID4VPRequest(call: call, result: result)
+    case "handleOID4VCOfferRefactored":
+      handleOID4VCOfferRefactored(call: call, result: result)
+    case "handleOID4VPRequestRefactored":
+      guard let args = call.arguments as? [String: Any] else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+        return
+      }
+
+      let request = args["request"] as? String ?? ""
+      let selectedCredentials = args["selectedCredentials"] as? [[String: Any]] ?? []
+      let sessionId = args["sessionId"] as? String
+
+      Task {
+        let response = await handleOID4VPRequestRefactored(request: request, selectedCredentials: selectedCredentials, sessionId: sessionId)
+        result(response)
+      }
+    case "handleVpRequest":
+      // Map handleVpRequest to handleOID4VPRequestRefactored for cross-platform consistency
+      guard let args = call.arguments as? [String: Any] else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+        return
+      }
+
+      let request = args["request"] as? String ?? args["requestUrl"] as? String ?? ""
+      let selectedCredentials = args["selectedCredentials"] as? [[String: Any]] ?? []
+      let sessionId = args["sessionId"] as? String
+
+      Task {
+        let response = await handleOID4VPRequestRefactored(request: request, selectedCredentials: selectedCredentials, sessionId: sessionId)
+        result(response)
+      }
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -192,6 +223,62 @@ extension SpruceIdChannelHandler {
       "request": ["verifier": requestUrl, "requirements": []],
       "status": "received"
     ])
+  }
+
+  // MARK: - Refactored Methods Wrappers
+
+  private func handleOID4VCOfferRefactored(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [String: Any],
+          let offer = args["offer"] as? String else {
+      result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+      return
+    }
+    let pin = args["pin"] as? String
+
+    Task {
+      let response = await self.handleOID4VCOfferRefactored(offer: offer, pin: pin)
+      DispatchQueue.main.async {
+        result(response)
+      }
+    }
+  }
+
+  private func handleOID4VPRequestRefactored(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [String: Any],
+          let request = args["request"] as? String,
+          let selectedCredentials = args["selectedCredentials"] as? [[String: Any]] else {
+      result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+      return
+    }
+
+    let sessionId = args["sessionId"] as? String
+
+    Task {
+      let response = await self.handleOID4VPRequestRefactored(request: request, selectedCredentials: selectedCredentials, sessionId: sessionId)
+      DispatchQueue.main.async {
+        result(response)
+      }
+    }
+  }
+
+  // MARK: - Refactored Implementation Methods
+
+  private func handleOID4VCOfferRefactored(offer: String, pin: String?) async -> [String: Any] {
+    print("W3C: Processing OID4VC credential offer (Refactored) from \(offer)")
+    // Simplified implementation
+    return [
+      "offer": ["issuer": offer, "credentials": []],
+      "status": "received"
+    ]
+  }
+
+  private func handleOID4VPRequestRefactored(request: String, selectedCredentials: [[String: Any]], sessionId: String?) async -> [String: Any] {
+    print("W3C: Processing OID4VP presentation request (Refactored) from \(request)")
+    // Simplified implementation
+    return [
+      "request": ["verifier": request, "requirements": []],
+      "status": "received"
+    ]
   }
 
   // MARK: - Helper Methods

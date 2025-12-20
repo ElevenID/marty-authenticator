@@ -58,4 +58,4 @@ Deep Link → DeeplinkNotifier → Scheme Processor → Token/Credential Action
 - **Secure**: Cryptographic verification built-in
 - **Private**: Selective disclosure control
 
-For detailed documentation see [DEEP_LINKING.md](./DEEP_LINKING.md).
+For detailed documentation see [DEEP_LINKING.md](../DEEP_LINKING.md).

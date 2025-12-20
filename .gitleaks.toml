@@ -1,0 +1,13 @@
+# Gitleaks configuration file
+# https://github.com/gitleaks/gitleaks
+
+title = "Gitleaks Configuration"
+
+[allowlist]
+  description = "Allowlist for false positives"
+
+  # Exclude detect-secrets baseline file - it contains hashed secrets (not real secrets)
+  paths = [
+    '''\.precommit/\.secrets\.baseline''',
+    '''\.secrets\.baseline''',
+  ]

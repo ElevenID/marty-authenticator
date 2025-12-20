@@ -72,7 +72,7 @@ class _WalletLandingViewState extends ConsumerState<WalletLandingView> {
                   children: [
                     // Wallet title in upper left
                     const Text(
-                      'Wallet',
+                      'Documents',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 32,

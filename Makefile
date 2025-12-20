@@ -88,6 +88,28 @@ test: ## Run all tests
 	@echo "🧪 Running Python tests..."
 	@python -m pytest -v || echo "⚠️  pytest not available or no Python tests found"
 
+test-live-credential: ## Run integration test with live QR code
+	@echo "🔍 Fetching live QR code..."
+	@QR_CODE=$$(node scripts/fetch_live_qr.js) && \
+	if [ -z "$$QR_CODE" ]; then \
+		echo "❌ Failed to fetch QR code"; \
+		exit 1; \
+	fi && \
+	echo "✅ Fetched QR Code: $$QR_CODE" && \
+	echo "🚀 Running integration test..." && \
+	flutter test integration_test/real_credential_flow_test.dart --dart-define=QR_CODE="$$QR_CODE"
+
+test-live-presentation: ## Run integration test with live presentation QR code
+	@echo "🔍 Fetching live presentation QR code..."
+	@QR_CODE=$$(node scripts/fetch_live_presentation_qr.js) && \
+	if [ -z "$$QR_CODE" ]; then \
+		echo "❌ Failed to fetch QR code"; \
+		exit 1; \
+	fi && \
+	echo "✅ Fetched QR Code: $$QR_CODE" && \
+	echo "🚀 Running integration test..." && \
+	flutter test integration_test/real_presentation_flow_test.dart -d macos --dart-define=QR_CODE="$$QR_CODE"
+
 # Maintenance
 clean: ## Clean build artifacts and caches
 	@echo "🧹 Cleaning Flutter build..."

@@ -9,6 +9,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
 ### Core Services
 
 #### 1. SpruceKitServiceExtended (`lib/services/sprucekit_service_extended.dart`)
+
 - **Purpose**: Enhanced SpruceID client with extended capabilities
 - **Lines**: 600+
 - **Key Features**:
@@ -21,6 +22,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Comprehensive caching strategies
 
 #### 2. WalletManagerExtended (`lib/services/wallet_manager_extended.dart`)
+
 - **Purpose**: Advanced wallet operations with enhanced security
 - **Lines**: 650+
 - **Key Features**:
@@ -33,6 +35,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Comprehensive backup and recovery
 
 #### 3. PresentationBuilderService (`lib/services/presentation_builder_service.dart`)
+
 - **Purpose**: Intelligent presentation creation with template system
 - **Lines**: 700+
 - **Key Features**:
@@ -45,6 +48,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Batch processing capabilities
 
 #### 4. CredentialVerificationService (`lib/services/credential_verification_service.dart`)
+
 - **Purpose**: Comprehensive credential verification with security analysis
 - **Lines**: 650+
 - **Key Features**:
@@ -57,6 +61,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Background verification capabilities
 
 #### 5. PrivacyAnalysisService (`lib/services/privacy_analysis_service.dart`)
+
 - **Purpose**: Advanced privacy assessment with risk evaluation
 - **Lines**: 600+
 - **Key Features**:
@@ -69,6 +74,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Regulatory compliance checking
 
 #### 6. DIDManagementServiceExtended (`lib/services/did_management_service_extended.dart`)
+
 - **Purpose**: Enhanced DID operations with advanced security
 - **Lines**: 550+
 - **Key Features**:
@@ -81,6 +87,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Recovery and backup mechanisms
 
 #### 7. QRScannerServiceEnhanced (`lib/services/qr_scanner_service_enhanced.dart`)
+
 - **Purpose**: Comprehensive QR processing with SDK validation
 - **Lines**: 800+
 - **Key Features**:
@@ -93,6 +100,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Comprehensive error handling and fallbacks
 
 #### 8. BackgroundSyncService (`lib/services/background_sync_service.dart`)
+
 - **Purpose**: Automated credential synchronization and lifecycle management
 - **Lines**: 650+
 - **Key Features**:
@@ -107,6 +115,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
 ### User Interface Components
 
 #### 1. Enhanced QR Scanner Widget (`lib/widgets/qr_scanner_enhanced.dart`)
+
 - **Lines**: 600+
 - **Key Features**:
   - Real-time credential processing during scan
@@ -117,6 +126,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Performance monitoring overlay
 
 #### 2. Enhanced QR Scanner View (`lib/views/qr_scanner_view/qr_scanner_view_enhanced.dart`)
+
 - **Lines**: 400+
 - **Key Features**:
   - Complete scanner interface with permission handling
@@ -126,6 +136,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Cross-platform compatibility
 
 #### 3. Credential Selection View (`lib/views/credential_selection_view.dart`)
+
 - **Lines**: 600+
 - **Key Features**:
   - Advanced credential selection interface
@@ -136,6 +147,7 @@ This document describes the comprehensive integration of SpruceID SDK into the p
   - Comprehensive presentation workflow
 
 #### 4. Sync Status Dashboard (`lib/widgets/sync_status_dashboard.dart`)
+
 - **Lines**: 500+
 - **Key Features**:
   - Real-time sync status visualization
@@ -147,16 +159,19 @@ This document describes the comprehensive integration of SpruceID SDK into the p
 ## Integration Workflow
 
 ### 1. Credential Acquisition
+
 ```
 QR Scan → SDK Processing → Credential Verification → Privacy Analysis → Secure Storage
 ```
 
 ### 2. Presentation Creation
+
 ```
 Request Analysis → Credential Matching → Privacy Assessment → User Approval → Presentation Generation
 ```
 
 ### 3. Background Synchronization
+
 ```
 Schedule Check → Network Assessment → Credential Sync → Status Update → Performance Metrics
 ```
@@ -164,24 +179,28 @@ Schedule Check → Network Assessment → Credential Sync → Status Update → 
 ## Key Features
 
 ### Privacy-First Design
+
 - **Data Minimization**: Automatic recommendations for minimal data disclosure
 - **Risk Assessment**: Real-time privacy impact analysis
 - **Selective Disclosure**: Fine-grained control over shared attributes
 - **Trust Scoring**: Verifier reputation and trustworthiness evaluation
 
 ### Performance Optimization
+
 - **Intelligent Caching**: Multi-level caching strategies for optimal performance
 - **Background Processing**: Non-blocking operations for smooth UX
 - **Hardware acceleration**: Leveraging device capabilities for cryptographic operations
 - **Network Optimization**: Efficient sync strategies and offline capability
 
 ### Security Enhancements
+
 - **Hardware-Backed Storage**: Secure Enclave/Keystore integration
 - **Multi-Factor Protection**: Biometric and PIN-based access controls
 - **Revocation Monitoring**: Real-time credential status tracking
 - **Security Assessments**: Comprehensive trust and risk evaluation
 
 ### Cross-Platform Compatibility
+
 - **iOS**: Keychain integration, biometric authentication
 - **Android**: Keystore support, hardware security modules
 - **Web**: Secure browser storage, WebAuthn integration
@@ -190,6 +209,7 @@ Schedule Check → Network Assessment → Credential Sync → Status Update → 
 ## Testing
 
 ### Comprehensive Test Suite (`test/integration/sprucekit_integration_test.dart`)
+
 - **End-to-End Workflows**: Complete integration testing
 - **Performance Benchmarks**: Critical operation timing validation
 - **Error Handling**: Edge case and failure scenario testing
@@ -197,6 +217,7 @@ Schedule Check → Network Assessment → Credential Sync → Status Update → 
 - **Data Flow Integrity**: Credential data consistency verification
 
 ### Performance Benchmarks
+
 - **QR Processing**: <100ms average processing time
 - **Credential Verification**: <300ms average verification time
 - **Presentation Creation**: <500ms average creation time
@@ -204,6 +225,7 @@ Schedule Check → Network Assessment → Credential Sync → Status Update → 
 ## Configuration
 
 ### Environment Setup
+
 ```dart
 // Initialize SDK services
 final container = ProviderContainer();
@@ -222,6 +244,7 @@ await backgroundSync.initialize(
 ```
 
 ### Privacy Configuration
+
 ```dart
 // Configure privacy analysis
 final privacyService = container.read(privacyAnalysisServiceProvider);
@@ -237,6 +260,7 @@ await privacyService.initialize(
 ## Usage Examples
 
 ### Basic Credential Presentation
+
 ```dart
 // Process QR code
 final qrResult = await qrScannerService.processQRCode(scannedData);
@@ -247,7 +271,7 @@ if (qrResult.isSuccess) {
     qrResult.enrichedResult!.matchingCredentials,
     qrResult.enrichedResult!.presentationRequest,
   );
-  
+
   // Create presentation
   final presentation = await presentationBuilder.createPresentation(
     credentials: selectedCredentials,
@@ -258,6 +282,7 @@ if (qrResult.isSuccess) {
 ```
 
 ### Background Synchronization
+
 ```dart
 // Perform manual sync
 final syncResult = await backgroundSyncService.performSync(
@@ -273,18 +298,21 @@ backgroundSyncService.syncStatusStream.listen((status) {
 ## Security Considerations
 
 ### Data Protection
+
 - All credentials encrypted at rest using hardware-backed keys
 - Biometric authentication for sensitive operations
 - Secure communication channels for all network operations
 - Zero-knowledge architecture where possible
 
 ### Privacy Protection
+
 - Minimal data disclosure by default
 - Real-time privacy impact assessment
 - User consent for all data sharing
 - Comprehensive audit logging
 
 ### Key Management
+
 - Hardware security module integration
 - Automatic key rotation and backup
 - Multi-factor key protection
@@ -293,12 +321,14 @@ backgroundSyncService.syncStatusStream.listen((status) {
 ## Performance Considerations
 
 ### Optimization Strategies
+
 - Intelligent caching at multiple levels
 - Background processing for non-critical operations
 - Network-aware sync strategies
 - Battery-conscious background operations
 
 ### Monitoring
+
 - Real-time performance metrics
 - Comprehensive logging and analytics
 - User experience monitoring
@@ -307,6 +337,7 @@ backgroundSyncService.syncStatusStream.listen((status) {
 ## Future Enhancements
 
 ### Planned Features
+
 - Multi-signature credential support
 - Advanced privacy-preserving techniques (ZKP)
 - Enhanced cross-platform synchronization
@@ -314,6 +345,7 @@ backgroundSyncService.syncStatusStream.listen((status) {
 - Machine learning-based privacy recommendations
 
 ### Scalability Improvements
+
 - Distributed credential storage
 - Advanced caching strategies
 - Performance optimization algorithms
@@ -322,12 +354,14 @@ backgroundSyncService.syncStatusStream.listen((status) {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Slow QR Processing**: Check device performance settings and enable hardware acceleration
 2. **Sync Failures**: Verify network connectivity and sync configuration
 3. **Storage Issues**: Check available storage and encryption capabilities
 4. **Performance Issues**: Review caching configuration and background processing settings
 
 ### Debug Configuration
+
 ```dart
 // Enable debug logging
 Logger.setLevel(LogLevel.debug);
@@ -340,6 +374,7 @@ await spruceKitService.enablePerformanceMonitoring();
 ## Contributing
 
 ### Development Guidelines
+
 1. Follow existing architectural patterns
 2. Maintain comprehensive test coverage
 3. Document all public APIs
@@ -347,6 +382,7 @@ await spruceKitService.enablePerformanceMonitoring();
 5. Optimize for performance and battery life
 
 ### Testing Requirements
+
 - Unit tests for all service methods
 - Integration tests for cross-service workflows
 - Performance benchmarks for critical operations

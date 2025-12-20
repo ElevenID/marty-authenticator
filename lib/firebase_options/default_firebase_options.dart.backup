@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   /// This should be called before Firebase initialization to ensure proper configuration.
   static void validateConfiguration() {
     final errors = <String>[];
-    
+
     void checkRequired(String envVar, String value) {
       if (value.isEmpty) {
         errors.add('Missing required environment variable: $envVar');

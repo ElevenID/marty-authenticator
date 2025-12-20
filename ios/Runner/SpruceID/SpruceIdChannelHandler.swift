@@ -18,6 +18,9 @@ class SpruceIdChannelHandler: NSObject {
   private var credentialPack: CredentialPack?
   private var contextMap: [String: Any] = [:]
 
+  // Pending requests for split flow
+  static var pendingMdocRequests: [String: Any] = [:]
+
   static func register(with registrar: FlutterPluginRegistrar) {
     let handler = SpruceIdChannelHandler()
 

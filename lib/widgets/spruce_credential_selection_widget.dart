@@ -30,7 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/spruce_sdk_services.dart';
-import '../model/credential.dart';
 import '../utils/logger.dart';
 
 /// Represents a selectable credential with disclosure options

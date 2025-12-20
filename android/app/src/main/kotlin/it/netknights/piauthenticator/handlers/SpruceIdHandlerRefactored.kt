@@ -17,6 +17,8 @@ import com.spruceid.mobile.sdk.rs.Oid4vciExchangeOptions
 import com.spruceid.mobile.sdk.rs.Holder
 import com.spruceid.mobile.sdk.rs.Oid4vp180137
 import com.spruceid.mobile.sdk.rs.JsonVc
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Refactored SpruceID handler using SDK APIs and adapter layer.
@@ -47,6 +49,10 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     // Adapter layer
     private var signer: Signer? = null
     private val httpClient = HttpClientWrapper()
+
+    // Session storage for pending requests
+    // Storing Any to avoid complex type imports here, but casting safely in methods
+    private val pendingRequests = ConcurrentHashMap<String, Any>()
 
     // Coroutine scope for async operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -265,7 +271,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
                 Log.d(TAG, "Processing credential offer: $offerUrl")
 
                 // Use SDK with HttpClientWrapper - replaces ~50 lines of custom code
-                val oid4vciSession = Oid4vci.newWithAsyncClient(httpClient.getOkHttpClient())
+                val oid4vciSession = Oid4vci.newWithAsyncClient(httpClient)
                 oid4vciSession.initiateWithOffer(offerUrl, "privacyidea-authenticator", "https://netknights.it")
 
                 val nonce = oid4vciSession.exchangeToken()
@@ -311,48 +317,23 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
     private fun handleVpRequestAsync(call: MethodCall, result: MethodChannel.Result) {
         val requestUrl = call.argument<String>("request")
-        if (requestUrl == null) {
-            result.error("INVALID_ARGUMENTS", "Invalid arguments: request URL required", null)
+        val sessionId = call.argument<String>("sessionId")
+
+        if (requestUrl == null && sessionId == null) {
+            result.error("INVALID_ARGUMENTS", "Invalid arguments: request URL or sessionId required", null)
             return
         }
 
         // Launch async operation
         scope.launch {
             try {
-                Log.d(TAG, "Creating VP for request: $requestUrl")
-
-                val signer = this@SpruceIdHandlerRefactored.signer ?: throw IllegalStateException("Signer not initialized")
-                val credentials = credentialPack.list()
-                val trustedDids = emptyList<String>()
-                val contextMap = getW3cContextMap() // Helper method for JSON-LD contexts
-
-                // Use SDK Holder with Signer adapter - replaces ~80 lines of custom VP logic
-                val holder = Holder.newWithCredentials(credentials, trustedDids, signer, contextMap)
-                val permissionRequest = holder.authorizationRequest(requestUrl)
-
-                // TODO: In real implementation, present UI for user to select credentials/fields
-                val selectedCredentials = credentials // Simplified for now
-                val selectedFields = emptyList<List<String>>() // Simplified for now
-
-                val permissionResponse = permissionRequest.createPermissionResponse(
-                    selectedCredentials,
-                    selectedFields,
-                    com.spruceid.mobile.sdk.rs.ResponseOptions(false, false, false)
-                )
-
-                val presentationResult = holder.submitPermissionResponse(permissionResponse)
-
-                // Return success on main thread
-                withContext(Dispatchers.Main) {
-                    result.success(mapOf(
-                        "status" to "success",
-                        "presentation" to presentationResult.toString(),
-                        "message" to "VP created via SDK Holder"
-                    ))
+                if (sessionId != null) {
+                    // Phase 2: Complete request with user selection
+                    completeVpRequest(sessionId, call, result)
+                } else {
+                    // Phase 1: Parse request and return matches for user selection
+                    initiateVpRequest(requestUrl!!, result)
                 }
-
-                Log.d(TAG, "Successfully created VP via SDK Holder")
-
             } catch (e: Exception) {
                 Log.e(TAG, "VP request failed", e)
                 withContext(Dispatchers.Main) {
@@ -362,47 +343,103 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         }
     }
 
+    private suspend fun initiateVpRequest(requestUrl: String, result: MethodChannel.Result) {
+        Log.d(TAG, "Creating VP for request: $requestUrl")
+
+        val signer = this@SpruceIdHandlerRefactored.signer ?: throw IllegalStateException("Signer not initialized")
+        val credentials = credentialPack.list()
+        val trustedDids = emptyList<String>()
+        val contextMap = getW3cContextMap()
+
+        // Use SDK Holder with Signer adapter
+        val holder = Holder.newWithCredentials(credentials, trustedDids, signer, contextMap)
+        val permissionRequest = holder.authorizationRequest(requestUrl)
+
+        // Generate session ID and store request
+        val newSessionId = UUID.randomUUID().toString()
+        pendingRequests[newSessionId] = permissionRequest
+
+        // Prepare matches for UI
+        // Note: In a real implementation, we'd extract actual matches from permissionRequest
+        // For now, we'll return all credentials as potential matches to demonstrate the flow
+        val matches = credentials.map { credential ->
+            mapOf(
+                "id" to credential.id(),
+                "type" to credential.credentialType(),
+                "issuer" to credential.issuer(),
+                "requestedFields" to mapOf("all" to listOf("credentialSubject")) // Simplified
+            )
+        }
+
+        withContext(Dispatchers.Main) {
+            result.success(mapOf(
+                "status" to "user_selection_required",
+                "sessionId" to newSessionId,
+                "matches" to matches,
+                "verifier" to "Unknown Verifier", // Should extract from request
+                "purpose" to "Verification"
+            ))
+        }
+    }
+
+    private suspend fun completeVpRequest(sessionId: String, call: MethodCall, result: MethodChannel.Result) {
+        val permissionRequest = pendingRequests.remove(sessionId) as? com.spruceid.mobile.sdk.rs.PermissionRequest
+            ?: throw IllegalStateException("Session expired or invalid")
+
+        val selectedCredentialId = call.argument<String>("selectedCredentialId")
+        // val selectedFields = call.argument<List<String>>("selectedFields") // Not used in this simplified version yet
+
+        val credentials = credentialPack.list()
+        val selectedCredentials = if (selectedCredentialId != null) {
+            credentials.filter { it.id() == selectedCredentialId }
+        } else {
+            credentials // Fallback
+        }
+
+        val selectedFieldsList = emptyList<List<String>>() // Simplified
+
+        val permissionResponse = permissionRequest.createPermissionResponse(
+            selectedCredentials,
+            selectedFieldsList,
+            com.spruceid.mobile.sdk.rs.ResponseOptions(false, false, false)
+        )
+
+        val presentationResult = permissionRequest.submit(permissionResponse)
+
+        withContext(Dispatchers.Main) {
+            result.success(mapOf(
+                "status" to "success",
+                "presentation" to presentationResult.toString(),
+                "message" to "VP created via SDK Holder"
+            ))
+        }
+
+        Log.d(TAG, "Successfully created VP via SDK Holder for session $sessionId")
+    }
+
     // =============================================================================
     // mDoc Operations - Using SDK Oid4vp180137
     // =============================================================================
 
     private fun createMdocResponseAsync(call: MethodCall, result: MethodChannel.Result) {
         val requestUrl = call.argument<String>("requestUrl")
-        if (requestUrl == null) {
-            result.error("INVALID_ARGUMENTS", "Invalid arguments: requestUrl required", null)
+        val sessionId = call.argument<String>("sessionId")
+
+        if (requestUrl == null && sessionId == null) {
+            result.error("INVALID_ARGUMENTS", "Invalid arguments: requestUrl or sessionId required", null)
             return
         }
 
         // Launch async operation
         scope.launch {
             try {
-                Log.d(TAG, "Processing mDoc request: $requestUrl")
-
-                // Use SDK Oid4vp180137 - replaces ~60 lines of custom mDoc logic
-                val mdocCredentials = credentialPack.list().mapNotNull { it.asMsoMdoc() }
-                val keyManager = this@SpruceIdHandlerRefactored.keyManager ?: throw IllegalStateException("KeyManager not initialized")
-                val handler = Oid4vp180137(mdocCredentials, keyManager)
-                val request = handler.processRequest(requestUrl)
-
-                val matches = request.matches()
-                Log.d(TAG, "Found ${matches.size} matching mDoc credentials")
-
-                // TODO: In real implementation, present UI for user field selection
-                val approvedResponse = matches.firstOrNull() ?: throw IllegalStateException("No matching credentials")
-                val response = request.respond(approvedResponse)
-
-                // Return success on main thread
-                withContext(Dispatchers.Main) {
-                    result.success(mapOf(
-                        "status" to "success",
-                        "mdocResponse" to response.toString(),
-                        "matches" to matches.size,
-                        "message" to "mDoc response created via SDK"
-                    ))
+                if (sessionId != null) {
+                    // Phase 2: Complete request with user selection
+                    completeMdocResponse(sessionId, call, result)
+                } else {
+                    // Phase 1: Parse request and return matches for user selection
+                    initiateMdocResponse(requestUrl!!, result)
                 }
-
-                Log.d(TAG, "Successfully created mDoc response via SDK")
-
             } catch (e: Exception) {
                 Log.e(TAG, "mDoc request failed", e)
                 withContext(Dispatchers.Main) {
@@ -410,6 +447,70 @@ class SpruceIdHandlerRefactored(private val context: Context) {
                 }
             }
         }
+    }
+
+    private suspend fun initiateMdocResponse(requestUrl: String, result: MethodChannel.Result) {
+        Log.d(TAG, "Processing mDoc request: $requestUrl")
+
+        val mdocCredentials = credentialPack.list().mapNotNull { it.asMsoMdoc() }
+        val keyManager = this@SpruceIdHandlerRefactored.keyManager ?: throw IllegalStateException("KeyManager not initialized")
+        val handler = Oid4vp180137(mdocCredentials, keyManager)
+        val request = handler.processRequest(requestUrl)
+
+        val matches = request.matches()
+        Log.d(TAG, "Found ${matches.size} matching mDoc credentials")
+
+        // Generate session ID and store request
+        val newSessionId = UUID.randomUUID().toString()
+        pendingRequests[newSessionId] = request
+
+        // Serialize matches for UI
+        val serializedMatches = matches.map { match ->
+            // We need to extract ID and requested items from the match object
+            // This is a simplification as the SDK API might differ slightly
+            mapOf(
+                "id" to "mdoc_cred", // SDK might not expose ID directly on match
+                "type" to "mDL",
+                "requestedFields" to mapOf(
+                    "org.iso.18013.5.1" to listOf("family_name", "given_name", "birth_date", "age_over_18")
+                )
+            )
+        }
+
+        withContext(Dispatchers.Main) {
+            result.success(mapOf(
+                "status" to "user_selection_required",
+                "sessionId" to newSessionId,
+                "matches" to serializedMatches,
+                "verifier" to "Unknown Verifier",
+                "purpose" to "Age Verification"
+            ))
+        }
+    }
+
+    private suspend fun completeMdocResponse(sessionId: String, call: MethodCall, result: MethodChannel.Result) {
+        val request = pendingRequests.remove(sessionId) as? com.spruceid.mobile.sdk.rs.MdocRequest
+            ?: throw IllegalStateException("Session expired or invalid")
+
+        // In a real implementation, we would use the user's selection to filter the response
+        // For now, we take the first match as approved (simulating user selected it)
+        val matches = request.matches()
+        val approvedResponse = matches.firstOrNull() ?: throw IllegalStateException("No matching credentials")
+
+        // TODO: Apply field filtering based on call.argument("selectedFields")
+
+        val response = request.respond(approvedResponse)
+
+        withContext(Dispatchers.Main) {
+            result.success(mapOf(
+                "status" to "success",
+                "mdocResponse" to response.toString(),
+                "matches" to matches.size,
+                "message" to "mDoc response created via SDK"
+            ))
+        }
+
+        Log.d(TAG, "Successfully created mDoc response via SDK for session $sessionId")
     }
 
     // =============================================================================

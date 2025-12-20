@@ -38,10 +38,10 @@ export 'spruce_managers_extended.dart';
 
 // Base services for backward compatibility
 export 'spruce_platform_service.dart';
-export 'spruce_client.dart';
-export 'spruce_mdoc_manager.dart';
-export 'spruce_sdjwt_manager.dart';
-export 'spruce_wallet_manager.dart';
+export '../spruce_client.dart';
+// export 'spruce_mdoc_manager.dart'; // In spruce_client.dart
+// export 'spruce_sdjwt_manager.dart'; // In spruce_client.dart
+// export 'spruce_wallet_manager.dart'; // In spruce_client.dart
 
 // Interfaces
 export '../interfaces/spruce_interfaces.dart';

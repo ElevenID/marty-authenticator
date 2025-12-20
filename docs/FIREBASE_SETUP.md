@@ -26,7 +26,7 @@ firebase projects:list
 # Get Android configuration
 firebase apps:sdkconfig android <android-app-id>
 
-# Get iOS configuration  
+# Get iOS configuration
 firebase apps:sdkconfig ios <ios-app-id>
 
 # Get Web configuration
@@ -38,7 +38,7 @@ firebase apps:sdkconfig web <web-app-id>
 Edit `.env.firebase` with the actual values from the CLI output:
 
 - Copy `projectId` to `FIREBASE_PROJECT_ID`
-- Copy `messagingSenderId` to `FIREBASE_MESSAGING_SENDER_ID` 
+- Copy `messagingSenderId` to `FIREBASE_MESSAGING_SENDER_ID`
 - Copy `storageBucket` to `FIREBASE_STORAGE_BUCKET`
 - Copy platform-specific `apiKey` values
 - Copy platform-specific `appId` values

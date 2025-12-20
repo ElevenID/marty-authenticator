@@ -941,3 +941,4 @@ ENV/
 env.bak/
 venv.bak/
 .venv/
+temp_main.js

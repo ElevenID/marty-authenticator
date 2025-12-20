@@ -42,7 +42,7 @@ class AddToWalletDialog {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Add to Wallet',
+                    'Add Documents',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,

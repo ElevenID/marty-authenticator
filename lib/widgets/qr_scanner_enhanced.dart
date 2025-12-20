@@ -34,7 +34,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 
 import '../services/qr_scanner_service_enhanced.dart';
+import '../services/spruce_client_extended.dart';
+import '../services/spruce_platform_service_extended.dart';
 import '../views/credential_selection_view.dart' hide SecurityLevel;
+import '../widgets/presentation_request_view.dart';
 import '../utils/logger.dart';
 
 /// Enhanced QR scanner widget with SDK integration
@@ -53,10 +56,10 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<QRScannerEnhanced> createState() => _QRScannerEnhancedState();
+  ConsumerState<QRScannerEnhanced> createState() => QRScannerEnhancedState();
 }
 
-class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
+class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     with TickerProviderStateMixin {
   // Scanner state
   bool _isScanning = false;
@@ -115,7 +118,8 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     super.dispose();
   }
 
-  Future<void> _handleScanResult(String scannedData) async {
+  @visibleForTesting
+  Future<void> handleScanResult(String scannedData) async {
     if (_isProcessing || scannedData == _lastScannedCode) {
       return; // Avoid duplicate processing
     }
@@ -214,9 +218,8 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
     final qrType = enrichedResult.validatedResult.parsedData.type;
 
-    // Auto-navigate for presentation requests with matching credentials
-    if (qrType == QRType.presentationRequest &&
-        enrichedResult.matchingCredentials.isNotEmpty) {
+    // Auto-navigate for presentation requests
+    if (qrType == QRType.presentationRequest) {
       await _handlePresentationRequest(enrichedResult);
     }
     // Auto-process credential offers if fully compatible
@@ -231,24 +234,59 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   ) async {
     final requestContent =
         enrichedResult.validatedResult.parsedData.parsedContent!;
-    final requestedAttributes =
-        (requestContent['requested_attributes'] as List?)?.cast<String>() ?? [];
+    final requestUri = enrichedResult.validatedResult.parsedData.rawData;
 
-    // Navigate to credential selection view
-    final presentation = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(
-        builder: (context) => CredentialSelectionView(
-          presentationRequest:
-              enrichedResult.validatedResult.parsedData.rawData,
-          requestedAttributes: requestedAttributes,
-          challenge: requestContent['challenge'] as String?,
-          domain: requestContent['domain'] as String?,
+    try {
+      final client = ref.read(spruceIdClientExtendedProvider);
+
+      // Initiate request processing via SDK
+      // This will throw UserSelectionRequiredException if matches are found
+      await client.initiateOID4VPRequestSDK(presentationRequest: requestUri);
+
+      // If no exception, it means it was auto-approved (shouldn't happen with new flow)
+      // or handled without UI
+      _showSuccess('Presentation submitted successfully');
+    } on UserSelectionRequiredException catch (e) {
+      // Show selection UI
+      if (!mounted) return;
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PresentationRequestView(
+            requestDetails: e.requestDetails,
+            matchingCredentials: e.matches,
+            onReject: () => Navigator.of(context).pop(),
+            onApprove: (selection) async {
+              Navigator.of(context).pop();
+              await _completePresentation(
+                e.sessionId,
+                selection['credentialId'],
+                selection['selectedFields'],
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      _showError('Failed to process presentation request: $e');
+    }
+  }
 
-    if (presentation != null) {
-      _showPresentationSuccess(presentation);
+  Future<void> _completePresentation(
+    String sessionId,
+    String credentialId,
+    List<String>? fields,
+  ) async {
+    try {
+      final client = ref.read(spruceIdClientExtendedProvider);
+      await client.completeOID4VPRequestSDK(
+        sessionId: sessionId,
+        selectedCredentialId: credentialId,
+        selectedFields: fields,
+      );
+      _showSuccess('Presentation submitted successfully');
+    } catch (e) {
+      _showError('Failed to submit presentation: $e');
     }
   }
 
@@ -273,7 +311,11 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Future<void> _acceptCredentialOffer(EnrichedQRResult enrichedResult) async {
     try {
-      // Implementation would use wallet manager to accept credentials
+      final client = ref.read(spruceIdClientExtendedProvider);
+      final offerUri = enrichedResult.validatedResult.parsedData.rawData;
+
+      await client.handleOID4VCOfferSDK(credentialOffer: offerUri);
+
       _showSuccess('Credential offer accepted successfully');
     } catch (e) {
       _showError('Failed to accept credential offer: $e');
@@ -305,33 +347,39 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: Colors.green,
-      ),
-    );
+      );
+    }
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
-        backgroundColor: Colors.red,
-      ),
-    );
+      );
+    }
   }
 
   @override
@@ -360,19 +408,40 @@ class _QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       return _buildWebInterface();
     }
 
+    // Check if running in test mode with injected QR code
+    const testQrCode = String.fromEnvironment('QR_CODE');
+    if (testQrCode.isNotEmpty) {
+      return Stack(
+        children: [
+          Container(color: Colors.black), // Placeholder for camera
+          _buildScannerOverlay(),
+          const Center(
+            child: Text(
+              'Test Mode: Camera Disabled',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      );
+    }
+
     // For mobile/desktop, use camera scanner
-    return ReaderWidget(
-      onControllerCreated: (controller, _) {
-        setState(() => _isScanning = controller != null);
-      },
-      actionButtonsAlignment: Alignment.bottomRight,
-      showFlashlight: Platform.isIOS || Platform.isAndroid,
-      flashOnIcon: const Icon(Icons.flash_on, color: Colors.white),
-      flashOffIcon: const Icon(Icons.flash_off, color: Colors.white),
-      showGallery: true,
-      galleryIcon: const Icon(Icons.image, color: Colors.white),
-      onScan: (result) => _handleScanResult(result.text),
-      scannerOverlay: _buildScannerOverlay(),
+    return Stack(
+      children: [
+        ReaderWidget(
+          onControllerCreated: (controller, _) {
+            setState(() => _isScanning = controller != null);
+          },
+          actionButtonsAlignment: Alignment.bottomRight,
+          showFlashlight: Platform.isIOS || Platform.isAndroid,
+          flashOnIcon: const Icon(Icons.flash_on, color: Colors.white),
+          flashOffIcon: const Icon(Icons.flash_off, color: Colors.white),
+          showGallery: true,
+          galleryIcon: const Icon(Icons.image, color: Colors.white),
+          onScan: (result) => handleScanResult(result.text ?? ''),
+        ),
+        _buildScannerOverlay(),
+      ],
     );
   }
 

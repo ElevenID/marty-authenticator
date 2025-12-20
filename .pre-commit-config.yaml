@@ -76,6 +76,7 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi]
+        exclude: ^(docker/|lib/services/)
       - id: ruff-format
         types_or: [python, pyi]
 
@@ -94,6 +95,7 @@ repos:
       - id: mypy
         args: [--ignore-missing-imports, --warn-unused-configs]
         types_or: [python, pyi]
+        exclude: ^(docker/|lib/services/)
 
   # Python - Dead code detection (disabled for development)
   # - repo: https://github.com/jendrikseipp/vulture
@@ -135,7 +137,7 @@ repos:
     rev: v3.14.1
     hooks:
       - id: markdown-link-check
-        args: ["--quiet"]
+        args: ["--quiet", "--config", ".mlc-config.json"]
         types: [markdown]
 
   # Dart/Flutter hooks

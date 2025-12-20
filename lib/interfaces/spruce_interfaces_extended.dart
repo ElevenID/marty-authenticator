@@ -61,6 +61,19 @@ abstract class ISpruceIdPlatformServiceExtended
     String? keyId,
   });
 
+  /// Initiate OID4VP request processing
+  /// Returns session ID and matches if user selection is required
+  Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
+    required String presentationRequest,
+  });
+
+  /// Complete OID4VP request with user selection
+  Future<Map<String, dynamic>> completeOID4VPRequestSDK({
+    required String sessionId,
+    required String selectedCredentialId,
+    List<String>? selectedFields,
+  });
+
   // ========================
   // SDK-Enhanced Holder Operations
   // ========================
@@ -188,6 +201,12 @@ abstract class ISpruceIdPlatformServiceExtended
     required Map<String, dynamic> mdocData,
     bool enableProximityDetection = true,
     Map<String, dynamic>? deviceConfig,
+  });
+
+  /// Handle mDoc OID4VP request using SDK
+  /// Processes an OID4VP request URL and generates a response
+  Future<Map<String, dynamic>> handleMdocOid4vpRequestSDK({
+    required String requestUrl,
   });
 
   /// Create mDoc presentation with advanced selective disclosure
@@ -406,6 +425,18 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
     String? expectedFormat,
     Map<String, dynamic>? importOptions,
   });
+
+  /// Initiate OID4VP request processing
+  Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
+    required String presentationRequest,
+  });
+
+  /// Complete OID4VP request with user selection
+  Future<Map<String, dynamic>> completeOID4VPRequestSDK({
+    required String sessionId,
+    required String selectedCredentialId,
+    List<String>? selectedFields,
+  });
 }
 
 /// Extended mDoc manager with SDK capabilities
@@ -429,6 +460,9 @@ abstract class ISpruceIdMdocManagerExtended extends ISpruceIdMdocManager {
     required Map<String, dynamic> sessionRequest,
     Map<String, dynamic>? securityOptions,
   });
+
+  /// Handle mDoc OID4VP request
+  Future<Map<String, dynamic>> handleOid4vpRequest(String requestUrl);
 }
 
 /// Extended SD-JWT manager with SDK capabilities

@@ -28,6 +28,22 @@ import '../interfaces/spruce_interfaces_extended.dart';
 import '../utils/spruce_channels.dart';
 import 'spruce_platform_service.dart';
 
+/// Exception thrown when user selection is required for a presentation request
+class UserSelectionRequiredException implements Exception {
+  final String sessionId;
+  final List<Map<String, dynamic>> matches;
+  final Map<String, dynamic> requestDetails;
+
+  UserSelectionRequiredException({
+    required this.sessionId,
+    required this.matches,
+    required this.requestDetails,
+  });
+
+  @override
+  String toString() => 'UserSelectionRequiredException(sessionId: $sessionId)';
+}
+
 /// Extended platform service implementation with SDK capabilities
 /// Uses the refactored Android and iOS handlers with SDK integration
 class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
@@ -67,12 +83,88 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }
 
   @override
+  Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
+    required String presentationRequest,
+  }) async {
+    try {
+      MethodChannel channel = w3cChannel;
+      String method = 'handleVpRequest';
+
+      if (presentationRequest.startsWith('mdoc')) {
+        channel = mdocChannel;
+        method = 'createMdocResponse';
+      }
+
+      final result = await channel.invokeMethod(method, {
+        'request': presentationRequest,
+        'requestUrl': presentationRequest,
+      });
+
+      final resultMap = Map<String, dynamic>.from(result);
+
+      if (resultMap['status'] == 'user_selection_required') {
+        throw UserSelectionRequiredException(
+          sessionId: resultMap['sessionId'],
+          matches: List<Map<String, dynamic>>.from(resultMap['matches'] ?? []),
+          requestDetails: {
+            'verifier': resultMap['verifier'],
+            'purpose': resultMap['purpose'],
+          },
+        );
+      }
+
+      return resultMap;
+    } on PlatformException catch (e) {
+      throw SpruceIdException(
+        e.code,
+        'SDK OID4VP initiation failed: ${e.message}',
+        e.details,
+      );
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeOID4VPRequestSDK({
+    required String sessionId,
+    required String selectedCredentialId,
+    List<String>? selectedFields,
+  }) async {
+    try {
+      // Try VP completion first (W3C channel)
+      try {
+        final result = await w3cChannel.invokeMethod('handleVpRequest', {
+          'sessionId': sessionId,
+          'selectedCredentialId': selectedCredentialId,
+          'selectedFields': selectedFields,
+        });
+        return Map<String, dynamic>.from(result);
+      } on PlatformException catch (_) {
+        // Fallback to mDoc completion (mDoc channel)
+        final result = await mdocChannel.invokeMethod('createMdocResponse', {
+          'sessionId': sessionId,
+          'selectedCredentialId': selectedCredentialId,
+          'selectedFields': selectedFields,
+        });
+        return Map<String, dynamic>.from(result);
+      }
+    } on PlatformException catch (e) {
+      throw SpruceIdException(
+        e.code,
+        'SDK OID4VP completion failed: ${e.message}',
+        e.details,
+      );
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> handleOID4VPRequestSDK({
     required String presentationRequest,
     required List<Map<String, dynamic>> selectedCredentials,
     required List<String> disclosureOptions,
     String? keyId,
   }) async {
+    // Legacy method - redirect to initiate/complete flow if possible
+    // or just call the old method if it still exists on iOS
     try {
       // Use refactored Android/iOS handlers with SDK integration
       final result = await w3cChannel
@@ -449,6 +541,25 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       throw SpruceIdException(
         e.code,
         'SDK mDoc initialization failed: ${e.message}',
+        e.details,
+      );
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> handleMdocOid4vpRequestSDK({
+    required String requestUrl,
+  }) async {
+    try {
+      final result = await mdocChannel.invokeMethod('createMdocResponse', {
+        'requestUrl': requestUrl,
+      });
+
+      return Map<String, dynamic>.from(result);
+    } on PlatformException catch (e) {
+      throw SpruceIdException(
+        e.code,
+        'SDK mDoc OID4VP request handling failed: ${e.message}',
         e.details,
       );
     }

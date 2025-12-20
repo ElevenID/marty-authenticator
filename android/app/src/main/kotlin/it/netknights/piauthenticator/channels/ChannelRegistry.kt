@@ -5,7 +5,7 @@ import android.util.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import it.netknights.piauthenticator.handlers.FileHandler
-import it.netknights.piauthenticator.handlers.SpruceIdHandler
+import it.netknights.piauthenticator.handlers.SpruceIdHandlerRefactored
 
 /**
  * Manages all method channels for the Flutter application.
@@ -26,7 +26,7 @@ class ChannelRegistry(private val context: Context) {
 
     // Handlers
     private val fileHandler = FileHandler(context)
-    private val spruceIdHandler = SpruceIdHandler(context)
+    private val spruceIdHandler = SpruceIdHandlerRefactored(context)
 
     // Channels
     private var fileChannel: MethodChannel? = null
@@ -78,7 +78,7 @@ class ChannelRegistry(private val context: Context) {
         pkiChannel = MethodChannel(binaryMessenger, PKI_CHANNEL)
         pkiChannel?.setMethodCallHandler { call, result ->
             Log.d(TAG, "PKI channel received method call: ${call.method}")
-            spruceIdHandler.handlePkiCall(call, result)
+            spruceIdHandler.handleMethodCall(call, result)
         }
     }
 
@@ -90,7 +90,7 @@ class ChannelRegistry(private val context: Context) {
         jwtChannel = MethodChannel(binaryMessenger, JWT_CHANNEL)
         jwtChannel?.setMethodCallHandler { call, result ->
             Log.d(TAG, "JWT channel received method call: ${call.method}")
-            spruceIdHandler.handleJwtCall(call, result)
+            spruceIdHandler.handleMethodCall(call, result)
         }
     }
 
@@ -102,7 +102,7 @@ class ChannelRegistry(private val context: Context) {
         mdocChannel = MethodChannel(binaryMessenger, MDOC_CHANNEL)
         mdocChannel?.setMethodCallHandler { call, result ->
             Log.d(TAG, "mDoc channel received method call: ${call.method}")
-            spruceIdHandler.handleMdocCall(call, result)
+            spruceIdHandler.handleMethodCall(call, result)
         }
     }
 
@@ -114,7 +114,7 @@ class ChannelRegistry(private val context: Context) {
         walletChannel = MethodChannel(binaryMessenger, WALLET_CHANNEL)
         walletChannel?.setMethodCallHandler { call, result ->
             Log.d(TAG, "Wallet channel received method call: ${call.method}")
-            spruceIdHandler.handleWalletCall(call, result)
+            spruceIdHandler.handleMethodCall(call, result)
         }
     }
 
@@ -126,7 +126,7 @@ class ChannelRegistry(private val context: Context) {
         w3cChannel = MethodChannel(binaryMessenger, W3C_CHANNEL)
         w3cChannel?.setMethodCallHandler { call, result ->
             Log.d(TAG, "W3C channel received method call: ${call.method}")
-            spruceIdHandler.handleW3cCall(call, result)
+            spruceIdHandler.handleMethodCall(call, result)
         }
     }
 

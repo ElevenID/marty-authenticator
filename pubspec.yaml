@@ -1,5 +1,5 @@
 name: privacyidea_authenticator
-description: An OTP Authenticator App for privacyIDEA Authentication Server.
+description: A Digital Document Wallet and Authenticator App.
 homepage: https://netknights.it
 repository: https://github.com/privacyidea/pi-authenticator
 publish_to: none

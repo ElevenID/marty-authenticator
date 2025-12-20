@@ -35,9 +35,15 @@ class CustomBackButton extends StatelessWidget {
                       color: Colors.blue,
                       size: 18,
                     ),
-                    Text(
-                      text,
-                      style: const TextStyle(color: Colors.blue, fontSize: 14),
+                    Flexible(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 )

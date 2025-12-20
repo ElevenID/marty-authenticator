@@ -20,7 +20,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'macos_compatible_qr_scanner.dart';
+import '../../../../widgets/qr_scanner_enhanced.dart';
 
 class QRScannerWidget extends StatefulWidget {
   const QRScannerWidget({super.key});
@@ -32,7 +32,7 @@ class QRScannerWidget extends StatefulWidget {
 class _QRScannerWidgetState extends State<QRScannerWidget> {
   @override
   Widget build(BuildContext context) {
-    // Use the platform-compatible QR scanner
-    return const MacOSCompatibleQRScanner();
+    // Use the enhanced QR scanner with OID4VC support
+    return const QRScannerEnhanced();
   }
 }

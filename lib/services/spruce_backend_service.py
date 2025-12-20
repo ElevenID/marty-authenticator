@@ -9,7 +9,7 @@ import json
 import logging
 import secrets
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # Global flag for SpruceID availability
 SPRUCEID_AVAILABLE = False
@@ -70,7 +70,7 @@ class SpruceIdBackendService:
             SPRUCEID_AVAILABLE = False
 
     async def create_did(
-        self, method: str = "key", options: Dict[str, Any] = None
+        self, method: str = "key", options: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Create a new DID using SpruceID DIDKit.
@@ -422,7 +422,7 @@ class SpruceIdBackendService:
     # Fallback implementations when SpruceID libraries are not available
 
     def _fallback_create_did(
-        self, method: str, options: Dict[str, Any] = None
+        self, method: str, options: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Fallback DID creation when DIDKit is not available."""
         if options is None:
@@ -565,7 +565,7 @@ spruce_backend = SpruceIdBackendService()
 
 # Convenience functions for Flask/FastAPI integration
 async def create_did_endpoint(
-    method: str = "key", options: Dict[str, Any] = None
+    method: str = "key", options: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Endpoint wrapper for DID creation."""
     return await spruce_backend.create_did(method, options)

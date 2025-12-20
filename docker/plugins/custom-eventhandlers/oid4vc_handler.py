@@ -24,6 +24,9 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+# HTTP Status Codes
+HTTP_OK = 200
+
 
 class OID4VCEventHandler(BaseEventHandler):
     """
@@ -42,7 +45,7 @@ class OID4VCEventHandler(BaseEventHandler):
     description = "OpenID for Verifiable Credentials Event Handler with mDoc support"
 
     def __init__(self):
-        super(OID4VCEventHandler, self).__init__()
+        super().__init__()
         self.did_manager = None
         self.mdoc_issuer = None
         self.oid4vci_issuer = None
@@ -88,6 +91,26 @@ class OID4VCEventHandler(BaseEventHandler):
 
         return actions
 
+    def _check_auth_success(self, g):
+        """Check if authentication was successful."""
+        if g and g.audit_object:
+            return g.audit_object.audit_data.get("success", False)
+        return True  # No audit data means we can't check, allow by default
+
+    def _check_token_type(self, g, required_type):
+        """Check if token type matches the required type."""
+        if not required_type or not g or not g.audit_object:
+            return True
+        audit_token_type = g.audit_object.audit_data.get("token_type", "")
+        return required_type.lower() in audit_token_type.lower()
+
+    def _check_realm(self, g, required_realm):
+        """Check if realm matches the required realm."""
+        if not required_realm or not g or not g.audit_object:
+            return True
+        audit_realm = g.audit_object.audit_data.get("realm", "")
+        return required_realm.lower() == audit_realm.lower()
+
     def check_condition(self, options=None):
         """
         Check if the event should trigger this handler.
@@ -95,31 +118,19 @@ class OID4VCEventHandler(BaseEventHandler):
         options = options or {}
         handler_def = options.get("handler_def", {})
         g = options.get("g")
-
-        # Get conditions from handler definition
         conditions = handler_def.get("conditions", {})
 
-        # Check if authentication was successful
-        if g and g.audit_object:
-            audit_data = g.audit_object.audit_data
-            success = audit_data.get("success", False)
-
-            if not success:
-                return False  # Only issue credentials on successful auth
+        # Check authentication success
+        if not self._check_auth_success(g):
+            return False
 
         # Check token type condition
-        token_type = conditions.get("token_type")
-        if token_type and g and g.audit_object:
-            audit_token_type = g.audit_object.audit_data.get("token_type", "")
-            if token_type.lower() not in audit_token_type.lower():
-                return False
+        if not self._check_token_type(g, conditions.get("token_type")):
+            return False
 
         # Check realm condition
-        realm = conditions.get("realm")
-        if realm and g and g.audit_object:
-            audit_realm = g.audit_object.audit_data.get("realm", "")
-            if realm.lower() != audit_realm.lower():
-                return False
+        if not self._check_realm(g, conditions.get("realm")):
+            return False
 
         return True
 
@@ -384,7 +395,7 @@ class OID4VCEventHandler(BaseEventHandler):
                 timeout=issuer_config["timeout"],
             )
 
-            if response.status_code == 200:
+            if response.status_code == HTTP_OK:
                 result = response.json()
                 log.info(
                     "Credential issued successfully: %s",
@@ -402,7 +413,8 @@ class OID4VCEventHandler(BaseEventHandler):
     def _create_credential_offer(self, handler_def, g):
         """Create a credential offer"""
         options = handler_def.get("options", {})
-        user_info = self._extract_user_info(g)
+        # Note: g is used for future user context, currently offer is generic
+        _ = g  # Reserved for future user-specific offer customization
 
         offer = {
             "credential_issuer": options.get("issuer_url", ""),
@@ -433,20 +445,22 @@ class OID4VCEventHandler(BaseEventHandler):
 
         try:
             response = requests.post(webhook_url, json=offer, timeout=30)
-            return response.status_code == 200
+            return response.status_code == HTTP_OK
         except Exception as e:
             log.error("Error sending webhook: %s", str(e))
             return False
 
-    def _generate_offer_qr_code(self, offer, handler_def):
+    def _generate_offer_qr_code(self, _offer, _handler_def):
         """Generate QR code for credential offer"""
         # In practice, generate QR code and store/display it
+        # Parameters reserved for future implementation
         log.info("Generated QR code for credential offer")
         return True
 
-    def _send_offer_deep_link(self, offer, handler_def):
+    def _send_offer_deep_link(self, _offer, _handler_def):
         """Send credential offer via deep link"""
         # In practice, create deep link and send via configured method
+        # Parameters reserved for future implementation
         log.info("Sent credential offer via deep link")
         return True
 
@@ -461,7 +475,7 @@ class OID4VCEventHandler(BaseEventHandler):
             }
 
             response = requests.patch(status_list_url, json=update_data, timeout=30)
-            return response.status_code == 200
+            return response.status_code == HTTP_OK
 
         except Exception as e:
             log.error("Error updating status list: %s", str(e))
