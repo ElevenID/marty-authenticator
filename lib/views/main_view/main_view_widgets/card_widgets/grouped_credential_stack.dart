@@ -26,50 +26,9 @@ import 'verifiable_credential_card.dart';
 import 'mdoc_credential_card.dart';
 import 'promotional_credential_card.dart';
 
-/// Data class for grouped credentials from the same issuer
-class CredentialGroup {
-  final String issuerName;
-  final List<VerifiableCredential> verifiableCredentials;
-  final List<MDocCredential> mDocCredentials;
-  final List<PromotionalCredential> promotionalCredentials;
-  final bool isPromotional;
-
-  CredentialGroup({
-    required this.issuerName,
-    this.verifiableCredentials = const [],
-    this.mDocCredentials = const [],
-    this.promotionalCredentials = const [],
-    this.isPromotional = false,
-  });
-
-  int get totalCount =>
-      verifiableCredentials.length +
-      mDocCredentials.length +
-      promotionalCredentials.length;
-  bool get hasSingle => totalCount == 1;
-  bool get hasMultiple => totalCount > 1;
-
-  /// Get all credentials as a mixed list for iteration
-  List<dynamic> get allCredentials => [
-    ...promotionalCredentials,
-    ...verifiableCredentials,
-    ...mDocCredentials,
-  ];
-
-  /// Get the primary (most recent or first) credential for display
-  dynamic get primaryCredential {
-    if (promotionalCredentials.isNotEmpty) {
-      return promotionalCredentials.first;
-    }
-    if (verifiableCredentials.isNotEmpty) {
-      return verifiableCredentials.first;
-    }
-    if (mDocCredentials.isNotEmpty) {
-      return mDocCredentials.first;
-    }
-    return null;
-  }
-}
+// Re-export CredentialGroup from canonical models location
+export '../../../../models/credential_group.dart' show CredentialGroup;
+import '../../../../models/credential_group.dart';
 
 /// Widget that displays grouped credentials as a stack with horizontal scrolling
 class GroupedCredentialStack extends StatefulWidget {
@@ -112,7 +71,7 @@ class _GroupedCredentialStackState extends State<GroupedCredentialStack> {
     final theme = context.credentialCardTheme;
 
     if (credential is VerifiableCredential) {
-      return theme.getGradientForCredentialType(credential.type.first);
+      return theme.getGradientForCredentialType(credential.credentialType);
     } else if (credential is MDocCredential) {
       return theme.getGradientForCredentialType(credential.docType);
     }

@@ -22,8 +22,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
-import 'main_view/main_view_widgets/card_widgets/verifiable_credential_card.dart';
-import 'main_view/main_view_widgets/card_widgets/mdoc_credential_card.dart';
+import '../models/credentials.dart';
+import 'main_view/main_view_widgets/card_widgets/verifiable_credential_card.dart'
+    show VerifiableCredentialCard;
+import 'main_view/main_view_widgets/card_widgets/mdoc_credential_card.dart'
+    show MDocCredentialCard;
 
 /// Detail view for verifiable credentials with Apple Wallet-like presentation
 class CredentialDetailView extends StatefulWidget {
@@ -234,7 +237,7 @@ class _CredentialDetailViewState extends State<CredentialDetailView>
 
         // Basic info
         _buildInfoSection('Credential Information', [
-          _buildInfoItem('Subject', vc.subjectName),
+          _buildInfoItem('Subject', vc.displayName),
           _buildInfoItem('Type', vc.credentialType),
           _buildInfoItem('Issuer', vc.issuerName),
           _buildInfoItem('Issue Date', _formatDate(vc.issuanceDate)),
@@ -267,7 +270,7 @@ class _CredentialDetailViewState extends State<CredentialDetailView>
           const SizedBox(height: 24),
           _buildJsonSection('Full Credential (JSON)', {
             'id': vc.id,
-            'type': vc.type,
+            'type': vc.types,
             'issuer': vc.issuer,
             'credentialSubject': vc.credentialSubject,
             'issuanceDate': vc.issuanceDate,

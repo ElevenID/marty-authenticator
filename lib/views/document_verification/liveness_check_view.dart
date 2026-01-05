@@ -5,6 +5,7 @@ import '../../utils/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../../models/document_verification_config.dart';
+import '../../models/liveness_challenge.dart';
 import '../../widgets/common/back_button.dart';
 import 'review_and_submit_view.dart';
 
@@ -24,13 +25,38 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   List<LivenessGesture> _gestures = [];
   int _currentGestureIndex = 0;
   String _feedback = '';
+  LivenessChallenge? _challenge;
+  int _expirySeconds = 0;
 
   @override
   void initState() {
     super.initState();
     _gestures = DocumentVerificationConfig.generateRandomGestures();
+    _challenge = LivenessChallenge.create(
+      gestures: _gestures,
+      ttl: const Duration(seconds: 60),
+      signingSecret: 'local-dev-secret',
+    );
+    _expirySeconds = 60;
+    _startExpiryTicker();
     _initializeCamera();
     _initializeFaceDetector();
+  }
+
+  void _startExpiryTicker() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted || _challenge == null) return false;
+      final remaining = _challenge!.expiresAt
+          .difference(DateTime.now().toUtc())
+          .inSeconds;
+      if (remaining <= 0) {
+        setState(() => _expirySeconds = 0);
+        return false;
+      }
+      setState(() => _expirySeconds = remaining);
+      return true;
+    });
   }
 
   void _initializeFaceDetector() {
@@ -222,7 +248,10 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
     _controller?.stopImageStream();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const ReviewAndSubmitView()),
+      MaterialPageRoute(
+        builder: (context) =>
+            ReviewAndSubmitView(livenessChallenge: _challenge),
+      ),
     );
   }
 
@@ -288,6 +317,16 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
                     shadows: [Shadow(blurRadius: 10, color: Colors.black)],
                   ),
                 ),
+                const SizedBox(height: 12),
+                if (_challenge != null)
+                  Text(
+                    'Challenge: ${_challenge!.challengeId} · Expires in $_expirySeconds s',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      shadows: [Shadow(blurRadius: 10, color: Colors.black)],
+                    ),
+                  ),
               ],
             ),
           ),

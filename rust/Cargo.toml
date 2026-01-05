@@ -1,0 +1,40 @@
+[package]
+name = "marty-authenticator-bridge"
+version = "0.1.0"
+edition = "2021"
+description = "Flutter bridge to marty-verification for credential operations"
+license = "MIT"
+
+[lib]
+name = "marty_authenticator_bridge"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+# Core crates from marty-core
+marty-crypto = { path = "../../marty-core/marty-crypto" }
+marty-verification = { path = "../../marty-core/marty-verification", default-features = false, features = ["iaca", "csca"] }
+
+# Flutter Rust Bridge
+flutter_rust_bridge = "=2.11.1"
+
+# Serialization for FFI
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# SD-JWT parsing
+ssi-sd-jwt = "0.3"
+ssi-claims = { version = "0.4", default-features = false }
+
+# Async runtime for blocking calls
+tokio = { version = "1.0", features = ["rt", "sync"] }
+
+[build-dependencies]
+flutter_rust_bridge_codegen = "2.0"

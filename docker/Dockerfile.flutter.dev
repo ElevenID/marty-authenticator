@@ -1,47 +1,28 @@
-# Multi-stage build for Flutter web app with Firebase Emulator support
-FROM ubuntu:22.04 AS flutter-builder
+# syntax=docker/dockerfile:1
+# Multi-stage build for Flutter web app - Development version
+# Uses pre-built Flutter image and SSE for push notifications (no Firebase emulator needed)
+FROM ghcr.io/cirruslabs/flutter:stable AS flutter-builder
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    unzip \
-    xz-utils \
-    zip \
-    libglu1-mesa \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Flutter
-RUN git clone https://github.com/flutter/flutter.git -b stable /opt/flutter
-ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}"
-
-# Set up Flutter
-RUN flutter doctor --android-licenses || true
-RUN flutter precache --web
-
-# Set working directory
 WORKDIR /app
 
-# Copy pubspec files and local dependencies
+# Copy pubspec files and local dependencies first for layer caching
 COPY pubspec.yaml pubspec.lock ./
 COPY local_wasm_overrides/ ./local_wasm_overrides/
 COPY local_plugins/ ./local_plugins/
+
+# Get dependencies
 RUN flutter pub get
 
 # Copy source code
 COPY . .
 
-# Create development Firebase config that points to emulator
-RUN mkdir -p lib/firebase_options
-
 # Build for web with development configuration
-RUN flutter build web --target=lib/main_document.dart \
-    --dart-define=USE_FIREBASE_EMULATOR=true \
-    --dart-define=FIREBASE_AUTH_EMULATOR_HOST=firebase:9099 \
-    --dart-define=FIRESTORE_EMULATOR_HOST=firebase:8081 \
-    --dart-define=FIREBASE_DATABASE_EMULATOR_HOST=firebase:9000 \
-    --dart-define=PRIVACYIDEA_URL=http://privacyidea:8080 \
-    --dart-define=FLUTTER_WEB_USE_SKIA=true \
+# Uses SSE for push notifications instead of Firebase
+# Note: FLUTTER_WEB_USE_SKIA removed as CanvasKit is default in Flutter 3.x
+RUN flutter build web --target=lib/mains/main_web_test.dart \
+    --dart-define=MARTY_API_URL=http://localhost:8000 \
+    --dart-define=TEST_MODE=true \
+    --dart-define=USE_SSE_PUSH=true \
     --release
 
 # Production stage with nginx
@@ -67,7 +48,7 @@ server {
         add_header X-XSS-Protection "1; mode=block";
         add_header X-Content-Type-Options "nosniff";
 
-        # CORS for development - allow firebase emulator
+        # CORS for development
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
         add_header Access-Control-Allow-Headers "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization";

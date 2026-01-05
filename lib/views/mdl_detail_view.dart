@@ -21,7 +21,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'main_view/main_view_widgets/card_widgets/mdoc_credential_card.dart';
+import '../models/mdoc_credential.dart';
 
 /// Detail view for mobile Driver's License (mDL)
 /// Shows setup information when not issued, or displays the mDL when available

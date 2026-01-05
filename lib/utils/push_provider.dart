@@ -45,6 +45,9 @@ import 'utils.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/verification_state_provider.dart';
+import '../models/marty_challenge.dart';
+import '../services/marty_push_service.dart';
+import '../repo/marty_pending_challenge_repository.dart';
 
 /// This class bundles all logic that is needed to handle incomig PushRequests, e.g.,
 /// firebase, polling, notifications.
@@ -58,6 +61,7 @@ class PushProvider {
   bool pollingIsEnabled = false;
   Timer? _pollTimer;
   final List<Function(PushRequest)> _subscribers = [];
+  final List<Function(MartyChallenge)> _martySubscribers = [];
 
   FirebaseUtils _firebaseUtils;
   FirebaseUtils get firebaseUtils => _firebaseUtils;
@@ -196,6 +200,14 @@ class PushProvider {
       return;
     }
 
+    // Check for Marty format (marty/v1)
+    if (MartyChallenge.isMartyFormat(remoteMessage.data)) {
+      Logger.info('Received Marty challenge format');
+      await _handleMartyChallengeForeground(remoteMessage.data);
+      return;
+    }
+
+    // Handle legacy privacyIDEA format
     Map<String, dynamic> data;
     try {
       data = _getAndValidateDataFromRemoteMessage(remoteMessage);
@@ -239,6 +251,14 @@ class PushProvider {
       return;
     }
 
+    // Check for Marty format (marty/v1)
+    if (MartyChallenge.isMartyFormat(remoteMessage.data)) {
+      Logger.info('Received Marty challenge format in background');
+      await _handleMartyChallengeBackground(remoteMessage.data);
+      return;
+    }
+
+    // Handle legacy privacyIDEA format
     Map<String, dynamic> data;
     try {
       data = _getAndValidateDataFromRemoteMessage(remoteMessage);
@@ -271,6 +291,109 @@ class PushProvider {
       );
     }
   }
+
+  // ==========================================================================
+  // MARTY CHALLENGE HANDLING
+  // ==========================================================================
+
+  /// Handle Marty challenge in foreground
+  Future<void> _handleMartyChallengeForeground(
+    Map<String, dynamic> data,
+  ) async {
+    Logger.info('Handling Marty challenge in foreground');
+    try {
+      final challenge = MartyChallenge.fromFcmData(data);
+
+      // Check if challenge is expired
+      if (challenge.isExpired) {
+        Logger.warning('Marty challenge has expired: ${challenge.challengeId}');
+        return;
+      }
+
+      // Verify server signature if available
+      final martyService = MartyPushService.instance;
+      if (martyService.serverPublicKey != null &&
+          challenge.signature.isNotEmpty) {
+        final isValid = challenge.verifySignature(
+          martyService.serverPublicKey!,
+          rsaUtils: _rsaUtils,
+        );
+        if (!isValid) {
+          Logger.warning(
+            'Marty challenge signature verification failed: ${challenge.challengeId}',
+          );
+          // Still process the challenge but log the warning
+          // In production, you might want to reject unsigned/invalid challenges
+        }
+      }
+
+      Logger.info(
+        'Marty challenge received: ${challenge.challengeId}, '
+        'options: ${challenge.options.length}, '
+        'notifying ${_martySubscribers.length} subscribers + MartyPushService',
+      );
+
+      // Notify Marty subscribers (PushProvider subscribers)
+      for (var subscriber in _martySubscribers) {
+        try {
+          subscriber(challenge);
+        } catch (e) {
+          Logger.error('Error in Marty challenge subscriber', error: e);
+        }
+      }
+
+      // Forward to MartyPushService listeners
+      martyService.notifyChallenge(challenge);
+    } catch (e, s) {
+      Logger.error('Failed to parse Marty challenge', error: e, stackTrace: s);
+    }
+  }
+
+  /// Handle Marty challenge in background
+  static Future<void> _handleMartyChallengeBackground(
+    Map<String, dynamic> data,
+  ) async {
+    Logger.info('Handling Marty challenge in background');
+    try {
+      final challenge = MartyChallenge.fromFcmData(data);
+
+      // Check if challenge is expired
+      if (challenge.isExpired) {
+        Logger.warning('Marty challenge has expired: ${challenge.challengeId}');
+        return;
+      }
+
+      // Show notification
+      PiNotifications.show(challenge.title, challenge.question);
+
+      // Store challenge for later handling when app is opened
+      await savePendingMartyChallengeBackground(data);
+
+      Logger.info(
+        'Marty challenge notification shown and stored: ${challenge.challengeId}',
+      );
+    } catch (e, s) {
+      Logger.error(
+        'Failed to handle Marty challenge in background',
+        error: e,
+        stackTrace: s,
+      );
+    }
+  }
+
+  /// Subscribe to Marty challenges
+  void subscribeToMartyChallenges(Function(MartyChallenge) subscriber) {
+    _martySubscribers.add(subscriber);
+  }
+
+  /// Unsubscribe from Marty challenges
+  void unsubscribeFromMartyChallenges(Function(MartyChallenge) subscriber) {
+    _martySubscribers.remove(subscriber);
+  }
+
+  // ==========================================================================
+  // LEGACY PRIVACYIDEA HANDLING
+  // ==========================================================================
 
   // HANDLING
   /// Handles incoming push requests by verifying the challenge and adding it
@@ -555,9 +678,15 @@ class PlaceholderPushProvider implements PushProvider {
     Map<String, dynamic> data,
   ) async {}
   @override
+  Future<void> _handleMartyChallengeForeground(
+    Map<String, dynamic> data,
+  ) async {}
+  @override
   void _startOrStopPolling(bool pollingEnabled) {}
   @override
   List<Function(PushRequest p1)> get _subscribers => [];
+  @override
+  List<Function(MartyChallenge p1)> get _martySubscribers => [];
   @override
   Future<void> pollForChallenge(
     PushToken token, {
@@ -571,6 +700,12 @@ class PlaceholderPushProvider implements PushProvider {
   void subscribe(void Function(PushRequest pushRequest) newRequest) {}
   @override
   void unsubscribe(void Function(PushRequest pushRequest) newRequest) {}
+  @override
+  void subscribeToMartyChallenges(void Function(MartyChallenge) subscriber) {}
+  @override
+  void unsubscribeFromMartyChallenges(
+    void Function(MartyChallenge) subscriber,
+  ) {}
   @override
   Future<(List<PushToken>, List<PushToken>)?> updateAllFirebaseTokens({
     String? firebaseToken,

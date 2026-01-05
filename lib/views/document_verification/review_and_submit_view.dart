@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/liveness_challenge.dart';
 import '../../providers/verification_state_provider.dart';
 import '../../widgets/common/back_button.dart';
 // import '../../utils/lock_auth.dart';
 // import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
 
 class ReviewAndSubmitView extends ConsumerStatefulWidget {
-  const ReviewAndSubmitView({super.key});
+  final LivenessChallenge? livenessChallenge;
+
+  const ReviewAndSubmitView({super.key, this.livenessChallenge});
 
   @override
   ConsumerState<ReviewAndSubmitView> createState() =>
@@ -93,6 +96,24 @@ class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
               style: TextStyle(color: Colors.grey, fontSize: 16),
               textAlign: TextAlign.center,
             ),
+            if (widget.livenessChallenge != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Liveness Challenge: ${widget.livenessChallenge!.challengeId}',
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Nonce: ${widget.livenessChallenge!.nonce}',
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Expires: ${widget.livenessChallenge!.expiresAt.toIso8601String()}',
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const Spacer(),
             if (_isSubmitting)
               const Center(child: CircularProgressIndicator())

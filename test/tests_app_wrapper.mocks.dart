@@ -8,7 +8,7 @@ import 'dart:typed_data' as _i28;
 
 import 'package:firebase_core/firebase_core.dart' as _i31;
 import 'package:firebase_messaging/firebase_messaging.dart' as _i32;
-import 'package:flutter/foundation.dart' as _i35;
+import 'package:flutter/foundation.dart' as _i36;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i11;
 import 'package:http/http.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
@@ -48,9 +48,10 @@ import 'package:privacyidea_authenticator/model/riverpod_states/token_state.dart
 import 'package:privacyidea_authenticator/model/token_container.dart' as _i24;
 import 'package:privacyidea_authenticator/model/tokens/push_token.dart' as _i29;
 import 'package:privacyidea_authenticator/model/tokens/token.dart' as _i14;
-import 'package:privacyidea_authenticator/repo/secure_storage.dart' as _i36;
+import 'package:privacyidea_authenticator/models/marty_challenge.dart' as _i34;
+import 'package:privacyidea_authenticator/repo/secure_storage.dart' as _i37;
 import 'package:privacyidea_authenticator/utils/allow_screenshot_utils.dart'
-    as _i34;
+    as _i35;
 import 'package:privacyidea_authenticator/utils/ecc_utils.dart' as _i26;
 import 'package:privacyidea_authenticator/utils/firebase_utils.dart' as _i8;
 import 'package:privacyidea_authenticator/utils/privacyidea_io_client.dart'
@@ -1265,6 +1266,22 @@ class MockPushProvider extends _i1.Mock implements _i33.PushProvider {
   );
 
   @override
+  void subscribeToMartyChallenges(
+    dynamic Function(_i34.MartyChallenge)? subscriber,
+  ) => super.noSuchMethod(
+    Invocation.method(#subscribeToMartyChallenges, [subscriber]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void unsubscribeFromMartyChallenges(
+    dynamic Function(_i34.MartyChallenge)? subscriber,
+  ) => super.noSuchMethod(
+    Invocation.method(#unsubscribeFromMartyChallenges, [subscriber]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i13.Future<void> pollForChallenges({required bool? isManually}) =>
       (super.noSuchMethod(
             Invocation.method(#pollForChallenges, [], {
@@ -1328,7 +1345,7 @@ class MockPushProvider extends _i1.Mock implements _i33.PushProvider {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAllowScreenshotUtils extends _i1.Mock
-    implements _i34.AllowScreenshotUtils {
+    implements _i35.AllowScreenshotUtils {
   @override
   _i13.Future<bool> allowScreenshots() =>
       (super.noSuchMethod(
@@ -1452,7 +1469,7 @@ class MockFlutterSecureStorage extends _i1.Mock
   @override
   void registerListener({
     required String? key,
-    required _i35.ValueChanged<String?>? listener,
+    required _i36.ValueChanged<String?>? listener,
   }) => super.noSuchMethod(
     Invocation.method(#registerListener, [], {#key: key, #listener: listener}),
     returnValueForMissingStub: null,
@@ -1461,7 +1478,7 @@ class MockFlutterSecureStorage extends _i1.Mock
   @override
   void unregisterListener({
     required String? key,
-    required _i35.ValueChanged<String?>? listener,
+    required _i36.ValueChanged<String?>? listener,
   }) => super.noSuchMethod(
     Invocation.method(#unregisterListener, [], {
       #key: key,
@@ -1648,7 +1665,7 @@ class MockFlutterSecureStorage extends _i1.Mock
 /// A class which mocks [SecureStorage].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSecureStorage extends _i1.Mock implements _i36.SecureStorage {
+class MockSecureStorage extends _i1.Mock implements _i37.SecureStorage {
   @override
   _i11.FlutterSecureStorage get storage =>
       (super.noSuchMethod(

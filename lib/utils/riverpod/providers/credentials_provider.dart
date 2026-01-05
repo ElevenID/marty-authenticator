@@ -25,9 +25,7 @@ import '../../logger.dart';
 import '../../../services/spruce_client_extended.dart';
 import '../../../model/processor_result.dart';
 import '../../../model/promotional_credential.dart';
-import '../../../views/main_view/main_view_widgets/card_widgets/verifiable_credential_card.dart';
-import '../../../views/main_view/main_view_widgets/card_widgets/mdoc_credential_card.dart';
-import '../../../views/main_view/main_view_widgets/card_widgets/grouped_credential_stack.dart';
+import '../../../models/credentials.dart';
 import 'spruce_providers.dart';
 
 /// Provider for managing the list of credentials
@@ -336,6 +334,10 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
 
   /// Check if credential data represents a W3C Verifiable Credential
   bool _isVerifiableCredential(Map<String, dynamic> credData) {
+    if (_isOpenBadgeV2(credData) || _isOpenBadgeV3(credData)) {
+      return true;
+    }
+
     return credData.containsKey('type') &&
             credData.containsKey('credentialSubject') &&
             credData.containsKey('@context') ||
@@ -358,27 +360,188 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
     Map<String, dynamic> credData,
   ) {
     try {
+      final normalized = _normalizeOpenBadgeCredential(credData);
+      final contextValue = normalized['@context'];
+      final List<String>? parsedContext = contextValue is List
+          ? contextValue.cast<String>()
+          : contextValue is String
+          ? [contextValue]
+          : null;
+
       return VerifiableCredential(
         id:
-            credData['id']?.toString() ??
+            normalized['id']?.toString() ??
             'urn:uuid:${DateTime.now().millisecondsSinceEpoch}',
-        type: _parseCredentialTypes(credData['type']),
-        issuer: _parseIssuer(credData['issuer']),
+        types: _parseCredentialTypes(normalized['type']),
+        issuer: _parseIssuer(normalized['issuer']),
         credentialSubject: Map<String, dynamic>.from(
-          credData['credentialSubject'] ?? {},
+          normalized['credentialSubject'] ?? {},
         ),
         issuanceDate:
-            credData['issuanceDate']?.toString() ??
+            normalized['issuanceDate']?.toString() ??
             DateTime.now().toIso8601String(),
-        expirationDate: credData['expirationDate']?.toString(),
-        proof: credData['proof'] != null
-            ? Map<String, dynamic>.from(credData['proof'])
+        expirationDate: normalized['expirationDate']?.toString(),
+        proof: normalized['proof'] != null
+            ? Map<String, dynamic>.from(normalized['proof'])
+            : null,
+        context: parsedContext,
+        credentialStatus: normalized['credentialStatus'] != null
+            ? Map<String, dynamic>.from(normalized['credentialStatus'])
             : null,
       );
     } catch (e) {
       Logger.error('Error parsing verifiable credential: $e');
       return null;
     }
+  }
+
+  bool _contextContains(Map<String, dynamic> credData, String needle) {
+    final context = credData['@context'] ?? credData['context'];
+    if (context is String) {
+      return context.contains(needle);
+    }
+    if (context is List) {
+      return context.any((item) => item is String && item.contains(needle));
+    }
+    return false;
+  }
+
+  bool _isOpenBadgeV2(Map<String, dynamic> credData) {
+    final type = credData['type'];
+    final hasBadge = credData.containsKey('badge');
+    return _contextContains(credData, 'openbadges/v2') ||
+        (type == 'Assertion' && hasBadge);
+  }
+
+  bool _isOpenBadgeV3(Map<String, dynamic> credData) {
+    if (_contextContains(credData, 'openbadges/v3') ||
+        _contextContains(credData, 'ob/v3p0/context.json')) {
+      return true;
+    }
+
+    final type = credData['type'];
+    if (type is List) {
+      return type.contains('OpenBadgeCredential') ||
+          type.contains('AchievementCredential');
+    }
+    if (type is String) {
+      return type == 'OpenBadgeCredential' || type == 'AchievementCredential';
+    }
+    return false;
+  }
+
+  Map<String, dynamic> _normalizeOpenBadgeCredential(
+    Map<String, dynamic> credData,
+  ) {
+    if (_isOpenBadgeV2(credData)) {
+      return _normalizeOpenBadgeV2(credData);
+    }
+    if (_isOpenBadgeV3(credData)) {
+      return _normalizeOpenBadgeV3(credData);
+    }
+    return credData;
+  }
+
+  Map<String, dynamic> _normalizeOpenBadgeV2(Map<String, dynamic> credData) {
+    final normalized = Map<String, dynamic>.from(credData);
+
+    Map<String, dynamic> badge = {};
+    final badgeValue = credData['badge'];
+    if (badgeValue is Map) {
+      badge = Map<String, dynamic>.from(badgeValue);
+    } else if (badgeValue is String) {
+      badge = {'id': badgeValue};
+    }
+
+    final issuerValue = badge['issuer'] ?? credData['issuer'];
+    final issuer = _parseIssuer(issuerValue);
+
+    final recipientValue = credData['recipient'];
+    final recipient = recipientValue is Map
+        ? Map<String, dynamic>.from(recipientValue)
+        : <String, dynamic>{};
+    final recipientName =
+        recipient['name']?.toString() ?? recipient['identity']?.toString();
+
+    final subject = Map<String, dynamic>.from(
+      normalized['credentialSubject'] ?? {},
+    );
+    subject['name'] =
+        subject['name']?.toString() ?? recipientName ?? badge['name'];
+    subject['recipient'] = recipient;
+    if (badge.isNotEmpty) {
+      subject['badge_id'] = badge['id'];
+      subject['badge_name'] = badge['name'];
+      subject['badge_description'] = badge['description'];
+    }
+
+    normalized['id'] = normalized['id'] ?? badge['id'];
+    normalized['type'] = ['OpenBadgeCredential', 'VerifiableCredential'];
+    normalized['issuer'] = issuer;
+    normalized['credentialSubject'] = subject;
+    normalized['issuanceDate'] =
+        normalized['issuedOn'] ?? normalized['issuanceDate'];
+    normalized['expirationDate'] =
+        normalized['expires'] ?? normalized['expirationDate'];
+
+    if (normalized['proof'] == null) {
+      if (normalized['signature'] != null) {
+        normalized['proof'] = {
+          'type': 'OpenBadgeSignature',
+          'signature': normalized['signature'],
+        };
+      } else if (normalized['verification'] != null) {
+        normalized['proof'] = normalized['verification'];
+      }
+    }
+
+    return normalized;
+  }
+
+  Map<String, dynamic> _normalizeOpenBadgeV3(Map<String, dynamic> credData) {
+    final normalized = Map<String, dynamic>.from(credData);
+    final subjectValue = normalized['credentialSubject'] ?? {};
+    final subject = subjectValue is Map
+        ? Map<String, dynamic>.from(subjectValue)
+        : <String, dynamic>{};
+    final achievementValue = subject['achievement'];
+    final achievement = achievementValue is Map
+        ? Map<String, dynamic>.from(achievementValue)
+        : <String, dynamic>{};
+
+    final recipientValue = subject['recipient'];
+    final recipient = recipientValue is Map
+        ? Map<String, dynamic>.from(recipientValue)
+        : <String, dynamic>{};
+
+    final fallbackName =
+        recipient['name']?.toString() ??
+        recipient['identity']?.toString() ??
+        achievement['name']?.toString();
+
+    subject['name'] = subject['name']?.toString() ?? fallbackName;
+    if (achievement.isNotEmpty) {
+      subject['badge_name'] = achievement['name'];
+      subject['badge_description'] = achievement['description'];
+    }
+
+    normalized['credentialSubject'] = subject;
+    normalized['issuer'] = _parseIssuer(normalized['issuer']);
+
+    final types = _parseCredentialTypes(normalized['type']);
+    if (types.contains('OpenBadgeCredential')) {
+      types.remove('OpenBadgeCredential');
+      types.insert(0, 'OpenBadgeCredential');
+    } else if (types.contains('AchievementCredential')) {
+      types.remove('AchievementCredential');
+      types.insert(0, 'AchievementCredential');
+    }
+    if (!types.contains('VerifiableCredential')) {
+      types.add('VerifiableCredential');
+    }
+    normalized['type'] = types;
+
+    return normalized;
   }
 
   /// Parse SpruceID wallet data into MDocCredential
@@ -432,7 +595,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       // University credentials (2 from same issuer - will be stacked)
       VerifiableCredential(
         id: 'urn:uuid:sample-degree-1',
-        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+        types: ['VerifiableCredential', 'UniversityDegreeCredential'],
         issuer: {'id': 'did:web:stanford.edu', 'name': 'Stanford University'},
         credentialSubject: {
           'id': 'did:key:holder123',
@@ -449,7 +612,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       ),
       VerifiableCredential(
         id: 'urn:uuid:sample-certificate-1',
-        type: ['VerifiableCredential', 'ProfessionalCertificate'],
+        types: ['VerifiableCredential', 'ProfessionalCertificate'],
         issuer: {'id': 'did:web:stanford.edu', 'name': 'Stanford University'},
         credentialSubject: {
           'id': 'did:key:holder123',
@@ -468,7 +631,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       // Corporate credentials (3 from same issuer - will be stacked)
       VerifiableCredential(
         id: 'urn:uuid:employee-id-1',
-        type: ['VerifiableCredential', 'EmployeeCredential'],
+        types: ['VerifiableCredential', 'EmployeeCredential'],
         issuer: {'id': 'did:web:techcorp.com', 'name': 'TechCorp Inc'},
         credentialSubject: {
           'id': 'did:key:holder123',
@@ -486,7 +649,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       ),
       VerifiableCredential(
         id: 'urn:uuid:access-badge-1',
-        type: ['VerifiableCredential', 'AccessCredential'],
+        types: ['VerifiableCredential', 'AccessCredential'],
         issuer: {'id': 'did:web:techcorp.com', 'name': 'TechCorp Inc'},
         credentialSubject: {
           'id': 'did:key:holder123',
@@ -503,7 +666,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       ),
       VerifiableCredential(
         id: 'urn:uuid:training-cert-1',
-        type: ['VerifiableCredential', 'TrainingCertificate'],
+        types: ['VerifiableCredential', 'TrainingCertificate'],
         issuer: {'id': 'did:web:techcorp.com', 'name': 'TechCorp Inc'},
         credentialSubject: {
           'id': 'did:key:holder123',
@@ -523,7 +686,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
       // Single credential from different issuer
       VerifiableCredential(
         id: 'urn:uuid:health-card-1',
-        type: ['VerifiableCredential', 'HealthCredential'],
+        types: ['VerifiableCredential', 'HealthCredential'],
         issuer: {'id': 'did:web:health.gov', 'name': 'Department of Health'},
         credentialSubject: {
           'id': 'did:key:holder123',

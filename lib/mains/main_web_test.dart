@@ -24,6 +24,7 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:convert';
+import 'dart:js_util' as js_util;
 
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -44,9 +45,13 @@ import '../widgets/app_wrapper.dart';
 import '../mocks/mock_spruce_services.dart';
 import '../mocks/mock_qr_scanner_service.dart';
 import '../utils/riverpod/providers/spruce_providers.dart';
+import '../utils/riverpod/providers/credentials_provider.dart';
 
 // Import Marty push service
 import '../services/marty_push_service.dart';
+
+// Import WASM interop for real crypto operations
+import '../services/wasm/marty_wasm.dart';
 
 /// Global test configuration
 class TestConfig {
@@ -86,17 +91,17 @@ class TestMessageHandler {
     _sendToParent('WALLET_READY', {});
   }
 
-  static void _handleMessage(html.Event event) {
+  static Future<void> _handleMessage(html.Event event) async {
     if (event is! html.MessageEvent) return;
 
     final messageEvent = event;
 
     try {
-      final data = messageEvent.data;
-      if (data is! Map) return;
+      final data = _coerceMessageData(messageEvent.data);
+      if (data == null) return;
 
       final type = data['type'] as String?;
-      final payload = data['payload'] as Map<String, dynamic>?;
+      final payload = _coerceMessageData(data['payload']);
 
       Logger.info('TestMessageHandler: Received message type=$type');
 
@@ -111,18 +116,56 @@ class TestMessageHandler {
           _handleGetDeviceId();
           break;
         case 'GET_CREDENTIALS':
-          _handleGetCredentials();
+          await _handleGetCredentials();
+          break;
+        case 'GET_DISPLAY_CREDENTIALS':
+          await _handleGetDisplayCredentials();
+          break;
+        case 'STORE_CREDENTIAL':
+          await _handleStoreCredential(payload);
           break;
         case 'CLEAR_DATA':
-          _handleClearData();
+          await _handleClearData();
           break;
         case 'INJECT_CHALLENGE':
           _handleInjectChallenge(payload);
+          break;
+        case 'PROCESS_OID4VP_REQUEST':
+          _handleProcessOid4vpRequest(payload);
+          break;
+        case 'APPROVE_PRESENTATION':
+          await _handleApprovePresentation(payload);
+          break;
+        case 'WASM_HEALTH_CHECK':
+          _handleWasmHealthCheck();
+          break;
+        case 'WASM_GENERATE_KEY':
+          await _handleWasmGenerateKey(payload);
+          break;
+        case 'WASM_CREATE_CREDENTIAL':
+          await _handleWasmCreateCredential(payload);
+          break;
+        case 'WASM_CREATE_PRESENTATION':
+          await _handleWasmCreatePresentation(payload);
           break;
       }
     } catch (e) {
       Logger.error('TestMessageHandler: Error handling message', error: e);
     }
+  }
+
+  static Map<String, dynamic>? _coerceMessageData(dynamic data) {
+    if (data == null) return null;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data as Map);
+    }
+    try {
+      final converted = js_util.dartify(data);
+      if (converted is Map) {
+        return Map<String, dynamic>.from(converted as Map);
+      }
+    } catch (_) {}
+    return null;
   }
 
   static void _handleQrCodeInjection(Map<String, dynamic>? payload) {
@@ -172,19 +215,294 @@ class TestMessageHandler {
     _sendToParent('DEVICE_ID', {'device_id': deviceId});
   }
 
-  static void _handleGetCredentials() {
+  static Future<void> _handleGetCredentials() async {
     final stored = html.window.localStorage['marty_credentials'];
-    final credentials = stored != null ? jsonDecode(stored) : [];
+    final List<dynamic> credentials = stored != null ? jsonDecode(stored) : [];
+
+    try {
+      final ref = globalRef;
+      if (ref != null) {
+        final walletManager = ref.read(spruceIdWalletManagerProvider);
+        final walletCredentials = await walletManager.getAllCredentials();
+        for (final credential in walletCredentials) {
+          final credentialId = credential['id']?.toString();
+          final alreadyStored = credentials.any((existing) {
+            if (existing is Map) {
+              return existing['id']?.toString() == credentialId;
+            }
+            return false;
+          });
+          if (!alreadyStored) {
+            credentials.add(credential);
+          }
+        }
+      }
+    } catch (e) {
+      Logger.warning(
+        'TestMessageHandler: Failed to read wallet credentials: $e',
+      );
+    }
+
     _sendToParent('CREDENTIALS', {'credentials': credentials});
   }
 
-  static void _handleClearData() {
+  static Future<void> _handleGetDisplayCredentials() async {
+    try {
+      final ref = globalRef;
+      if (ref == null) {
+        _sendToParent('DISPLAY_CREDENTIALS', {'credentials': []});
+        return;
+      }
+
+      final state = ref.read(credentialsProvider);
+      final credentials = state.verifiableCredentials.map((credential) {
+        return {
+          'id': credential.id,
+          'type': credential.type,
+          'issuer': credential.issuer,
+          'credentialSubject': credential.credentialSubject,
+          'issuanceDate': credential.issuanceDate,
+          'expirationDate': credential.expirationDate,
+          'subjectName': credential.subjectName,
+          'credentialType': credential.credentialType,
+        };
+      }).toList();
+
+      _sendToParent('DISPLAY_CREDENTIALS', {'credentials': credentials});
+    } catch (e) {
+      Logger.warning(
+        'TestMessageHandler: Failed to read display credentials: $e',
+      );
+      _sendToParent('DISPLAY_CREDENTIALS', {'credentials': []});
+    }
+  }
+
+  /// Store a credential to localStorage (for testing)
+  static Future<void> _handleStoreCredential(
+    Map<String, dynamic>? payload,
+  ) async {
+    if (payload == null) return;
+
+    final credential = payload['credential'];
+    if (credential == null) {
+      _sendToParent('CREDENTIAL_STORED', {
+        'success': false,
+        'error': 'No credential provided',
+      });
+      return;
+    }
+
+    try {
+      final Map<String, dynamic> credentialMap =
+          credential is Map<String, dynamic>
+          ? credential
+          : Map<String, dynamic>.from(credential as Map);
+      final stored = html.window.localStorage['marty_credentials'];
+      final List<dynamic> credentials = stored != null
+          ? jsonDecode(stored)
+          : [];
+      credentials.add(credentialMap);
+      html.window.localStorage['marty_credentials'] = jsonEncode(credentials);
+
+      Logger.info(
+        'TestMessageHandler: Credential stored, total=${credentials.length}',
+      );
+      final ref = globalRef;
+      if (ref != null) {
+        final walletManager = ref.read(spruceIdWalletManagerProvider);
+        await walletManager.storeCredential(credentialMap);
+        await ref.read(credentialsProvider.notifier).refreshCredentials();
+      }
+
+      _sendToParent('CREDENTIAL_STORED', {
+        'success': true,
+        'count': credentials.length,
+      });
+    } catch (e) {
+      Logger.error('Failed to store credential', error: e);
+      _sendToParent('CREDENTIAL_STORED', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// Process an OID4VP presentation request
+  /// This simulates wallet receiving a presentation request and finding matching credentials
+  static void _handleProcessOid4vpRequest(Map<String, dynamic>? payload) {
+    if (payload == null) {
+      _sendToParent('OID4VP_PROCESSED', {
+        'success': false,
+        'error': 'No payload',
+      });
+      return;
+    }
+
+    try {
+      final requestUri = payload['request_uri'] as String?;
+      final credentialType = payload['credential_type'] as String?;
+
+      Logger.info(
+        'TestMessageHandler: Processing OID4VP request for type=$credentialType',
+      );
+
+      // Get stored credentials
+      final stored = html.window.localStorage['marty_credentials'];
+      final List<dynamic> allCredentials = stored != null
+          ? jsonDecode(stored)
+          : [];
+
+      // Find matching credentials by type
+      final List<dynamic> matchingCredentials = allCredentials.where((cred) {
+        if (credentialType == null) return true;
+        final credType = cred['type'] ?? cred['credential_type'];
+        if (credType is List) {
+          return credType.contains(credentialType);
+        }
+        return credType == credentialType;
+      }).toList();
+
+      _sendToParent('OID4VP_PROCESSED', {
+        'success': true,
+        'request_uri': requestUri,
+        'credential_type': credentialType,
+        'matching_credentials': matchingCredentials,
+        'matching_count': matchingCredentials.length,
+      });
+    } catch (e) {
+      Logger.error('Failed to process OID4VP request', error: e);
+      _sendToParent('OID4VP_PROCESSED', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  /// Approve a presentation request and create a VP
+  /// Uses WASM if available for real crypto, otherwise returns mock VP
+  static Future<void> _handleApprovePresentation(
+    Map<String, dynamic>? payload,
+  ) async {
+    if (payload == null) {
+      _sendToParent('PRESENTATION_APPROVED', {
+        'success': false,
+        'error': 'No payload',
+      });
+      return;
+    }
+
+    try {
+      final credentialIndex = payload['credential_index'] as int? ?? 0;
+      final audience = payload['audience'] as String? ?? 'demo_verifier';
+      final nonce = payload['nonce'] as String?;
+      final callbackUrl = payload['callback_url'] as String?;
+
+      // Get selected credential from localStorage
+      final stored = html.window.localStorage['marty_credentials'];
+      final List<dynamic> credentials = stored != null
+          ? jsonDecode(stored)
+          : [];
+
+      if (credentials.isEmpty || credentialIndex >= credentials.length) {
+        _sendToParent('PRESENTATION_APPROVED', {
+          'success': false,
+          'error': 'No credential at index $credentialIndex',
+        });
+        return;
+      }
+
+      final credential = credentials[credentialIndex];
+      final credentialJwt = credential['jwt'] as String?;
+
+      String vpJwt;
+
+      // Use WASM if available for real VP creation
+      final wasm = MartyWasm.instance;
+      if (wasm.isAvailable && credentialJwt != null) {
+        // Get or generate holder key
+        final holderKeyStored = html.window.localStorage['marty_holder_key'];
+        Map<String, dynamic> holderKey;
+        String holderDid;
+
+        if (holderKeyStored != null) {
+          final keyData = jsonDecode(holderKeyStored);
+          holderKey = keyData['jwk'] as Map<String, dynamic>;
+          holderDid = keyData['did'] as String;
+        } else {
+          // Generate new holder key
+          final keyResult = await wasm.generateP256Key();
+          holderKey = keyResult.jwk;
+          holderDid = keyResult.did;
+          html.window.localStorage['marty_holder_key'] = jsonEncode({
+            'did': holderDid,
+            'jwk': holderKey,
+          });
+        }
+
+        vpJwt = await wasm.createPresentation(
+          holderDid: holderDid,
+          holderJwkJson: jsonEncode(holderKey),
+          credentialJwts: [credentialJwt],
+          audience: audience,
+          nonce: nonce,
+        );
+
+        Logger.info('TestMessageHandler: Created VP with WASM');
+      } else {
+        // Create mock VP for testing without WASM
+        vpJwt = 'mock-vp-jwt-${DateTime.now().millisecondsSinceEpoch}';
+        Logger.info('TestMessageHandler: Created mock VP (WASM not available)');
+      }
+
+      // If callback URL provided, submit the presentation
+      if (callbackUrl != null) {
+        // Note: In a real implementation, this would make an HTTP POST
+        // For testing, we just notify the parent
+        Logger.info('TestMessageHandler: Would submit VP to $callbackUrl');
+      }
+
+      _sendToParent('PRESENTATION_APPROVED', {
+        'success': true,
+        'vp_jwt': vpJwt,
+        'credential_index': credentialIndex,
+        'audience': audience,
+        'nonce': nonce,
+      });
+    } catch (e) {
+      Logger.error('Failed to approve presentation', error: e);
+      _sendToParent('PRESENTATION_APPROVED', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  static Future<void> _handleClearData() async {
     html.window.localStorage.remove('marty_device_id');
     html.window.localStorage.remove('marty_org_id');
     html.window.localStorage.remove('marty_credentials');
     html.window.localStorage.remove('marty_push_token');
     TestConfig.deviceId = null;
     TestConfig.organizationId = null;
+
+    try {
+      final ref = globalRef;
+      if (ref != null) {
+        final walletManager = ref.read(spruceIdWalletManagerProvider);
+        final credentials = await walletManager.getAllCredentials();
+        for (final credential in credentials) {
+          final credentialId = credential['id']?.toString();
+          if (credentialId != null) {
+            await walletManager.deleteCredential(credentialId);
+          }
+        }
+        await ref.read(credentialsProvider.notifier).refreshCredentials();
+      }
+    } catch (e) {
+      Logger.warning(
+        'TestMessageHandler: Failed to clear wallet credentials: $e',
+      );
+    }
 
     Logger.info('TestMessageHandler: All data cleared');
     _sendToParent('DATA_CLEARED', {});
@@ -225,6 +543,131 @@ class TestMessageHandler {
       'source': 'marty-wallet',
     }, '*');
   }
+
+  // =========================================================================
+  // WASM Message Handlers - Enable Playwright to use real crypto
+  // =========================================================================
+
+  static void _handleWasmHealthCheck() {
+    final wasm = MartyWasm.instance;
+    if (!wasm.isAvailable) {
+      _sendToParent('WASM_STATUS', {
+        'available': false,
+        'error': 'WASM module not loaded',
+      });
+      return;
+    }
+
+    try {
+      final health = wasm.healthCheck();
+      final version = wasm.getVersion();
+      _sendToParent('WASM_STATUS', {
+        'available': true,
+        'health': health,
+        'version': version,
+      });
+    } catch (e) {
+      _sendToParent('WASM_STATUS', {'available': false, 'error': e.toString()});
+    }
+  }
+
+  static Future<void> _handleWasmGenerateKey(
+    Map<String, dynamic>? payload,
+  ) async {
+    final wasm = MartyWasm.instance;
+    if (!wasm.isAvailable) {
+      _sendToParent('WASM_KEY', {
+        'success': false,
+        'error': 'WASM not available',
+      });
+      return;
+    }
+
+    try {
+      final algorithm = payload?['algorithm'] as String? ?? 'P-256';
+      final WasmKeyResult key;
+
+      if (algorithm == 'Ed25519') {
+        key = await wasm.generateEd25519Key();
+      } else {
+        key = await wasm.generateP256Key();
+      }
+
+      _sendToParent('WASM_KEY', {
+        'success': true,
+        'did': key.did,
+        'keyId': key.keyId,
+        'jwk': key.jwk,
+      });
+    } catch (e) {
+      _sendToParent('WASM_KEY', {'success': false, 'error': e.toString()});
+    }
+  }
+
+  static Future<void> _handleWasmCreateCredential(
+    Map<String, dynamic>? payload,
+  ) async {
+    final wasm = MartyWasm.instance;
+    if (!wasm.isAvailable || payload == null) {
+      _sendToParent('WASM_CREDENTIAL', {
+        'success': false,
+        'error': 'WASM not available or no payload',
+      });
+      return;
+    }
+
+    try {
+      final result = await wasm.createVerifiableCredential(
+        issuerDid: payload['issuer_did'] as String,
+        issuerJwkJson: jsonEncode(payload['issuer_jwk']),
+        subjectId: payload['subject_id'] as String?,
+        credentialType: payload['credential_type'] as String,
+        claims: payload['claims'] as Map<String, dynamic>,
+        expirationSeconds: payload['expiration_seconds'] as int?,
+      );
+
+      _sendToParent('WASM_CREDENTIAL', {
+        'success': true,
+        'jwt': result.jwt,
+        'credentialId': result.credentialId,
+      });
+    } catch (e) {
+      _sendToParent('WASM_CREDENTIAL', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
+
+  static Future<void> _handleWasmCreatePresentation(
+    Map<String, dynamic>? payload,
+  ) async {
+    final wasm = MartyWasm.instance;
+    if (!wasm.isAvailable || payload == null) {
+      _sendToParent('WASM_PRESENTATION', {
+        'success': false,
+        'error': 'WASM not available or no payload',
+      });
+      return;
+    }
+
+    try {
+      final vpJwt = await wasm.createPresentation(
+        holderDid: payload['holder_did'] as String,
+        holderJwkJson: jsonEncode(payload['holder_jwk']),
+        credentialJwts: (payload['credential_jwts'] as List).cast<String>(),
+        audience: payload['audience'] as String,
+        nonce: payload['nonce'] as String?,
+      );
+
+      _sendToParent('WASM_PRESENTATION', {'success': true, 'vp_jwt': vpJwt});
+    } catch (e) {
+      _sendToParent('WASM_PRESENTATION', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
 }
 
 void main() async {
@@ -241,6 +684,19 @@ void main() async {
 
       Logger.warning('🧪 RUNNING IN WEB TEST MODE 🧪');
       Logger.warning('API URL: ${TestConfig.apiUrl}');
+
+      // Initialize WASM module for real crypto operations
+      try {
+        await MartyWasm.instance.initialize();
+        if (MartyWasm.instance.isAvailable) {
+          Logger.info('✅ Marty WASM module initialized');
+          Logger.info('   Version: ${MartyWasm.instance.getVersion()}');
+        } else {
+          Logger.warning('⚠️ WASM not available - using mock crypto');
+        }
+      } catch (e) {
+        Logger.warning('⚠️ WASM initialization failed: $e - using mock crypto');
+      }
 
       // Create mock SpruceID services
       final mockServices = MockSpruceIdServices.createDefault(

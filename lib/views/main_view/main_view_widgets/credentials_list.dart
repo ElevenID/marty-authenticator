@@ -21,8 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'card_widgets/verifiable_credential_card.dart';
-import 'card_widgets/mdoc_credential_card.dart';
+import '../../../models/credentials.dart';
 
 import 'card_widgets/vertical_stacked_credentials.dart';
 import 'card_widgets/horizontal_stacked_credentials.dart';

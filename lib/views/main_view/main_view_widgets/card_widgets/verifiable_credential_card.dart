@@ -24,97 +24,10 @@ import 'package:flutter/services.dart';
 import 'base_credential_card.dart';
 import '../../../../utils/customization/credential_card_theme.dart';
 
-/// Model for W3C Verifiable Credential
-class VerifiableCredential {
-  final String id;
-  final List<String> type;
-  final Map<String, dynamic> issuer;
-  final Map<String, dynamic> credentialSubject;
-  final String issuanceDate;
-  final String? expirationDate;
-  final Map<String, dynamic>? proof;
-  final List<String>? context;
-  final Map<String, dynamic>? credentialStatus;
-
-  VerifiableCredential({
-    required this.id,
-    required this.type,
-    required this.issuer,
-    required this.credentialSubject,
-    required this.issuanceDate,
-    this.expirationDate,
-    this.proof,
-    this.context,
-    this.credentialStatus,
-  });
-
-  factory VerifiableCredential.fromJson(Map<String, dynamic> json) {
-    return VerifiableCredential(
-      id: json['id'] ?? '',
-      type: List<String>.from(json['type'] ?? ['VerifiableCredential']),
-      issuer: json['issuer'] is String
-          ? {'id': json['issuer']}
-          : Map<String, dynamic>.from(json['issuer'] ?? {}),
-      credentialSubject: Map<String, dynamic>.from(
-        json['credentialSubject'] ?? {},
-      ),
-      issuanceDate: json['issuanceDate'] ?? '',
-      expirationDate: json['expirationDate'],
-      proof: json['proof'] != null
-          ? Map<String, dynamic>.from(json['proof'])
-          : null,
-      context: json['@context'] != null
-          ? List<String>.from(json['@context'])
-          : null,
-      credentialStatus: json['credentialStatus'] != null
-          ? Map<String, dynamic>.from(json['credentialStatus'])
-          : null,
-    );
-  }
-
-  String get issuerName {
-    if (issuer.containsKey('name')) {
-      return issuer['name'] as String;
-    }
-
-    final issuerId = issuer['id'] as String? ?? '';
-    if (issuerId.startsWith('did:web:')) {
-      return issuerId.replaceFirst('did:web:', '').split('.').first;
-    } else if (issuerId.startsWith('did:')) {
-      return issuerId.split(':')[1];
-    }
-
-    return 'Unknown Issuer';
-  }
-
-  String get subjectName {
-    final subject = credentialSubject;
-    return subject['name'] as String? ??
-        subject['given_name'] as String? ??
-        subject['id'] as String? ??
-        'Unknown Subject';
-  }
-
-  String get credentialType {
-    return type.where((t) => t != 'VerifiableCredential').firstOrNull ??
-        'Credential';
-  }
-
-  bool get isExpired {
-    if (expirationDate == null) return false;
-    return DateTime.parse(expirationDate!).isBefore(DateTime.now());
-  }
-
-  bool get isValid {
-    return proof != null && !isExpired;
-  }
-
-  String get status {
-    if (!isValid) return 'invalid';
-    if (isExpired) return 'expired';
-    return 'valid';
-  }
-}
+// Re-export VerifiableCredential from canonical models location
+export '../../../../models/verifiable_credential.dart'
+    show VerifiableCredential;
+import '../../../../models/verifiable_credential.dart';
 
 /// Widget for displaying W3C Verifiable Credentials as cards
 class VerifiableCredentialCard extends StatelessWidget {
@@ -194,6 +107,8 @@ class VerifiableCredentialCard extends StatelessWidget {
       return Icons.school;
     } else if (credType.contains('license') || credType.contains('driver')) {
       return Icons.drive_eta;
+    } else if (credType.contains('badge')) {
+      return Icons.badge;
     } else if (credType.contains('id') || credType.contains('identity')) {
       return Icons.badge;
     } else if (credType.contains('certificate')) {

@@ -1,8 +1,33 @@
-# Firebase Configuration Setup
+# Push Notification Configuration
 
-This directory contains the Docker configuration for the privacyIDEA authenticator, including Firebase Cloud Messaging (FCM) integration.
+This directory contains the Docker configuration for the Marty Authenticator, including push notification integration.
 
-## Quick Start
+## Push Notification Options
+
+The Marty Authenticator supports multiple push notification methods:
+
+1. **SSE (Server-Sent Events)** - Real-time push for web development and testing
+2. **Polling** - Fallback when SSE/FCM is unavailable
+3. **FCM (Firebase Cloud Messaging)** - Production mobile push notifications
+
+## Web Development with SSE
+
+For web development and testing, SSE provides real-time push notifications without Firebase:
+
+```bash
+# Start the development stack
+cd docker
+docker-compose up -d
+
+# Run the Flutter web app
+flutter run -d chrome
+```
+
+The Flutter app automatically uses SSE on web when `USE_SSE_PUSH=true` (default).
+
+## Mobile Development with FCM
+
+For mobile app development with Firebase push notifications:
 
 1. **Copy the environment template:**
 
@@ -13,7 +38,6 @@ This directory contains the Docker configuration for the privacyIDEA authenticat
 2. **Add your Firebase credentials to `docker/.env`:**
    - Get your Firebase configuration from the [Firebase Console](https://console.firebase.google.com)
    - Update the values in `docker/.env` with your actual credentials
-   - See `setup-firebase-project.sh` for detailed setup instructions
 
 3. **Start the containers:**
 
@@ -22,23 +46,20 @@ This directory contains the Docker configuration for the privacyIDEA authenticat
    docker-compose up -d
    ```
 
-4. **Run the Android app:**
+4. **Run the mobile app:**
    ```bash
    flutter run -d <device-id>
    ```
 
-## Firebase Configuration Files
-
-- **`.env`** - Contains your actual Firebase credentials (git-ignored, DO NOT COMMIT)
-- **`.env.example`** - Template file showing required environment variables
-- **`docker-compose.yml`** - References environment variables from `.env`
-- **`pi.cfg`** - privacyIDEA configuration (no hardcoded credentials)
-
 ## Environment Variables
 
-The following Firebase variables are configured in `docker/.env`:
+### Push Configuration
 
-### Android Configuration
+- `USE_SSE_PUSH` - Enable SSE for web push (default: `true`)
+- `POLL_INTERVAL_MS` - Polling interval in milliseconds (default: `5000`)
+- `MARTY_API_URL` - Marty backend API URL
+
+### Firebase Configuration (Mobile Only)
 
 - `FIREBASE_PROJECT_ID` - Your Firebase project ID
 - `FIREBASE_API_KEY` - Android API key

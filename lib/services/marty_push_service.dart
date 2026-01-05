@@ -9,8 +9,10 @@
  * Features:
  * - Device registration with org-scoped device IDs
  * - Push challenge polling (for web/testing)
+ * - SSE (Server-Sent Events) for real-time web push (replaces Firebase on web)
  * - Challenge response handling with cryptographic signatures
  * - Firebase token management
+ * - Persistent secure storage for keys and registration
  */
 
 import 'dart:async';
@@ -26,26 +28,46 @@ import '../utils/app_info_utils.dart';
 import '../utils/firebase_utils.dart';
 import '../utils/logger.dart';
 import '../utils/rsa_utils.dart';
+import '../models/marty_challenge.dart';
+import '../repo/marty_secure_storage.dart';
+import 'sse_push_service.dart';
 
 /// Configuration for Marty Push Service
 class MartyPushConfig {
   final String apiBaseUrl;
   final Duration pollInterval;
   final Duration requestTimeout;
+  final bool useSSEOnWeb;
 
   const MartyPushConfig({
     required this.apiBaseUrl,
     this.pollInterval = const Duration(seconds: 5),
     this.requestTimeout = const Duration(seconds: 30),
+    this.useSSEOnWeb = true,
   });
 
   /// Create config from environment or defaults
   factory MartyPushConfig.fromEnvironment() {
+    final pollIntervalMs =
+        int.tryParse(
+          const String.fromEnvironment(
+            'POLL_INTERVAL_MS',
+            defaultValue: '5000',
+          ),
+        ) ??
+        5000;
+
+    final useSSE =
+        const String.fromEnvironment('USE_SSE_PUSH', defaultValue: 'true') ==
+        'true';
+
     return MartyPushConfig(
       apiBaseUrl: const String.fromEnvironment(
         'MARTY_API_URL',
         defaultValue: 'http://localhost:8000',
       ),
+      pollInterval: Duration(milliseconds: pollIntervalMs),
+      useSSEOnWeb: useSSE,
     );
   }
 }
@@ -88,6 +110,8 @@ class DeviceRegistrationResult {
   final String? organizationId;
   final String? publicKeyKid; // SHA-256 thumbprint of registered public key
   final DateTime registeredAt;
+  final String?
+  serverPublicKey; // Server's RSA public key for verifying challenge signatures
 
   const DeviceRegistrationResult({
     required this.deviceId,
@@ -95,6 +119,7 @@ class DeviceRegistrationResult {
     this.organizationId,
     this.publicKeyKid,
     required this.registeredAt,
+    this.serverPublicKey,
   });
 
   factory DeviceRegistrationResult.fromJson(Map<String, dynamic> json) {
@@ -104,51 +129,14 @@ class DeviceRegistrationResult {
       organizationId: json['organization_id'] as String?,
       publicKeyKid: json['public_key_kid'] as String?,
       registeredAt: DateTime.parse(json['registered_at'] as String),
+      serverPublicKey: json['server_public_key'] as String?,
     );
   }
 }
 
-/// Push challenge from Marty backend
-class MartyPushChallenge {
-  final String challengeId;
-  final String title;
-  final String question;
-  final String nonce;
-  final String? credentialId;
-  final Map<String, dynamic> data;
-  final DateTime createdAt;
-  final int ttlSeconds;
-
-  const MartyPushChallenge({
-    required this.challengeId,
-    required this.title,
-    required this.question,
-    required this.nonce,
-    this.credentialId,
-    this.data = const {},
-    required this.createdAt,
-    required this.ttlSeconds,
-  });
-
-  factory MartyPushChallenge.fromJson(Map<String, dynamic> json) {
-    return MartyPushChallenge(
-      challengeId: json['challenge_id'] as String,
-      title: json['title'] as String,
-      question: json['question'] as String,
-      nonce: json['nonce'] as String,
-      credentialId: json['credential_id'] as String?,
-      data: json['data'] as Map<String, dynamic>? ?? {},
-      createdAt: DateTime.parse(json['created_at'] as String),
-      ttlSeconds: json['ttl_seconds'] as int? ?? 120,
-    );
-  }
-
-  /// Check if challenge has expired
-  bool get isExpired {
-    final expiresAt = createdAt.add(Duration(seconds: ttlSeconds));
-    return DateTime.now().isAfter(expiresAt);
-  }
-}
+// NOTE: MartyPushChallenge has been replaced by MartyChallenge in lib/models/marty_challenge.dart
+// The new model supports server-signed challenges with options for multi-choice responses.
+// Import 'package:privacyidea_authenticator/models/marty_challenge.dart' to use it.
 
 /// Marty Push Service
 ///
@@ -160,25 +148,35 @@ class MartyPushService {
   final FirebaseUtils _firebaseUtils;
   final RsaUtils _rsaUtils;
   final http.Client _httpClient;
+  final MartySecureStorage _secureStorage;
 
   String? _currentDeviceId;
   String? _currentOrganizationId;
   String? _currentUserId;
   String? _currentPublicKeyKid; // Key ID returned from registration
   RSAPrivateKey? _privateKey; // Private key for challenge signing
+  String?
+  _serverPublicKey; // Server's public key for verifying challenge signatures
   Timer? _pollTimer;
   bool _isPolling = false;
+  bool _isInitialized = false;
 
-  final List<void Function(MartyPushChallenge)> _challengeListeners = [];
+  // SSE service for web real-time push
+  SSEPushService? _sseService;
+  StreamSubscription<SSEPushChallenge>? _sseSubscription;
+
+  final List<void Function(MartyChallenge)> _challengeListeners = [];
 
   MartyPushService._({
     required this.config,
     FirebaseUtils? firebaseUtils,
     RsaUtils? rsaUtils,
     http.Client? httpClient,
+    MartySecureStorage? secureStorage,
   }) : _firebaseUtils = firebaseUtils ?? FirebaseUtils(),
        _rsaUtils = rsaUtils ?? const RsaUtils(),
-       _httpClient = httpClient ?? http.Client();
+       _httpClient = httpClient ?? http.Client(),
+       _secureStorage = secureStorage ?? MartySecureStorage.instance;
 
   /// Get singleton instance
   static MartyPushService get instance {
@@ -192,14 +190,55 @@ class MartyPushService {
     FirebaseUtils? firebaseUtils,
     RsaUtils? rsaUtils,
     http.Client? httpClient,
+    MartySecureStorage? secureStorage,
   }) {
     return MartyPushService._(
       config: config,
       firebaseUtils: firebaseUtils,
       rsaUtils: rsaUtils,
       httpClient: httpClient,
+      secureStorage: secureStorage,
     );
   }
+
+  /// Initialize the service, loading stored credentials.
+  ///
+  /// Should be called during app startup before using the service.
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    Logger.info('MartyPushService: Initializing');
+
+    // Load stored credentials
+    _serverPublicKey = await _secureStorage.loadServerPublicKey();
+    _currentDeviceId = await _secureStorage.loadDeviceId();
+    _currentOrganizationId = await _secureStorage.loadOrganizationId();
+    _currentPublicKeyKid = await _secureStorage.loadPublicKeyKid();
+
+    // Load private key if stored
+    final privateKeyBase64 = await _secureStorage.loadPrivateKey();
+    if (privateKeyBase64 != null) {
+      try {
+        _privateKey = _rsaUtils.deserializeRSAPrivateKeyPKCS1(privateKeyBase64);
+        Logger.info('MartyPushService: Private key loaded from storage');
+      } catch (e) {
+        Logger.error('MartyPushService: Failed to load private key', error: e);
+      }
+    }
+
+    _isInitialized = true;
+    Logger.info('MartyPushService: Initialized, deviceId: $_currentDeviceId');
+  }
+
+  /// Whether the service has been initialized.
+  bool get isInitialized => _isInitialized;
+
+  /// Whether a device is currently registered.
+  bool get isRegistered =>
+      _currentDeviceId != null && _currentDeviceId!.isNotEmpty;
+
+  /// Get the server public key (for signature verification).
+  String? get serverPublicKey => _serverPublicKey;
 
   /// Current device ID (org-scoped)
   String? get currentDeviceId => _currentDeviceId;
@@ -314,6 +353,30 @@ class MartyPushService {
         jsonDecode(response.body) as Map<String, dynamic>,
       );
       _currentPublicKeyKid = result.publicKeyKid;
+
+      // Store server public key for signature verification
+      if (result.serverPublicKey != null) {
+        _serverPublicKey = result.serverPublicKey;
+        await _secureStorage.saveServerPublicKey(result.serverPublicKey!);
+        Logger.info('MartyPushService: Server public key received and stored');
+      }
+
+      // Persist device registration
+      await _secureStorage.saveDeviceRegistration(
+        deviceId: _currentDeviceId!,
+        registrationId: result.registrationId,
+        organizationId: organizationId,
+        publicKeyKid: result.publicKeyKid,
+      );
+
+      // Persist private key if generated
+      if (_privateKey != null) {
+        final privateKeyBase64 = _rsaUtils.serializeRSAPrivateKeyPKCS1(
+          _privateKey!,
+        );
+        await _secureStorage.savePrivateKey(privateKeyBase64);
+      }
+
       Logger.info(
         'MartyPushService: Device registered: ${result.registrationId}, key: ${result.publicKeyKid}',
       );
@@ -345,9 +408,17 @@ class MartyPushService {
 
     if (response.statusCode == 204) {
       stopPolling();
+
+      // Clear secure storage
+      await _secureStorage.clearAll();
+
       _currentDeviceId = null;
       _currentUserId = null;
       _currentOrganizationId = null;
+      _privateKey = null;
+      _serverPublicKey = null;
+      _currentPublicKeyKid = null;
+
       return true;
     }
 
@@ -391,17 +462,19 @@ class MartyPushService {
   // ===========================================================================
 
   /// Add a listener for incoming challenges
-  void addChallengeListener(void Function(MartyPushChallenge) listener) {
+  void addChallengeListener(void Function(MartyChallenge) listener) {
     _challengeListeners.add(listener);
   }
 
   /// Remove a challenge listener
-  void removeChallengeListener(void Function(MartyPushChallenge) listener) {
+  void removeChallengeListener(void Function(MartyChallenge) listener) {
     _challengeListeners.remove(listener);
   }
 
-  /// Notify all listeners of a new challenge
-  void _notifyListeners(MartyPushChallenge challenge) {
+  /// Notify all listeners of a new challenge.
+  ///
+  /// Called internally and by PushProvider when FCM messages are received.
+  void notifyChallenge(MartyChallenge challenge) {
     for (final listener in _challengeListeners) {
       try {
         listener(challenge);
@@ -417,6 +490,12 @@ class MartyPushService {
     if (_isPolling) return;
     if (_currentDeviceId == null) {
       Logger.warning('MartyPushService: Cannot start polling - not registered');
+      return;
+    }
+
+    // On web, prefer SSE for real-time notifications
+    if (kIsWeb && config.useSSEOnWeb) {
+      _startSSE();
       return;
     }
 
@@ -437,10 +516,63 @@ class MartyPushService {
     _pollTimer?.cancel();
     _pollTimer = null;
     _isPolling = false;
+
+    // Also stop SSE if running
+    _stopSSE();
   }
 
+  /// Start SSE connection for real-time push notifications (web only)
+  void _startSSE() {
+    if (_currentDeviceId == null) {
+      Logger.warning('MartyPushService: Cannot start SSE - not registered');
+      return;
+    }
+
+    Logger.info('MartyPushService: Starting SSE connection');
+
+    _sseService ??= SSEPushService(
+      config: SSEPushConfig(
+        apiBaseUrl: config.apiBaseUrl,
+        reconnectMinDelay: const Duration(seconds: 1),
+        reconnectMaxDelay: const Duration(seconds: 30),
+      ),
+    );
+
+    // Subscribe to SSE challenges
+    _sseSubscription?.cancel();
+    _sseSubscription = _sseService!.challenges.listen((sseChallenge) {
+      // Convert SSE challenge to MartyChallenge
+      final challenge = MartyChallenge.fromJson(sseChallenge.data);
+
+      // Verify signature if server public key is available
+      if (_serverPublicKey != null && challenge.signature.isNotEmpty) {
+        // TODO: Verify signature using _serverPublicKey
+        Logger.info('MartyPushService: Challenge received with signature');
+      }
+
+      notifyChallenge(challenge);
+    });
+
+    _sseService!.connect(_currentDeviceId!);
+    _isPolling = true;
+  }
+
+  /// Stop SSE connection
+  void _stopSSE() {
+    _sseSubscription?.cancel();
+    _sseSubscription = null;
+    _sseService?.disconnect();
+  }
+
+  /// Whether SSE is connected (web only)
+  bool get isSSEConnected => _sseService?.isConnected ?? false;
+
+  /// SSE connection state stream (web only)
+  Stream<SSEConnectionState>? get sseConnectionState =>
+      _sseService?.connectionState;
+
   /// Poll for pending challenges
-  Future<List<MartyPushChallenge>> _pollForChallenges() async {
+  Future<List<MartyChallenge>> _pollForChallenges() async {
     if (_currentDeviceId == null) return [];
 
     try {
@@ -458,14 +590,13 @@ class MartyPushService {
 
         final challenges = challengesJson
             .map(
-              (json) =>
-                  MartyPushChallenge.fromJson(json as Map<String, dynamic>),
+              (json) => MartyChallenge.fromJson(json as Map<String, dynamic>),
             )
             .where((c) => !c.isExpired)
             .toList();
 
         for (final challenge in challenges) {
-          _notifyListeners(challenge);
+          notifyChallenge(challenge);
         }
 
         return challenges;
@@ -481,7 +612,7 @@ class MartyPushService {
   }
 
   /// Get pending challenges (one-time fetch)
-  Future<List<MartyPushChallenge>> getPendingChallenges() async {
+  Future<List<MartyChallenge>> getPendingChallenges() async {
     return _pollForChallenges();
   }
 
@@ -494,11 +625,11 @@ class MartyPushService {
   /// Respond to a push challenge
   ///
   /// [challenge] - The challenge to respond to
-  /// [accept] - Whether to accept or reject
+  /// [optionId] - The selected option ID (e.g., 'accept' or 'reject')
   /// [privateKey] - RSA private key for signing (uses stored key if not provided)
   Future<bool> respondToChallenge(
-    MartyPushChallenge challenge, {
-    required bool accept,
+    MartyChallenge challenge, {
+    required String optionId,
     RSAPrivateKey? privateKey,
   }) async {
     if (_currentDeviceId == null) {
@@ -506,14 +637,15 @@ class MartyPushService {
     }
 
     Logger.info(
-      'MartyPushService: Responding to challenge ${challenge.challengeId}: ${accept ? 'accept' : 'reject'}',
+      'MartyPushService: Responding to challenge ${challenge.challengeId}: $optionId',
     );
 
     // Use provided key or fall back to stored key
     final keyToUse = privateKey ?? _privateKey;
 
+    // Sign if signature is required and key is available
     String? signature;
-    if (keyToUse != null && accept) {
+    if (keyToUse != null && challenge.requireSignature) {
       // Sign the nonce with the private key using PKCS#1 SHA-256
       final signatureBytes = _rsaUtils.createRSASignature(
         keyToUse,
@@ -521,7 +653,7 @@ class MartyPushService {
       );
       signature = base64Encode(signatureBytes);
       Logger.info('MartyPushService: Challenge response signed');
-    } else if (accept && keyToUse == null) {
+    } else if (challenge.requireSignature && keyToUse == null) {
       Logger.warning('MartyPushService: No private key available for signing');
     }
 
@@ -532,7 +664,7 @@ class MartyPushService {
           ),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'response': accept ? 'accept' : 'reject',
+            'option_id': optionId,
             if (signature != null) 'signature': signature,
           }),
         )
@@ -561,7 +693,7 @@ class MartyPushService {
 /// Test-only service for injecting challenges and device IDs
 class TestMartyPushService extends MartyPushService {
   String? _injectedDeviceId;
-  final List<MartyPushChallenge> _injectedChallenges = [];
+  final List<MartyChallenge> _injectedChallenges = [];
 
   TestMartyPushService({required MartyPushConfig config})
     : super._(config: config);
@@ -581,9 +713,9 @@ class TestMartyPushService extends MartyPushService {
   }
 
   /// Inject a challenge for testing
-  void injectChallenge(MartyPushChallenge challenge) {
+  void injectChallenge(MartyChallenge challenge) {
     _injectedChallenges.add(challenge);
-    _notifyListeners(challenge);
+    notifyChallenge(challenge);
   }
 
   /// Clear injected challenges

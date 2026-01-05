@@ -266,6 +266,8 @@ class CredentialCardTheme extends ThemeExtension<CredentialCardTheme> {
       return certificateGradient;
     } else if (lowerType.contains('membership')) {
       return membershipGradient;
+    } else if (lowerType.contains('badge')) {
+      return membershipGradient;
     } else if (lowerType.contains('employment') || lowerType.contains('work')) {
       return employmentGradient;
     }

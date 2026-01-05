@@ -89,6 +89,7 @@ dependencies:
 
   # SpruceID integration dependencies - Real SDK libraries
   ffi: ^2.1.2 # For native library integration
+  flutter_rust_bridge: ^2.0.0 # For Marty Rust bridge FFI bindings
   cbor: ^6.3.7 # For mDoc CBOR encoding/decoding
   dart_jsonwebtoken: ^3.1.1 # For JWT handling in VCs
   # QR and NFC capabilities for authentication
@@ -101,6 +102,7 @@ dependencies:
 dev_dependencies:
   build_runner: ^2.4.13
   dependency_validator: ^4.1.0
+  ffigen: ^15.0.0
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_test:

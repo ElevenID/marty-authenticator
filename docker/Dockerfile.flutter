@@ -1,38 +1,26 @@
+# syntax=docker/dockerfile:1
 # Multi-stage build for Flutter web app
-FROM ubuntu:22.04 AS flutter-builder
+# Uses pre-built Flutter image instead of cloning (~1GB saved per build)
+FROM ghcr.io/cirruslabs/flutter:stable AS flutter-builder
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    unzip \
-    xz-utils \
-    zip \
-    libglu1-mesa \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Flutter
-RUN git clone https://github.com/flutter/flutter.git -b beta /opt/flutter
-ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}"
-
-# Set up Flutter
-RUN flutter doctor --android-licenses || true
-RUN flutter precache --web
-
-# Set working directory
 WORKDIR /app
 
-# Copy pubspec files
+# Copy pubspec files first for layer caching
 COPY pubspec.yaml pubspec.lock ./
+
+# Copy local path dependencies before pub get
+COPY local_wasm_overrides/ ./local_wasm_overrides/
+COPY local_plugins/ ./local_plugins/
+
+# Get dependencies
 RUN flutter pub get
 
 # Copy source code
 COPY . .
 
-# Build for web (using the new production main file)
-RUN flutter build web --target=lib/main_document.dart \
-    --dart-define=FLUTTER_WEB_USE_SKIA=true \
-    --release
+# Build for web (using the production main file)
+# Note: FLUTTER_WEB_USE_SKIA removed as CanvasKit is default in Flutter 3.x
+RUN flutter build web --target=lib/main_document.dart --release
 
 # Production stage with nginx
 FROM nginx:alpine

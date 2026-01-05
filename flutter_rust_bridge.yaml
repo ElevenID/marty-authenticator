@@ -1,0 +1,26 @@
+# Flutter Rust Bridge configuration for marty-authenticator
+# See: https://cjycode.com/flutter_rust_bridge/
+
+rust_input: crate::api
+dart_output: lib/rust/marty_bridge.dart
+
+# Rust crate root
+rust_root: rust/
+
+# Use full feature set
+full_dep: true
+
+# Enable async runtime
+default_dart_async: true
+
+# Output organization
+dart_enums_style: true
+
+# Add necessary imports to generated Rust code
+rust_preamble: |
+  use serde_json::Value;
+
+# Platform-specific output directories
+c_output: ios/Runner/bridge_generated.h
+duplicated_c_output:
+  - macos/Runner/bridge_generated.h
