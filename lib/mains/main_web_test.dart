@@ -49,6 +49,7 @@ import '../utils/riverpod/providers/credentials_provider.dart';
 
 // Import Marty push service
 import '../services/marty_push_service.dart';
+import '../models/marty_challenge.dart';
 
 // Import WASM interop for real crypto operations
 import '../services/wasm/marty_wasm.dart';
@@ -258,12 +259,12 @@ class TestMessageHandler {
       final credentials = state.verifiableCredentials.map((credential) {
         return {
           'id': credential.id,
-          'type': credential.type,
+          'type': credential.credentialType,
           'issuer': credential.issuer,
           'credentialSubject': credential.credentialSubject,
           'issuanceDate': credential.issuanceDate,
           'expirationDate': credential.expirationDate,
-          'subjectName': credential.subjectName,
+          'subjectName': credential.displayName,
           'credentialType': credential.credentialType,
         };
       }).toList();
@@ -512,17 +513,25 @@ class TestMessageHandler {
     if (payload == null) return;
 
     // Create challenge from payload
-    final challenge = MartyPushChallenge(
+    final challenge = MartyChallenge(
+      format: martyChallengeFormat,
       challengeId:
           payload['challenge_id'] as String? ??
           'test-${DateTime.now().millisecondsSinceEpoch}',
+      deviceId: TestConfig.deviceId ?? 'test-device',
       title: payload['title'] as String? ?? 'Test Challenge',
       question: payload['question'] as String? ?? 'Do you approve this action?',
       nonce: payload['nonce'] as String? ?? 'test-nonce',
+      ttlSeconds: payload['ttl_seconds'] as int? ?? 120,
+      createdAt: DateTime.now(),
+      requireSignature: false,
+      options: const [
+        ChallengeOption(id: 'accept', label: 'Approve'),
+        ChallengeOption(id: 'reject', label: 'Deny'),
+      ],
+      signature: '',
       credentialId: payload['credential_id'] as String?,
       data: payload['data'] as Map<String, dynamic>? ?? {},
-      createdAt: DateTime.now(),
-      ttlSeconds: payload['ttl_seconds'] as int? ?? 120,
     );
 
     // Inject into push service
