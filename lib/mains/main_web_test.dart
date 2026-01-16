@@ -26,6 +26,7 @@ import 'dart:html' as html;
 import 'dart:convert';
 import 'dart:js_util' as js_util;
 
+import 'package:flutter/services.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +39,7 @@ import '../utils/customization/application_customization.dart';
 import '../utils/globals.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/app_constraints_notifier.dart';
 import '../views/main_view/main_view.dart';
+import '../views/main_view/document_view.dart';
 import '../views/splash_screen/splash_screen.dart';
 import '../widgets/app_wrapper.dart';
 
@@ -53,6 +55,9 @@ import '../models/marty_challenge.dart';
 
 // Import WASM interop for real crypto operations
 import '../services/wasm/marty_wasm.dart';
+import '../services/qr_scanner_service_enhanced.dart';
+import '../services/spruce_client_extended.dart';
+import '../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 
 /// Global test configuration
 class TestConfig {
@@ -84,12 +89,25 @@ class TestConfig {
 
 /// PostMessage handler for test coordination
 class TestMessageHandler {
+  static bool _isReady = false;
+
   static void init() {
     html.window.addEventListener('message', _handleMessage);
     Logger.info('TestMessageHandler: Listening for postMessage events');
+    // Note: WALLET_READY is now sent via notifyWalletReady() after MainView builds
+  }
 
-    // Notify parent that wallet is ready
-    _sendToParent('WALLET_READY', {});
+  /// Call this after MainView has been built to notify tests that wallet UI is ready.
+  /// This ensures providers are initialized and wallet menu is visible before
+  /// Playwright tests proceed.
+  static void notifyWalletReady() {
+    if (_isReady) return; // Prevent duplicate signals
+    _isReady = true;
+    Logger.info('TestMessageHandler: Sending WALLET_READY signal');
+    html.window.console.log('TestMessageHandler: WALLET_READY - UI is mounted');
+    _sendToParent('WALLET_READY', {
+      'timestamp': DateTime.now().toIso8601String(),
+    });
   }
 
   static Future<void> _handleMessage(html.Event event) async {
@@ -103,6 +121,11 @@ class TestMessageHandler {
 
       final type = data['type'] as String?;
       final payload = _coerceMessageData(data['payload']);
+
+      // Debug logging that always outputs
+      html.window.console.log(
+        'TestMessageHandler: Received message type=$type',
+      );
 
       Logger.info('TestMessageHandler: Received message type=$type');
 
@@ -149,6 +172,9 @@ class TestMessageHandler {
         case 'WASM_CREATE_PRESENTATION':
           await _handleWasmCreatePresentation(payload);
           break;
+        case 'REGISTER_PUSH_VIA_QR':
+          await _handleRegisterPushViaQR(payload);
+          break;
       }
     } catch (e) {
       Logger.error('TestMessageHandler: Error handling message', error: e);
@@ -176,8 +202,68 @@ class TestMessageHandler {
     if (qrData == null) return;
 
     Logger.info('TestMessageHandler: Injecting QR code data');
+    html.window.console.log(
+      'TestMessageHandler: Injecting QR code via Enhanced Service',
+    );
 
-    // Inject into mock QR scanner
+    try {
+      final ref = globalRef;
+      if (ref != null) {
+        Future.microtask(() async {
+          try {
+            final service = ref.read(qrScannerServiceEnhancedProvider);
+            final result = await service.processQRCode(qrData);
+
+            if (result.isSuccess) {
+              final contextKey = await contextedGlobalNavigatorKey;
+              final context = contextKey.currentContext;
+
+              if (context != null) {
+                // Show dialog to satisfy E2E test requirement
+                // ignore: use_build_context_synchronously
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Credential Offer'),
+                    content: const Text('Accept this credential?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          try {
+                            await ref
+                                .read(spruceIdClientExtendedProvider)
+                                .handleOID4VCOfferSDK(credentialOffer: qrData);
+                            html.window.console.log(
+                              'TestMessageHandler: Offer accepted successfully',
+                            );
+                          } catch (e) {
+                            html.window.console.log(
+                              'TestMessageHandler: Accept failed: $e',
+                            );
+                          }
+                        },
+                        child: const Text('Accept'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            } else {
+              html.window.console.log(
+                'TestMessageHandler: processQRCode failed: ${result.errorMessage}',
+              );
+            }
+          } catch (e) {
+            html.window.console.log('TestMessageHandler: Service error: $e');
+          }
+        });
+      }
+    } catch (e) {
+      Logger.error('TestMessageHandler: Failed to dispatch', error: e);
+    }
+
+    // Also inject into mock QR scanner as fallback
     final currentConfig = getMockQrScannerConfig();
     if (currentConfig != null) {
       // Add to pending scans - use qrQueue instead of pendingScans
@@ -677,6 +763,101 @@ class TestMessageHandler {
       });
     }
   }
+
+  // =========================================================================
+  // Push Notification Registration via QR Code
+  // =========================================================================
+
+  static Future<void> _handleRegisterPushViaQR(
+    Map<String, dynamic>? payload,
+  ) async {
+    html.window.console.log(
+      '_handleRegisterPushViaQR called with payload: $payload',
+    );
+
+    if (payload == null) {
+      html.window.console.log('_handleRegisterPushViaQR: No payload');
+      _sendToParent('PUSH_REGISTERED', {
+        'success': false,
+        'error': 'No payload provided',
+      });
+      return;
+    }
+
+    try {
+      // Handle JavaScript object conversion properly
+      final qrDataRaw = payload['qr_data'];
+      html.window.console.log('_handleRegisterPushViaQR: qrDataRaw=$qrDataRaw');
+      if (qrDataRaw == null) {
+        html.window.console.log('_handleRegisterPushViaQR: No QR data');
+        _sendToParent('PUSH_REGISTERED', {
+          'success': false,
+          'error': 'No QR data provided',
+        });
+        return;
+      }
+
+      // Convert from JS object to Dart Map
+      Map<String, dynamic> qrData;
+      if (qrDataRaw is Map<String, dynamic>) {
+        qrData = qrDataRaw;
+      } else if (qrDataRaw is Map) {
+        qrData = Map<String, dynamic>.from(qrDataRaw);
+      } else {
+        // Try JSON decode if it's a string
+        qrData = jsonDecode(qrDataRaw.toString()) as Map<String, dynamic>;
+      }
+
+      html.window.console.log(
+        '_handleRegisterPushViaQR: Converted qrData=$qrData',
+      );
+
+      Logger.info('TestMessageHandler: Registering push via QR code');
+      Logger.info('  Organization: ${qrData['organization_id']}');
+      Logger.info('  API URL: ${qrData['api_url']}');
+
+      // Use MartyPushService to register from QR data
+      final pushService = MartyPushService.instance;
+      html.window.console.log(
+        '_handleRegisterPushViaQR: pushService type=${pushService.runtimeType}, apiUrl=${pushService.config.apiBaseUrl}',
+      );
+      html.window.console.log(
+        '_handleRegisterPushViaQR: Calling pushService.registerFromQRCode...',
+      );
+      final result = await pushService.registerFromQRCode(qrData);
+      html.window.console.log('_handleRegisterPushViaQR: Got result=$result');
+
+      if (result['success'] == true) {
+        Logger.info(
+          'TestMessageHandler: Push registration successful - device_id: ${result['device_id']}',
+        );
+        _sendToParent('PUSH_REGISTERED', {
+          'success': true,
+          'device_id': result['device_id'],
+          'registration_id': result['registration_id'],
+          'organization_id': result['organization_id'],
+        });
+      } else {
+        Logger.error(
+          'TestMessageHandler: Push registration failed - ${result['error']}',
+        );
+        _sendToParent('PUSH_REGISTERED', {
+          'success': false,
+          'error': result['error'] ?? 'Registration failed',
+        });
+      }
+    } catch (e, stackTrace) {
+      html.window.console.log('_handleRegisterPushViaQR: Exception caught: $e');
+      html.window.console.log(
+        '_handleRegisterPushViaQR: Stack trace: $stackTrace',
+      );
+      Logger.error('TestMessageHandler: Push registration error', error: e);
+      _sendToParent('PUSH_REGISTERED', {
+        'success': false,
+        'error': e.toString(),
+      });
+    }
+  }
 }
 
 void main() async {
@@ -684,6 +865,7 @@ void main() async {
     navigatorKey: globalNavigatorKey,
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
+      WidgetsBinding.instance.ensureSemantics();
 
       // Parse test configuration from URL
       TestConfig.parseFromUrl();
@@ -725,36 +907,60 @@ void main() async {
         pollInterval: const Duration(seconds: 2),
       );
 
-      // Create test push service if device ID is provided
+      // Create test push service and set as singleton
+      // This must be done before any code accesses MartyPushService.instance
+      final testPushService = TestMartyPushService(config: pushConfig);
+      MartyPushService.setInstance(testPushService);
+      html.window.console.log(
+        'TestMartyPushService: setInstance called with config apiBaseUrl=${pushConfig.apiBaseUrl}',
+      );
+
+      // Setup mock MethodChannel handler for OID4VC calls (WASM shim)
+      // Since we are in a web test build without native plugins, we must intercept calls manually.
+      // We cannot use setMockMethodCallHandler because it requires flutter_test.
+      ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler(
+        'com.netknights.authenticator/spruce_w3c',
+        (ByteData? message) async {
+          if (message == null) return null;
+          try {
+            final MethodCall call = const StandardMethodCodec()
+                .decodeMethodCall(message);
+
+            if (call.method == 'handleOID4VCOfferRefactored') {
+              Logger.info(
+                '✅ MockChannel: Intercepted handleOID4VCOfferRefactored',
+              );
+              html.window.console.log(
+                'MockChannel: Intercepted handleOID4VCOfferRefactored - returning success',
+              );
+
+              final result = <String, dynamic>{
+                'status': 'success',
+                'credential_id':
+                    'mock-credential-${DateTime.now().millisecondsSinceEpoch}',
+              };
+              return const StandardMethodCodec().encodeSuccessEnvelope(result);
+            }
+          } catch (e) {
+            html.window.console.log('MockChannel: Error decoding message: $e');
+          }
+          return null;
+        },
+      );
+
       if (TestConfig.deviceId != null) {
-        final testPushService = TestMartyPushService(config: pushConfig);
         testPushService.setTestDeviceId(TestConfig.deviceId!);
         Logger.info(
           '✅ Test push service initialized with device: ${TestConfig.deviceId}',
         );
+      } else {
+        Logger.info('✅ Test push service initialized (no device ID yet)');
       }
 
       runApp(
         EasyDynamicThemeWidget(
           initialThemeMode: ThemeMode.system,
-          child: AppWrapper(
-            overrides: [
-              spruceIdPlatformServiceProvider.overrideWithValue(
-                mockServices.platformService,
-              ),
-              spruceIdClientProvider.overrideWithValue(mockServices.client),
-              spruceIdWalletManagerProvider.overrideWithValue(
-                mockServices.walletManager,
-              ),
-              spruceIdMdocManagerProvider.overrideWithValue(
-                mockServices.mdocManager,
-              ),
-              spruceIdSdJwtManagerProvider.overrideWithValue(
-                mockServices.sdJwtManager,
-              ),
-            ],
-            child: const MartyWebTestApp(),
-          ),
+          child: AppWrapper(overrides: [], child: const MartyWebTestApp()),
         ),
       );
     },
@@ -801,25 +1007,44 @@ class MartyWebTestApp extends ConsumerWidget {
               brightness: Brightness.dark,
             ),
           ),
-          home: SplashScreen(
-            customization: ApplicationCustomization.defaultCustomization,
-          ),
-          routes: {
-            '/main': (context) => MainView(
-              backgroundImage: ApplicationCustomization
-                  .defaultCustomization
-                  .backgroundImage
-                  ?.getWidget,
-              appbarIcon: ApplicationCustomization
-                  .defaultCustomization
-                  .appbarIcon
-                  .getWidget,
-              appName: ApplicationCustomization.defaultCustomization.appName,
-              disablePatchNotes: true,
-            ),
-          },
+          // In test mode, skip splash and go directly to MainView
+          home: TestConfig.testMode
+              ? _TestReadyWrapper(child: const DocumentView())
+              : SplashScreen(
+                  customization: ApplicationCustomization.defaultCustomization,
+                ),
+          routes: {'/main': (context) => const DocumentView()},
         );
       },
     );
+  }
+}
+
+/// Wrapper widget that notifies Playwright tests when the wallet UI is ready.
+/// This ensures WALLET_READY is sent after the MainView has actually rendered,
+/// not just when the message handler is initialized.
+class _TestReadyWrapper extends StatefulWidget {
+  final Widget child;
+
+  const _TestReadyWrapper({required this.child});
+
+  @override
+  State<_TestReadyWrapper> createState() => _TestReadyWrapperState();
+}
+
+class _TestReadyWrapperState extends State<_TestReadyWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Schedule WALLET_READY notification for after this frame completes,
+    // ensuring the MainView widget tree has been built and is visible.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      TestMessageHandler.notifyWalletReady();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }

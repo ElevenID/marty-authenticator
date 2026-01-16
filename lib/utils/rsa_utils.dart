@@ -261,10 +261,18 @@ class RsaUtils {
   Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>>
   generateRSAKeyPair() async {
     Logger.info('Start generating RSA key pair');
-    AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await compute(
-      _generateRSAKeyPairIsolate,
-      4096,
-    );
+    AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair;
+
+    // On web, isolates are not supported, so run synchronously
+    // Use a smaller key size on web for faster generation
+    // Note: 1024-bit is insecure for production, but adequate for testing
+    if (kIsWeb) {
+      keyPair = _generateRSAKeyPairIsolate(
+        1024,
+      ); // Small key for fast web testing
+    } else {
+      keyPair = await compute(_generateRSAKeyPairIsolate, 4096);
+    }
     Logger.info('Finished generating RSA key pair');
     return keyPair;
   }

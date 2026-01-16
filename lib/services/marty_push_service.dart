@@ -17,7 +17,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -128,7 +127,10 @@ class DeviceRegistrationResult {
       registrationId: json['registration_id'] as String,
       organizationId: json['organization_id'] as String?,
       publicKeyKid: json['public_key_kid'] as String?,
-      registeredAt: DateTime.parse(json['registered_at'] as String),
+      // Use current time if server doesn't return registered_at
+      registeredAt: json['registered_at'] != null
+          ? DateTime.parse(json['registered_at'] as String)
+          : DateTime.now(),
       serverPublicKey: json['server_public_key'] as String?,
     );
   }
@@ -182,6 +184,17 @@ class MartyPushService {
   static MartyPushService get instance {
     _instance ??= MartyPushService._(config: MartyPushConfig.fromEnvironment());
     return _instance!;
+  }
+
+  /// Set the singleton instance (for testing/web test builds)
+  /// This allows replacing the singleton with a test instance.
+  static void setInstance(MartyPushService instance) {
+    _instance = instance;
+  }
+
+  /// Reset the singleton instance (for testing)
+  static void resetInstance() {
+    _instance = null;
   }
 
   /// Create with custom config (for testing)
@@ -256,10 +269,10 @@ class MartyPushService {
 
     final deviceInfo = DeviceInfoPlugin();
 
-    if (Platform.isAndroid) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
       final androidInfo = await deviceInfo.androidInfo;
       return androidInfo.id; // Android device ID
-    } else if (Platform.isIOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       final iosInfo = await deviceInfo.iosInfo;
       return iosInfo.identifierForVendor ?? 'ios-unknown';
     }
@@ -294,8 +307,8 @@ class MartyPushService {
   /// Get current platform string
   String _getPlatform() {
     if (kIsWeb) return 'web';
-    if (Platform.isAndroid) return 'android';
-    if (Platform.isIOS) return 'ios';
+    if (defaultTargetPlatform == TargetPlatform.android) return 'android';
+    if (defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
     return 'unknown';
   }
 
@@ -310,18 +323,28 @@ class MartyPushService {
     bool generateKeyPair = true,
   }) async {
     Logger.info('MartyPushService: Registering device for user $userId');
+    print('registerDevice: Starting for user $userId');
 
     _currentUserId = userId;
     _currentOrganizationId = organizationId;
-    _currentDeviceId = await generateDeviceId(organizationId: organizationId);
 
+    print('registerDevice: Generating device ID...');
+    _currentDeviceId = await generateDeviceId(organizationId: organizationId);
+    print('registerDevice: Device ID generated: $_currentDeviceId');
+
+    print('registerDevice: Getting Firebase token...');
     final fcmToken = await _getFirebaseToken();
+    print('registerDevice: Firebase token obtained: $fcmToken');
 
     // Generate RSA keypair for challenge signature verification
     String? publicKeyBase64;
     if (generateKeyPair) {
       Logger.info('MartyPushService: Generating RSA keypair for device');
+      print(
+        'registerDevice: Generating RSA keypair (this may take a moment on web)...',
+      );
       final keyPair = await _rsaUtils.generateRSAKeyPair();
+      print('registerDevice: RSA keypair generated');
       _privateKey = keyPair.privateKey;
       // Serialize public key as base64 PKCS#1 DER
       publicKeyBase64 = _rsaUtils.serializeRSAPublicKeyPKCS1(keyPair.publicKey);
@@ -340,6 +363,10 @@ class MartyPushService {
       publicKey: publicKeyBase64,
     );
 
+    print(
+      'registerDevice: Making HTTP request to ${config.apiBaseUrl}/api/devices/register',
+    );
+
     final response = await _httpClient
         .post(
           Uri.parse('${config.apiBaseUrl}/api/devices/register'),
@@ -347,6 +374,9 @@ class MartyPushService {
           body: jsonEncode(deviceInfo.toJson()),
         )
         .timeout(config.requestTimeout);
+
+    print('registerDevice: HTTP response status: ${response.statusCode}');
+    print('registerDevice: HTTP response body: ${response.body}');
 
     if (response.statusCode == 201) {
       final result = DeviceRegistrationResult.fromJson(
@@ -423,6 +453,97 @@ class MartyPushService {
     }
 
     return false;
+  }
+
+  /// Register device from QR code scan
+  ///
+  /// Called when user scans a push registration QR code from the web UI.
+  /// QR format: marty://push-register?org={org_id}&api={api_url}&token={temp_token}&user={user_id}
+  ///
+  /// [qrData] - The parsed QR code content map containing org, api, token, user
+  /// Returns the registration result with device ID and confirmation
+  Future<Map<String, dynamic>> registerFromQRCode(
+    Map<String, dynamic> qrData,
+  ) async {
+    // Use print instead of html.window.console.log for better visibility
+    print('registerFromQRCode: Starting with qrData=$qrData');
+
+    final organizationId = qrData['organization_id'] as String?;
+    final apiUrl = qrData['api_url'] as String?;
+    final registrationToken = qrData['registration_token'] as String?;
+    final userId = qrData['user_id'] as String?;
+
+    Logger.info(
+      'MartyPushService: Registering from QR code for org=$organizationId',
+    );
+    print('registerFromQRCode: org=$organizationId, api=$apiUrl, user=$userId');
+
+    if (registrationToken == null || userId == null) {
+      throw Exception('Invalid QR code: missing token or user_id');
+    }
+
+    // Use the API URL from the QR code if provided
+    final effectiveApiUrl = apiUrl ?? config.apiBaseUrl;
+
+    print('registerFromQRCode: Calling registerDevice...');
+
+    // First register the device normally
+    final result = await registerDevice(
+      userId: userId,
+      organizationId: organizationId,
+    );
+
+    print(
+      'registerFromQRCode: registerDevice completed, deviceId=${result.deviceId}',
+    );
+
+    // Then call the QR callback endpoint to confirm registration and link to session
+    final callbackResponse = await _httpClient
+        .post(
+          Uri.parse('$effectiveApiUrl/api/devices/qr-callback'),
+          headers: {'Content-Type': 'application/json', 'X-User-ID': userId},
+          body: jsonEncode({
+            'temp_token':
+                registrationToken, // API expects temp_token not registration_token
+            'device_id': result.deviceId,
+            'fcm_token': 'no_firebase_token',
+            'platform': 'web',
+            'public_key': null, // Could include the public key if needed
+          }),
+        )
+        .timeout(config.requestTimeout);
+
+    print(
+      'registerFromQRCode: QR callback response status: ${callbackResponse.statusCode}',
+    );
+    print(
+      'registerFromQRCode: QR callback response body: ${callbackResponse.body}',
+    );
+
+    if (callbackResponse.statusCode == 200) {
+      Logger.info('MartyPushService: QR registration callback successful');
+      return {
+        'success': true,
+        'device_id': result.deviceId,
+        'registration_id': result.registrationId,
+        'organization_id': organizationId,
+        'message': 'Push notifications enabled successfully',
+      };
+    } else {
+      Logger.warning(
+        'MartyPushService: QR callback failed: ${callbackResponse.statusCode}',
+      );
+      // Registration succeeded but callback failed - still return success
+      // The device is registered, just the web UI won't get notified via SSE
+      return {
+        'success': true,
+        'device_id': result.deviceId,
+        'registration_id': result.registrationId,
+        'organization_id': organizationId,
+        'callback_failed': true,
+        'message': 'Device registered but web notification may not update',
+      };
+    }
   }
 
   /// Update Firebase token
@@ -696,7 +817,10 @@ class TestMartyPushService extends MartyPushService {
   final List<MartyChallenge> _injectedChallenges = [];
 
   TestMartyPushService({required MartyPushConfig config})
-    : super._(config: config);
+    : super._(
+        config: config,
+        firebaseUtils: NoFirebaseUtils(), // Use no-op Firebase for tests
+      );
 
   /// Set a test device ID
   void setTestDeviceId(String deviceId) {

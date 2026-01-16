@@ -15,6 +15,7 @@ import '../utils/riverpod/riverpod_providers/generated_providers/token_folder_no
 import '../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../utils/riverpod/state_listeners/home_widget_deep_link_listener.dart';
 import '../utils/riverpod/state_listeners/home_widget_token_state_listener.dart';
+import '../utils/riverpod/state_listeners/marty_push_deep_link_listener.dart';
 import '../utils/riverpod/state_listeners/navigation_deep_link_listener.dart';
 import '../utils/riverpod/state_listeners/token_container_deep_link_listener.dart';
 import '../utils/riverpod/state_listeners/token_deep_link_listener.dart';

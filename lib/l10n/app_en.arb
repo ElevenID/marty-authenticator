@@ -2078,5 +2078,26 @@
   "verboseLogging": "Verbose logging",
   "versionTitle": "Version",
   "wrongPassword": "Incorrect password",
-  "yes": "Yes"
+  "yes": "Yes",
+
+  "martyPushRegistrationSuccess": "Device registered for push notifications",
+  "@martyPushRegistrationSuccess": {
+    "description": "Success message shown when device is registered for Marty push notifications via deep link"
+  },
+  "martyPushRegistrationFailed": "Push notification registration failed",
+  "@martyPushRegistrationFailed": {
+    "description": "Error message shown when Marty push notification registration fails"
+  },
+  "martyPushRegistrationExpired": "Registration link has expired",
+  "@martyPushRegistrationExpired": {
+    "description": "Error message shown when the push registration deep link token has expired"
+  },
+  "martyPushRegistrationMissingToken": "Invalid registration link: missing token",
+  "@martyPushRegistrationMissingToken": {
+    "description": "Error message when push registration deep link is missing the token parameter"
+  },
+  "martyPushRegistrationMissingUser": "Invalid registration link: missing user ID",
+  "@martyPushRegistrationMissingUser": {
+    "description": "Error message when push registration deep link is missing the user ID parameter"
+  }
 }

@@ -1,0 +1,54 @@
+# Build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform builds
+android/.gradle/
+android/build/
+android/app/build/
+ios/Pods/
+ios/.symlinks/
+ios/build/
+macos/Pods/
+macos/.symlinks/
+macos/build/
+linux/build/
+windows/build/
+
+# Dependencies (will be fetched fresh in Docker)
+.pub-cache/
+.packages
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Tests
+test-results/
+coverage/
+
+# Rust/Cargo (if any)
+target/
+rust/target/
+
+# Misc
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Docker files (don't need to copy these into context)
+docker/
+!docker/Dockerfile.flutter.web.test

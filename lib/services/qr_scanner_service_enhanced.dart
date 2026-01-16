@@ -117,6 +117,11 @@ class QRScannerServiceEnhanced {
         return await _parseOpenIDQR(rawData);
       }
 
+      // Handle Marty push registration scheme
+      if (rawData.startsWith('marty://push-register')) {
+        return await _parsePushRegistrationQR(rawData);
+      }
+
       // Handle DIDComm messages
       if (rawData.contains('"@type"') && rawData.contains('didcomm')) {
         return await _parseDIDCommQR(rawData);
@@ -282,6 +287,26 @@ class QRScannerServiceEnhanced {
         'from': jsonData['from'],
         'to': jsonData['to'],
       },
+    );
+  }
+
+  /// Parse Marty push registration QR codes
+  /// Format: marty://push-register?org={org_id}&api={api_url}&token={temp_token}&user={user_id}
+  Future<ParsedQRData> _parsePushRegistrationQR(String data) async {
+    final uri = Uri.parse(data);
+    final params = uri.queryParameters;
+
+    return ParsedQRData(
+      type: QRType.pushRegistration,
+      format: QRFormat.url,
+      rawData: data,
+      parsedContent: {
+        'organization_id': params['org'],
+        'api_url': params['api'],
+        'registration_token': params['token'],
+        'user_id': params['user'],
+      },
+      metadata: {'scheme': 'marty', 'action': 'push-register'},
     );
   }
 
@@ -980,6 +1005,7 @@ enum QRType {
   didcommMessage,
   jsonDocument,
   genericURL,
+  pushRegistration, // marty://push-register QR for enabling push notifications
   unknown,
 }
 

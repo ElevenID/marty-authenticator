@@ -7,6 +7,7 @@ import '../utils/spruce_channels.dart';
 import '../mocks/mock_spruce_services.dart';
 import '../utils/logger.dart';
 import 'spruce_platform_service_extended.dart';
+import 'spruce_platform_service_web.dart';
 
 /// Exception thrown when SpruceID operations fail
 class SpruceIdException implements Exception {
@@ -444,10 +445,15 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
 final spruceIdPlatformServiceProvider = Provider<ISpruceIdPlatformService>((
   ref,
 ) {
-  // Use Mock service for Web (Chrome) and Desktop development
+  // Use Web implementation for Web platform
+  if (kIsWeb) {
+    Logger.debug('DEBUG: Using SpruceIdPlatformServiceWeb');
+    return SpruceIdPlatformServiceWeb();
+  }
+
+  // Use Mock service for Desktop development
   // Force Mock for debugging
-  if (kIsWeb ||
-      defaultTargetPlatform == TargetPlatform.macOS ||
+  if (defaultTargetPlatform == TargetPlatform.macOS ||
       defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.linux) {
     Logger.debug('DEBUG: Using MockSpruceIdPlatformService');
