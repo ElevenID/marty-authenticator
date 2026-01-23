@@ -313,3 +313,168 @@ pub fn credential_from_json(json: String) -> anyhow::Result<Credential> {
     serde_json::from_str(&json)
         .map_err(|e| anyhow::anyhow!("Credential parsing failed: {}", e))
 }
+
+// ============================================================================
+// Policy Operations
+// ============================================================================
+
+/// Sync presentation policies from backend API.
+///
+/// # Arguments
+/// * `license_jwt` - License JWT for authentication
+/// * `endpoint` - Backend API endpoint (e.g., "https://api.example.com")
+pub async fn sync_policies(
+    license_jwt: String,
+    endpoint: String,
+) -> anyhow::Result<Vec<marty_verification::policy::PresentationPolicy>> {
+    use marty_sync::PolicySyncProvider;
+
+    let provider = PolicySyncProvider::new(endpoint, license_jwt);
+    let policies = provider.fetch_all().await
+        .map_err(|e| anyhow::anyhow!("Policy sync failed: {}", e))?;
+
+    Ok(policies)
+}
+
+/// Evaluate a presentation request against policies and available credentials.
+///
+/// Returns the minimum disclosure set and any policy violations.
+pub fn evaluate_presentation_request(
+    request_json: String,
+    policies_json: Vec<String>,
+    credentials: Vec<Credential>,
+) -> anyhow::Result<PolicyEvaluationResult> {
+    use marty_verification::policy::{PresentationPolicy, MinimumDisclosureResolver};
+    use std::collections::HashMap;
+
+    // Parse policies
+    let policies: Vec<PresentationPolicy> = policies_json
+        .iter()
+        .map(|json| serde_json::from_str(json))
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| anyhow::anyhow!("Failed to parse policies: {}", e))?;
+
+    // For now, use first policy (TODO: match by verifier ID)
+    let policy = policies.first()
+        .ok_or_else(|| anyhow::anyhow!("No policies provided"))?;
+
+    // Get all available claims from credentials
+    let mut all_claims = Vec::new();
+    for cred in &credentials {
+        all_claims.extend(get_credential_claims(cred));
+    }
+
+    // Resolve minimum disclosure
+    let resolver = MinimumDisclosureResolver::new(policy);
+    let disclosure = resolver.resolve(&all_claims);
+
+    Ok(PolicyEvaluationResult {
+        is_satisfied: disclosure.is_complete(),
+        minimum_disclosure_claims: disclosure.claims,
+        missing_required_claims: disclosure.missing_required,
+        policy_id: policy.id.clone(),
+    })
+}
+
+/// Get the minimum set of claims to disclose from a credential based on policy.
+pub fn get_minimum_disclosure_set(
+    policy_json: String,
+    credential: Credential,
+) -> anyhow::Result<Vec<String>> {
+    use marty_verification::policy::{PresentationPolicy, MinimumDisclosureResolver};
+
+    let policy: PresentationPolicy = serde_json::from_str(&policy_json)
+        .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
+
+    let available_claims = get_credential_claims(&credential);
+    let resolver = MinimumDisclosureResolver::new(&policy);
+    let disclosure = resolver.resolve(&available_claims);
+
+    Ok(disclosure.claims)
+}
+
+/// Rank credentials according to policy preferences.
+pub fn rank_matching_credentials(
+    policy_json: String,
+    credentials: Vec<RankableCredentialInput>,
+) -> anyhow::Result<Vec<String>> {
+    use marty_verification::policy::{PresentationPolicy, CredentialRanker, RankableCredential};
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    let policy: PresentationPolicy = serde_json::from_str(&policy_json)
+        .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
+
+    let ranker = CredentialRanker::new(&policy);
+
+    let mut rankable: Vec<RankableCredential> = credentials
+        .into_iter()
+        .map(|c| {
+            let issued_at = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(c.issued_at_unix as u64);
+            RankableCredential {
+                credential_id: c.credential_id,
+                issuer_id: c.issuer_id,
+                issued_at,
+                trust_level: c.trust_level,
+                claim_count: c.claim_count,
+            }
+        })
+        .collect();
+
+    ranker.rank(&mut rankable);
+
+    Ok(rankable.into_iter().map(|r| r.credential_id).collect())
+}
+
+/// Check issuer constraints against policy.
+pub fn check_issuer_constraints(
+    policy_json: String,
+    issuer_id: String,
+    trust_profile_verified: bool,
+) -> anyhow::Result<IssuerCheckResultOutput> {
+    use marty_verification::policy::{PresentationPolicy, IssuerConstraintChecker, IssuerCheckResult};
+
+    let policy: PresentationPolicy = serde_json::from_str(&policy_json)
+        .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
+
+    let checker = IssuerConstraintChecker::new(
+        policy.trust_profile_id.as_ref(),
+        &policy.allowed_issuers,
+    );
+
+    let result = checker.check_issuer(&issuer_id, trust_profile_verified);
+
+    Ok(IssuerCheckResultOutput {
+        is_trusted: result.is_trusted(),
+        violation_message: result.violation_message().map(String::from),
+    })
+}
+
+// ============================================================================
+// Policy Support Types
+// ============================================================================
+
+/// Result of policy evaluation for FFI.
+#[derive(Debug, Clone)]
+pub struct PolicyEvaluationResult {
+    pub is_satisfied: bool,
+    pub minimum_disclosure_claims: Vec<String>,
+    pub missing_required_claims: Vec<String>,
+    pub policy_id: String,
+}
+
+/// Input for credential ranking.
+#[derive(Debug, Clone)]
+pub struct RankableCredentialInput {
+    pub credential_id: String,
+    pub issuer_id: String,
+    pub issued_at_unix: i64,
+    pub trust_level: f64,
+    pub claim_count: usize,
+}
+
+/// Result of issuer constraint check.
+#[derive(Debug, Clone)]
+pub struct IssuerCheckResultOutput {
+    pub is_trusted: bool,
+    pub violation_message: Option<String>,
+}
