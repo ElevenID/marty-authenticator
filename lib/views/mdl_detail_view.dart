@@ -21,20 +21,22 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/mdoc_credential.dart';
+import '../services/zk_verification_service.dart';
 
 /// Detail view for mobile Driver's License (mDL)
 /// Shows setup information when not issued, or displays the mDL when available
-class MdlDetailView extends StatefulWidget {
+class MdlDetailView extends ConsumerStatefulWidget {
   final MDocCredential? credential;
 
   const MdlDetailView({super.key, this.credential});
 
   @override
-  State<MdlDetailView> createState() => _MdlDetailViewState();
+  ConsumerState<MdlDetailView> createState() => _MdlDetailViewState();
 }
 
-class _MdlDetailViewState extends State<MdlDetailView>
+class _MdlDetailViewState extends ConsumerState<MdlDetailView>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -333,6 +335,14 @@ class _MdlDetailViewState extends State<MdlDetailView>
                   onTap: () => _shareCredential(),
                 ),
               ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.security,
+                  label: 'Verify Age',
+                  onTap: () => _verifyAge(),
+                ),
+              ),
             ],
           ),
 
@@ -548,6 +558,85 @@ class _MdlDetailViewState extends State<MdlDetailView>
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  Future<void> _verifyAge() async {
+    HapticFeedback.mediumImpact();
+
+    final zkService = ref.read(zkVerificationServiceProvider);
+
+    // Check if supported first
+    final supported = await zkService.isSupported();
+    if (!supported && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ZK Proofs not supported on this device/OS version'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Generating ZK Proof of Age (18+)...'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    // Generic implementation using Presentation Definition
+    try {
+      // Mock data - In a real app these come from the credential and backend session
+      final request = PdProofRequest(
+        presentationDefinition: {
+          "input_descriptors": [
+            {
+              "id": "age_over_18",
+              "schema": [
+                {"uri": "org.iso.18013.5.1.mDL"},
+              ],
+              "constraints": {
+                "fields": [
+                  {
+                    "path": ["\$.credentialSubject.birth_date"],
+                    "filter": {"type": "string"},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        msoBytes: Uint8List(0),
+        signature: Uint8List(0),
+        secrets: {"birth_date": "1990-01-01"},
+        sessionNonce: Uint8List(0),
+      );
+
+      final proof = await zkService.generateProof(request);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Proof generated successfully! Size: ${proof.length} bytes',
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating proof: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 }
 

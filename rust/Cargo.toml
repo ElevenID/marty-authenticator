@@ -13,6 +13,7 @@ crate-type = ["cdylib", "staticlib"]
 # Core crates from marty-core
 marty-crypto = { path = "../../marty-core/marty-crypto" }
 marty-verification = { path = "../../marty-core/marty-verification", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { path = "../../marty-core/marty-zkp" }
 
 # Sync for policy caching
 marty-sync = { path = "../../marty-verifier/crates/marty-sync" }

@@ -8,6 +8,7 @@ use crate::credential::{
     SdJwtCredential, TrustInfo, VerifiableCredential,
 };
 use crate::trust;
+pub use crate::zk::*;
 
 // ============================================================================
 // Credential Parsing
