@@ -8,6 +8,7 @@ import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `extract_claim`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -66,3 +67,572 @@ Future<String> credentialToJson({required Credential credential}) =>
 /// Deserialize a credential from JSON.
 Future<Credential> credentialFromJson({required String json}) =>
     RustLib.instance.api.crateApiCredentialFromJson(json: json);
+
+/// Sync presentation policies from backend API.
+///
+/// # Arguments
+/// * `license_jwt` - License JWT for authentication
+/// * `endpoint` - Backend API endpoint (e.g., "https://api.example.com")
+Future<List<PresentationPolicy>> syncPolicies({
+  required String licenseJwt,
+  required String endpoint,
+}) => RustLib.instance.api.crateApiSyncPolicies(
+  licenseJwt: licenseJwt,
+  endpoint: endpoint,
+);
+
+/// Evaluate a presentation request against policies and available credentials.
+///
+/// Returns the minimum disclosure set and any policy violations.
+Future<PolicyEvaluationResult> evaluatePresentationRequest({
+  required String requestJson,
+  required List<String> policiesJson,
+  required List<Credential> credentials,
+}) => RustLib.instance.api.crateApiEvaluatePresentationRequest(
+  requestJson: requestJson,
+  policiesJson: policiesJson,
+  credentials: credentials,
+);
+
+/// Get the minimum set of claims to disclose from a credential based on policy.
+Future<List<String>> getMinimumDisclosureSet({
+  required String policyJson,
+  required Credential credential,
+}) => RustLib.instance.api.crateApiGetMinimumDisclosureSet(
+  policyJson: policyJson,
+  credential: credential,
+);
+
+/// Rank credentials according to policy preferences.
+Future<List<String>> rankMatchingCredentials({
+  required String policyJson,
+  required List<RankableCredentialInput> credentials,
+}) => RustLib.instance.api.crateApiRankMatchingCredentials(
+  policyJson: policyJson,
+  credentials: credentials,
+);
+
+/// Check issuer constraints against policy.
+Future<IssuerCheckResultOutput> checkIssuerConstraints({
+  required String policyJson,
+  required String issuerId,
+  required bool trustProfileVerified,
+}) => RustLib.instance.api.crateApiCheckIssuerConstraints(
+  policyJson: policyJson,
+  issuerId: issuerId,
+  trustProfileVerified: trustProfileVerified,
+);
+
+/// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
+Future<FrbCredentialOffer> walletParseCredentialOffer({
+  required String offerUri,
+}) =>
+    RustLib.instance.api.crateApiWalletParseCredentialOffer(offerUri: offerUri);
+
+/// Fetch `.well-known/openid-credential-issuer` metadata.
+Future<FrbIssuerMetadata> walletFetchIssuerMetadata({
+  required String issuerUrl,
+}) => RustLib.instance.api.crateApiWalletFetchIssuerMetadata(
+  issuerUrl: issuerUrl,
+);
+
+/// Exchange a pre-authorized code for an access token.
+Future<FrbTokenResponse> walletExchangePreAuthToken({
+  required String tokenEndpoint,
+  required String preAuthCode,
+  String? txCode,
+}) => RustLib.instance.api.crateApiWalletExchangePreAuthToken(
+  tokenEndpoint: tokenEndpoint,
+  preAuthCode: preAuthCode,
+  txCode: txCode,
+);
+
+/// Build PKCE authorization request URL + code verifier.
+Future<FrbAuthorizationRequest> walletBuildAuthRequest({
+  required String issuerMetadataJson,
+  required String credentialConfigurationId,
+  required String clientId,
+  required String redirectUri,
+  String? issuerState,
+}) => RustLib.instance.api.crateApiWalletBuildAuthRequest(
+  issuerMetadataJson: issuerMetadataJson,
+  credentialConfigurationId: credentialConfigurationId,
+  clientId: clientId,
+  redirectUri: redirectUri,
+  issuerState: issuerState,
+);
+
+/// Exchange authorization code + PKCE verifier for access token.
+Future<FrbTokenResponse> walletExchangeAuthCodeToken({
+  required String tokenEndpoint,
+  required String code,
+  required String codeVerifier,
+  String? redirectUri,
+  String? clientId,
+}) => RustLib.instance.api.crateApiWalletExchangeAuthCodeToken(
+  tokenEndpoint: tokenEndpoint,
+  code: code,
+  codeVerifier: codeVerifier,
+  redirectUri: redirectUri,
+  clientId: clientId,
+);
+
+/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
+Future<String> walletCreateProofJwt({
+  required String holderKid,
+  required String cNonce,
+  required String issuerUrl,
+  required String jwkJson,
+}) => RustLib.instance.api.crateApiWalletCreateProofJwt(
+  holderKid: holderKid,
+  cNonce: cNonce,
+  issuerUrl: issuerUrl,
+  jwkJson: jwkJson,
+);
+
+/// Request a credential from the issuer.
+Future<FrbCredentialResponse> walletRequestCredential({
+  required String credentialEndpoint,
+  required String accessToken,
+  required String credentialFormat,
+  String? credentialConfigurationId,
+  required String proofJwt,
+}) => RustLib.instance.api.crateApiWalletRequestCredential(
+  credentialEndpoint: credentialEndpoint,
+  accessToken: accessToken,
+  credentialFormat: credentialFormat,
+  credentialConfigurationId: credentialConfigurationId,
+  proofJwt: proofJwt,
+);
+
+/// Parse an `openid4vp://` or `https://…` presentation request URI.
+Future<FrbPresentationRequest> walletParsePresentationRequest({
+  required String requestUri,
+}) => RustLib.instance.api.crateApiWalletParsePresentationRequest(
+  requestUri: requestUri,
+);
+
+/// Build and submit a standard VP presentation.
+Future<FrbPresentationResponse> walletBuildAndSubmitPresentation({
+  required String responseUri,
+  required String presentationDefinitionJson,
+  required String credentialsJson,
+}) => RustLib.instance.api.crateApiWalletBuildAndSubmitPresentation(
+  responseUri: responseUri,
+  presentationDefinitionJson: presentationDefinitionJson,
+  credentialsJson: credentialsJson,
+);
+
+/// Build and submit a ZK VP presentation.
+Future<FrbPresentationResponse> walletBuildAndSubmitZkPresentation({
+  required String responseUri,
+  required String presentationDefinitionJson,
+  required String credentialsJson,
+  required List<FrbZkProofEntry> zkProofs,
+}) => RustLib.instance.api.crateApiWalletBuildAndSubmitZkPresentation(
+  responseUri: responseUri,
+  presentationDefinitionJson: presentationDefinitionJson,
+  credentialsJson: credentialsJson,
+  zkProofs: zkProofs,
+);
+
+/// Prove all ZK predicates in a `PresentationDefinition`.
+Future<Uint8List> zkProveFromPresentationDefinition({
+  required String presentationDefinitionJson,
+  required List<int> msoBytes,
+  required List<int> signature,
+  required String secretsJson,
+  required List<int> sessionNonce,
+}) => RustLib.instance.api.crateApiZkProveFromPresentationDefinition(
+  presentationDefinitionJson: presentationDefinitionJson,
+  msoBytes: msoBytes,
+  signature: signature,
+  secretsJson: secretsJson,
+  sessionNonce: sessionNonce,
+);
+
+/// Generate a ZK proof for a single named predicate.
+Future<Uint8List> zkProve({
+  required String predicateId,
+  required String claimValue,
+  required List<int> msoBytes,
+  required List<int> signature,
+  required List<int> sessionNonce,
+}) => RustLib.instance.api.crateApiZkProve(
+  predicateId: predicateId,
+  claimValue: claimValue,
+  msoBytes: msoBytes,
+  signature: signature,
+  sessionNonce: sessionNonce,
+);
+
+/// Check whether ZK proofs are supported on this device.
+Future<bool> zkIsSupportedOnDevice() =>
+    RustLib.instance.api.crateApiZkIsSupportedOnDevice();
+
+// Rust type: RustOpaqueNom<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>
+abstract class PresentationPolicy implements RustOpaqueInterface {}
+
+/// Everything Flutter needs to open the authorization redirect URL.
+class FrbAuthorizationRequest {
+  final String authorizationUrl;
+  final String codeVerifier;
+  final String state;
+  final String redirectUri;
+
+  const FrbAuthorizationRequest({
+    required this.authorizationUrl,
+    required this.codeVerifier,
+    required this.state,
+    required this.redirectUri,
+  });
+
+  @override
+  int get hashCode =>
+      authorizationUrl.hashCode ^
+      codeVerifier.hashCode ^
+      state.hashCode ^
+      redirectUri.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbAuthorizationRequest &&
+          runtimeType == other.runtimeType &&
+          authorizationUrl == other.authorizationUrl &&
+          codeVerifier == other.codeVerifier &&
+          state == other.state &&
+          redirectUri == other.redirectUri;
+}
+
+/// Parsed credential offer returned to Flutter.
+class FrbCredentialOffer {
+  final String credentialIssuer;
+  final List<String> credentialConfigurationIds;
+  final String? preAuthorizedCode;
+  final bool txCodeRequired;
+  final String? issuerState;
+
+  const FrbCredentialOffer({
+    required this.credentialIssuer,
+    required this.credentialConfigurationIds,
+    this.preAuthorizedCode,
+    required this.txCodeRequired,
+    this.issuerState,
+  });
+
+  @override
+  int get hashCode =>
+      credentialIssuer.hashCode ^
+      credentialConfigurationIds.hashCode ^
+      preAuthorizedCode.hashCode ^
+      txCodeRequired.hashCode ^
+      issuerState.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbCredentialOffer &&
+          runtimeType == other.runtimeType &&
+          credentialIssuer == other.credentialIssuer &&
+          credentialConfigurationIds == other.credentialConfigurationIds &&
+          preAuthorizedCode == other.preAuthorizedCode &&
+          txCodeRequired == other.txCodeRequired &&
+          issuerState == other.issuerState;
+}
+
+/// Credential response from the issuer.
+class FrbCredentialResponse {
+  final String? format;
+  final String? credential;
+  final String? transactionId;
+  final String? cNonce;
+  final BigInt? cNonceExpiresIn;
+
+  const FrbCredentialResponse({
+    this.format,
+    this.credential,
+    this.transactionId,
+    this.cNonce,
+    this.cNonceExpiresIn,
+  });
+
+  @override
+  int get hashCode =>
+      format.hashCode ^
+      credential.hashCode ^
+      transactionId.hashCode ^
+      cNonce.hashCode ^
+      cNonceExpiresIn.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbCredentialResponse &&
+          runtimeType == other.runtimeType &&
+          format == other.format &&
+          credential == other.credential &&
+          transactionId == other.transactionId &&
+          cNonce == other.cNonce &&
+          cNonceExpiresIn == other.cNonceExpiresIn;
+}
+
+/// Wallet-relevant issuer metadata.
+class FrbIssuerMetadata {
+  final String credentialIssuer;
+  final String tokenEndpoint;
+  final String credentialEndpoint;
+  final String? authorizationEndpoint;
+  final List<String> grantTypesSupported;
+  final String credentialConfigurationsJson;
+
+  const FrbIssuerMetadata({
+    required this.credentialIssuer,
+    required this.tokenEndpoint,
+    required this.credentialEndpoint,
+    this.authorizationEndpoint,
+    required this.grantTypesSupported,
+    required this.credentialConfigurationsJson,
+  });
+
+  @override
+  int get hashCode =>
+      credentialIssuer.hashCode ^
+      tokenEndpoint.hashCode ^
+      credentialEndpoint.hashCode ^
+      authorizationEndpoint.hashCode ^
+      grantTypesSupported.hashCode ^
+      credentialConfigurationsJson.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbIssuerMetadata &&
+          runtimeType == other.runtimeType &&
+          credentialIssuer == other.credentialIssuer &&
+          tokenEndpoint == other.tokenEndpoint &&
+          credentialEndpoint == other.credentialEndpoint &&
+          authorizationEndpoint == other.authorizationEndpoint &&
+          grantTypesSupported == other.grantTypesSupported &&
+          credentialConfigurationsJson == other.credentialConfigurationsJson;
+}
+
+/// Parsed OID4VP presentation request.
+class FrbPresentationRequest {
+  final String clientId;
+  final String nonce;
+  final String responseUri;
+  final String presentationDefinitionJson;
+
+  const FrbPresentationRequest({
+    required this.clientId,
+    required this.nonce,
+    required this.responseUri,
+    required this.presentationDefinitionJson,
+  });
+
+  @override
+  int get hashCode =>
+      clientId.hashCode ^
+      nonce.hashCode ^
+      responseUri.hashCode ^
+      presentationDefinitionJson.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPresentationRequest &&
+          runtimeType == other.runtimeType &&
+          clientId == other.clientId &&
+          nonce == other.nonce &&
+          responseUri == other.responseUri &&
+          presentationDefinitionJson == other.presentationDefinitionJson;
+}
+
+/// The verifier's response after receiving a VP token.
+class FrbPresentationResponse {
+  final bool ok;
+  final String? redirectUri;
+  final String? error;
+  final String? errorDescription;
+
+  const FrbPresentationResponse({
+    required this.ok,
+    this.redirectUri,
+    this.error,
+    this.errorDescription,
+  });
+
+  @override
+  int get hashCode =>
+      ok.hashCode ^
+      redirectUri.hashCode ^
+      error.hashCode ^
+      errorDescription.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPresentationResponse &&
+          runtimeType == other.runtimeType &&
+          ok == other.ok &&
+          redirectUri == other.redirectUri &&
+          error == other.error &&
+          errorDescription == other.errorDescription;
+}
+
+/// OAuth 2.0 / OID4VCI token response.
+class FrbTokenResponse {
+  final String accessToken;
+  final String tokenType;
+  final BigInt? expiresIn;
+  final String? cNonce;
+  final BigInt? cNonceExpiresIn;
+  final String? scope;
+
+  const FrbTokenResponse({
+    required this.accessToken,
+    required this.tokenType,
+    this.expiresIn,
+    this.cNonce,
+    this.cNonceExpiresIn,
+    this.scope,
+  });
+
+  @override
+  int get hashCode =>
+      accessToken.hashCode ^
+      tokenType.hashCode ^
+      expiresIn.hashCode ^
+      cNonce.hashCode ^
+      cNonceExpiresIn.hashCode ^
+      scope.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbTokenResponse &&
+          runtimeType == other.runtimeType &&
+          accessToken == other.accessToken &&
+          tokenType == other.tokenType &&
+          expiresIn == other.expiresIn &&
+          cNonce == other.cNonce &&
+          cNonceExpiresIn == other.cNonceExpiresIn &&
+          scope == other.scope;
+}
+
+/// One ZK proof to include in a presentation.
+class FrbZkProofEntry {
+  final String descriptorId;
+  final String predicateId;
+  final Uint8List proofBytes;
+
+  const FrbZkProofEntry({
+    required this.descriptorId,
+    required this.predicateId,
+    required this.proofBytes,
+  });
+
+  @override
+  int get hashCode =>
+      descriptorId.hashCode ^ predicateId.hashCode ^ proofBytes.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbZkProofEntry &&
+          runtimeType == other.runtimeType &&
+          descriptorId == other.descriptorId &&
+          predicateId == other.predicateId &&
+          proofBytes == other.proofBytes;
+}
+
+/// Result of issuer constraint check.
+class IssuerCheckResultOutput {
+  final bool isTrusted;
+  final String? violationMessage;
+
+  const IssuerCheckResultOutput({
+    required this.isTrusted,
+    this.violationMessage,
+  });
+
+  @override
+  int get hashCode => isTrusted.hashCode ^ violationMessage.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IssuerCheckResultOutput &&
+          runtimeType == other.runtimeType &&
+          isTrusted == other.isTrusted &&
+          violationMessage == other.violationMessage;
+}
+
+/// Result of policy evaluation for FFI.
+class PolicyEvaluationResult {
+  final bool isSatisfied;
+  final List<String> minimumDisclosureClaims;
+  final List<String> missingRequiredClaims;
+  final String policyId;
+
+  const PolicyEvaluationResult({
+    required this.isSatisfied,
+    required this.minimumDisclosureClaims,
+    required this.missingRequiredClaims,
+    required this.policyId,
+  });
+
+  @override
+  int get hashCode =>
+      isSatisfied.hashCode ^
+      minimumDisclosureClaims.hashCode ^
+      missingRequiredClaims.hashCode ^
+      policyId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PolicyEvaluationResult &&
+          runtimeType == other.runtimeType &&
+          isSatisfied == other.isSatisfied &&
+          minimumDisclosureClaims == other.minimumDisclosureClaims &&
+          missingRequiredClaims == other.missingRequiredClaims &&
+          policyId == other.policyId;
+}
+
+/// Input for credential ranking.
+class RankableCredentialInput {
+  final String credentialId;
+  final String issuerId;
+  final PlatformInt64 issuedAtUnix;
+  final double trustLevel;
+  final BigInt claimCount;
+
+  const RankableCredentialInput({
+    required this.credentialId,
+    required this.issuerId,
+    required this.issuedAtUnix,
+    required this.trustLevel,
+    required this.claimCount,
+  });
+
+  @override
+  int get hashCode =>
+      credentialId.hashCode ^
+      issuerId.hashCode ^
+      issuedAtUnix.hashCode ^
+      trustLevel.hashCode ^
+      claimCount.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RankableCredentialInput &&
+          runtimeType == other.runtimeType &&
+          credentialId == other.credentialId &&
+          issuerId == other.issuerId &&
+          issuedAtUnix == other.issuedAtUnix &&
+          trustLevel == other.trustLevel &&
+          claimCount == other.claimCount;
+}

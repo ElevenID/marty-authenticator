@@ -19,8 +19,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     required super.portManager,
   });
 
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_PresentationPolicyPtr => wire
+      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  PresentationPolicy
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
+
+  @protected
+  PresentationPolicy
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -47,6 +63,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo dco_decode_box_autoadd_trust_info(dynamic raw);
 
   @protected
+  BigInt dco_decode_box_autoadd_u_64(dynamic raw);
+
+  @protected
   VerifiableCredential dco_decode_box_autoadd_verifiable_credential(
     dynamic raw,
   );
@@ -64,7 +83,46 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject dco_decode_credential_subject(dynamic raw);
 
   @protected
+  double dco_decode_f_64(dynamic raw);
+
+  @protected
+  FrbAuthorizationRequest dco_decode_frb_authorization_request(dynamic raw);
+
+  @protected
+  FrbCredentialOffer dco_decode_frb_credential_offer(dynamic raw);
+
+  @protected
+  FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw);
+
+  @protected
+  FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
+
+  @protected
+  FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw);
+
+  @protected
+  FrbPresentationResponse dco_decode_frb_presentation_response(dynamic raw);
+
+  @protected
+  FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
+
+  @protected
+  FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw);
+
+  @protected
   int dco_decode_i_32(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
+  IssuerCheckResultOutput dco_decode_issuer_check_result_output(dynamic raw);
+
+  @protected
+  List<PresentationPolicy>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
@@ -76,6 +134,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<CredentialGroup> dco_decode_list_credential_group(dynamic raw);
 
   @protected
+  List<FrbZkProofEntry> dco_decode_list_frb_zk_proof_entry(dynamic raw);
+
+  @protected
   List<Uint8List> dco_decode_list_list_prim_u_8_strict(dynamic raw);
 
   @protected
@@ -83,6 +144,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
+
+  @protected
+  List<RankableCredentialInput> dco_decode_list_rankable_credential_input(
+    dynamic raw,
+  );
 
   @protected
   MDocCredential dco_decode_m_doc_credential(dynamic raw);
@@ -100,10 +166,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo? dco_decode_opt_box_autoadd_trust_info(dynamic raw);
 
   @protected
+  BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw);
+
+  @protected
+  PolicyEvaluationResult dco_decode_policy_evaluation_result(dynamic raw);
+
+  @protected
   PrivacyLevel dco_decode_privacy_level(dynamic raw);
 
   @protected
   Proof dco_decode_proof(dynamic raw);
+
+  @protected
+  RankableCredentialInput dco_decode_rankable_credential_input(dynamic raw);
 
   @protected
   SdJwtCredential dco_decode_sd_jwt_credential(dynamic raw);
@@ -115,16 +190,34 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo dco_decode_trust_info(dynamic raw);
 
   @protected
+  BigInt dco_decode_u_64(dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
   void dco_decode_unit(dynamic raw);
 
   @protected
+  BigInt dco_decode_usize(dynamic raw);
+
+  @protected
   VerifiableCredential dco_decode_verifiable_credential(dynamic raw);
 
   @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+
+  @protected
+  PresentationPolicy
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  PresentationPolicy
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -157,6 +250,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo sse_decode_box_autoadd_trust_info(SseDeserializer deserializer);
 
   @protected
+  BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer);
+
+  @protected
   VerifiableCredential sse_decode_box_autoadd_verifiable_credential(
     SseDeserializer deserializer,
   );
@@ -174,7 +270,60 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject sse_decode_credential_subject(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
+  FrbAuthorizationRequest sse_decode_frb_authorization_request(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbCredentialOffer sse_decode_frb_credential_offer(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbCredentialResponse sse_decode_frb_credential_response(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbIssuerMetadata sse_decode_frb_issuer_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationRequest sse_decode_frb_presentation_request(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationResponse sse_decode_frb_presentation_response(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
+
+  @protected
+  FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  IssuerCheckResultOutput sse_decode_issuer_check_result_output(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<PresentationPolicy>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
@@ -188,6 +337,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<FrbZkProofEntry> sse_decode_list_frb_zk_proof_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<Uint8List> sse_decode_list_list_prim_u_8_strict(
     SseDeserializer deserializer,
   );
@@ -197,6 +351,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  List<RankableCredentialInput> sse_decode_list_rankable_credential_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MDocCredential sse_decode_m_doc_credential(SseDeserializer deserializer);
@@ -218,10 +377,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer);
+
+  @protected
+  PolicyEvaluationResult sse_decode_policy_evaluation_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PrivacyLevel sse_decode_privacy_level(SseDeserializer deserializer);
 
   @protected
   Proof sse_decode_proof(SseDeserializer deserializer);
+
+  @protected
+  RankableCredentialInput sse_decode_rankable_credential_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   SdJwtCredential sse_decode_sd_jwt_credential(SseDeserializer deserializer);
@@ -235,10 +407,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo sse_decode_trust_info(SseDeserializer deserializer);
 
   @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
   VerifiableCredential sse_decode_verifiable_credential(
@@ -315,12 +493,45 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  ffi.Pointer<ffi.Uint64> cst_encode_box_autoadd_u_64(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return wire.cst_new_box_autoadd_u_64(cst_encode_u_64(raw));
+  }
+
+  @protected
   ffi.Pointer<wire_cst_verifiable_credential>
   cst_encode_box_autoadd_verifiable_credential(VerifiableCredential raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     final ptr = wire.cst_new_box_autoadd_verifiable_credential();
     cst_api_fill_to_wire_verifiable_credential(raw, ptr.ref);
     return ptr;
+  }
+
+  @protected
+  int cst_encode_i_64(PlatformInt64 raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.toInt();
+  }
+
+  @protected
+  ffi.Pointer<
+    wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+  >
+  cst_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    List<PresentationPolicy> raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    final ans = wire
+        .cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+          raw.length,
+        );
+    for (var i = 0; i < raw.length; ++i) {
+      ans.ref.ptr[i] =
+          cst_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+            raw[i],
+          );
+    }
+    return ans;
   }
 
   @protected
@@ -358,6 +569,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  ffi.Pointer<wire_cst_list_frb_zk_proof_entry>
+  cst_encode_list_frb_zk_proof_entry(List<FrbZkProofEntry> raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    final ans = wire.cst_new_list_frb_zk_proof_entry(raw.length);
+    for (var i = 0; i < raw.length; ++i) {
+      cst_api_fill_to_wire_frb_zk_proof_entry(raw[i], ans.ref.ptr[i]);
+    }
+    return ans;
+  }
+
+  @protected
   ffi.Pointer<wire_cst_list_list_prim_u_8_strict>
   cst_encode_list_list_prim_u_8_strict(List<Uint8List> raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
@@ -385,6 +607,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     // Codec=Cst (C-struct based), see doc to use other codecs
     final ans = wire.cst_new_list_prim_u_8_strict(raw.length);
     ans.ref.ptr.asTypedList(raw.length).setAll(0, raw);
+    return ans;
+  }
+
+  @protected
+  ffi.Pointer<wire_cst_list_rankable_credential_input>
+  cst_encode_list_rankable_credential_input(List<RankableCredentialInput> raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    final ans = wire.cst_new_list_rankable_credential_input(raw.length);
+    for (var i = 0; i < raw.length; ++i) {
+      cst_api_fill_to_wire_rankable_credential_input(raw[i], ans.ref.ptr[i]);
+    }
     return ans;
   }
 
@@ -417,6 +650,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? ffi.nullptr : cst_encode_box_autoadd_trust_info(raw);
+  }
+
+  @protected
+  ffi.Pointer<ffi.Uint64> cst_encode_opt_box_autoadd_u_64(BigInt? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? ffi.nullptr : cst_encode_box_autoadd_u_64(raw);
+  }
+
+  @protected
+  int cst_encode_u_64(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.toSigned(64).toInt();
+  }
+
+  @protected
+  int cst_encode_usize(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.toSigned(64).toInt();
   }
 
   @protected
@@ -535,6 +786,124 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_frb_authorization_request(
+    FrbAuthorizationRequest apiObj,
+    wire_cst_frb_authorization_request wireObj,
+  ) {
+    wireObj.authorization_url = cst_encode_String(apiObj.authorizationUrl);
+    wireObj.code_verifier = cst_encode_String(apiObj.codeVerifier);
+    wireObj.state = cst_encode_String(apiObj.state);
+    wireObj.redirect_uri = cst_encode_String(apiObj.redirectUri);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_credential_offer(
+    FrbCredentialOffer apiObj,
+    wire_cst_frb_credential_offer wireObj,
+  ) {
+    wireObj.credential_issuer = cst_encode_String(apiObj.credentialIssuer);
+    wireObj.credential_configuration_ids = cst_encode_list_String(
+      apiObj.credentialConfigurationIds,
+    );
+    wireObj.pre_authorized_code = cst_encode_opt_String(
+      apiObj.preAuthorizedCode,
+    );
+    wireObj.tx_code_required = cst_encode_bool(apiObj.txCodeRequired);
+    wireObj.issuer_state = cst_encode_opt_String(apiObj.issuerState);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_credential_response(
+    FrbCredentialResponse apiObj,
+    wire_cst_frb_credential_response wireObj,
+  ) {
+    wireObj.format = cst_encode_opt_String(apiObj.format);
+    wireObj.credential = cst_encode_opt_String(apiObj.credential);
+    wireObj.transaction_id = cst_encode_opt_String(apiObj.transactionId);
+    wireObj.c_nonce = cst_encode_opt_String(apiObj.cNonce);
+    wireObj.c_nonce_expires_in = cst_encode_opt_box_autoadd_u_64(
+      apiObj.cNonceExpiresIn,
+    );
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_issuer_metadata(
+    FrbIssuerMetadata apiObj,
+    wire_cst_frb_issuer_metadata wireObj,
+  ) {
+    wireObj.credential_issuer = cst_encode_String(apiObj.credentialIssuer);
+    wireObj.token_endpoint = cst_encode_String(apiObj.tokenEndpoint);
+    wireObj.credential_endpoint = cst_encode_String(apiObj.credentialEndpoint);
+    wireObj.authorization_endpoint = cst_encode_opt_String(
+      apiObj.authorizationEndpoint,
+    );
+    wireObj.grant_types_supported = cst_encode_list_String(
+      apiObj.grantTypesSupported,
+    );
+    wireObj.credential_configurations_json = cst_encode_String(
+      apiObj.credentialConfigurationsJson,
+    );
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_presentation_request(
+    FrbPresentationRequest apiObj,
+    wire_cst_frb_presentation_request wireObj,
+  ) {
+    wireObj.client_id = cst_encode_String(apiObj.clientId);
+    wireObj.nonce = cst_encode_String(apiObj.nonce);
+    wireObj.response_uri = cst_encode_String(apiObj.responseUri);
+    wireObj.presentation_definition_json = cst_encode_String(
+      apiObj.presentationDefinitionJson,
+    );
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_presentation_response(
+    FrbPresentationResponse apiObj,
+    wire_cst_frb_presentation_response wireObj,
+  ) {
+    wireObj.ok = cst_encode_bool(apiObj.ok);
+    wireObj.redirect_uri = cst_encode_opt_String(apiObj.redirectUri);
+    wireObj.error = cst_encode_opt_String(apiObj.error);
+    wireObj.error_description = cst_encode_opt_String(apiObj.errorDescription);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_token_response(
+    FrbTokenResponse apiObj,
+    wire_cst_frb_token_response wireObj,
+  ) {
+    wireObj.access_token = cst_encode_String(apiObj.accessToken);
+    wireObj.token_type = cst_encode_String(apiObj.tokenType);
+    wireObj.expires_in = cst_encode_opt_box_autoadd_u_64(apiObj.expiresIn);
+    wireObj.c_nonce = cst_encode_opt_String(apiObj.cNonce);
+    wireObj.c_nonce_expires_in = cst_encode_opt_box_autoadd_u_64(
+      apiObj.cNonceExpiresIn,
+    );
+    wireObj.scope = cst_encode_opt_String(apiObj.scope);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_zk_proof_entry(
+    FrbZkProofEntry apiObj,
+    wire_cst_frb_zk_proof_entry wireObj,
+  ) {
+    wireObj.descriptor_id = cst_encode_String(apiObj.descriptorId);
+    wireObj.predicate_id = cst_encode_String(apiObj.predicateId);
+    wireObj.proof_bytes = cst_encode_list_prim_u_8_strict(apiObj.proofBytes);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_issuer_check_result_output(
+    IssuerCheckResultOutput apiObj,
+    wire_cst_issuer_check_result_output wireObj,
+  ) {
+    wireObj.is_trusted = cst_encode_bool(apiObj.isTrusted);
+    wireObj.violation_message = cst_encode_opt_String(apiObj.violationMessage);
+  }
+
+  @protected
   void cst_api_fill_to_wire_m_doc_credential(
     MDocCredential apiObj,
     wire_cst_m_doc_credential wireObj,
@@ -553,6 +922,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_policy_evaluation_result(
+    PolicyEvaluationResult apiObj,
+    wire_cst_policy_evaluation_result wireObj,
+  ) {
+    wireObj.is_satisfied = cst_encode_bool(apiObj.isSatisfied);
+    wireObj.minimum_disclosure_claims = cst_encode_list_String(
+      apiObj.minimumDisclosureClaims,
+    );
+    wireObj.missing_required_claims = cst_encode_list_String(
+      apiObj.missingRequiredClaims,
+    );
+    wireObj.policy_id = cst_encode_String(apiObj.policyId);
+  }
+
+  @protected
   void cst_api_fill_to_wire_proof(Proof apiObj, wire_cst_proof wireObj) {
     wireObj.proof_type = cst_encode_String(apiObj.proofType);
     wireObj.created = cst_encode_opt_String(apiObj.created);
@@ -561,6 +945,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     );
     wireObj.proof_purpose = cst_encode_opt_String(apiObj.proofPurpose);
     wireObj.proof_value = cst_encode_opt_String(apiObj.proofValue);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_rankable_credential_input(
+    RankableCredentialInput apiObj,
+    wire_cst_rankable_credential_input wireObj,
+  ) {
+    wireObj.credential_id = cst_encode_String(apiObj.credentialId);
+    wireObj.issuer_id = cst_encode_String(apiObj.issuerId);
+    wireObj.issued_at_unix = cst_encode_i_64(apiObj.issuedAtUnix);
+    wireObj.trust_level = cst_encode_f_64(apiObj.trustLevel);
+    wireObj.claim_count = cst_encode_usize(apiObj.claimCount);
   }
 
   @protected
@@ -624,7 +1020,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  int
+  cst_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  );
+
+  @protected
+  int
+  cst_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  );
+
+  @protected
   bool cst_encode_bool(bool raw);
+
+  @protected
+  double cst_encode_f_64(double raw);
 
   @protected
   int cst_encode_i_32(int raw);
@@ -641,6 +1052,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
     SseSerializer serializer,
   );
 
@@ -684,6 +1109,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_verifiable_credential(
     VerifiableCredential self,
     SseSerializer serializer,
@@ -711,7 +1139,74 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_frb_authorization_request(
+    FrbAuthorizationRequest self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_credential_offer(
+    FrbCredentialOffer self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_credential_response(
+    FrbCredentialResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_issuer_metadata(
+    FrbIssuerMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_request(
+    FrbPresentationRequest self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_response(
+    FrbPresentationResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_token_response(
+    FrbTokenResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_zk_proof_entry(
+    FrbZkProofEntry self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_issuer_check_result_output(
+    IssuerCheckResultOutput self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    List<PresentationPolicy> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
@@ -729,6 +1224,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_frb_zk_proof_entry(
+    List<FrbZkProofEntry> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_list_prim_u_8_strict(
     List<Uint8List> self,
     SseSerializer serializer,
@@ -740,6 +1241,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_rankable_credential_input(
+    List<RankableCredentialInput> self,
     SseSerializer serializer,
   );
 
@@ -768,10 +1275,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_policy_evaluation_result(
+    PolicyEvaluationResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_privacy_level(PrivacyLevel self, SseSerializer serializer);
 
   @protected
   void sse_encode_proof(Proof self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_rankable_credential_input(
+    RankableCredentialInput self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_sd_jwt_credential(
@@ -789,10 +1311,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_trust_info(TrustInfo self, SseSerializer serializer);
 
   @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_verifiable_credential(
@@ -837,6 +1365,44 @@ class RustLibWire implements BaseWire {
       );
   late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
       .asFunction<void Function(DartPostCObjectFnType)>();
+
+  void wire__crate__api__check_issuer_constraints(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_id,
+    bool trust_profile_verified,
+  ) {
+    return _wire__crate__api__check_issuer_constraints(
+      port_,
+      policy_json,
+      issuer_id,
+      trust_profile_verified,
+    );
+  }
+
+  late final _wire__crate__api__check_issuer_constraintsPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Bool,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints',
+      );
+  late final _wire__crate__api__check_issuer_constraints =
+      _wire__crate__api__check_issuer_constraintsPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              bool,
+            )
+          >();
 
   void wire__crate__api__create_selectable_credential(
     int port_,
@@ -911,6 +1477,44 @@ class RustLibWire implements BaseWire {
       _wire__crate__api__credential_to_jsonPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
 
+  void wire__crate__api__evaluate_presentation_request(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> request_json,
+    ffi.Pointer<wire_cst_list_String> policies_json,
+    ffi.Pointer<wire_cst_list_credential> credentials,
+  ) {
+    return _wire__crate__api__evaluate_presentation_request(
+      port_,
+      request_json,
+      policies_json,
+      credentials,
+    );
+  }
+
+  late final _wire__crate__api__evaluate_presentation_requestPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_String>,
+            ffi.Pointer<wire_cst_list_credential>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request',
+      );
+  late final _wire__crate__api__evaluate_presentation_request =
+      _wire__crate__api__evaluate_presentation_requestPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_String>,
+              ffi.Pointer<wire_cst_list_credential>,
+            )
+          >();
+
   void wire__crate__api__get_credential_claims(
     int port_,
     ffi.Pointer<wire_cst_credential> credential,
@@ -929,6 +1533,40 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__get_credential_claims =
       _wire__crate__api__get_credential_claimsPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
+
+  void wire__crate__api__get_minimum_disclosure_set(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_json,
+    ffi.Pointer<wire_cst_credential> credential,
+  ) {
+    return _wire__crate__api__get_minimum_disclosure_set(
+      port_,
+      policy_json,
+      credential,
+    );
+  }
+
+  late final _wire__crate__api__get_minimum_disclosure_setPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_credential>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set',
+      );
+  late final _wire__crate__api__get_minimum_disclosure_set =
+      _wire__crate__api__get_minimum_disclosure_setPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_credential>,
+            )
+          >();
 
   void wire__crate__api__group_credentials_by_issuer(
     int port_,
@@ -1042,6 +1680,68 @@ class RustLibWire implements BaseWire {
             void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
           >();
 
+  void wire__crate__api__rank_matching_credentials(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_json,
+    ffi.Pointer<wire_cst_list_rankable_credential_input> credentials,
+  ) {
+    return _wire__crate__api__rank_matching_credentials(
+      port_,
+      policy_json,
+      credentials,
+    );
+  }
+
+  late final _wire__crate__api__rank_matching_credentialsPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_rankable_credential_input>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials',
+      );
+  late final _wire__crate__api__rank_matching_credentials =
+      _wire__crate__api__rank_matching_credentialsPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_rankable_credential_input>,
+            )
+          >();
+
+  void wire__crate__api__sync_policies(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> license_jwt,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> endpoint,
+  ) {
+    return _wire__crate__api__sync_policies(port_, license_jwt, endpoint);
+  }
+
+  late final _wire__crate__api__sync_policiesPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >('frbgen_privacyidea_authenticator_wire__crate__api__sync_policies');
+  late final _wire__crate__api__sync_policies =
+      _wire__crate__api__sync_policiesPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__verify_and_attach_trust(
     int port_,
     ffi.Pointer<wire_cst_m_doc_credential> mdoc,
@@ -1095,6 +1795,514 @@ class RustLibWire implements BaseWire {
           .asFunction<
             void Function(int, ffi.Pointer<wire_cst_list_list_prim_u_8_strict>)
           >();
+
+  void wire__crate__api__wallet_build_and_submit_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> response_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> presentation_definition_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credentials_json,
+  ) {
+    return _wire__crate__api__wallet_build_and_submit_presentation(
+      port_,
+      response_uri,
+      presentation_definition_json,
+      credentials_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_build_and_submit_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation',
+      );
+  late final _wire__crate__api__wallet_build_and_submit_presentation =
+      _wire__crate__api__wallet_build_and_submit_presentationPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_build_and_submit_zk_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> response_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> presentation_definition_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credentials_json,
+    ffi.Pointer<wire_cst_list_frb_zk_proof_entry> zk_proofs,
+  ) {
+    return _wire__crate__api__wallet_build_and_submit_zk_presentation(
+      port_,
+      response_uri,
+      presentation_definition_json,
+      credentials_json,
+      zk_proofs,
+    );
+  }
+
+  late final _wire__crate__api__wallet_build_and_submit_zk_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_frb_zk_proof_entry>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation',
+      );
+  late final _wire__crate__api__wallet_build_and_submit_zk_presentation =
+      _wire__crate__api__wallet_build_and_submit_zk_presentationPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_frb_zk_proof_entry>,
+            )
+          >();
+
+  void wire__crate__api__wallet_build_auth_request(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_metadata_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_configuration_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> client_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_state,
+  ) {
+    return _wire__crate__api__wallet_build_auth_request(
+      port_,
+      issuer_metadata_json,
+      credential_configuration_id,
+      client_id,
+      redirect_uri,
+      issuer_state,
+    );
+  }
+
+  late final _wire__crate__api__wallet_build_auth_requestPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request',
+      );
+  late final _wire__crate__api__wallet_build_auth_request =
+      _wire__crate__api__wallet_build_auth_requestPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_create_proof_jwt(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_kid,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_url,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> jwk_json,
+  ) {
+    return _wire__crate__api__wallet_create_proof_jwt(
+      port_,
+      holder_kid,
+      c_nonce,
+      issuer_url,
+      jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_create_proof_jwtPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt',
+      );
+  late final _wire__crate__api__wallet_create_proof_jwt =
+      _wire__crate__api__wallet_create_proof_jwtPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_exchange_auth_code_token(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> token_endpoint,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> code,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> code_verifier,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> client_id,
+  ) {
+    return _wire__crate__api__wallet_exchange_auth_code_token(
+      port_,
+      token_endpoint,
+      code,
+      code_verifier,
+      redirect_uri,
+      client_id,
+    );
+  }
+
+  late final _wire__crate__api__wallet_exchange_auth_code_tokenPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token',
+      );
+  late final _wire__crate__api__wallet_exchange_auth_code_token =
+      _wire__crate__api__wallet_exchange_auth_code_tokenPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_exchange_pre_auth_token(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> token_endpoint,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> pre_auth_code,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> tx_code,
+  ) {
+    return _wire__crate__api__wallet_exchange_pre_auth_token(
+      port_,
+      token_endpoint,
+      pre_auth_code,
+      tx_code,
+    );
+  }
+
+  late final _wire__crate__api__wallet_exchange_pre_auth_tokenPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token',
+      );
+  late final _wire__crate__api__wallet_exchange_pre_auth_token =
+      _wire__crate__api__wallet_exchange_pre_auth_tokenPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_fetch_issuer_metadata(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_url,
+  ) {
+    return _wire__crate__api__wallet_fetch_issuer_metadata(port_, issuer_url);
+  }
+
+  late final _wire__crate__api__wallet_fetch_issuer_metadataPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata',
+      );
+  late final _wire__crate__api__wallet_fetch_issuer_metadata =
+      _wire__crate__api__wallet_fetch_issuer_metadataPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
+  void wire__crate__api__wallet_parse_credential_offer(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> offer_uri,
+  ) {
+    return _wire__crate__api__wallet_parse_credential_offer(port_, offer_uri);
+  }
+
+  late final _wire__crate__api__wallet_parse_credential_offerPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer',
+      );
+  late final _wire__crate__api__wallet_parse_credential_offer =
+      _wire__crate__api__wallet_parse_credential_offerPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
+  void wire__crate__api__wallet_parse_presentation_request(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> request_uri,
+  ) {
+    return _wire__crate__api__wallet_parse_presentation_request(
+      port_,
+      request_uri,
+    );
+  }
+
+  late final _wire__crate__api__wallet_parse_presentation_requestPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request',
+      );
+  late final _wire__crate__api__wallet_parse_presentation_request =
+      _wire__crate__api__wallet_parse_presentation_requestPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
+  void wire__crate__api__wallet_request_credential(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_endpoint,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> access_token,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_format,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_configuration_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> proof_jwt,
+  ) {
+    return _wire__crate__api__wallet_request_credential(
+      port_,
+      credential_endpoint,
+      access_token,
+      credential_format,
+      credential_configuration_id,
+      proof_jwt,
+    );
+  }
+
+  late final _wire__crate__api__wallet_request_credentialPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential',
+      );
+  late final _wire__crate__api__wallet_request_credential =
+      _wire__crate__api__wallet_request_credentialPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__zk_is_supported_on_device(int port_) {
+    return _wire__crate__api__zk_is_supported_on_device(port_);
+  }
+
+  late final _wire__crate__api__zk_is_supported_on_devicePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+        'frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device',
+      );
+  late final _wire__crate__api__zk_is_supported_on_device =
+      _wire__crate__api__zk_is_supported_on_devicePtr
+          .asFunction<void Function(int)>();
+
+  void wire__crate__api__zk_prove(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> predicate_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> claim_value,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> mso_bytes,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> session_nonce,
+  ) {
+    return _wire__crate__api__zk_prove(
+      port_,
+      predicate_id,
+      claim_value,
+      mso_bytes,
+      signature,
+      session_nonce,
+    );
+  }
+
+  late final _wire__crate__api__zk_provePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+          )
+        >
+      >('frbgen_privacyidea_authenticator_wire__crate__api__zk_prove');
+  late final _wire__crate__api__zk_prove = _wire__crate__api__zk_provePtr
+      .asFunction<
+        void Function(
+          int,
+          ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+          ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+          ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+        )
+      >();
+
+  void wire__crate__api__zk_prove_from_presentation_definition(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> presentation_definition_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> mso_bytes,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> secrets_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> session_nonce,
+  ) {
+    return _wire__crate__api__zk_prove_from_presentation_definition(
+      port_,
+      presentation_definition_json,
+      mso_bytes,
+      signature,
+      secrets_json,
+      session_nonce,
+    );
+  }
+
+  late final _wire__crate__api__zk_prove_from_presentation_definitionPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition',
+      );
+  late final _wire__crate__api__zk_prove_from_presentation_definition =
+      _wire__crate__api__zk_prove_from_presentation_definitionPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            )
+          >();
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+      );
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
+      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+      );
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
+      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   ffi.Pointer<wire_cst_credential> cst_new_box_autoadd_credential() {
     return _cst_new_box_autoadd_credential();
@@ -1176,6 +2384,17 @@ class RustLibWire implements BaseWire {
       _cst_new_box_autoadd_trust_infoPtr
           .asFunction<ffi.Pointer<wire_cst_trust_info> Function()>();
 
+  ffi.Pointer<ffi.Uint64> cst_new_box_autoadd_u_64(int value) {
+    return _cst_new_box_autoadd_u_64(value);
+  }
+
+  late final _cst_new_box_autoadd_u_64Ptr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Uint64> Function(ffi.Uint64)>>(
+        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64',
+      );
+  late final _cst_new_box_autoadd_u_64 = _cst_new_box_autoadd_u_64Ptr
+      .asFunction<ffi.Pointer<ffi.Uint64> Function(int)>();
+
   ffi.Pointer<wire_cst_verifiable_credential>
   cst_new_box_autoadd_verifiable_credential() {
     return _cst_new_box_autoadd_verifiable_credential();
@@ -1192,6 +2411,37 @@ class RustLibWire implements BaseWire {
   late final _cst_new_box_autoadd_verifiable_credential =
       _cst_new_box_autoadd_verifiable_credentialPtr
           .asFunction<ffi.Pointer<wire_cst_verifiable_credential> Function()>();
+
+  ffi.Pointer<
+    wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+  >
+  cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    int len,
+  ) {
+    return _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+      len,
+    );
+  }
+
+  late final _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Pointer<
+            wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+          >
+          Function(ffi.Int32)
+        >
+      >(
+        'frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+      );
+  late final _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
+      _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
+          .asFunction<
+            ffi.Pointer<
+              wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+            >
+            Function(int)
+          >();
 
   ffi.Pointer<wire_cst_list_String> cst_new_list_String(int len) {
     return _cst_new_list_String(len);
@@ -1233,6 +2483,24 @@ class RustLibWire implements BaseWire {
       >('frbgen_privacyidea_authenticator_cst_new_list_credential_group');
   late final _cst_new_list_credential_group = _cst_new_list_credential_groupPtr
       .asFunction<ffi.Pointer<wire_cst_list_credential_group> Function(int)>();
+
+  ffi.Pointer<wire_cst_list_frb_zk_proof_entry> cst_new_list_frb_zk_proof_entry(
+    int len,
+  ) {
+    return _cst_new_list_frb_zk_proof_entry(len);
+  }
+
+  late final _cst_new_list_frb_zk_proof_entryPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Pointer<wire_cst_list_frb_zk_proof_entry> Function(ffi.Int32)
+        >
+      >('frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry');
+  late final _cst_new_list_frb_zk_proof_entry =
+      _cst_new_list_frb_zk_proof_entryPtr
+          .asFunction<
+            ffi.Pointer<wire_cst_list_frb_zk_proof_entry> Function(int)
+          >();
 
   ffi.Pointer<wire_cst_list_list_prim_u_8_strict>
   cst_new_list_list_prim_u_8_strict(int len) {
@@ -1280,6 +2548,27 @@ class RustLibWire implements BaseWire {
       >('frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_strict');
   late final _cst_new_list_prim_u_8_strict = _cst_new_list_prim_u_8_strictPtr
       .asFunction<ffi.Pointer<wire_cst_list_prim_u_8_strict> Function(int)>();
+
+  ffi.Pointer<wire_cst_list_rankable_credential_input>
+  cst_new_list_rankable_credential_input(int len) {
+    return _cst_new_list_rankable_credential_input(len);
+  }
+
+  late final _cst_new_list_rankable_credential_inputPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Pointer<wire_cst_list_rankable_credential_input> Function(
+            ffi.Int32,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input',
+      );
+  late final _cst_new_list_rankable_credential_input =
+      _cst_new_list_rankable_credential_inputPtr
+          .asFunction<
+            ffi.Pointer<wire_cst_list_rankable_credential_input> Function(int)
+          >();
 
   int dummy_method_to_enforce_bundling() {
     return _dummy_method_to_enforce_bundling();
@@ -1454,8 +2743,53 @@ final class wire_cst_list_prim_u_8_loose extends ffi.Struct {
   external int len;
 }
 
+final class wire_cst_rankable_credential_input extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_id;
+
+  @ffi.Int64()
+  external int issued_at_unix;
+
+  @ffi.Double()
+  external double trust_level;
+
+  @ffi.UintPtr()
+  external int claim_count;
+}
+
+final class wire_cst_list_rankable_credential_input extends ffi.Struct {
+  external ffi.Pointer<wire_cst_rankable_credential_input> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
 final class wire_cst_list_list_prim_u_8_strict extends ffi.Struct {
   external ffi.Pointer<ffi.Pointer<wire_cst_list_prim_u_8_strict>> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
+final class wire_cst_frb_zk_proof_entry extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> descriptor_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> predicate_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> proof_bytes;
+}
+
+final class wire_cst_list_frb_zk_proof_entry extends ffi.Struct {
+  external ffi.Pointer<wire_cst_frb_zk_proof_entry> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
+final class wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+    extends ffi.Struct {
+  external ffi.Pointer<ffi.UintPtr> ptr;
 
   @ffi.Int32()
   external int len;
@@ -1476,6 +2810,110 @@ final class wire_cst_list_credential_group extends ffi.Struct {
 
   @ffi.Int32()
   external int len;
+}
+
+final class wire_cst_frb_authorization_request extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> authorization_url;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> code_verifier;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> state;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri;
+}
+
+final class wire_cst_frb_credential_offer extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_issuer;
+
+  external ffi.Pointer<wire_cst_list_String> credential_configuration_ids;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> pre_authorized_code;
+
+  @ffi.Bool()
+  external bool tx_code_required;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_state;
+}
+
+final class wire_cst_frb_credential_response extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> format;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> transaction_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce;
+
+  external ffi.Pointer<ffi.Uint64> c_nonce_expires_in;
+}
+
+final class wire_cst_frb_issuer_metadata extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_issuer;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> token_endpoint;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_endpoint;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> authorization_endpoint;
+
+  external ffi.Pointer<wire_cst_list_String> grant_types_supported;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict>
+  credential_configurations_json;
+}
+
+final class wire_cst_frb_presentation_request extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> client_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> nonce;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> response_uri;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict>
+  presentation_definition_json;
+}
+
+final class wire_cst_frb_presentation_response extends ffi.Struct {
+  @ffi.Bool()
+  external bool ok;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> error;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> error_description;
+}
+
+final class wire_cst_frb_token_response extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> access_token;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> token_type;
+
+  external ffi.Pointer<ffi.Uint64> expires_in;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce;
+
+  external ffi.Pointer<ffi.Uint64> c_nonce_expires_in;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> scope;
+}
+
+final class wire_cst_issuer_check_result_output extends ffi.Struct {
+  @ffi.Bool()
+  external bool is_trusted;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> violation_message;
+}
+
+final class wire_cst_policy_evaluation_result extends ffi.Struct {
+  @ffi.Bool()
+  external bool is_satisfied;
+
+  external ffi.Pointer<wire_cst_list_String> minimum_disclosure_claims;
+
+  external ffi.Pointer<wire_cst_list_String> missing_required_claims;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_id;
 }
 
 final class wire_cst_selectable_credential extends ffi.Struct {

@@ -34,7 +34,9 @@ abstract class _$TokenFolderNotifier
     extends BuildlessNotifier<TokenFolderState> {
   late final TokenFolderRepository repo;
 
-  TokenFolderState build({required TokenFolderRepository repo});
+  TokenFolderState build({
+    required TokenFolderRepository repo,
+  });
 }
 
 /// See also [TokenFolderNotifier].
@@ -47,15 +49,21 @@ class TokenFolderNotifierFamily extends Family<TokenFolderState> {
   const TokenFolderNotifierFamily();
 
   /// See also [TokenFolderNotifier].
-  TokenFolderNotifierProvider call({required TokenFolderRepository repo}) {
-    return TokenFolderNotifierProvider(repo: repo);
+  TokenFolderNotifierProvider call({
+    required TokenFolderRepository repo,
+  }) {
+    return TokenFolderNotifierProvider(
+      repo: repo,
+    );
   }
 
   @override
   TokenFolderNotifierProvider getProviderOverride(
     covariant TokenFolderNotifierProvider provider,
   ) {
-    return call(repo: provider.repo);
+    return call(
+      repo: provider.repo,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -77,19 +85,21 @@ class TokenFolderNotifierFamily extends Family<TokenFolderState> {
 class TokenFolderNotifierProvider
     extends NotifierProviderImpl<TokenFolderNotifier, TokenFolderState> {
   /// See also [TokenFolderNotifier].
-  TokenFolderNotifierProvider({required TokenFolderRepository repo})
-    : this._internal(
-        () => TokenFolderNotifier()..repo = repo,
-        from: tokenFolderNotifierProviderOf,
-        name: r'tokenFolderNotifierProviderOf',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$tokenFolderNotifierHash,
-        dependencies: TokenFolderNotifierFamily._dependencies,
-        allTransitiveDependencies:
-            TokenFolderNotifierFamily._allTransitiveDependencies,
-        repo: repo,
-      );
+  TokenFolderNotifierProvider({
+    required TokenFolderRepository repo,
+  }) : this._internal(
+          () => TokenFolderNotifier()..repo = repo,
+          from: tokenFolderNotifierProviderOf,
+          name: r'tokenFolderNotifierProviderOf',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$tokenFolderNotifierHash,
+          dependencies: TokenFolderNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              TokenFolderNotifierFamily._allTransitiveDependencies,
+          repo: repo,
+        );
 
   TokenFolderNotifierProvider._internal(
     super._createNotifier, {
@@ -104,8 +114,12 @@ class TokenFolderNotifierProvider
   final TokenFolderRepository repo;
 
   @override
-  TokenFolderState runNotifierBuild(covariant TokenFolderNotifier notifier) {
-    return notifier.build(repo: repo);
+  TokenFolderState runNotifierBuild(
+    covariant TokenFolderNotifier notifier,
+  ) {
+    return notifier.build(
+      repo: repo,
+    );
   }
 
   @override
@@ -126,7 +140,7 @@ class TokenFolderNotifierProvider
 
   @override
   NotifierProviderElement<TokenFolderNotifier, TokenFolderState>
-  createElement() {
+      createElement() {
     return _TokenFolderNotifierProviderElement(this);
   }
 
@@ -158,6 +172,5 @@ class _TokenFolderNotifierProviderElement
   TokenFolderRepository get repo =>
       (origin as TokenFolderNotifierProvider).repo;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

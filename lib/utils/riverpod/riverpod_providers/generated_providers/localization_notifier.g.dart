@@ -13,14 +13,14 @@ String _$localizationNotifierHash() =>
 @ProviderFor(LocalizationNotifier)
 final localizationNotifierProvider =
     NotifierProvider<LocalizationNotifier, AppLocalizations>.internal(
-      LocalizationNotifier.new,
-      name: r'localizationNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$localizationNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  LocalizationNotifier.new,
+  name: r'localizationNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$localizationNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$LocalizationNotifier = Notifier<AppLocalizations>;
 // ignore_for_file: type=lint

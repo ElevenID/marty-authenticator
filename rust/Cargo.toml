@@ -15,6 +15,9 @@ marty-crypto = { path = "../../marty-core/marty-crypto" }
 marty-verification = { path = "../../marty-core/marty-verification", default-features = false, features = ["iaca", "csca"] }
 marty-zkp = { path = "../../marty-core/marty-zkp" }
 
+# OID4VCI/VP wallet (holder) — no issuer or verifier features
+marty-oid4vci = { path = "../../marty-core/marty-oid4vci", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+
 # Sync for policy caching
 marty-sync = { path = "../../marty-verifier/crates/marty-sync" }
 
@@ -32,6 +35,7 @@ anyhow = "1.0"
 # Utilities
 uuid = { version = "1.0", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
 
 # SD-JWT parsing
 ssi-sd-jwt = "0.3"

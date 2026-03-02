@@ -21,8 +21,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     required super.portManager,
   });
 
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_PresentationPolicyPtr => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  PresentationPolicy
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
+
+  @protected
+  PresentationPolicy
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -49,6 +65,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo dco_decode_box_autoadd_trust_info(dynamic raw);
 
   @protected
+  BigInt dco_decode_box_autoadd_u_64(dynamic raw);
+
+  @protected
   VerifiableCredential dco_decode_box_autoadd_verifiable_credential(
     dynamic raw,
   );
@@ -66,7 +85,46 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject dco_decode_credential_subject(dynamic raw);
 
   @protected
+  double dco_decode_f_64(dynamic raw);
+
+  @protected
+  FrbAuthorizationRequest dco_decode_frb_authorization_request(dynamic raw);
+
+  @protected
+  FrbCredentialOffer dco_decode_frb_credential_offer(dynamic raw);
+
+  @protected
+  FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw);
+
+  @protected
+  FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
+
+  @protected
+  FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw);
+
+  @protected
+  FrbPresentationResponse dco_decode_frb_presentation_response(dynamic raw);
+
+  @protected
+  FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
+
+  @protected
+  FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw);
+
+  @protected
   int dco_decode_i_32(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
+  IssuerCheckResultOutput dco_decode_issuer_check_result_output(dynamic raw);
+
+  @protected
+  List<PresentationPolicy>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  );
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
@@ -78,6 +136,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<CredentialGroup> dco_decode_list_credential_group(dynamic raw);
 
   @protected
+  List<FrbZkProofEntry> dco_decode_list_frb_zk_proof_entry(dynamic raw);
+
+  @protected
   List<Uint8List> dco_decode_list_list_prim_u_8_strict(dynamic raw);
 
   @protected
@@ -85,6 +146,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
+
+  @protected
+  List<RankableCredentialInput> dco_decode_list_rankable_credential_input(
+    dynamic raw,
+  );
 
   @protected
   MDocCredential dco_decode_m_doc_credential(dynamic raw);
@@ -102,10 +168,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo? dco_decode_opt_box_autoadd_trust_info(dynamic raw);
 
   @protected
+  BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw);
+
+  @protected
+  PolicyEvaluationResult dco_decode_policy_evaluation_result(dynamic raw);
+
+  @protected
   PrivacyLevel dco_decode_privacy_level(dynamic raw);
 
   @protected
   Proof dco_decode_proof(dynamic raw);
+
+  @protected
+  RankableCredentialInput dco_decode_rankable_credential_input(dynamic raw);
 
   @protected
   SdJwtCredential dco_decode_sd_jwt_credential(dynamic raw);
@@ -117,16 +192,34 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo dco_decode_trust_info(dynamic raw);
 
   @protected
+  BigInt dco_decode_u_64(dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
   void dco_decode_unit(dynamic raw);
 
   @protected
+  BigInt dco_decode_usize(dynamic raw);
+
+  @protected
   VerifiableCredential dco_decode_verifiable_credential(dynamic raw);
 
   @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+
+  @protected
+  PresentationPolicy
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  PresentationPolicy
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -159,6 +252,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo sse_decode_box_autoadd_trust_info(SseDeserializer deserializer);
 
   @protected
+  BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer);
+
+  @protected
   VerifiableCredential sse_decode_box_autoadd_verifiable_credential(
     SseDeserializer deserializer,
   );
@@ -176,7 +272,60 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject sse_decode_credential_subject(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
+  FrbAuthorizationRequest sse_decode_frb_authorization_request(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbCredentialOffer sse_decode_frb_credential_offer(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbCredentialResponse sse_decode_frb_credential_response(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbIssuerMetadata sse_decode_frb_issuer_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationRequest sse_decode_frb_presentation_request(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationResponse sse_decode_frb_presentation_response(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
+
+  @protected
+  FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  IssuerCheckResultOutput sse_decode_issuer_check_result_output(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<PresentationPolicy>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
@@ -190,6 +339,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<FrbZkProofEntry> sse_decode_list_frb_zk_proof_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<Uint8List> sse_decode_list_list_prim_u_8_strict(
     SseDeserializer deserializer,
   );
@@ -199,6 +353,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  List<RankableCredentialInput> sse_decode_list_rankable_credential_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MDocCredential sse_decode_m_doc_credential(SseDeserializer deserializer);
@@ -220,10 +379,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer);
+
+  @protected
+  PolicyEvaluationResult sse_decode_policy_evaluation_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PrivacyLevel sse_decode_privacy_level(SseDeserializer deserializer);
 
   @protected
   Proof sse_decode_proof(SseDeserializer deserializer);
+
+  @protected
+  RankableCredentialInput sse_decode_rankable_credential_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   SdJwtCredential sse_decode_sd_jwt_credential(SseDeserializer deserializer);
@@ -237,10 +409,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrustInfo sse_decode_trust_info(SseDeserializer deserializer);
 
   @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
   VerifiableCredential sse_decode_verifiable_credential(
@@ -293,6 +471,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   JSAny cst_encode_box_autoadd_trust_info(TrustInfo raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_trust_info(raw);
+  }
+
+  @protected
+  JSAny cst_encode_box_autoadd_u_64(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return cst_encode_u_64(raw);
   }
 
   @protected
@@ -351,6 +535,128 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_frb_authorization_request(FrbAuthorizationRequest raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.authorizationUrl),
+      cst_encode_String(raw.codeVerifier),
+      cst_encode_String(raw.state),
+      cst_encode_String(raw.redirectUri),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_credential_offer(FrbCredentialOffer raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.credentialIssuer),
+      cst_encode_list_String(raw.credentialConfigurationIds),
+      cst_encode_opt_String(raw.preAuthorizedCode),
+      cst_encode_bool(raw.txCodeRequired),
+      cst_encode_opt_String(raw.issuerState),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_credential_response(FrbCredentialResponse raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_opt_String(raw.format),
+      cst_encode_opt_String(raw.credential),
+      cst_encode_opt_String(raw.transactionId),
+      cst_encode_opt_String(raw.cNonce),
+      cst_encode_opt_box_autoadd_u_64(raw.cNonceExpiresIn),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_issuer_metadata(FrbIssuerMetadata raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.credentialIssuer),
+      cst_encode_String(raw.tokenEndpoint),
+      cst_encode_String(raw.credentialEndpoint),
+      cst_encode_opt_String(raw.authorizationEndpoint),
+      cst_encode_list_String(raw.grantTypesSupported),
+      cst_encode_String(raw.credentialConfigurationsJson),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_presentation_request(FrbPresentationRequest raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.clientId),
+      cst_encode_String(raw.nonce),
+      cst_encode_String(raw.responseUri),
+      cst_encode_String(raw.presentationDefinitionJson),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_presentation_response(FrbPresentationResponse raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_bool(raw.ok),
+      cst_encode_opt_String(raw.redirectUri),
+      cst_encode_opt_String(raw.error),
+      cst_encode_opt_String(raw.errorDescription),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_token_response(FrbTokenResponse raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.accessToken),
+      cst_encode_String(raw.tokenType),
+      cst_encode_opt_box_autoadd_u_64(raw.expiresIn),
+      cst_encode_opt_String(raw.cNonce),
+      cst_encode_opt_box_autoadd_u_64(raw.cNonceExpiresIn),
+      cst_encode_opt_String(raw.scope),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_zk_proof_entry(FrbZkProofEntry raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.descriptorId),
+      cst_encode_String(raw.predicateId),
+      cst_encode_list_prim_u_8_strict(raw.proofBytes),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_i_64(PlatformInt64 raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return castNativeBigInt(raw);
+  }
+
+  @protected
+  JSAny cst_encode_issuer_check_result_output(IssuerCheckResultOutput raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_bool(raw.isTrusted),
+      cst_encode_opt_String(raw.violationMessage),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny
+  cst_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    List<PresentationPolicy> raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw
+        .map(
+          cst_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy,
+        )
+        .toList()
+        .jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_list_String(List<String> raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw.map(cst_encode_String).toList().jsify()!;
@@ -369,6 +675,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_list_frb_zk_proof_entry(List<FrbZkProofEntry> raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.map(cst_encode_frb_zk_proof_entry).toList().jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_list_list_prim_u_8_strict(List<Uint8List> raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw.map(cst_encode_list_prim_u_8_strict).toList().jsify()!;
@@ -384,6 +696,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   JSAny cst_encode_list_prim_u_8_strict(Uint8List raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw.jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_list_rankable_credential_input(
+    List<RankableCredentialInput> raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.map(cst_encode_rankable_credential_input).toList().jsify()!;
   }
 
   @protected
@@ -427,6 +747,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny? cst_encode_opt_box_autoadd_u_64(BigInt? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? null : cst_encode_box_autoadd_u_64(raw);
+  }
+
+  @protected
+  JSAny cst_encode_policy_evaluation_result(PolicyEvaluationResult raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_bool(raw.isSatisfied),
+      cst_encode_list_String(raw.minimumDisclosureClaims),
+      cst_encode_list_String(raw.missingRequiredClaims),
+      cst_encode_String(raw.policyId),
+    ].jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_proof(Proof raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return [
@@ -435,6 +772,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.verificationMethod),
       cst_encode_opt_String(raw.proofPurpose),
       cst_encode_opt_String(raw.proofValue),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_rankable_credential_input(RankableCredentialInput raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.credentialId),
+      cst_encode_String(raw.issuerId),
+      cst_encode_i_64(raw.issuedAtUnix),
+      cst_encode_f_64(raw.trustLevel),
+      cst_encode_usize(raw.claimCount),
     ].jsify()!;
   }
 
@@ -476,6 +825,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_u_64(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return castNativeBigInt(raw);
+  }
+
+  @protected
+  JSAny cst_encode_usize(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return castNativeBigInt(raw);
+  }
+
+  @protected
   JSAny cst_encode_verifiable_credential(VerifiableCredential raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return [
@@ -493,7 +854,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  int
+  cst_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  );
+
+  @protected
+  int
+  cst_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  );
+
+  @protected
   bool cst_encode_bool(bool raw);
+
+  @protected
+  double cst_encode_f_64(double raw);
 
   @protected
   int cst_encode_i_32(int raw);
@@ -510,6 +886,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
     SseSerializer serializer,
   );
 
@@ -553,6 +943,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_verifiable_credential(
     VerifiableCredential self,
     SseSerializer serializer,
@@ -580,7 +973,74 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_frb_authorization_request(
+    FrbAuthorizationRequest self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_credential_offer(
+    FrbCredentialOffer self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_credential_response(
+    FrbCredentialResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_issuer_metadata(
+    FrbIssuerMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_request(
+    FrbPresentationRequest self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_response(
+    FrbPresentationResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_token_response(
+    FrbTokenResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_zk_proof_entry(
+    FrbZkProofEntry self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_issuer_check_result_output(
+    IssuerCheckResultOutput self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    List<PresentationPolicy> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
@@ -598,6 +1058,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_frb_zk_proof_entry(
+    List<FrbZkProofEntry> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_list_prim_u_8_strict(
     List<Uint8List> self,
     SseSerializer serializer,
@@ -609,6 +1075,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_rankable_credential_input(
+    List<RankableCredentialInput> self,
     SseSerializer serializer,
   );
 
@@ -637,10 +1109,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_policy_evaluation_result(
+    PolicyEvaluationResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_privacy_level(PrivacyLevel self, SseSerializer serializer);
 
   @protected
   void sse_encode_proof(Proof self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_rankable_credential_input(
+    RankableCredentialInput self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_sd_jwt_credential(
@@ -658,10 +1145,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_trust_info(TrustInfo self, SseSerializer serializer);
 
   @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_verifiable_credential(
@@ -674,6 +1167,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
 class RustLibWire implements BaseWire {
   RustLibWire.fromExternalLibrary(ExternalLibrary lib);
+
+  void wire__crate__api__check_issuer_constraints(
+    NativePortType port_,
+    String policy_json,
+    String issuer_id,
+    bool trust_profile_verified,
+  ) => wasmModule.wire__crate__api__check_issuer_constraints(
+    port_,
+    policy_json,
+    issuer_id,
+    trust_profile_verified,
+  );
 
   void wire__crate__api__create_selectable_credential(
     NativePortType port_,
@@ -695,10 +1200,32 @@ class RustLibWire implements BaseWire {
     JSAny credential,
   ) => wasmModule.wire__crate__api__credential_to_json(port_, credential);
 
+  void wire__crate__api__evaluate_presentation_request(
+    NativePortType port_,
+    String request_json,
+    JSAny policies_json,
+    JSAny credentials,
+  ) => wasmModule.wire__crate__api__evaluate_presentation_request(
+    port_,
+    request_json,
+    policies_json,
+    credentials,
+  );
+
   void wire__crate__api__get_credential_claims(
     NativePortType port_,
     JSAny credential,
   ) => wasmModule.wire__crate__api__get_credential_claims(port_, credential);
+
+  void wire__crate__api__get_minimum_disclosure_set(
+    NativePortType port_,
+    String policy_json,
+    JSAny credential,
+  ) => wasmModule.wire__crate__api__get_minimum_disclosure_set(
+    port_,
+    policy_json,
+    credential,
+  );
 
   void wire__crate__api__group_credentials_by_issuer(
     NativePortType port_,
@@ -728,6 +1255,22 @@ class RustLibWire implements BaseWire {
     String json,
   ) => wasmModule.wire__crate__api__parse_verifiable_credential(port_, json);
 
+  void wire__crate__api__rank_matching_credentials(
+    NativePortType port_,
+    String policy_json,
+    JSAny credentials,
+  ) => wasmModule.wire__crate__api__rank_matching_credentials(
+    port_,
+    policy_json,
+    credentials,
+  );
+
+  void wire__crate__api__sync_policies(
+    NativePortType port_,
+    String license_jwt,
+    String endpoint,
+  ) => wasmModule.wire__crate__api__sync_policies(port_, license_jwt, endpoint);
+
   void wire__crate__api__verify_and_attach_trust(
     NativePortType port_,
     JSAny mdoc,
@@ -742,6 +1285,181 @@ class RustLibWire implements BaseWire {
     NativePortType port_,
     JSAny x5chain,
   ) => wasmModule.wire__crate__api__verify_mdoc_trust_chain(port_, x5chain);
+
+  void wire__crate__api__wallet_build_and_submit_presentation(
+    NativePortType port_,
+    String response_uri,
+    String presentation_definition_json,
+    String credentials_json,
+  ) => wasmModule.wire__crate__api__wallet_build_and_submit_presentation(
+    port_,
+    response_uri,
+    presentation_definition_json,
+    credentials_json,
+  );
+
+  void wire__crate__api__wallet_build_and_submit_zk_presentation(
+    NativePortType port_,
+    String response_uri,
+    String presentation_definition_json,
+    String credentials_json,
+    JSAny zk_proofs,
+  ) => wasmModule.wire__crate__api__wallet_build_and_submit_zk_presentation(
+    port_,
+    response_uri,
+    presentation_definition_json,
+    credentials_json,
+    zk_proofs,
+  );
+
+  void wire__crate__api__wallet_build_auth_request(
+    NativePortType port_,
+    String issuer_metadata_json,
+    String credential_configuration_id,
+    String client_id,
+    String redirect_uri,
+    String? issuer_state,
+  ) => wasmModule.wire__crate__api__wallet_build_auth_request(
+    port_,
+    issuer_metadata_json,
+    credential_configuration_id,
+    client_id,
+    redirect_uri,
+    issuer_state,
+  );
+
+  void wire__crate__api__wallet_create_proof_jwt(
+    NativePortType port_,
+    String holder_kid,
+    String c_nonce,
+    String issuer_url,
+    String jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_create_proof_jwt(
+    port_,
+    holder_kid,
+    c_nonce,
+    issuer_url,
+    jwk_json,
+  );
+
+  void wire__crate__api__wallet_exchange_auth_code_token(
+    NativePortType port_,
+    String token_endpoint,
+    String code,
+    String code_verifier,
+    String? redirect_uri,
+    String? client_id,
+  ) => wasmModule.wire__crate__api__wallet_exchange_auth_code_token(
+    port_,
+    token_endpoint,
+    code,
+    code_verifier,
+    redirect_uri,
+    client_id,
+  );
+
+  void wire__crate__api__wallet_exchange_pre_auth_token(
+    NativePortType port_,
+    String token_endpoint,
+    String pre_auth_code,
+    String? tx_code,
+  ) => wasmModule.wire__crate__api__wallet_exchange_pre_auth_token(
+    port_,
+    token_endpoint,
+    pre_auth_code,
+    tx_code,
+  );
+
+  void wire__crate__api__wallet_fetch_issuer_metadata(
+    NativePortType port_,
+    String issuer_url,
+  ) => wasmModule.wire__crate__api__wallet_fetch_issuer_metadata(
+    port_,
+    issuer_url,
+  );
+
+  void wire__crate__api__wallet_parse_credential_offer(
+    NativePortType port_,
+    String offer_uri,
+  ) => wasmModule.wire__crate__api__wallet_parse_credential_offer(
+    port_,
+    offer_uri,
+  );
+
+  void wire__crate__api__wallet_parse_presentation_request(
+    NativePortType port_,
+    String request_uri,
+  ) => wasmModule.wire__crate__api__wallet_parse_presentation_request(
+    port_,
+    request_uri,
+  );
+
+  void wire__crate__api__wallet_request_credential(
+    NativePortType port_,
+    String credential_endpoint,
+    String access_token,
+    String credential_format,
+    String? credential_configuration_id,
+    String proof_jwt,
+  ) => wasmModule.wire__crate__api__wallet_request_credential(
+    port_,
+    credential_endpoint,
+    access_token,
+    credential_format,
+    credential_configuration_id,
+    proof_jwt,
+  );
+
+  void wire__crate__api__zk_is_supported_on_device(NativePortType port_) =>
+      wasmModule.wire__crate__api__zk_is_supported_on_device(port_);
+
+  void wire__crate__api__zk_prove(
+    NativePortType port_,
+    String predicate_id,
+    String claim_value,
+    JSAny mso_bytes,
+    JSAny signature,
+    JSAny session_nonce,
+  ) => wasmModule.wire__crate__api__zk_prove(
+    port_,
+    predicate_id,
+    claim_value,
+    mso_bytes,
+    signature,
+    session_nonce,
+  );
+
+  void wire__crate__api__zk_prove_from_presentation_definition(
+    NativePortType port_,
+    String presentation_definition_json,
+    JSAny mso_bytes,
+    JSAny signature,
+    String secrets_json,
+    JSAny session_nonce,
+  ) => wasmModule.wire__crate__api__zk_prove_from_presentation_definition(
+    port_,
+    presentation_definition_json,
+    mso_bytes,
+    signature,
+    secrets_json,
+    session_nonce,
+  );
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr,
+      );
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr,
+      );
 }
 
 @JS('wasm_bindgen')
@@ -750,6 +1468,13 @@ external RustLibWasmModule get wasmModule;
 @JS()
 @anonymous
 extension type RustLibWasmModule._(JSObject _) implements JSObject {
+  external void wire__crate__api__check_issuer_constraints(
+    NativePortType port_,
+    String policy_json,
+    String issuer_id,
+    bool trust_profile_verified,
+  );
+
   external void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -766,8 +1491,21 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     JSAny credential,
   );
 
+  external void wire__crate__api__evaluate_presentation_request(
+    NativePortType port_,
+    String request_json,
+    JSAny policies_json,
+    JSAny credentials,
+  );
+
   external void wire__crate__api__get_credential_claims(
     NativePortType port_,
+    JSAny credential,
+  );
+
+  external void wire__crate__api__get_minimum_disclosure_set(
+    NativePortType port_,
+    String policy_json,
     JSAny credential,
   );
 
@@ -796,6 +1534,18 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String json,
   );
 
+  external void wire__crate__api__rank_matching_credentials(
+    NativePortType port_,
+    String policy_json,
+    JSAny credentials,
+  );
+
+  external void wire__crate__api__sync_policies(
+    NativePortType port_,
+    String license_jwt,
+    String endpoint,
+  );
+
   external void wire__crate__api__verify_and_attach_trust(
     NativePortType port_,
     JSAny mdoc,
@@ -805,5 +1555,109 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
   external void wire__crate__api__verify_mdoc_trust_chain(
     NativePortType port_,
     JSAny x5chain,
+  );
+
+  external void wire__crate__api__wallet_build_and_submit_presentation(
+    NativePortType port_,
+    String response_uri,
+    String presentation_definition_json,
+    String credentials_json,
+  );
+
+  external void wire__crate__api__wallet_build_and_submit_zk_presentation(
+    NativePortType port_,
+    String response_uri,
+    String presentation_definition_json,
+    String credentials_json,
+    JSAny zk_proofs,
+  );
+
+  external void wire__crate__api__wallet_build_auth_request(
+    NativePortType port_,
+    String issuer_metadata_json,
+    String credential_configuration_id,
+    String client_id,
+    String redirect_uri,
+    String? issuer_state,
+  );
+
+  external void wire__crate__api__wallet_create_proof_jwt(
+    NativePortType port_,
+    String holder_kid,
+    String c_nonce,
+    String issuer_url,
+    String jwk_json,
+  );
+
+  external void wire__crate__api__wallet_exchange_auth_code_token(
+    NativePortType port_,
+    String token_endpoint,
+    String code,
+    String code_verifier,
+    String? redirect_uri,
+    String? client_id,
+  );
+
+  external void wire__crate__api__wallet_exchange_pre_auth_token(
+    NativePortType port_,
+    String token_endpoint,
+    String pre_auth_code,
+    String? tx_code,
+  );
+
+  external void wire__crate__api__wallet_fetch_issuer_metadata(
+    NativePortType port_,
+    String issuer_url,
+  );
+
+  external void wire__crate__api__wallet_parse_credential_offer(
+    NativePortType port_,
+    String offer_uri,
+  );
+
+  external void wire__crate__api__wallet_parse_presentation_request(
+    NativePortType port_,
+    String request_uri,
+  );
+
+  external void wire__crate__api__wallet_request_credential(
+    NativePortType port_,
+    String credential_endpoint,
+    String access_token,
+    String credential_format,
+    String? credential_configuration_id,
+    String proof_jwt,
+  );
+
+  external void wire__crate__api__zk_is_supported_on_device(
+    NativePortType port_,
+  );
+
+  external void wire__crate__api__zk_prove(
+    NativePortType port_,
+    String predicate_id,
+    String claim_value,
+    JSAny mso_bytes,
+    JSAny signature,
+    JSAny session_nonce,
+  );
+
+  external void wire__crate__api__zk_prove_from_presentation_definition(
+    NativePortType port_,
+    String presentation_definition_json,
+    JSAny mso_bytes,
+    JSAny signature,
+    String secrets_json,
+    JSAny session_nonce,
+  );
+
+  external void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    int ptr,
+  );
+
+  external void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    int ptr,
   );
 }

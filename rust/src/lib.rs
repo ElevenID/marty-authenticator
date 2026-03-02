@@ -12,8 +12,11 @@ pub mod api;
 pub mod credential;
 pub mod error;
 pub mod trust;
-pub mod zk;
 
 // Re-export types for flutter_rust_bridge
 pub use credential::{Credential, MDocCredential, SdJwtCredential, TrustInfo, VerifiableCredential};
 pub use error::{MartyError, MartyResult};
+pub use api::{
+    FrbAuthorizationRequest, FrbCredentialOffer, FrbCredentialResponse, FrbIssuerMetadata,
+    FrbPresentationRequest, FrbPresentationResponse, FrbTokenResponse, FrbZkProofEntry,
+};

@@ -106,24 +106,25 @@ class PushRequestNotifierProvider
     required PushProvider pushProvider,
     required PushRequestRepository pushRepo,
   }) : this._internal(
-         () => PushRequestNotifier()
-           ..rsaUtils = rsaUtils
-           ..ioClient = ioClient
-           ..pushProvider = pushProvider
-           ..pushRepo = pushRepo,
-         from: pushRequestNotifierProviderOf,
-         name: r'pushRequestNotifierProviderOf',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$pushRequestNotifierHash,
-         dependencies: PushRequestNotifierFamily._dependencies,
-         allTransitiveDependencies:
-             PushRequestNotifierFamily._allTransitiveDependencies,
-         rsaUtils: rsaUtils,
-         ioClient: ioClient,
-         pushProvider: pushProvider,
-         pushRepo: pushRepo,
-       );
+          () => PushRequestNotifier()
+            ..rsaUtils = rsaUtils
+            ..ioClient = ioClient
+            ..pushProvider = pushProvider
+            ..pushRepo = pushRepo,
+          from: pushRequestNotifierProviderOf,
+          name: r'pushRequestNotifierProviderOf',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$pushRequestNotifierHash,
+          dependencies: PushRequestNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              PushRequestNotifierFamily._allTransitiveDependencies,
+          rsaUtils: rsaUtils,
+          ioClient: ioClient,
+          pushProvider: pushProvider,
+          pushRepo: pushRepo,
+        );
 
   PushRequestNotifierProvider._internal(
     super._createNotifier, {
@@ -180,7 +181,7 @@ class PushRequestNotifierProvider
 
   @override
   AsyncNotifierProviderElement<PushRequestNotifier, PushRequestState>
-  createElement() {
+      createElement() {
     return _PushRequestNotifierProviderElement(this);
   }
 
@@ -236,6 +237,5 @@ class _PushRequestNotifierProviderElement
   PushRequestRepository get pushRepo =>
       (origin as PushRequestNotifierProvider).pushRepo;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

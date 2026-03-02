@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/card_data.dart';
 import '../interfaces/spruce_interfaces.dart';
 import '../services/spruce_platform_service.dart';
+import '../services/wallet_credential_store.dart';
 import '../utils/logger.dart';
 
 final cardStateProvider =
@@ -49,45 +50,63 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
   final _storage = const FlutterSecureStorage();
   static const _storageKey = 'card_groups_data';
 
+  /// Loads all credentials from both the Spruce SDK channel and the
+  /// OID4VCI [WalletCredentialStore], then groups them by issuer.
   Future<void> loadCards() async {
     Logger.debug('DEBUG: loadCards called');
+    final List<CardData> allCards = [];
+
+    // 1. Load from Spruce SDK native channel (legacy / third-party wallets).
     try {
-      // Try to load from SpruceID SDK
       final credentials = await _spruceService.getStoredCredentials();
-      Logger.debug('DEBUG: Loaded ${credentials.length} credentials');
-      if (credentials.isNotEmpty) {
-        final cards = credentials
-            .map((c) => _mapCredentialToCardData(c))
-            .toList();
-
-        // Group cards by issuer
-        final Map<String, List<CardData>> groupedCards = {};
-        for (var card in cards) {
-          final issuer = card.issuer ?? 'Unknown Issuer';
-          if (!groupedCards.containsKey(issuer)) {
-            groupedCards[issuer] = [];
-          }
-          groupedCards[issuer]!.add(card);
-        }
-
-        state = groupedCards.entries.map((entry) {
-          return CardGroup(title: entry.key, cards: entry.value);
-        }).toList();
-        Logger.debug(
-          'DEBUG: CardStateNotifier state updated with ${state.length} groups',
-        );
-
-        return;
-      } else {
-        // No credentials found
-        Logger.debug('DEBUG: No credentials found.');
-        state = [];
-      }
+      Logger.debug(
+        'DEBUG: Loaded ${credentials.length} credentials from Spruce channel',
+      );
+      allCards.addAll(credentials.map(_mapCredentialToCardData));
     } catch (e) {
       Logger.error('Error loading credentials from SpruceID: $e');
-      state = [];
     }
+
+    // 2. Load OID4VCI-issued credentials from WalletCredentialStore.
+    try {
+      final stored = await WalletCredentialStore.getAll();
+      Logger.debug(
+        'DEBUG: Loaded ${stored.length} credentials from WalletCredentialStore',
+      );
+      final existingIds =
+          allCards.map((c) => c.id).whereType<String>().toSet();
+      for (final cred in stored) {
+        if (!existingIds.contains(cred.id)) {
+          allCards.add(_mapStoredCredentialToCardData(cred));
+        }
+      }
+    } catch (e) {
+      Logger.error('Error loading credentials from WalletCredentialStore: $e');
+    }
+
+    if (allCards.isEmpty) {
+      Logger.debug('DEBUG: No credentials found.');
+      state = [];
+      return;
+    }
+
+    // Group by issuer.
+    final Map<String, List<CardData>> groupedCards = {};
+    for (final card in allCards) {
+      final issuer = card.issuer ?? 'Unknown Issuer';
+      groupedCards.putIfAbsent(issuer, () => []).add(card);
+    }
+
+    state = groupedCards.entries
+        .map((e) => CardGroup(title: e.key, cards: e.value))
+        .toList();
+    Logger.debug(
+      'DEBUG: CardStateNotifier state updated with ${state.length} groups',
+    );
   }
+
+  /// Refreshes the wallet card list from all credential sources.
+  Future<void> refreshCards() => loadCards();
 
   CardData _mapCredentialToCardData(Map<String, dynamic> credential) {
     // Extract fields
@@ -142,6 +161,57 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       rawData: data,
       metadata: data,
       privateData: data,
+    );
+  }
+
+  /// Maps a [StoredCredential] (OID4VCI-received) to [CardData] for display.
+  CardData _mapStoredCredentialToCardData(StoredCredential cred) {
+    final type = cred.types.isNotEmpty ? cred.types.first : cred.format;
+    final typeLower = type.toLowerCase();
+
+    String title = type;
+    IconData icon = Icons.credit_card;
+    Color color = Colors.blue;
+    List<Color> gradient = [Colors.blue, Colors.blueAccent];
+
+    if (typeLower.contains('driverlicense') ||
+        typeLower.contains('mdl') ||
+        typeLower.contains('mso_mdoc')) {
+      title = "Driver's License";
+      icon = Icons.drive_eta;
+      color = Colors.deepPurple;
+      gradient = [Colors.deepPurple, Colors.purpleAccent];
+    } else if (typeLower.contains('id') || typeLower.contains('identity')) {
+      title = 'Digital ID';
+      icon = Icons.perm_identity;
+      color = Colors.teal;
+      gradient = [Colors.teal, Colors.tealAccent];
+    } else if (typeLower.contains('sd-jwt') ||
+        typeLower.contains('sdjwt') ||
+        typeLower.contains('jwt')) {
+      title = 'Verifiable Credential';
+      icon = Icons.verified_user;
+      color = Colors.indigo;
+      gradient = [Colors.indigo, Colors.indigoAccent];
+    }
+
+    final Map<String, dynamic> data = {
+      '_source': 'wallet_credential_store',
+      'format': cred.format,
+      'issuedAt': cred.issuedAt.toIso8601String(),
+    };
+
+    return CardData(
+      title: title,
+      subtitle: cred.issuer,
+      icon: icon,
+      color: color,
+      gradient: gradient,
+      id: cred.id,
+      type: type,
+      issuer: cred.issuer,
+      rawData: data,
+      metadata: data,
     );
   }
 
@@ -225,7 +295,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
     saveCards();
   }
 
-  void deleteCard(CardData card) {
+  Future<void> deleteCard(CardData card) async {
     List<CardGroup> newGroups = [];
     for (var group in state) {
       final newCards = List<CardData>.from(group.cards);
@@ -234,5 +304,14 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
     }
     state = newGroups;
     saveCards();
+    // Also remove from WalletCredentialStore if issued via OID4VCI.
+    if (card.rawData?['_source'] == 'wallet_credential_store' &&
+        card.id != null) {
+      try {
+        await WalletCredentialStore.delete(card.id!);
+      } catch (e) {
+        Logger.error('Failed to delete OID4VCI credential from store: $e');
+      }
+    }
   }
 }

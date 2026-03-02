@@ -25,6 +25,7 @@
 
 // Section: imports
 
+use crate::api::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
 use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
 use flutter_rust_bridge::{Handler, IntoIntoDart};
@@ -39,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1861125443;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -13748832;
 
 // Section: executor
 
@@ -47,6 +48,37 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__check_issuer_constraints_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    policy_json: impl CstDecode<String>,
+    issuer_id: impl CstDecode<String>,
+    trust_profile_verified: impl CstDecode<bool>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "check_issuer_constraints",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_policy_json = policy_json.cst_decode();
+            let api_issuer_id = issuer_id.cst_decode();
+            let api_trust_profile_verified = trust_profile_verified.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::check_issuer_constraints(
+                            api_policy_json,
+                            api_issuer_id,
+                            api_trust_profile_verified,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__create_selectable_credential_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     credential: impl CstDecode<crate::credential::Credential>,
@@ -119,6 +151,37 @@ fn wire__crate__api__credential_to_json_impl(
         },
     )
 }
+fn wire__crate__api__evaluate_presentation_request_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    request_json: impl CstDecode<String>,
+    policies_json: impl CstDecode<Vec<String>>,
+    credentials: impl CstDecode<Vec<crate::credential::Credential>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "evaluate_presentation_request",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_request_json = request_json.cst_decode();
+            let api_policies_json = policies_json.cst_decode();
+            let api_credentials = credentials.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::evaluate_presentation_request(
+                            api_request_json,
+                            api_policies_json,
+                            api_credentials,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__get_credential_claims_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     credential: impl CstDecode<crate::credential::Credential>,
@@ -137,6 +200,34 @@ fn wire__crate__api__get_credential_claims_impl(
                         Result::<_, ()>::Ok(crate::api::get_credential_claims(&api_credential))?;
                     Ok(output_ok)
                 })())
+            }
+        },
+    )
+}
+fn wire__crate__api__get_minimum_disclosure_set_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    policy_json: impl CstDecode<String>,
+    credential: impl CstDecode<crate::credential::Credential>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_minimum_disclosure_set",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_policy_json = policy_json.cst_decode();
+            let api_credential = credential.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::get_minimum_disclosure_set(
+                            api_policy_json,
+                            api_credential,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
             }
         },
     )
@@ -255,6 +346,61 @@ fn wire__crate__api__parse_verifiable_credential_impl(
         },
     )
 }
+fn wire__crate__api__rank_matching_credentials_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    policy_json: impl CstDecode<String>,
+    credentials: impl CstDecode<Vec<crate::api::RankableCredentialInput>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "rank_matching_credentials",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_policy_json = policy_json.cst_decode();
+            let api_credentials = credentials.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::rank_matching_credentials(
+                            api_policy_json,
+                            api_credentials,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__sync_policies_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    license_jwt: impl CstDecode<String>,
+    endpoint: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "sync_policies",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_license_jwt = license_jwt.cst_decode();
+            let api_endpoint = endpoint.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::sync_policies(api_license_jwt, api_endpoint).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__verify_and_attach_trust_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     mdoc: impl CstDecode<crate::credential::MDocCredential>,
@@ -303,6 +449,425 @@ fn wire__crate__api__verify_mdoc_trust_chain_impl(
         },
     )
 }
+fn wire__crate__api__wallet_build_and_submit_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    response_uri: impl CstDecode<String>,
+    presentation_definition_json: impl CstDecode<String>,
+    credentials_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_build_and_submit_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_response_uri = response_uri.cst_decode();
+            let api_presentation_definition_json = presentation_definition_json.cst_decode();
+            let api_credentials_json = credentials_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_build_and_submit_presentation(
+                            api_response_uri,
+                            api_presentation_definition_json,
+                            api_credentials_json,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_build_and_submit_zk_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    response_uri: impl CstDecode<String>,
+    presentation_definition_json: impl CstDecode<String>,
+    credentials_json: impl CstDecode<String>,
+    zk_proofs: impl CstDecode<Vec<crate::api::FrbZkProofEntry>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_build_and_submit_zk_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_response_uri = response_uri.cst_decode();
+            let api_presentation_definition_json = presentation_definition_json.cst_decode();
+            let api_credentials_json = credentials_json.cst_decode();
+            let api_zk_proofs = zk_proofs.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_build_and_submit_zk_presentation(
+                            api_response_uri,
+                            api_presentation_definition_json,
+                            api_credentials_json,
+                            api_zk_proofs,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_build_auth_request_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    issuer_metadata_json: impl CstDecode<String>,
+    credential_configuration_id: impl CstDecode<String>,
+    client_id: impl CstDecode<String>,
+    redirect_uri: impl CstDecode<String>,
+    issuer_state: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_build_auth_request",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_issuer_metadata_json = issuer_metadata_json.cst_decode();
+            let api_credential_configuration_id = credential_configuration_id.cst_decode();
+            let api_client_id = client_id.cst_decode();
+            let api_redirect_uri = redirect_uri.cst_decode();
+            let api_issuer_state = issuer_state.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::wallet_build_auth_request(
+                            api_issuer_metadata_json,
+                            api_credential_configuration_id,
+                            api_client_id,
+                            api_redirect_uri,
+                            api_issuer_state,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_create_proof_jwt_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    holder_kid: impl CstDecode<String>,
+    c_nonce: impl CstDecode<String>,
+    issuer_url: impl CstDecode<String>,
+    jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_create_proof_jwt",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_holder_kid = holder_kid.cst_decode();
+            let api_c_nonce = c_nonce.cst_decode();
+            let api_issuer_url = issuer_url.cst_decode();
+            let api_jwk_json = jwk_json.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::wallet_create_proof_jwt(
+                            api_holder_kid,
+                            api_c_nonce,
+                            api_issuer_url,
+                            api_jwk_json,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_exchange_auth_code_token_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    token_endpoint: impl CstDecode<String>,
+    code: impl CstDecode<String>,
+    code_verifier: impl CstDecode<String>,
+    redirect_uri: impl CstDecode<Option<String>>,
+    client_id: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_exchange_auth_code_token",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_token_endpoint = token_endpoint.cst_decode();
+            let api_code = code.cst_decode();
+            let api_code_verifier = code_verifier.cst_decode();
+            let api_redirect_uri = redirect_uri.cst_decode();
+            let api_client_id = client_id.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_exchange_auth_code_token(
+                            api_token_endpoint,
+                            api_code,
+                            api_code_verifier,
+                            api_redirect_uri,
+                            api_client_id,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_exchange_pre_auth_token_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    token_endpoint: impl CstDecode<String>,
+    pre_auth_code: impl CstDecode<String>,
+    tx_code: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_exchange_pre_auth_token",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_token_endpoint = token_endpoint.cst_decode();
+            let api_pre_auth_code = pre_auth_code.cst_decode();
+            let api_tx_code = tx_code.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_exchange_pre_auth_token(
+                            api_token_endpoint,
+                            api_pre_auth_code,
+                            api_tx_code,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_fetch_issuer_metadata_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    issuer_url: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_fetch_issuer_metadata",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_issuer_url = issuer_url.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::wallet_fetch_issuer_metadata(api_issuer_url).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_parse_credential_offer_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    offer_uri: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_parse_credential_offer",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_offer_uri = offer_uri.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::wallet_parse_credential_offer(api_offer_uri).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_parse_presentation_request_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    request_uri: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_parse_presentation_request",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_request_uri = request_uri.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::wallet_parse_presentation_request(api_request_uri).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_request_credential_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    credential_endpoint: impl CstDecode<String>,
+    access_token: impl CstDecode<String>,
+    credential_format: impl CstDecode<String>,
+    credential_configuration_id: impl CstDecode<Option<String>>,
+    proof_jwt: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_request_credential",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_credential_endpoint = credential_endpoint.cst_decode();
+            let api_access_token = access_token.cst_decode();
+            let api_credential_format = credential_format.cst_decode();
+            let api_credential_configuration_id = credential_configuration_id.cst_decode();
+            let api_proof_jwt = proof_jwt.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_request_credential(
+                            api_credential_endpoint,
+                            api_access_token,
+                            api_credential_format,
+                            api_credential_configuration_id,
+                            api_proof_jwt,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__zk_is_supported_on_device_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "zk_is_supported_on_device",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            move |context| {
+                transform_result_dco::<_, _, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(crate::api::zk_is_supported_on_device())?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__zk_prove_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    predicate_id: impl CstDecode<String>,
+    claim_value: impl CstDecode<String>,
+    mso_bytes: impl CstDecode<Vec<u8>>,
+    signature: impl CstDecode<Vec<u8>>,
+    session_nonce: impl CstDecode<Vec<u8>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "zk_prove",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_predicate_id = predicate_id.cst_decode();
+            let api_claim_value = claim_value.cst_decode();
+            let api_mso_bytes = mso_bytes.cst_decode();
+            let api_signature = signature.cst_decode();
+            let api_session_nonce = session_nonce.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::zk_prove(
+                            api_predicate_id,
+                            api_claim_value,
+                            api_mso_bytes,
+                            api_signature,
+                            api_session_nonce,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__zk_prove_from_presentation_definition_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    presentation_definition_json: impl CstDecode<String>,
+    mso_bytes: impl CstDecode<Vec<u8>>,
+    signature: impl CstDecode<Vec<u8>>,
+    secrets_json: impl CstDecode<String>,
+    session_nonce: impl CstDecode<Vec<u8>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "zk_prove_from_presentation_definition",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_presentation_definition_json = presentation_definition_json.cst_decode();
+            let api_mso_bytes = mso_bytes.cst_decode();
+            let api_signature = signature.cst_decode();
+            let api_secrets_json = secrets_json.cst_decode();
+            let api_session_nonce = session_nonce.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::zk_prove_from_presentation_definition(
+                            api_presentation_definition_json,
+                            api_mso_bytes,
+                            api_signature,
+                            api_secrets_json,
+                            api_session_nonce,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 
 // Section: dart2rust
 
@@ -312,9 +877,21 @@ impl CstDecode<bool> for bool {
         self
     }
 }
+impl CstDecode<f64> for f64 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> f64 {
+        self
+    }
+}
 impl CstDecode<i32> for i32 {
     // Codec=Cst (C-struct based), see doc to use other codecs
     fn cst_decode(self) -> i32 {
+        self
+    }
+}
+impl CstDecode<i64> for i64 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> i64 {
         self
     }
 }
@@ -329,9 +906,21 @@ impl CstDecode<crate::credential::PrivacyLevel> for i32 {
         }
     }
 }
+impl CstDecode<u64> for u64 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> u64 {
+        self
+    }
+}
 impl CstDecode<u8> for u8 {
     // Codec=Cst (C-struct based), see doc to use other codecs
     fn cst_decode(self) -> u8 {
+        self
+    }
+}
+impl CstDecode<usize> for usize {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> usize {
         self
     }
 }
@@ -340,6 +929,26 @@ impl SseDecode for flutter_rust_bridge::for_generated::anyhow::Error {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
         return flutter_rust_bridge::for_generated::anyhow::anyhow!("{}", inner);
+    }
+}
+
+impl SseDecode for PresentationPolicy {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <RustOpaqueNom<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+        >>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
+
+impl SseDecode
+    for RustOpaqueNom<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <usize>::sse_decode(deserializer);
+        return unsafe { decode_rust_opaque_nom(inner) };
     }
 }
 
@@ -425,10 +1034,186 @@ impl SseDecode for crate::credential::CredentialSubject {
     }
 }
 
+impl SseDecode for f64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_f64::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::api::FrbAuthorizationRequest {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_authorizationUrl = <String>::sse_decode(deserializer);
+        let mut var_codeVerifier = <String>::sse_decode(deserializer);
+        let mut var_state = <String>::sse_decode(deserializer);
+        let mut var_redirectUri = <String>::sse_decode(deserializer);
+        return crate::api::FrbAuthorizationRequest {
+            authorization_url: var_authorizationUrl,
+            code_verifier: var_codeVerifier,
+            state: var_state,
+            redirect_uri: var_redirectUri,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbCredentialOffer {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_credentialIssuer = <String>::sse_decode(deserializer);
+        let mut var_credentialConfigurationIds = <Vec<String>>::sse_decode(deserializer);
+        let mut var_preAuthorizedCode = <Option<String>>::sse_decode(deserializer);
+        let mut var_txCodeRequired = <bool>::sse_decode(deserializer);
+        let mut var_issuerState = <Option<String>>::sse_decode(deserializer);
+        return crate::api::FrbCredentialOffer {
+            credential_issuer: var_credentialIssuer,
+            credential_configuration_ids: var_credentialConfigurationIds,
+            pre_authorized_code: var_preAuthorizedCode,
+            tx_code_required: var_txCodeRequired,
+            issuer_state: var_issuerState,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbCredentialResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_format = <Option<String>>::sse_decode(deserializer);
+        let mut var_credential = <Option<String>>::sse_decode(deserializer);
+        let mut var_transactionId = <Option<String>>::sse_decode(deserializer);
+        let mut var_cNonce = <Option<String>>::sse_decode(deserializer);
+        let mut var_cNonceExpiresIn = <Option<u64>>::sse_decode(deserializer);
+        return crate::api::FrbCredentialResponse {
+            format: var_format,
+            credential: var_credential,
+            transaction_id: var_transactionId,
+            c_nonce: var_cNonce,
+            c_nonce_expires_in: var_cNonceExpiresIn,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbIssuerMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_credentialIssuer = <String>::sse_decode(deserializer);
+        let mut var_tokenEndpoint = <String>::sse_decode(deserializer);
+        let mut var_credentialEndpoint = <String>::sse_decode(deserializer);
+        let mut var_authorizationEndpoint = <Option<String>>::sse_decode(deserializer);
+        let mut var_grantTypesSupported = <Vec<String>>::sse_decode(deserializer);
+        let mut var_credentialConfigurationsJson = <String>::sse_decode(deserializer);
+        return crate::api::FrbIssuerMetadata {
+            credential_issuer: var_credentialIssuer,
+            token_endpoint: var_tokenEndpoint,
+            credential_endpoint: var_credentialEndpoint,
+            authorization_endpoint: var_authorizationEndpoint,
+            grant_types_supported: var_grantTypesSupported,
+            credential_configurations_json: var_credentialConfigurationsJson,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbPresentationRequest {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_clientId = <String>::sse_decode(deserializer);
+        let mut var_nonce = <String>::sse_decode(deserializer);
+        let mut var_responseUri = <String>::sse_decode(deserializer);
+        let mut var_presentationDefinitionJson = <String>::sse_decode(deserializer);
+        return crate::api::FrbPresentationRequest {
+            client_id: var_clientId,
+            nonce: var_nonce,
+            response_uri: var_responseUri,
+            presentation_definition_json: var_presentationDefinitionJson,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbPresentationResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_ok = <bool>::sse_decode(deserializer);
+        let mut var_redirectUri = <Option<String>>::sse_decode(deserializer);
+        let mut var_error = <Option<String>>::sse_decode(deserializer);
+        let mut var_errorDescription = <Option<String>>::sse_decode(deserializer);
+        return crate::api::FrbPresentationResponse {
+            ok: var_ok,
+            redirect_uri: var_redirectUri,
+            error: var_error,
+            error_description: var_errorDescription,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbTokenResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_accessToken = <String>::sse_decode(deserializer);
+        let mut var_tokenType = <String>::sse_decode(deserializer);
+        let mut var_expiresIn = <Option<u64>>::sse_decode(deserializer);
+        let mut var_cNonce = <Option<String>>::sse_decode(deserializer);
+        let mut var_cNonceExpiresIn = <Option<u64>>::sse_decode(deserializer);
+        let mut var_scope = <Option<String>>::sse_decode(deserializer);
+        return crate::api::FrbTokenResponse {
+            access_token: var_accessToken,
+            token_type: var_tokenType,
+            expires_in: var_expiresIn,
+            c_nonce: var_cNonce,
+            c_nonce_expires_in: var_cNonceExpiresIn,
+            scope: var_scope,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbZkProofEntry {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_descriptorId = <String>::sse_decode(deserializer);
+        let mut var_predicateId = <String>::sse_decode(deserializer);
+        let mut var_proofBytes = <Vec<u8>>::sse_decode(deserializer);
+        return crate::api::FrbZkProofEntry {
+            descriptor_id: var_descriptorId,
+            predicate_id: var_predicateId,
+            proof_bytes: var_proofBytes,
+        };
+    }
+}
+
 impl SseDecode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_i32::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for i64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_i64::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::api::IssuerCheckResultOutput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_isTrusted = <bool>::sse_decode(deserializer);
+        let mut var_violationMessage = <Option<String>>::sse_decode(deserializer);
+        return crate::api::IssuerCheckResultOutput {
+            is_trusted: var_isTrusted,
+            violation_message: var_violationMessage,
+        };
+    }
+}
+
+impl SseDecode for Vec<PresentationPolicy> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<PresentationPolicy>::sse_decode(deserializer));
+        }
+        return ans_;
     }
 }
 
@@ -470,6 +1255,18 @@ impl SseDecode for Vec<crate::credential::CredentialGroup> {
     }
 }
 
+impl SseDecode for Vec<crate::api::FrbZkProofEntry> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::FrbZkProofEntry>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<Vec<u8>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -489,6 +1286,20 @@ impl SseDecode for Vec<u8> {
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
             ans_.push(<u8>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::RankableCredentialInput> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::RankableCredentialInput>::sse_decode(
+                deserializer,
+            ));
         }
         return ans_;
     }
@@ -566,6 +1377,33 @@ impl SseDecode for Option<crate::credential::TrustInfo> {
     }
 }
 
+impl SseDecode for Option<u64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<u64>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for crate::api::PolicyEvaluationResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_isSatisfied = <bool>::sse_decode(deserializer);
+        let mut var_minimumDisclosureClaims = <Vec<String>>::sse_decode(deserializer);
+        let mut var_missingRequiredClaims = <Vec<String>>::sse_decode(deserializer);
+        let mut var_policyId = <String>::sse_decode(deserializer);
+        return crate::api::PolicyEvaluationResult {
+            is_satisfied: var_isSatisfied,
+            minimum_disclosure_claims: var_minimumDisclosureClaims,
+            missing_required_claims: var_missingRequiredClaims,
+            policy_id: var_policyId,
+        };
+    }
+}
+
 impl SseDecode for crate::credential::PrivacyLevel {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -593,6 +1431,24 @@ impl SseDecode for crate::credential::Proof {
             verification_method: var_verificationMethod,
             proof_purpose: var_proofPurpose,
             proof_value: var_proofValue,
+        };
+    }
+}
+
+impl SseDecode for crate::api::RankableCredentialInput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_credentialId = <String>::sse_decode(deserializer);
+        let mut var_issuerId = <String>::sse_decode(deserializer);
+        let mut var_issuedAtUnix = <i64>::sse_decode(deserializer);
+        let mut var_trustLevel = <f64>::sse_decode(deserializer);
+        let mut var_claimCount = <usize>::sse_decode(deserializer);
+        return crate::api::RankableCredentialInput {
+            credential_id: var_credentialId,
+            issuer_id: var_issuerId,
+            issued_at_unix: var_issuedAtUnix,
+            trust_level: var_trustLevel,
+            claim_count: var_claimCount,
         };
     }
 }
@@ -653,6 +1509,13 @@ impl SseDecode for crate::credential::TrustInfo {
     }
 }
 
+impl SseDecode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u64::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for u8 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -663,6 +1526,13 @@ impl SseDecode for u8 {
 impl SseDecode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
+}
+
+impl SseDecode for usize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u64::<NativeEndian>().unwrap() as _
+    }
 }
 
 impl SseDecode for crate::credential::VerifiableCredential {
@@ -720,6 +1590,24 @@ fn pde_ffi_dispatcher_sync_impl(
 }
 
 // Section: rust2dart
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<PresentationPolicy> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, StdArc<_>>(self.0)
+            .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<PresentationPolicy>
+{
+}
+
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<PresentationPolicy>> for PresentationPolicy {
+    fn into_into_dart(self) -> FrbWrapper<PresentationPolicy> {
+        self.into()
+    }
+}
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::credential::Credential {
@@ -815,6 +1703,213 @@ impl flutter_rust_bridge::IntoIntoDart<crate::credential::CredentialSubject>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbAuthorizationRequest {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.authorization_url.into_into_dart().into_dart(),
+            self.code_verifier.into_into_dart().into_dart(),
+            self.state.into_into_dart().into_dart(),
+            self.redirect_uri.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbAuthorizationRequest
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbAuthorizationRequest>
+    for crate::api::FrbAuthorizationRequest
+{
+    fn into_into_dart(self) -> crate::api::FrbAuthorizationRequest {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbCredentialOffer {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.credential_issuer.into_into_dart().into_dart(),
+            self.credential_configuration_ids
+                .into_into_dart()
+                .into_dart(),
+            self.pre_authorized_code.into_into_dart().into_dart(),
+            self.tx_code_required.into_into_dart().into_dart(),
+            self.issuer_state.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbCredentialOffer
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbCredentialOffer>
+    for crate::api::FrbCredentialOffer
+{
+    fn into_into_dart(self) -> crate::api::FrbCredentialOffer {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbCredentialResponse {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.format.into_into_dart().into_dart(),
+            self.credential.into_into_dart().into_dart(),
+            self.transaction_id.into_into_dart().into_dart(),
+            self.c_nonce.into_into_dart().into_dart(),
+            self.c_nonce_expires_in.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbCredentialResponse
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbCredentialResponse>
+    for crate::api::FrbCredentialResponse
+{
+    fn into_into_dart(self) -> crate::api::FrbCredentialResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbIssuerMetadata {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.credential_issuer.into_into_dart().into_dart(),
+            self.token_endpoint.into_into_dart().into_dart(),
+            self.credential_endpoint.into_into_dart().into_dart(),
+            self.authorization_endpoint.into_into_dart().into_dart(),
+            self.grant_types_supported.into_into_dart().into_dart(),
+            self.credential_configurations_json
+                .into_into_dart()
+                .into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::FrbIssuerMetadata {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbIssuerMetadata>
+    for crate::api::FrbIssuerMetadata
+{
+    fn into_into_dart(self) -> crate::api::FrbIssuerMetadata {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbPresentationRequest {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.client_id.into_into_dart().into_dart(),
+            self.nonce.into_into_dart().into_dart(),
+            self.response_uri.into_into_dart().into_dart(),
+            self.presentation_definition_json
+                .into_into_dart()
+                .into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbPresentationRequest
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbPresentationRequest>
+    for crate::api::FrbPresentationRequest
+{
+    fn into_into_dart(self) -> crate::api::FrbPresentationRequest {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbPresentationResponse {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.ok.into_into_dart().into_dart(),
+            self.redirect_uri.into_into_dart().into_dart(),
+            self.error.into_into_dart().into_dart(),
+            self.error_description.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbPresentationResponse
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbPresentationResponse>
+    for crate::api::FrbPresentationResponse
+{
+    fn into_into_dart(self) -> crate::api::FrbPresentationResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbTokenResponse {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.access_token.into_into_dart().into_dart(),
+            self.token_type.into_into_dart().into_dart(),
+            self.expires_in.into_into_dart().into_dart(),
+            self.c_nonce.into_into_dart().into_dart(),
+            self.c_nonce_expires_in.into_into_dart().into_dart(),
+            self.scope.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::FrbTokenResponse {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbTokenResponse>
+    for crate::api::FrbTokenResponse
+{
+    fn into_into_dart(self) -> crate::api::FrbTokenResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbZkProofEntry {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.descriptor_id.into_into_dart().into_dart(),
+            self.predicate_id.into_into_dart().into_dart(),
+            self.proof_bytes.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::FrbZkProofEntry {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbZkProofEntry>
+    for crate::api::FrbZkProofEntry
+{
+    fn into_into_dart(self) -> crate::api::FrbZkProofEntry {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::IssuerCheckResultOutput {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.is_trusted.into_into_dart().into_dart(),
+            self.violation_message.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::IssuerCheckResultOutput
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::IssuerCheckResultOutput>
+    for crate::api::IssuerCheckResultOutput
+{
+    fn into_into_dart(self) -> crate::api::IssuerCheckResultOutput {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::credential::MDocCredential {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -839,6 +1934,29 @@ impl flutter_rust_bridge::IntoIntoDart<crate::credential::MDocCredential>
     for crate::credential::MDocCredential
 {
     fn into_into_dart(self) -> crate::credential::MDocCredential {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::PolicyEvaluationResult {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.is_satisfied.into_into_dart().into_dart(),
+            self.minimum_disclosure_claims.into_into_dart().into_dart(),
+            self.missing_required_claims.into_into_dart().into_dart(),
+            self.policy_id.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::PolicyEvaluationResult
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::PolicyEvaluationResult>
+    for crate::api::PolicyEvaluationResult
+{
+    fn into_into_dart(self) -> crate::api::PolicyEvaluationResult {
         self
     }
 }
@@ -880,6 +1998,30 @@ impl flutter_rust_bridge::IntoDart for crate::credential::Proof {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::credential::Proof {}
 impl flutter_rust_bridge::IntoIntoDart<crate::credential::Proof> for crate::credential::Proof {
     fn into_into_dart(self) -> crate::credential::Proof {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::RankableCredentialInput {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.credential_id.into_into_dart().into_dart(),
+            self.issuer_id.into_into_dart().into_dart(),
+            self.issued_at_unix.into_into_dart().into_dart(),
+            self.trust_level.into_into_dart().into_dart(),
+            self.claim_count.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::RankableCredentialInput
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::RankableCredentialInput>
+    for crate::api::RankableCredentialInput
+{
+    fn into_into_dart(self) -> crate::api::RankableCredentialInput {
         self
     }
 }
@@ -990,6 +2132,24 @@ impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
     }
 }
 
+impl SseEncode for PresentationPolicy {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <RustOpaqueNom<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, StdArc<_>>(self), serializer);
+    }
+}
+
+impl SseEncode
+    for RustOpaqueNom<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        let (ptr, size) = self.sse_encode_raw();
+        <usize>::sse_encode(ptr, serializer);
+        <i32>::sse_encode(size, serializer);
+    }
+}
+
 impl SseEncode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1054,10 +2214,127 @@ impl SseEncode for crate::credential::CredentialSubject {
     }
 }
 
+impl SseEncode for f64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_f64::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::FrbAuthorizationRequest {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.authorization_url, serializer);
+        <String>::sse_encode(self.code_verifier, serializer);
+        <String>::sse_encode(self.state, serializer);
+        <String>::sse_encode(self.redirect_uri, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbCredentialOffer {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.credential_issuer, serializer);
+        <Vec<String>>::sse_encode(self.credential_configuration_ids, serializer);
+        <Option<String>>::sse_encode(self.pre_authorized_code, serializer);
+        <bool>::sse_encode(self.tx_code_required, serializer);
+        <Option<String>>::sse_encode(self.issuer_state, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbCredentialResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<String>>::sse_encode(self.format, serializer);
+        <Option<String>>::sse_encode(self.credential, serializer);
+        <Option<String>>::sse_encode(self.transaction_id, serializer);
+        <Option<String>>::sse_encode(self.c_nonce, serializer);
+        <Option<u64>>::sse_encode(self.c_nonce_expires_in, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbIssuerMetadata {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.credential_issuer, serializer);
+        <String>::sse_encode(self.token_endpoint, serializer);
+        <String>::sse_encode(self.credential_endpoint, serializer);
+        <Option<String>>::sse_encode(self.authorization_endpoint, serializer);
+        <Vec<String>>::sse_encode(self.grant_types_supported, serializer);
+        <String>::sse_encode(self.credential_configurations_json, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbPresentationRequest {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.client_id, serializer);
+        <String>::sse_encode(self.nonce, serializer);
+        <String>::sse_encode(self.response_uri, serializer);
+        <String>::sse_encode(self.presentation_definition_json, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbPresentationResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.ok, serializer);
+        <Option<String>>::sse_encode(self.redirect_uri, serializer);
+        <Option<String>>::sse_encode(self.error, serializer);
+        <Option<String>>::sse_encode(self.error_description, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbTokenResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.access_token, serializer);
+        <String>::sse_encode(self.token_type, serializer);
+        <Option<u64>>::sse_encode(self.expires_in, serializer);
+        <Option<String>>::sse_encode(self.c_nonce, serializer);
+        <Option<u64>>::sse_encode(self.c_nonce_expires_in, serializer);
+        <Option<String>>::sse_encode(self.scope, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbZkProofEntry {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.descriptor_id, serializer);
+        <String>::sse_encode(self.predicate_id, serializer);
+        <Vec<u8>>::sse_encode(self.proof_bytes, serializer);
+    }
+}
+
 impl SseEncode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for i64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_i64::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::IssuerCheckResultOutput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_trusted, serializer);
+        <Option<String>>::sse_encode(self.violation_message, serializer);
+    }
+}
+
+impl SseEncode for Vec<PresentationPolicy> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <PresentationPolicy>::sse_encode(item, serializer);
+        }
     }
 }
 
@@ -1091,6 +2368,16 @@ impl SseEncode for Vec<crate::credential::CredentialGroup> {
     }
 }
 
+impl SseEncode for Vec<crate::api::FrbZkProofEntry> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::FrbZkProofEntry>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<Vec<u8>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1107,6 +2394,16 @@ impl SseEncode for Vec<u8> {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <u8>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::RankableCredentialInput> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::RankableCredentialInput>::sse_encode(item, serializer);
         }
     }
 }
@@ -1166,6 +2463,26 @@ impl SseEncode for Option<crate::credential::TrustInfo> {
     }
 }
 
+impl SseEncode for Option<u64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <u64>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for crate::api::PolicyEvaluationResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_satisfied, serializer);
+        <Vec<String>>::sse_encode(self.minimum_disclosure_claims, serializer);
+        <Vec<String>>::sse_encode(self.missing_required_claims, serializer);
+        <String>::sse_encode(self.policy_id, serializer);
+    }
+}
+
 impl SseEncode for crate::credential::PrivacyLevel {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1191,6 +2508,17 @@ impl SseEncode for crate::credential::Proof {
         <Option<String>>::sse_encode(self.verification_method, serializer);
         <Option<String>>::sse_encode(self.proof_purpose, serializer);
         <Option<String>>::sse_encode(self.proof_value, serializer);
+    }
+}
+
+impl SseEncode for crate::api::RankableCredentialInput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.credential_id, serializer);
+        <String>::sse_encode(self.issuer_id, serializer);
+        <i64>::sse_encode(self.issued_at_unix, serializer);
+        <f64>::sse_encode(self.trust_level, serializer);
+        <usize>::sse_encode(self.claim_count, serializer);
     }
 }
 
@@ -1228,6 +2556,13 @@ impl SseEncode for crate::credential::TrustInfo {
     }
 }
 
+impl SseEncode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u64::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for u8 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1238,6 +2573,16 @@ impl SseEncode for u8 {
 impl SseEncode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
+}
+
+impl SseEncode for usize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer
+            .cursor
+            .write_u64::<NativeEndian>(self as _)
+            .unwrap();
+    }
 }
 
 impl SseEncode for crate::credential::VerifiableCredential {
@@ -1264,6 +2609,7 @@ mod io {
     // Section: imports
 
     use super::*;
+    use crate::api::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
@@ -1284,6 +2630,34 @@ mod io {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> flutter_rust_bridge::for_generated::anyhow::Error {
             unimplemented!()
+        }
+    }
+    impl CstDecode<PresentationPolicy> for usize {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> PresentationPolicy {
+            flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(CstDecode::<
+                RustOpaqueNom<
+                    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+                >,
+            >::cst_decode(
+                self
+            ))
+        }
+    }
+    impl
+        CstDecode<
+            RustOpaqueNom<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+            >,
+        > for usize
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(
+            self,
+        ) -> RustOpaqueNom<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+        > {
+            unsafe { decode_rust_opaque_nom(self as _) }
         }
     }
     impl CstDecode<String> for *mut wire_cst_list_prim_u_8_strict {
@@ -1333,6 +2707,12 @@ mod io {
         fn cst_decode(self) -> crate::credential::TrustInfo {
             let wrap = unsafe { flutter_rust_bridge::for_generated::box_from_leak_ptr(self) };
             CstDecode::<crate::credential::TrustInfo>::cst_decode(*wrap).into()
+        }
+    }
+    impl CstDecode<u64> for *mut u64 {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> u64 {
+            unsafe { *flutter_rust_bridge::for_generated::box_from_leak_ptr(self) }
         }
     }
     impl CstDecode<crate::credential::VerifiableCredential> for *mut wire_cst_verifiable_credential {
@@ -1392,6 +2772,118 @@ mod io {
             }
         }
     }
+    impl CstDecode<crate::api::FrbAuthorizationRequest> for wire_cst_frb_authorization_request {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbAuthorizationRequest {
+            crate::api::FrbAuthorizationRequest {
+                authorization_url: self.authorization_url.cst_decode(),
+                code_verifier: self.code_verifier.cst_decode(),
+                state: self.state.cst_decode(),
+                redirect_uri: self.redirect_uri.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbCredentialOffer> for wire_cst_frb_credential_offer {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbCredentialOffer {
+            crate::api::FrbCredentialOffer {
+                credential_issuer: self.credential_issuer.cst_decode(),
+                credential_configuration_ids: self.credential_configuration_ids.cst_decode(),
+                pre_authorized_code: self.pre_authorized_code.cst_decode(),
+                tx_code_required: self.tx_code_required.cst_decode(),
+                issuer_state: self.issuer_state.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbCredentialResponse> for wire_cst_frb_credential_response {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbCredentialResponse {
+            crate::api::FrbCredentialResponse {
+                format: self.format.cst_decode(),
+                credential: self.credential.cst_decode(),
+                transaction_id: self.transaction_id.cst_decode(),
+                c_nonce: self.c_nonce.cst_decode(),
+                c_nonce_expires_in: self.c_nonce_expires_in.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbIssuerMetadata> for wire_cst_frb_issuer_metadata {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbIssuerMetadata {
+            crate::api::FrbIssuerMetadata {
+                credential_issuer: self.credential_issuer.cst_decode(),
+                token_endpoint: self.token_endpoint.cst_decode(),
+                credential_endpoint: self.credential_endpoint.cst_decode(),
+                authorization_endpoint: self.authorization_endpoint.cst_decode(),
+                grant_types_supported: self.grant_types_supported.cst_decode(),
+                credential_configurations_json: self.credential_configurations_json.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPresentationRequest> for wire_cst_frb_presentation_request {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPresentationRequest {
+            crate::api::FrbPresentationRequest {
+                client_id: self.client_id.cst_decode(),
+                nonce: self.nonce.cst_decode(),
+                response_uri: self.response_uri.cst_decode(),
+                presentation_definition_json: self.presentation_definition_json.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPresentationResponse> for wire_cst_frb_presentation_response {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPresentationResponse {
+            crate::api::FrbPresentationResponse {
+                ok: self.ok.cst_decode(),
+                redirect_uri: self.redirect_uri.cst_decode(),
+                error: self.error.cst_decode(),
+                error_description: self.error_description.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbTokenResponse> for wire_cst_frb_token_response {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbTokenResponse {
+            crate::api::FrbTokenResponse {
+                access_token: self.access_token.cst_decode(),
+                token_type: self.token_type.cst_decode(),
+                expires_in: self.expires_in.cst_decode(),
+                c_nonce: self.c_nonce.cst_decode(),
+                c_nonce_expires_in: self.c_nonce_expires_in.cst_decode(),
+                scope: self.scope.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbZkProofEntry> for wire_cst_frb_zk_proof_entry {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbZkProofEntry {
+            crate::api::FrbZkProofEntry {
+                descriptor_id: self.descriptor_id.cst_decode(),
+                predicate_id: self.predicate_id.cst_decode(),
+                proof_bytes: self.proof_bytes.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::IssuerCheckResultOutput> for wire_cst_issuer_check_result_output {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::IssuerCheckResultOutput {
+            crate::api::IssuerCheckResultOutput {
+                is_trusted: self.is_trusted.cst_decode(),
+                violation_message: self.violation_message.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<Vec< PresentationPolicy>> for *mut wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy {
+            // Codec=Cst (C-struct based), see doc to use other codecs
+            fn cst_decode(self) -> Vec< PresentationPolicy> {
+                let vec = unsafe {
+        let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
+        flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
+    };
+    vec.into_iter().map(CstDecode::cst_decode).collect()
+            }
+        }
     impl CstDecode<Vec<String>> for *mut wire_cst_list_String {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<String> {
@@ -1415,6 +2907,16 @@ mod io {
     impl CstDecode<Vec<crate::credential::CredentialGroup>> for *mut wire_cst_list_credential_group {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<crate::credential::CredentialGroup> {
+            let vec = unsafe {
+                let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
+                flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
+            };
+            vec.into_iter().map(CstDecode::cst_decode).collect()
+        }
+    }
+    impl CstDecode<Vec<crate::api::FrbZkProofEntry>> for *mut wire_cst_list_frb_zk_proof_entry {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::api::FrbZkProofEntry> {
             let vec = unsafe {
                 let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
                 flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
@@ -1450,6 +2952,18 @@ mod io {
             }
         }
     }
+    impl CstDecode<Vec<crate::api::RankableCredentialInput>>
+        for *mut wire_cst_list_rankable_credential_input
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::api::RankableCredentialInput> {
+            let vec = unsafe {
+                let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
+                flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
+            };
+            vec.into_iter().map(CstDecode::cst_decode).collect()
+        }
+    }
     impl CstDecode<crate::credential::MDocCredential> for wire_cst_m_doc_credential {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::credential::MDocCredential {
@@ -1466,6 +2980,17 @@ mod io {
             }
         }
     }
+    impl CstDecode<crate::api::PolicyEvaluationResult> for wire_cst_policy_evaluation_result {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::PolicyEvaluationResult {
+            crate::api::PolicyEvaluationResult {
+                is_satisfied: self.is_satisfied.cst_decode(),
+                minimum_disclosure_claims: self.minimum_disclosure_claims.cst_decode(),
+                missing_required_claims: self.missing_required_claims.cst_decode(),
+                policy_id: self.policy_id.cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::credential::Proof> for wire_cst_proof {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::credential::Proof {
@@ -1475,6 +3000,18 @@ mod io {
                 verification_method: self.verification_method.cst_decode(),
                 proof_purpose: self.proof_purpose.cst_decode(),
                 proof_value: self.proof_value.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::RankableCredentialInput> for wire_cst_rankable_credential_input {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::RankableCredentialInput {
+            crate::api::RankableCredentialInput {
+                credential_id: self.credential_id.cst_decode(),
+                issuer_id: self.issuer_id.cst_decode(),
+                issued_at_unix: self.issued_at_unix.cst_decode(),
+                trust_level: self.trust_level.cst_decode(),
+                claim_count: self.claim_count.cst_decode(),
             }
         }
     }
@@ -1587,6 +3124,144 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
+    impl NewWithNullPtr for wire_cst_frb_authorization_request {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                authorization_url: core::ptr::null_mut(),
+                code_verifier: core::ptr::null_mut(),
+                state: core::ptr::null_mut(),
+                redirect_uri: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_authorization_request {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_credential_offer {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                credential_issuer: core::ptr::null_mut(),
+                credential_configuration_ids: core::ptr::null_mut(),
+                pre_authorized_code: core::ptr::null_mut(),
+                tx_code_required: Default::default(),
+                issuer_state: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_credential_offer {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_credential_response {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                format: core::ptr::null_mut(),
+                credential: core::ptr::null_mut(),
+                transaction_id: core::ptr::null_mut(),
+                c_nonce: core::ptr::null_mut(),
+                c_nonce_expires_in: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_credential_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_issuer_metadata {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                credential_issuer: core::ptr::null_mut(),
+                token_endpoint: core::ptr::null_mut(),
+                credential_endpoint: core::ptr::null_mut(),
+                authorization_endpoint: core::ptr::null_mut(),
+                grant_types_supported: core::ptr::null_mut(),
+                credential_configurations_json: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_issuer_metadata {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_presentation_request {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                client_id: core::ptr::null_mut(),
+                nonce: core::ptr::null_mut(),
+                response_uri: core::ptr::null_mut(),
+                presentation_definition_json: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_presentation_request {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_presentation_response {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                ok: Default::default(),
+                redirect_uri: core::ptr::null_mut(),
+                error: core::ptr::null_mut(),
+                error_description: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_presentation_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_token_response {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                access_token: core::ptr::null_mut(),
+                token_type: core::ptr::null_mut(),
+                expires_in: core::ptr::null_mut(),
+                c_nonce: core::ptr::null_mut(),
+                c_nonce_expires_in: core::ptr::null_mut(),
+                scope: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_token_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_zk_proof_entry {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                descriptor_id: core::ptr::null_mut(),
+                predicate_id: core::ptr::null_mut(),
+                proof_bytes: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_zk_proof_entry {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_issuer_check_result_output {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                is_trusted: Default::default(),
+                violation_message: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_issuer_check_result_output {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
     impl NewWithNullPtr for wire_cst_m_doc_credential {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -1607,6 +3282,21 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
+    impl NewWithNullPtr for wire_cst_policy_evaluation_result {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                is_satisfied: Default::default(),
+                minimum_disclosure_claims: core::ptr::null_mut(),
+                missing_required_claims: core::ptr::null_mut(),
+                policy_id: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_policy_evaluation_result {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
     impl NewWithNullPtr for wire_cst_proof {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -1619,6 +3309,22 @@ mod io {
         }
     }
     impl Default for wire_cst_proof {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_rankable_credential_input {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                credential_id: core::ptr::null_mut(),
+                issuer_id: core::ptr::null_mut(),
+                issued_at_unix: Default::default(),
+                trust_level: Default::default(),
+                claim_count: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_rankable_credential_input {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -1695,6 +3401,21 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints(
+        port_: i64,
+        policy_json: *mut wire_cst_list_prim_u_8_strict,
+        issuer_id: *mut wire_cst_list_prim_u_8_strict,
+        trust_profile_verified: bool,
+    ) {
+        wire__crate__api__check_issuer_constraints_impl(
+            port_,
+            policy_json,
+            issuer_id,
+            trust_profile_verified,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__create_selectable_credential(
         port_: i64,
         credential: *mut wire_cst_credential,
@@ -1720,11 +3441,35 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request(
+        port_: i64,
+        request_json: *mut wire_cst_list_prim_u_8_strict,
+        policies_json: *mut wire_cst_list_String,
+        credentials: *mut wire_cst_list_credential,
+    ) {
+        wire__crate__api__evaluate_presentation_request_impl(
+            port_,
+            request_json,
+            policies_json,
+            credentials,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__get_credential_claims(
         port_: i64,
         credential: *mut wire_cst_credential,
     ) {
         wire__crate__api__get_credential_claims_impl(port_, credential)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set(
+        port_: i64,
+        policy_json: *mut wire_cst_list_prim_u_8_strict,
+        credential: *mut wire_cst_credential,
+    ) {
+        wire__crate__api__get_minimum_disclosure_set_impl(port_, policy_json, credential)
     }
 
     #[unsafe(no_mangle)]
@@ -1768,6 +3513,24 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials(
+        port_: i64,
+        policy_json: *mut wire_cst_list_prim_u_8_strict,
+        credentials: *mut wire_cst_list_rankable_credential_input,
+    ) {
+        wire__crate__api__rank_matching_credentials_impl(port_, policy_json, credentials)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__sync_policies(
+        port_: i64,
+        license_jwt: *mut wire_cst_list_prim_u_8_strict,
+        endpoint: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__sync_policies_impl(port_, license_jwt, endpoint)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust(
         port_: i64,
         mdoc: *mut wire_cst_m_doc_credential,
@@ -1782,6 +3545,210 @@ mod io {
         x5chain: *mut wire_cst_list_list_prim_u_8_strict,
     ) {
         wire__crate__api__verify_mdoc_trust_chain_impl(port_, x5chain)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation(
+        port_: i64,
+        response_uri: *mut wire_cst_list_prim_u_8_strict,
+        presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+        credentials_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_build_and_submit_presentation_impl(
+            port_,
+            response_uri,
+            presentation_definition_json,
+            credentials_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(
+        port_: i64,
+        response_uri: *mut wire_cst_list_prim_u_8_strict,
+        presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+        credentials_json: *mut wire_cst_list_prim_u_8_strict,
+        zk_proofs: *mut wire_cst_list_frb_zk_proof_entry,
+    ) {
+        wire__crate__api__wallet_build_and_submit_zk_presentation_impl(
+            port_,
+            response_uri,
+            presentation_definition_json,
+            credentials_json,
+            zk_proofs,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request(
+        port_: i64,
+        issuer_metadata_json: *mut wire_cst_list_prim_u_8_strict,
+        credential_configuration_id: *mut wire_cst_list_prim_u_8_strict,
+        client_id: *mut wire_cst_list_prim_u_8_strict,
+        redirect_uri: *mut wire_cst_list_prim_u_8_strict,
+        issuer_state: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_build_auth_request_impl(
+            port_,
+            issuer_metadata_json,
+            credential_configuration_id,
+            client_id,
+            redirect_uri,
+            issuer_state,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt(
+        port_: i64,
+        holder_kid: *mut wire_cst_list_prim_u_8_strict,
+        c_nonce: *mut wire_cst_list_prim_u_8_strict,
+        issuer_url: *mut wire_cst_list_prim_u_8_strict,
+        jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_create_proof_jwt_impl(
+            port_, holder_kid, c_nonce, issuer_url, jwk_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token(
+        port_: i64,
+        token_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        code: *mut wire_cst_list_prim_u_8_strict,
+        code_verifier: *mut wire_cst_list_prim_u_8_strict,
+        redirect_uri: *mut wire_cst_list_prim_u_8_strict,
+        client_id: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_exchange_auth_code_token_impl(
+            port_,
+            token_endpoint,
+            code,
+            code_verifier,
+            redirect_uri,
+            client_id,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token(
+        port_: i64,
+        token_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        pre_auth_code: *mut wire_cst_list_prim_u_8_strict,
+        tx_code: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_exchange_pre_auth_token_impl(
+            port_,
+            token_endpoint,
+            pre_auth_code,
+            tx_code,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(
+        port_: i64,
+        issuer_url: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_fetch_issuer_metadata_impl(port_, issuer_url)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer(
+        port_: i64,
+        offer_uri: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_parse_credential_offer_impl(port_, offer_uri)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request(
+        port_: i64,
+        request_uri: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_parse_presentation_request_impl(port_, request_uri)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential(
+        port_: i64,
+        credential_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        access_token: *mut wire_cst_list_prim_u_8_strict,
+        credential_format: *mut wire_cst_list_prim_u_8_strict,
+        credential_configuration_id: *mut wire_cst_list_prim_u_8_strict,
+        proof_jwt: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_request_credential_impl(
+            port_,
+            credential_endpoint,
+            access_token,
+            credential_format,
+            credential_configuration_id,
+            proof_jwt,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device(
+        port_: i64,
+    ) {
+        wire__crate__api__zk_is_supported_on_device_impl(port_)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_prove(
+        port_: i64,
+        predicate_id: *mut wire_cst_list_prim_u_8_strict,
+        claim_value: *mut wire_cst_list_prim_u_8_strict,
+        mso_bytes: *mut wire_cst_list_prim_u_8_loose,
+        signature: *mut wire_cst_list_prim_u_8_loose,
+        session_nonce: *mut wire_cst_list_prim_u_8_loose,
+    ) {
+        wire__crate__api__zk_prove_impl(
+            port_,
+            predicate_id,
+            claim_value,
+            mso_bytes,
+            signature,
+            session_nonce,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition(
+        port_: i64,
+        presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+        mso_bytes: *mut wire_cst_list_prim_u_8_loose,
+        signature: *mut wire_cst_list_prim_u_8_loose,
+        secrets_json: *mut wire_cst_list_prim_u_8_strict,
+        session_nonce: *mut wire_cst_list_prim_u_8_loose,
+    ) {
+        wire__crate__api__zk_prove_from_presentation_definition_impl(
+            port_,
+            presentation_definition_json,
+            mso_bytes,
+            signature,
+            secrets_json,
+            session_nonce,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr: *const std::ffi::c_void,
+    ) {
+        unsafe {
+            StdArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>::increment_strong_count(ptr as _);
+        }
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr: *const std::ffi::c_void,
+    ) {
+        unsafe {
+            StdArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>::decrement_strong_count(ptr as _);
+        }
     }
 
     #[unsafe(no_mangle)]
@@ -1831,11 +3798,24 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64(
+        value: u64,
+    ) -> *mut u64 {
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_verifiable_credential(
     ) -> *mut wire_cst_verifiable_credential {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_verifiable_credential::new_with_null_ptr(),
         )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(len: i32) -> *mut wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy{
+        let wrap = wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy { ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(Default::default(), len), len };
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(wrap)
     }
 
     #[unsafe(no_mangle)]
@@ -1881,6 +3861,20 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry(
+        len: i32,
+    ) -> *mut wire_cst_list_frb_zk_proof_entry {
+        let wrap = wire_cst_list_frb_zk_proof_entry {
+            ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(
+                <wire_cst_frb_zk_proof_entry>::new_with_null_ptr(),
+                len,
+            ),
+            len,
+        };
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(wrap)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_list_prim_u_8_strict(
         len: i32,
     ) -> *mut wire_cst_list_list_prim_u_8_strict {
@@ -1914,6 +3908,20 @@ mod io {
             len,
         };
         flutter_rust_bridge::for_generated::new_leak_box_ptr(ans)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input(
+        len: i32,
+    ) -> *mut wire_cst_list_rankable_credential_input {
+        let wrap = wire_cst_list_rankable_credential_input {
+            ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(
+                <wire_cst_rankable_credential_input>::new_with_null_ptr(),
+                len,
+            ),
+            len,
+        };
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(wrap)
     }
 
     #[repr(C)]
@@ -1968,6 +3976,88 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_authorization_request {
+        authorization_url: *mut wire_cst_list_prim_u_8_strict,
+        code_verifier: *mut wire_cst_list_prim_u_8_strict,
+        state: *mut wire_cst_list_prim_u_8_strict,
+        redirect_uri: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_credential_offer {
+        credential_issuer: *mut wire_cst_list_prim_u_8_strict,
+        credential_configuration_ids: *mut wire_cst_list_String,
+        pre_authorized_code: *mut wire_cst_list_prim_u_8_strict,
+        tx_code_required: bool,
+        issuer_state: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_credential_response {
+        format: *mut wire_cst_list_prim_u_8_strict,
+        credential: *mut wire_cst_list_prim_u_8_strict,
+        transaction_id: *mut wire_cst_list_prim_u_8_strict,
+        c_nonce: *mut wire_cst_list_prim_u_8_strict,
+        c_nonce_expires_in: *mut u64,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_issuer_metadata {
+        credential_issuer: *mut wire_cst_list_prim_u_8_strict,
+        token_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        credential_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        authorization_endpoint: *mut wire_cst_list_prim_u_8_strict,
+        grant_types_supported: *mut wire_cst_list_String,
+        credential_configurations_json: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_presentation_request {
+        client_id: *mut wire_cst_list_prim_u_8_strict,
+        nonce: *mut wire_cst_list_prim_u_8_strict,
+        response_uri: *mut wire_cst_list_prim_u_8_strict,
+        presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_presentation_response {
+        ok: bool,
+        redirect_uri: *mut wire_cst_list_prim_u_8_strict,
+        error: *mut wire_cst_list_prim_u_8_strict,
+        error_description: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_token_response {
+        access_token: *mut wire_cst_list_prim_u_8_strict,
+        token_type: *mut wire_cst_list_prim_u_8_strict,
+        expires_in: *mut u64,
+        c_nonce: *mut wire_cst_list_prim_u_8_strict,
+        c_nonce_expires_in: *mut u64,
+        scope: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_zk_proof_entry {
+        descriptor_id: *mut wire_cst_list_prim_u_8_strict,
+        predicate_id: *mut wire_cst_list_prim_u_8_strict,
+        proof_bytes: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_issuer_check_result_output {
+        is_trusted: bool,
+        violation_message: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
+    {
+        ptr: *mut usize,
+        len: i32,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
     pub struct wire_cst_list_String {
         ptr: *mut *mut wire_cst_list_prim_u_8_strict,
         len: i32,
@@ -1982,6 +4072,12 @@ mod io {
     #[derive(Clone, Copy)]
     pub struct wire_cst_list_credential_group {
         ptr: *mut wire_cst_credential_group,
+        len: i32,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_list_frb_zk_proof_entry {
+        ptr: *mut wire_cst_frb_zk_proof_entry,
         len: i32,
     }
     #[repr(C)]
@@ -2004,6 +4100,12 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
+    pub struct wire_cst_list_rankable_credential_input {
+        ptr: *mut wire_cst_rankable_credential_input,
+        len: i32,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
     pub struct wire_cst_m_doc_credential {
         id: *mut wire_cst_list_prim_u_8_strict,
         doc_type: *mut wire_cst_list_prim_u_8_strict,
@@ -2017,12 +4119,29 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
+    pub struct wire_cst_policy_evaluation_result {
+        is_satisfied: bool,
+        minimum_disclosure_claims: *mut wire_cst_list_String,
+        missing_required_claims: *mut wire_cst_list_String,
+        policy_id: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
     pub struct wire_cst_proof {
         proof_type: *mut wire_cst_list_prim_u_8_strict,
         created: *mut wire_cst_list_prim_u_8_strict,
         verification_method: *mut wire_cst_list_prim_u_8_strict,
         proof_purpose: *mut wire_cst_list_prim_u_8_strict,
         proof_value: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_rankable_credential_input {
+        credential_id: *mut wire_cst_list_prim_u_8_strict,
+        issuer_id: *mut wire_cst_list_prim_u_8_strict,
+        issued_at_unix: i64,
+        trust_level: f64,
+        claim_count: usize,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -2079,6 +4198,7 @@ mod web {
     // Section: imports
 
     use super::*;
+    use crate::api::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
@@ -2184,6 +4304,219 @@ mod web {
             }
         }
     }
+    impl CstDecode<crate::api::FrbAuthorizationRequest>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbAuthorizationRequest {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbAuthorizationRequest {
+                authorization_url: self_.get(0).cst_decode(),
+                code_verifier: self_.get(1).cst_decode(),
+                state: self_.get(2).cst_decode(),
+                redirect_uri: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbCredentialOffer>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbCredentialOffer {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                5,
+                "Expected 5 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbCredentialOffer {
+                credential_issuer: self_.get(0).cst_decode(),
+                credential_configuration_ids: self_.get(1).cst_decode(),
+                pre_authorized_code: self_.get(2).cst_decode(),
+                tx_code_required: self_.get(3).cst_decode(),
+                issuer_state: self_.get(4).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbCredentialResponse>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbCredentialResponse {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                5,
+                "Expected 5 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbCredentialResponse {
+                format: self_.get(0).cst_decode(),
+                credential: self_.get(1).cst_decode(),
+                transaction_id: self_.get(2).cst_decode(),
+                c_nonce: self_.get(3).cst_decode(),
+                c_nonce_expires_in: self_.get(4).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbIssuerMetadata>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbIssuerMetadata {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                6,
+                "Expected 6 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbIssuerMetadata {
+                credential_issuer: self_.get(0).cst_decode(),
+                token_endpoint: self_.get(1).cst_decode(),
+                credential_endpoint: self_.get(2).cst_decode(),
+                authorization_endpoint: self_.get(3).cst_decode(),
+                grant_types_supported: self_.get(4).cst_decode(),
+                credential_configurations_json: self_.get(5).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPresentationRequest>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPresentationRequest {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbPresentationRequest {
+                client_id: self_.get(0).cst_decode(),
+                nonce: self_.get(1).cst_decode(),
+                response_uri: self_.get(2).cst_decode(),
+                presentation_definition_json: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPresentationResponse>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPresentationResponse {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbPresentationResponse {
+                ok: self_.get(0).cst_decode(),
+                redirect_uri: self_.get(1).cst_decode(),
+                error: self_.get(2).cst_decode(),
+                error_description: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbTokenResponse>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbTokenResponse {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                6,
+                "Expected 6 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbTokenResponse {
+                access_token: self_.get(0).cst_decode(),
+                token_type: self_.get(1).cst_decode(),
+                expires_in: self_.get(2).cst_decode(),
+                c_nonce: self_.get(3).cst_decode(),
+                c_nonce_expires_in: self_.get(4).cst_decode(),
+                scope: self_.get(5).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbZkProofEntry>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbZkProofEntry {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                3,
+                "Expected 3 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbZkProofEntry {
+                descriptor_id: self_.get(0).cst_decode(),
+                predicate_id: self_.get(1).cst_decode(),
+                proof_bytes: self_.get(2).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::IssuerCheckResultOutput>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::IssuerCheckResultOutput {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                2,
+                "Expected 2 elements, got {}",
+                self_.length()
+            );
+            crate::api::IssuerCheckResultOutput {
+                is_trusted: self_.get(0).cst_decode(),
+                violation_message: self_.get(1).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<Vec<PresentationPolicy>>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<PresentationPolicy> {
+            self.dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap()
+                .iter()
+                .map(CstDecode::cst_decode)
+                .collect()
+        }
+    }
     impl CstDecode<Vec<String>> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<String> {
@@ -2218,6 +4551,18 @@ mod web {
                 .collect()
         }
     }
+    impl CstDecode<Vec<crate::api::FrbZkProofEntry>>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::api::FrbZkProofEntry> {
+            self.dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap()
+                .iter()
+                .map(CstDecode::cst_decode)
+                .collect()
+        }
+    }
     impl CstDecode<Vec<Vec<u8>>> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<Vec<u8>> {
@@ -2232,6 +4577,18 @@ mod web {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<u8> {
             self.into_vec()
+        }
+    }
+    impl CstDecode<Vec<crate::api::RankableCredentialInput>>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::api::RankableCredentialInput> {
+            self.dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap()
+                .iter()
+                .map(CstDecode::cst_decode)
+                .collect()
         }
     }
     impl CstDecode<crate::credential::MDocCredential>
@@ -2267,6 +4624,28 @@ mod web {
             self.map(CstDecode::cst_decode)
         }
     }
+    impl CstDecode<crate::api::PolicyEvaluationResult>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::PolicyEvaluationResult {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::PolicyEvaluationResult {
+                is_satisfied: self_.get(0).cst_decode(),
+                minimum_disclosure_claims: self_.get(1).cst_decode(),
+                missing_required_claims: self_.get(2).cst_decode(),
+                policy_id: self_.get(3).cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::credential::Proof>
         for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
     {
@@ -2287,6 +4666,29 @@ mod web {
                 verification_method: self_.get(2).cst_decode(),
                 proof_purpose: self_.get(3).cst_decode(),
                 proof_value: self_.get(4).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::RankableCredentialInput>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::RankableCredentialInput {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                5,
+                "Expected 5 elements, got {}",
+                self_.length()
+            );
+            crate::api::RankableCredentialInput {
+                credential_id: self_.get(0).cst_decode(),
+                issuer_id: self_.get(1).cst_decode(),
+                issued_at_unix: self_.get(2).cst_decode(),
+                trust_level: self_.get(3).cst_decode(),
+                claim_count: self_.get(4).cst_decode(),
             }
         }
     }
@@ -2396,6 +4798,38 @@ mod web {
             unimplemented!()
         }
     }
+    impl CstDecode<PresentationPolicy> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> PresentationPolicy {
+            flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(CstDecode::<
+                RustOpaqueNom<
+                    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+                >,
+            >::cst_decode(
+                self
+            ))
+        }
+    }
+    impl
+        CstDecode<
+            RustOpaqueNom<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+            >,
+        > for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(
+            self,
+        ) -> RustOpaqueNom<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PresentationPolicy>,
+        > {
+            #[cfg(target_pointer_width = "64")]
+            {
+                compile_error!("64-bit pointers are not supported.");
+            }
+            unsafe { decode_rust_opaque_nom((self.as_f64().unwrap() as usize) as _) }
+        }
+    }
     impl CstDecode<String> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> String {
@@ -2408,10 +4842,22 @@ mod web {
             self.is_truthy()
         }
     }
+    impl CstDecode<f64> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> f64 {
+            self.unchecked_into_f64() as _
+        }
+    }
     impl CstDecode<i32> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> i32 {
             self.unchecked_into_f64() as _
+        }
+    }
+    impl CstDecode<i64> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> i64 {
+            ::std::convert::TryInto::<i64>::try_into(self).unwrap() as _
         }
     }
     impl CstDecode<Vec<u8>> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
@@ -2430,11 +4876,38 @@ mod web {
             (self.unchecked_into_f64() as i32).cst_decode()
         }
     }
+    impl CstDecode<u64> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> u64 {
+            ::std::convert::TryInto::<u64>::try_into(self).unwrap() as _
+        }
+    }
     impl CstDecode<u8> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> u8 {
             self.unchecked_into_f64() as _
         }
+    }
+    impl CstDecode<usize> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> usize {
+            ::std::convert::TryInto::<u64>::try_into(self).unwrap() as _
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__check_issuer_constraints(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        policy_json: String,
+        issuer_id: String,
+        trust_profile_verified: bool,
+    ) {
+        wire__crate__api__check_issuer_constraints_impl(
+            port_,
+            policy_json,
+            issuer_id,
+            trust_profile_verified,
+        )
     }
 
     #[wasm_bindgen]
@@ -2463,11 +4936,35 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__api__evaluate_presentation_request(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        request_json: String,
+        policies_json: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        credentials: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+    ) {
+        wire__crate__api__evaluate_presentation_request_impl(
+            port_,
+            request_json,
+            policies_json,
+            credentials,
+        )
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__get_credential_claims(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
     ) {
         wire__crate__api__get_credential_claims_impl(port_, credential)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__get_minimum_disclosure_set(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        policy_json: String,
+        credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+    ) {
+        wire__crate__api__get_minimum_disclosure_set_impl(port_, policy_json, credential)
     }
 
     #[wasm_bindgen]
@@ -2511,6 +5008,24 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__api__rank_matching_credentials(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        policy_json: String,
+        credentials: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+    ) {
+        wire__crate__api__rank_matching_credentials_impl(port_, policy_json, credentials)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__sync_policies(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        license_jwt: String,
+        endpoint: String,
+    ) {
+        wire__crate__api__sync_policies_impl(port_, license_jwt, endpoint)
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__verify_and_attach_trust(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         mdoc: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
@@ -2525,6 +5040,210 @@ mod web {
         x5chain: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
     ) {
         wire__crate__api__verify_mdoc_trust_chain_impl(port_, x5chain)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_build_and_submit_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        response_uri: String,
+        presentation_definition_json: String,
+        credentials_json: String,
+    ) {
+        wire__crate__api__wallet_build_and_submit_presentation_impl(
+            port_,
+            response_uri,
+            presentation_definition_json,
+            credentials_json,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_build_and_submit_zk_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        response_uri: String,
+        presentation_definition_json: String,
+        credentials_json: String,
+        zk_proofs: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+    ) {
+        wire__crate__api__wallet_build_and_submit_zk_presentation_impl(
+            port_,
+            response_uri,
+            presentation_definition_json,
+            credentials_json,
+            zk_proofs,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_build_auth_request(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        issuer_metadata_json: String,
+        credential_configuration_id: String,
+        client_id: String,
+        redirect_uri: String,
+        issuer_state: Option<String>,
+    ) {
+        wire__crate__api__wallet_build_auth_request_impl(
+            port_,
+            issuer_metadata_json,
+            credential_configuration_id,
+            client_id,
+            redirect_uri,
+            issuer_state,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_create_proof_jwt(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        holder_kid: String,
+        c_nonce: String,
+        issuer_url: String,
+        jwk_json: String,
+    ) {
+        wire__crate__api__wallet_create_proof_jwt_impl(
+            port_, holder_kid, c_nonce, issuer_url, jwk_json,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_exchange_auth_code_token(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        token_endpoint: String,
+        code: String,
+        code_verifier: String,
+        redirect_uri: Option<String>,
+        client_id: Option<String>,
+    ) {
+        wire__crate__api__wallet_exchange_auth_code_token_impl(
+            port_,
+            token_endpoint,
+            code,
+            code_verifier,
+            redirect_uri,
+            client_id,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_exchange_pre_auth_token(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        token_endpoint: String,
+        pre_auth_code: String,
+        tx_code: Option<String>,
+    ) {
+        wire__crate__api__wallet_exchange_pre_auth_token_impl(
+            port_,
+            token_endpoint,
+            pre_auth_code,
+            tx_code,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_fetch_issuer_metadata(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        issuer_url: String,
+    ) {
+        wire__crate__api__wallet_fetch_issuer_metadata_impl(port_, issuer_url)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_parse_credential_offer(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        offer_uri: String,
+    ) {
+        wire__crate__api__wallet_parse_credential_offer_impl(port_, offer_uri)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_parse_presentation_request(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        request_uri: String,
+    ) {
+        wire__crate__api__wallet_parse_presentation_request_impl(port_, request_uri)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_request_credential(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        credential_endpoint: String,
+        access_token: String,
+        credential_format: String,
+        credential_configuration_id: Option<String>,
+        proof_jwt: String,
+    ) {
+        wire__crate__api__wallet_request_credential_impl(
+            port_,
+            credential_endpoint,
+            access_token,
+            credential_format,
+            credential_configuration_id,
+            proof_jwt,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__zk_is_supported_on_device(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+    ) {
+        wire__crate__api__zk_is_supported_on_device_impl(port_)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__zk_prove(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        predicate_id: String,
+        claim_value: String,
+        mso_bytes: Box<[u8]>,
+        signature: Box<[u8]>,
+        session_nonce: Box<[u8]>,
+    ) {
+        wire__crate__api__zk_prove_impl(
+            port_,
+            predicate_id,
+            claim_value,
+            mso_bytes,
+            signature,
+            session_nonce,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__zk_prove_from_presentation_definition(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        presentation_definition_json: String,
+        mso_bytes: Box<[u8]>,
+        signature: Box<[u8]>,
+        secrets_json: String,
+        session_nonce: Box<[u8]>,
+    ) {
+        wire__crate__api__zk_prove_from_presentation_definition_impl(
+            port_,
+            presentation_definition_json,
+            mso_bytes,
+            signature,
+            secrets_json,
+            session_nonce,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr: *const std::ffi::c_void,
+    ) {
+        unsafe {
+            StdArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>::increment_strong_count(ptr as _);
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        ptr: *const std::ffi::c_void,
+    ) {
+        unsafe {
+            StdArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner< PresentationPolicy>>::decrement_strong_count(ptr as _);
+        }
     }
 }
 #[cfg(target_family = "wasm")]

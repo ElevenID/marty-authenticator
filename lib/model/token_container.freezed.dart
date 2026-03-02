@@ -12,8 +12,7 @@ part of 'token_container.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 TokenContainer _$TokenContainerFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
@@ -23,12 +22,8 @@ TokenContainer _$TokenContainerFromJson(Map<String, dynamic> json) {
       return TokenContainerFinalized.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(
-        json,
-        'runtimeType',
-        'TokenContainer',
-        'Invalid union type "${json['runtimeType']}"!',
-      );
+      throw CheckedFromJsonException(json, 'runtimeType', 'TokenContainer',
+          'Invalid union type "${json['runtimeType']}"!');
   }
 }
 
@@ -51,146 +46,146 @@ mixin _$TokenContainer {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )
-    unfinalized,
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)
+        unfinalized,
     required TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )
-    finalized,
-  }) => throw _privateConstructorUsedError;
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)
+        finalized,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
     TResult? Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
-  }) => throw _privateConstructorUsedError;
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
     TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
     required TResult orElse(),
-  }) => throw _privateConstructorUsedError;
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(TokenContainerUnfinalized value) unfinalized,
     required TResult Function(TokenContainerFinalized value) finalized,
-  }) => throw _privateConstructorUsedError;
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(TokenContainerUnfinalized value)? unfinalized,
     TResult? Function(TokenContainerFinalized value)? finalized,
-  }) => throw _privateConstructorUsedError;
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(TokenContainerUnfinalized value)? unfinalized,
     TResult Function(TokenContainerFinalized value)? finalized,
     required TResult orElse(),
-  }) => throw _privateConstructorUsedError;
+  }) =>
+      throw _privateConstructorUsedError;
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $TokenContainerCopyWith<TokenContainer> get copyWith =>
@@ -200,26 +195,24 @@ mixin _$TokenContainer {
 /// @nodoc
 abstract class $TokenContainerCopyWith<$Res> {
   factory $TokenContainerCopyWith(
-    TokenContainer value,
-    $Res Function(TokenContainer) then,
-  ) = _$TokenContainerCopyWithImpl<$Res, TokenContainer>;
+          TokenContainer value, $Res Function(TokenContainer) then) =
+      _$TokenContainerCopyWithImpl<$Res, TokenContainer>;
   @useResult
-  $Res call({
-    String issuer,
-    String nonce,
-    DateTime timestamp,
-    Uri serverUrl,
-    String serial,
-    EcKeyAlgorithm ecKeyAlgorithm,
-    Algorithms hashAlgorithm,
-    bool sslVerify,
-    String serverName,
-    FinalizationState finalizationState,
-    ContainerPolicies policies,
-    String? passphraseQuestion,
-    String publicClientKey,
-    String privateClientKey,
-  });
+  $Res call(
+      {String issuer,
+      String nonce,
+      DateTime timestamp,
+      Uri serverUrl,
+      String serial,
+      EcKeyAlgorithm ecKeyAlgorithm,
+      Algorithms hashAlgorithm,
+      bool sslVerify,
+      String serverName,
+      FinalizationState finalizationState,
+      ContainerPolicies policies,
+      String? passphraseQuestion,
+      String publicClientKey,
+      String privateClientKey});
 
   $ContainerPoliciesCopyWith<$Res> get policies;
 }
@@ -252,67 +245,64 @@ class _$TokenContainerCopyWithImpl<$Res, $Val extends TokenContainer>
     Object? publicClientKey = null,
     Object? privateClientKey = null,
   }) {
-    return _then(
-      _value.copyWith(
-            issuer: null == issuer
-                ? _value.issuer
-                : issuer // ignore: cast_nullable_to_non_nullable
-                      as String,
-            nonce: null == nonce
-                ? _value.nonce
-                : nonce // ignore: cast_nullable_to_non_nullable
-                      as String,
-            timestamp: null == timestamp
-                ? _value.timestamp
-                : timestamp // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            serverUrl: null == serverUrl
-                ? _value.serverUrl
-                : serverUrl // ignore: cast_nullable_to_non_nullable
-                      as Uri,
-            serial: null == serial
-                ? _value.serial
-                : serial // ignore: cast_nullable_to_non_nullable
-                      as String,
-            ecKeyAlgorithm: null == ecKeyAlgorithm
-                ? _value.ecKeyAlgorithm
-                : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
-                      as EcKeyAlgorithm,
-            hashAlgorithm: null == hashAlgorithm
-                ? _value.hashAlgorithm
-                : hashAlgorithm // ignore: cast_nullable_to_non_nullable
-                      as Algorithms,
-            sslVerify: null == sslVerify
-                ? _value.sslVerify
-                : sslVerify // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            serverName: null == serverName
-                ? _value.serverName
-                : serverName // ignore: cast_nullable_to_non_nullable
-                      as String,
-            finalizationState: null == finalizationState
-                ? _value.finalizationState
-                : finalizationState // ignore: cast_nullable_to_non_nullable
-                      as FinalizationState,
-            policies: null == policies
-                ? _value.policies
-                : policies // ignore: cast_nullable_to_non_nullable
-                      as ContainerPolicies,
-            passphraseQuestion: freezed == passphraseQuestion
-                ? _value.passphraseQuestion
-                : passphraseQuestion // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            publicClientKey: null == publicClientKey
-                ? _value.publicClientKey!
-                : publicClientKey // ignore: cast_nullable_to_non_nullable
-                      as String,
-            privateClientKey: null == privateClientKey
-                ? _value.privateClientKey!
-                : privateClientKey // ignore: cast_nullable_to_non_nullable
-                      as String,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      issuer: null == issuer
+          ? _value.issuer
+          : issuer // ignore: cast_nullable_to_non_nullable
+              as String,
+      nonce: null == nonce
+          ? _value.nonce
+          : nonce // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      serverUrl: null == serverUrl
+          ? _value.serverUrl
+          : serverUrl // ignore: cast_nullable_to_non_nullable
+              as Uri,
+      serial: null == serial
+          ? _value.serial
+          : serial // ignore: cast_nullable_to_non_nullable
+              as String,
+      ecKeyAlgorithm: null == ecKeyAlgorithm
+          ? _value.ecKeyAlgorithm
+          : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
+              as EcKeyAlgorithm,
+      hashAlgorithm: null == hashAlgorithm
+          ? _value.hashAlgorithm
+          : hashAlgorithm // ignore: cast_nullable_to_non_nullable
+              as Algorithms,
+      sslVerify: null == sslVerify
+          ? _value.sslVerify
+          : sslVerify // ignore: cast_nullable_to_non_nullable
+              as bool,
+      serverName: null == serverName
+          ? _value.serverName
+          : serverName // ignore: cast_nullable_to_non_nullable
+              as String,
+      finalizationState: null == finalizationState
+          ? _value.finalizationState
+          : finalizationState // ignore: cast_nullable_to_non_nullable
+              as FinalizationState,
+      policies: null == policies
+          ? _value.policies
+          : policies // ignore: cast_nullable_to_non_nullable
+              as ContainerPolicies,
+      passphraseQuestion: freezed == passphraseQuestion
+          ? _value.passphraseQuestion
+          : passphraseQuestion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      publicClientKey: null == publicClientKey
+          ? _value.publicClientKey!
+          : publicClientKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      privateClientKey: null == privateClientKey
+          ? _value.privateClientKey!
+          : privateClientKey // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
   }
 
   @override
@@ -328,30 +318,29 @@ class _$TokenContainerCopyWithImpl<$Res, $Val extends TokenContainer>
 abstract class _$$TokenContainerUnfinalizedImplCopyWith<$Res>
     implements $TokenContainerCopyWith<$Res> {
   factory _$$TokenContainerUnfinalizedImplCopyWith(
-    _$TokenContainerUnfinalizedImpl value,
-    $Res Function(_$TokenContainerUnfinalizedImpl) then,
-  ) = __$$TokenContainerUnfinalizedImplCopyWithImpl<$Res>;
+          _$TokenContainerUnfinalizedImpl value,
+          $Res Function(_$TokenContainerUnfinalizedImpl) then) =
+      __$$TokenContainerUnfinalizedImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String issuer,
-    Duration ttl,
-    String nonce,
-    DateTime timestamp,
-    Uri serverUrl,
-    String serial,
-    EcKeyAlgorithm ecKeyAlgorithm,
-    Algorithms hashAlgorithm,
-    bool sslVerify,
-    String serverName,
-    FinalizationState finalizationState,
-    ContainerPolicies policies,
-    bool? addDeviceInfos,
-    String? passphraseQuestion,
-    String? publicClientKey,
-    String? privateClientKey,
-    bool sendPassphrase,
-  });
+  $Res call(
+      {String issuer,
+      Duration ttl,
+      String nonce,
+      DateTime timestamp,
+      Uri serverUrl,
+      String serial,
+      EcKeyAlgorithm ecKeyAlgorithm,
+      Algorithms hashAlgorithm,
+      bool sslVerify,
+      String serverName,
+      FinalizationState finalizationState,
+      ContainerPolicies policies,
+      bool? addDeviceInfos,
+      String? passphraseQuestion,
+      String? publicClientKey,
+      String? privateClientKey,
+      bool sendPassphrase});
 
   @override
   $ContainerPoliciesCopyWith<$Res> get policies;
@@ -362,9 +351,9 @@ class __$$TokenContainerUnfinalizedImplCopyWithImpl<$Res>
     extends _$TokenContainerCopyWithImpl<$Res, _$TokenContainerUnfinalizedImpl>
     implements _$$TokenContainerUnfinalizedImplCopyWith<$Res> {
   __$$TokenContainerUnfinalizedImplCopyWithImpl(
-    _$TokenContainerUnfinalizedImpl _value,
-    $Res Function(_$TokenContainerUnfinalizedImpl) _then,
-  ) : super(_value, _then);
+      _$TokenContainerUnfinalizedImpl _value,
+      $Res Function(_$TokenContainerUnfinalizedImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -387,105 +376,103 @@ class __$$TokenContainerUnfinalizedImplCopyWithImpl<$Res>
     Object? privateClientKey = freezed,
     Object? sendPassphrase = null,
   }) {
-    return _then(
-      _$TokenContainerUnfinalizedImpl(
-        issuer: null == issuer
-            ? _value.issuer
-            : issuer // ignore: cast_nullable_to_non_nullable
-                  as String,
-        ttl: null == ttl
-            ? _value.ttl
-            : ttl // ignore: cast_nullable_to_non_nullable
-                  as Duration,
-        nonce: null == nonce
-            ? _value.nonce
-            : nonce // ignore: cast_nullable_to_non_nullable
-                  as String,
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        serverUrl: null == serverUrl
-            ? _value.serverUrl
-            : serverUrl // ignore: cast_nullable_to_non_nullable
-                  as Uri,
-        serial: null == serial
-            ? _value.serial
-            : serial // ignore: cast_nullable_to_non_nullable
-                  as String,
-        ecKeyAlgorithm: null == ecKeyAlgorithm
-            ? _value.ecKeyAlgorithm
-            : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
-                  as EcKeyAlgorithm,
-        hashAlgorithm: null == hashAlgorithm
-            ? _value.hashAlgorithm
-            : hashAlgorithm // ignore: cast_nullable_to_non_nullable
-                  as Algorithms,
-        sslVerify: null == sslVerify
-            ? _value.sslVerify
-            : sslVerify // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        serverName: null == serverName
-            ? _value.serverName
-            : serverName // ignore: cast_nullable_to_non_nullable
-                  as String,
-        finalizationState: null == finalizationState
-            ? _value.finalizationState
-            : finalizationState // ignore: cast_nullable_to_non_nullable
-                  as FinalizationState,
-        policies: null == policies
-            ? _value.policies
-            : policies // ignore: cast_nullable_to_non_nullable
-                  as ContainerPolicies,
-        addDeviceInfos: freezed == addDeviceInfos
-            ? _value.addDeviceInfos
-            : addDeviceInfos // ignore: cast_nullable_to_non_nullable
-                  as bool?,
-        passphraseQuestion: freezed == passphraseQuestion
-            ? _value.passphraseQuestion
-            : passphraseQuestion // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        publicClientKey: freezed == publicClientKey
-            ? _value.publicClientKey
-            : publicClientKey // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        privateClientKey: freezed == privateClientKey
-            ? _value.privateClientKey
-            : privateClientKey // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        sendPassphrase: null == sendPassphrase
-            ? _value.sendPassphrase
-            : sendPassphrase // ignore: cast_nullable_to_non_nullable
-                  as bool,
-      ),
-    );
+    return _then(_$TokenContainerUnfinalizedImpl(
+      issuer: null == issuer
+          ? _value.issuer
+          : issuer // ignore: cast_nullable_to_non_nullable
+              as String,
+      ttl: null == ttl
+          ? _value.ttl
+          : ttl // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      nonce: null == nonce
+          ? _value.nonce
+          : nonce // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      serverUrl: null == serverUrl
+          ? _value.serverUrl
+          : serverUrl // ignore: cast_nullable_to_non_nullable
+              as Uri,
+      serial: null == serial
+          ? _value.serial
+          : serial // ignore: cast_nullable_to_non_nullable
+              as String,
+      ecKeyAlgorithm: null == ecKeyAlgorithm
+          ? _value.ecKeyAlgorithm
+          : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
+              as EcKeyAlgorithm,
+      hashAlgorithm: null == hashAlgorithm
+          ? _value.hashAlgorithm
+          : hashAlgorithm // ignore: cast_nullable_to_non_nullable
+              as Algorithms,
+      sslVerify: null == sslVerify
+          ? _value.sslVerify
+          : sslVerify // ignore: cast_nullable_to_non_nullable
+              as bool,
+      serverName: null == serverName
+          ? _value.serverName
+          : serverName // ignore: cast_nullable_to_non_nullable
+              as String,
+      finalizationState: null == finalizationState
+          ? _value.finalizationState
+          : finalizationState // ignore: cast_nullable_to_non_nullable
+              as FinalizationState,
+      policies: null == policies
+          ? _value.policies
+          : policies // ignore: cast_nullable_to_non_nullable
+              as ContainerPolicies,
+      addDeviceInfos: freezed == addDeviceInfos
+          ? _value.addDeviceInfos
+          : addDeviceInfos // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      passphraseQuestion: freezed == passphraseQuestion
+          ? _value.passphraseQuestion
+          : passphraseQuestion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      publicClientKey: freezed == publicClientKey
+          ? _value.publicClientKey
+          : publicClientKey // ignore: cast_nullable_to_non_nullable
+              as String?,
+      privateClientKey: freezed == privateClientKey
+          ? _value.privateClientKey
+          : privateClientKey // ignore: cast_nullable_to_non_nullable
+              as String?,
+      sendPassphrase: null == sendPassphrase
+          ? _value.sendPassphrase
+          : sendPassphrase // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$TokenContainerUnfinalizedImpl extends TokenContainerUnfinalized {
-  const _$TokenContainerUnfinalizedImpl({
-    required this.issuer,
-    required this.ttl,
-    required this.nonce,
-    required this.timestamp,
-    required this.serverUrl,
-    required this.serial,
-    required this.ecKeyAlgorithm,
-    required this.hashAlgorithm,
-    required this.sslVerify,
-    this.serverName = 'privacyIDEA',
-    this.finalizationState = FinalizationState.notStarted,
-    this.policies = ContainerPolicies.defaultSetting,
-    this.addDeviceInfos,
-    this.passphraseQuestion,
-    this.publicClientKey,
-    this.privateClientKey,
-    this.sendPassphrase = false,
-    final String? $type,
-  }) : $type = $type ?? 'unfinalized',
-       super._();
+  const _$TokenContainerUnfinalizedImpl(
+      {required this.issuer,
+      required this.ttl,
+      required this.nonce,
+      required this.timestamp,
+      required this.serverUrl,
+      required this.serial,
+      required this.ecKeyAlgorithm,
+      required this.hashAlgorithm,
+      required this.sslVerify,
+      this.serverName = 'privacyIDEA',
+      this.finalizationState = FinalizationState.notStarted,
+      this.policies = ContainerPolicies.defaultSetting,
+      this.addDeviceInfos,
+      this.passphraseQuestion,
+      this.publicClientKey,
+      this.privateClientKey,
+      this.sendPassphrase = false,
+      final String? $type})
+      : $type = $type ?? 'unfinalized',
+        super._();
 
   factory _$TokenContainerUnfinalizedImpl.fromJson(Map<String, dynamic> json) =>
       _$$TokenContainerUnfinalizedImplFromJson(json);
@@ -572,209 +559,74 @@ class _$TokenContainerUnfinalizedImpl extends TokenContainerUnfinalized {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    issuer,
-    ttl,
-    nonce,
-    timestamp,
-    serverUrl,
-    serial,
-    ecKeyAlgorithm,
-    hashAlgorithm,
-    sslVerify,
-    serverName,
-    finalizationState,
-    policies,
-    addDeviceInfos,
-    passphraseQuestion,
-    publicClientKey,
-    privateClientKey,
-    sendPassphrase,
-  );
+      runtimeType,
+      issuer,
+      ttl,
+      nonce,
+      timestamp,
+      serverUrl,
+      serial,
+      ecKeyAlgorithm,
+      hashAlgorithm,
+      sslVerify,
+      serverName,
+      finalizationState,
+      policies,
+      addDeviceInfos,
+      passphraseQuestion,
+      publicClientKey,
+      privateClientKey,
+      sendPassphrase);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$TokenContainerUnfinalizedImplCopyWith<_$TokenContainerUnfinalizedImpl>
-  get copyWith =>
-      __$$TokenContainerUnfinalizedImplCopyWithImpl<
-        _$TokenContainerUnfinalizedImpl
-      >(this, _$identity);
+      get copyWith => __$$TokenContainerUnfinalizedImplCopyWithImpl<
+          _$TokenContainerUnfinalizedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )
-    unfinalized,
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)
+        unfinalized,
     required TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )
-    finalized,
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)
+        finalized,
   }) {
     return unfinalized(
-      issuer,
-      ttl,
-      nonce,
-      timestamp,
-      serverUrl,
-      serial,
-      ecKeyAlgorithm,
-      hashAlgorithm,
-      sslVerify,
-      serverName,
-      finalizationState,
-      policies,
-      addDeviceInfos,
-      passphraseQuestion,
-      publicClientKey,
-      privateClientKey,
-      sendPassphrase,
-    );
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
-    TResult? Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
-  }) {
-    return unfinalized?.call(
-      issuer,
-      ttl,
-      nonce,
-      timestamp,
-      serverUrl,
-      serial,
-      ecKeyAlgorithm,
-      hashAlgorithm,
-      sslVerify,
-      serverName,
-      finalizationState,
-      policies,
-      addDeviceInfos,
-      passphraseQuestion,
-      publicClientKey,
-      privateClientKey,
-      sendPassphrase,
-    );
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
-    TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
-    required TResult orElse(),
-  }) {
-    if (unfinalized != null) {
-      return unfinalized(
         issuer,
         ttl,
         nonce,
@@ -791,8 +643,131 @@ class _$TokenContainerUnfinalizedImpl extends TokenContainerUnfinalized {
         passphraseQuestion,
         publicClientKey,
         privateClientKey,
-        sendPassphrase,
-      );
+        sendPassphrase);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
+    TResult? Function(
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
+  }) {
+    return unfinalized?.call(
+        issuer,
+        ttl,
+        nonce,
+        timestamp,
+        serverUrl,
+        serial,
+        ecKeyAlgorithm,
+        hashAlgorithm,
+        sslVerify,
+        serverName,
+        finalizationState,
+        policies,
+        addDeviceInfos,
+        passphraseQuestion,
+        publicClientKey,
+        privateClientKey,
+        sendPassphrase);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
+    TResult Function(
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
+    required TResult orElse(),
+  }) {
+    if (unfinalized != null) {
+      return unfinalized(
+          issuer,
+          ttl,
+          nonce,
+          timestamp,
+          serverUrl,
+          serial,
+          ecKeyAlgorithm,
+          hashAlgorithm,
+          sslVerify,
+          serverName,
+          finalizationState,
+          policies,
+          addDeviceInfos,
+          passphraseQuestion,
+          publicClientKey,
+          privateClientKey,
+          sendPassphrase);
     }
     return orElse();
   }
@@ -830,30 +805,31 @@ class _$TokenContainerUnfinalizedImpl extends TokenContainerUnfinalized {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TokenContainerUnfinalizedImplToJson(this);
+    return _$$TokenContainerUnfinalizedImplToJson(
+      this,
+    );
   }
 }
 
 abstract class TokenContainerUnfinalized extends TokenContainer {
-  const factory TokenContainerUnfinalized({
-    required final String issuer,
-    required final Duration ttl,
-    required final String nonce,
-    required final DateTime timestamp,
-    required final Uri serverUrl,
-    required final String serial,
-    required final EcKeyAlgorithm ecKeyAlgorithm,
-    required final Algorithms hashAlgorithm,
-    required final bool sslVerify,
-    final String serverName,
-    final FinalizationState finalizationState,
-    final ContainerPolicies policies,
-    final bool? addDeviceInfos,
-    final String? passphraseQuestion,
-    final String? publicClientKey,
-    final String? privateClientKey,
-    final bool sendPassphrase,
-  }) = _$TokenContainerUnfinalizedImpl;
+  const factory TokenContainerUnfinalized(
+      {required final String issuer,
+      required final Duration ttl,
+      required final String nonce,
+      required final DateTime timestamp,
+      required final Uri serverUrl,
+      required final String serial,
+      required final EcKeyAlgorithm ecKeyAlgorithm,
+      required final Algorithms hashAlgorithm,
+      required final bool sslVerify,
+      final String serverName,
+      final FinalizationState finalizationState,
+      final ContainerPolicies policies,
+      final bool? addDeviceInfos,
+      final String? passphraseQuestion,
+      final String? publicClientKey,
+      final String? privateClientKey,
+      final bool sendPassphrase}) = _$TokenContainerUnfinalizedImpl;
   const TokenContainerUnfinalized._() : super._();
 
   factory TokenContainerUnfinalized.fromJson(Map<String, dynamic> json) =
@@ -893,36 +869,35 @@ abstract class TokenContainerUnfinalized extends TokenContainer {
   @override
   @JsonKey(ignore: true)
   _$$TokenContainerUnfinalizedImplCopyWith<_$TokenContainerUnfinalizedImpl>
-  get copyWith => throw _privateConstructorUsedError;
+      get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class _$$TokenContainerFinalizedImplCopyWith<$Res>
     implements $TokenContainerCopyWith<$Res> {
   factory _$$TokenContainerFinalizedImplCopyWith(
-    _$TokenContainerFinalizedImpl value,
-    $Res Function(_$TokenContainerFinalizedImpl) then,
-  ) = __$$TokenContainerFinalizedImplCopyWithImpl<$Res>;
+          _$TokenContainerFinalizedImpl value,
+          $Res Function(_$TokenContainerFinalizedImpl) then) =
+      __$$TokenContainerFinalizedImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String issuer,
-    String nonce,
-    DateTime timestamp,
-    Uri serverUrl,
-    String serial,
-    EcKeyAlgorithm ecKeyAlgorithm,
-    Algorithms hashAlgorithm,
-    bool sslVerify,
-    String serverName,
-    FinalizationState finalizationState,
-    SyncState syncState,
-    ContainerPolicies policies,
-    bool initSynced,
-    String? passphraseQuestion,
-    String publicClientKey,
-    String privateClientKey,
-  });
+  $Res call(
+      {String issuer,
+      String nonce,
+      DateTime timestamp,
+      Uri serverUrl,
+      String serial,
+      EcKeyAlgorithm ecKeyAlgorithm,
+      Algorithms hashAlgorithm,
+      bool sslVerify,
+      String serverName,
+      FinalizationState finalizationState,
+      SyncState syncState,
+      ContainerPolicies policies,
+      bool initSynced,
+      String? passphraseQuestion,
+      String publicClientKey,
+      String privateClientKey});
 
   @override
   $ContainerPoliciesCopyWith<$Res> get policies;
@@ -933,9 +908,9 @@ class __$$TokenContainerFinalizedImplCopyWithImpl<$Res>
     extends _$TokenContainerCopyWithImpl<$Res, _$TokenContainerFinalizedImpl>
     implements _$$TokenContainerFinalizedImplCopyWith<$Res> {
   __$$TokenContainerFinalizedImplCopyWithImpl(
-    _$TokenContainerFinalizedImpl _value,
-    $Res Function(_$TokenContainerFinalizedImpl) _then,
-  ) : super(_value, _then);
+      _$TokenContainerFinalizedImpl _value,
+      $Res Function(_$TokenContainerFinalizedImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -957,100 +932,98 @@ class __$$TokenContainerFinalizedImplCopyWithImpl<$Res>
     Object? publicClientKey = null,
     Object? privateClientKey = null,
   }) {
-    return _then(
-      _$TokenContainerFinalizedImpl(
-        issuer: null == issuer
-            ? _value.issuer
-            : issuer // ignore: cast_nullable_to_non_nullable
-                  as String,
-        nonce: null == nonce
-            ? _value.nonce
-            : nonce // ignore: cast_nullable_to_non_nullable
-                  as String,
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        serverUrl: null == serverUrl
-            ? _value.serverUrl
-            : serverUrl // ignore: cast_nullable_to_non_nullable
-                  as Uri,
-        serial: null == serial
-            ? _value.serial
-            : serial // ignore: cast_nullable_to_non_nullable
-                  as String,
-        ecKeyAlgorithm: null == ecKeyAlgorithm
-            ? _value.ecKeyAlgorithm
-            : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
-                  as EcKeyAlgorithm,
-        hashAlgorithm: null == hashAlgorithm
-            ? _value.hashAlgorithm
-            : hashAlgorithm // ignore: cast_nullable_to_non_nullable
-                  as Algorithms,
-        sslVerify: null == sslVerify
-            ? _value.sslVerify
-            : sslVerify // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        serverName: null == serverName
-            ? _value.serverName
-            : serverName // ignore: cast_nullable_to_non_nullable
-                  as String,
-        finalizationState: null == finalizationState
-            ? _value.finalizationState
-            : finalizationState // ignore: cast_nullable_to_non_nullable
-                  as FinalizationState,
-        syncState: null == syncState
-            ? _value.syncState
-            : syncState // ignore: cast_nullable_to_non_nullable
-                  as SyncState,
-        policies: null == policies
-            ? _value.policies
-            : policies // ignore: cast_nullable_to_non_nullable
-                  as ContainerPolicies,
-        initSynced: null == initSynced
-            ? _value.initSynced
-            : initSynced // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        passphraseQuestion: freezed == passphraseQuestion
-            ? _value.passphraseQuestion
-            : passphraseQuestion // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        publicClientKey: null == publicClientKey
-            ? _value.publicClientKey
-            : publicClientKey // ignore: cast_nullable_to_non_nullable
-                  as String,
-        privateClientKey: null == privateClientKey
-            ? _value.privateClientKey
-            : privateClientKey // ignore: cast_nullable_to_non_nullable
-                  as String,
-      ),
-    );
+    return _then(_$TokenContainerFinalizedImpl(
+      issuer: null == issuer
+          ? _value.issuer
+          : issuer // ignore: cast_nullable_to_non_nullable
+              as String,
+      nonce: null == nonce
+          ? _value.nonce
+          : nonce // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      serverUrl: null == serverUrl
+          ? _value.serverUrl
+          : serverUrl // ignore: cast_nullable_to_non_nullable
+              as Uri,
+      serial: null == serial
+          ? _value.serial
+          : serial // ignore: cast_nullable_to_non_nullable
+              as String,
+      ecKeyAlgorithm: null == ecKeyAlgorithm
+          ? _value.ecKeyAlgorithm
+          : ecKeyAlgorithm // ignore: cast_nullable_to_non_nullable
+              as EcKeyAlgorithm,
+      hashAlgorithm: null == hashAlgorithm
+          ? _value.hashAlgorithm
+          : hashAlgorithm // ignore: cast_nullable_to_non_nullable
+              as Algorithms,
+      sslVerify: null == sslVerify
+          ? _value.sslVerify
+          : sslVerify // ignore: cast_nullable_to_non_nullable
+              as bool,
+      serverName: null == serverName
+          ? _value.serverName
+          : serverName // ignore: cast_nullable_to_non_nullable
+              as String,
+      finalizationState: null == finalizationState
+          ? _value.finalizationState
+          : finalizationState // ignore: cast_nullable_to_non_nullable
+              as FinalizationState,
+      syncState: null == syncState
+          ? _value.syncState
+          : syncState // ignore: cast_nullable_to_non_nullable
+              as SyncState,
+      policies: null == policies
+          ? _value.policies
+          : policies // ignore: cast_nullable_to_non_nullable
+              as ContainerPolicies,
+      initSynced: null == initSynced
+          ? _value.initSynced
+          : initSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
+      passphraseQuestion: freezed == passphraseQuestion
+          ? _value.passphraseQuestion
+          : passphraseQuestion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      publicClientKey: null == publicClientKey
+          ? _value.publicClientKey
+          : publicClientKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      privateClientKey: null == privateClientKey
+          ? _value.privateClientKey
+          : privateClientKey // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$TokenContainerFinalizedImpl extends TokenContainerFinalized {
-  const _$TokenContainerFinalizedImpl({
-    required this.issuer,
-    required this.nonce,
-    required this.timestamp,
-    required this.serverUrl,
-    required this.serial,
-    required this.ecKeyAlgorithm,
-    required this.hashAlgorithm,
-    required this.sslVerify,
-    this.serverName = 'privacyIDEA',
-    this.finalizationState = FinalizationState.completed,
-    this.syncState = SyncState.notStarted,
-    this.policies = ContainerPolicies.defaultSetting,
-    this.initSynced = false,
-    this.passphraseQuestion,
-    required this.publicClientKey,
-    required this.privateClientKey,
-    final String? $type,
-  }) : $type = $type ?? 'finalized',
-       super._();
+  const _$TokenContainerFinalizedImpl(
+      {required this.issuer,
+      required this.nonce,
+      required this.timestamp,
+      required this.serverUrl,
+      required this.serial,
+      required this.ecKeyAlgorithm,
+      required this.hashAlgorithm,
+      required this.sslVerify,
+      this.serverName = 'privacyIDEA',
+      this.finalizationState = FinalizationState.completed,
+      this.syncState = SyncState.notStarted,
+      this.policies = ContainerPolicies.defaultSetting,
+      this.initSynced = false,
+      this.passphraseQuestion,
+      required this.publicClientKey,
+      required this.privateClientKey,
+      final String? $type})
+      : $type = $type ?? 'finalized',
+        super._();
 
   factory _$TokenContainerFinalizedImpl.fromJson(Map<String, dynamic> json) =>
       _$$TokenContainerFinalizedImplFromJson(json);
@@ -1135,206 +1108,73 @@ class _$TokenContainerFinalizedImpl extends TokenContainerFinalized {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    issuer,
-    nonce,
-    timestamp,
-    serverUrl,
-    serial,
-    ecKeyAlgorithm,
-    hashAlgorithm,
-    sslVerify,
-    serverName,
-    finalizationState,
-    syncState,
-    policies,
-    initSynced,
-    passphraseQuestion,
-    publicClientKey,
-    privateClientKey,
-  );
+      runtimeType,
+      issuer,
+      nonce,
+      timestamp,
+      serverUrl,
+      serial,
+      ecKeyAlgorithm,
+      hashAlgorithm,
+      sslVerify,
+      serverName,
+      finalizationState,
+      syncState,
+      policies,
+      initSynced,
+      passphraseQuestion,
+      publicClientKey,
+      privateClientKey);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$TokenContainerFinalizedImplCopyWith<_$TokenContainerFinalizedImpl>
-  get copyWith =>
-      __$$TokenContainerFinalizedImplCopyWithImpl<
-        _$TokenContainerFinalizedImpl
-      >(this, _$identity);
+      get copyWith => __$$TokenContainerFinalizedImplCopyWithImpl<
+          _$TokenContainerFinalizedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )
-    unfinalized,
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)
+        unfinalized,
     required TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )
-    finalized,
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)
+        finalized,
   }) {
     return finalized(
-      issuer,
-      nonce,
-      timestamp,
-      serverUrl,
-      serial,
-      ecKeyAlgorithm,
-      hashAlgorithm,
-      sslVerify,
-      serverName,
-      finalizationState,
-      syncState,
-      policies,
-      initSynced,
-      passphraseQuestion,
-      publicClientKey,
-      privateClientKey,
-    );
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
-    TResult? Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
-  }) {
-    return finalized?.call(
-      issuer,
-      nonce,
-      timestamp,
-      serverUrl,
-      serial,
-      ecKeyAlgorithm,
-      hashAlgorithm,
-      sslVerify,
-      serverName,
-      finalizationState,
-      syncState,
-      policies,
-      initSynced,
-      passphraseQuestion,
-      publicClientKey,
-      privateClientKey,
-    );
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(
-      String issuer,
-      Duration ttl,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      ContainerPolicies policies,
-      bool? addDeviceInfos,
-      String? passphraseQuestion,
-      String? publicClientKey,
-      String? privateClientKey,
-      bool sendPassphrase,
-    )?
-    unfinalized,
-    TResult Function(
-      String issuer,
-      String nonce,
-      DateTime timestamp,
-      Uri serverUrl,
-      String serial,
-      EcKeyAlgorithm ecKeyAlgorithm,
-      Algorithms hashAlgorithm,
-      bool sslVerify,
-      String serverName,
-      FinalizationState finalizationState,
-      SyncState syncState,
-      ContainerPolicies policies,
-      bool initSynced,
-      String? passphraseQuestion,
-      String publicClientKey,
-      String privateClientKey,
-    )?
-    finalized,
-    required TResult orElse(),
-  }) {
-    if (finalized != null) {
-      return finalized(
         issuer,
         nonce,
         timestamp,
@@ -1350,8 +1190,129 @@ class _$TokenContainerFinalizedImpl extends TokenContainerFinalized {
         initSynced,
         passphraseQuestion,
         publicClientKey,
-        privateClientKey,
-      );
+        privateClientKey);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
+    TResult? Function(
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
+  }) {
+    return finalized?.call(
+        issuer,
+        nonce,
+        timestamp,
+        serverUrl,
+        serial,
+        ecKeyAlgorithm,
+        hashAlgorithm,
+        sslVerify,
+        serverName,
+        finalizationState,
+        syncState,
+        policies,
+        initSynced,
+        passphraseQuestion,
+        publicClientKey,
+        privateClientKey);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(
+            String issuer,
+            Duration ttl,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            ContainerPolicies policies,
+            bool? addDeviceInfos,
+            String? passphraseQuestion,
+            String? publicClientKey,
+            String? privateClientKey,
+            bool sendPassphrase)?
+        unfinalized,
+    TResult Function(
+            String issuer,
+            String nonce,
+            DateTime timestamp,
+            Uri serverUrl,
+            String serial,
+            EcKeyAlgorithm ecKeyAlgorithm,
+            Algorithms hashAlgorithm,
+            bool sslVerify,
+            String serverName,
+            FinalizationState finalizationState,
+            SyncState syncState,
+            ContainerPolicies policies,
+            bool initSynced,
+            String? passphraseQuestion,
+            String publicClientKey,
+            String privateClientKey)?
+        finalized,
+    required TResult orElse(),
+  }) {
+    if (finalized != null) {
+      return finalized(
+          issuer,
+          nonce,
+          timestamp,
+          serverUrl,
+          serial,
+          ecKeyAlgorithm,
+          hashAlgorithm,
+          sslVerify,
+          serverName,
+          finalizationState,
+          syncState,
+          policies,
+          initSynced,
+          passphraseQuestion,
+          publicClientKey,
+          privateClientKey);
     }
     return orElse();
   }
@@ -1389,29 +1350,30 @@ class _$TokenContainerFinalizedImpl extends TokenContainerFinalized {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TokenContainerFinalizedImplToJson(this);
+    return _$$TokenContainerFinalizedImplToJson(
+      this,
+    );
   }
 }
 
 abstract class TokenContainerFinalized extends TokenContainer {
-  const factory TokenContainerFinalized({
-    required final String issuer,
-    required final String nonce,
-    required final DateTime timestamp,
-    required final Uri serverUrl,
-    required final String serial,
-    required final EcKeyAlgorithm ecKeyAlgorithm,
-    required final Algorithms hashAlgorithm,
-    required final bool sslVerify,
-    final String serverName,
-    final FinalizationState finalizationState,
-    final SyncState syncState,
-    final ContainerPolicies policies,
-    final bool initSynced,
-    final String? passphraseQuestion,
-    required final String publicClientKey,
-    required final String privateClientKey,
-  }) = _$TokenContainerFinalizedImpl;
+  const factory TokenContainerFinalized(
+      {required final String issuer,
+      required final String nonce,
+      required final DateTime timestamp,
+      required final Uri serverUrl,
+      required final String serial,
+      required final EcKeyAlgorithm ecKeyAlgorithm,
+      required final Algorithms hashAlgorithm,
+      required final bool sslVerify,
+      final String serverName,
+      final FinalizationState finalizationState,
+      final SyncState syncState,
+      final ContainerPolicies policies,
+      final bool initSynced,
+      final String? passphraseQuestion,
+      required final String publicClientKey,
+      required final String privateClientKey}) = _$TokenContainerFinalizedImpl;
   const TokenContainerFinalized._() : super._();
 
   factory TokenContainerFinalized.fromJson(Map<String, dynamic> json) =
@@ -1450,5 +1412,5 @@ abstract class TokenContainerFinalized extends TokenContainer {
   @override
   @JsonKey(ignore: true)
   _$$TokenContainerFinalizedImplCopyWith<_$TokenContainerFinalizedImpl>
-  get copyWith => throw _privateConstructorUsedError;
+      get copyWith => throw _privateConstructorUsedError;
 }

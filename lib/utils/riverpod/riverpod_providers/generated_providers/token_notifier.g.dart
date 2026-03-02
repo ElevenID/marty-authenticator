@@ -104,24 +104,25 @@ class TokenNotifierProvider
     required PrivacyideaIOClient ioClient,
     required FirebaseUtils firebaseUtils,
   }) : this._internal(
-         () => TokenNotifier()
-           ..repo = repo
-           ..rsaUtils = rsaUtils
-           ..ioClient = ioClient
-           ..firebaseUtils = firebaseUtils,
-         from: tokenNotifierProviderOf,
-         name: r'tokenNotifierProviderOf',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$tokenNotifierHash,
-         dependencies: TokenNotifierFamily._dependencies,
-         allTransitiveDependencies:
-             TokenNotifierFamily._allTransitiveDependencies,
-         repo: repo,
-         rsaUtils: rsaUtils,
-         ioClient: ioClient,
-         firebaseUtils: firebaseUtils,
-       );
+          () => TokenNotifier()
+            ..repo = repo
+            ..rsaUtils = rsaUtils
+            ..ioClient = ioClient
+            ..firebaseUtils = firebaseUtils,
+          from: tokenNotifierProviderOf,
+          name: r'tokenNotifierProviderOf',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$tokenNotifierHash,
+          dependencies: TokenNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              TokenNotifierFamily._allTransitiveDependencies,
+          repo: repo,
+          rsaUtils: rsaUtils,
+          ioClient: ioClient,
+          firebaseUtils: firebaseUtils,
+        );
 
   TokenNotifierProvider._internal(
     super._createNotifier, {
@@ -142,7 +143,9 @@ class TokenNotifierProvider
   final FirebaseUtils firebaseUtils;
 
   @override
-  FutureOr<TokenState> runNotifierBuild(covariant TokenNotifier notifier) {
+  FutureOr<TokenState> runNotifierBuild(
+    covariant TokenNotifier notifier,
+  ) {
     return notifier.build(
       repo: repo,
       rsaUtils: rsaUtils,
@@ -230,6 +233,5 @@ class _TokenNotifierProviderElement
   FirebaseUtils get firebaseUtils =>
       (origin as TokenNotifierProvider).firebaseUtils;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

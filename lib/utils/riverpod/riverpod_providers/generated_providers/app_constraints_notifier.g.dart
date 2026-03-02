@@ -13,14 +13,14 @@ String _$appConstraintsNotifierHash() =>
 @ProviderFor(AppConstraintsNotifier)
 final appConstraintsNotifierProvider =
     NotifierProvider<AppConstraintsNotifier, BoxConstraints>.internal(
-      AppConstraintsNotifier.new,
-      name: r'appConstraintsNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$appConstraintsNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  AppConstraintsNotifier.new,
+  name: r'appConstraintsNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$appConstraintsNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$AppConstraintsNotifier = Notifier<BoxConstraints>;
 // ignore_for_file: type=lint

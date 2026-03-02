@@ -8,7 +8,11 @@ use crate::credential::{
     SdJwtCredential, TrustInfo, VerifiableCredential,
 };
 use crate::trust;
-pub use crate::zk::*;
+use flutter_rust_bridge::frb;
+use serde::{Deserialize, Serialize};
+// Required: sync_policies() returns Vec<PresentationPolicy>; frb_generated.rs
+// also needs this type in scope for its SseDecode impl.
+pub use marty_verification::policy::PresentationPolicy;
 
 // ============================================================================
 // Credential Parsing
@@ -399,7 +403,8 @@ pub fn rank_matching_credentials(
     policy_json: String,
     credentials: Vec<RankableCredentialInput>,
 ) -> anyhow::Result<Vec<String>> {
-    use marty_verification::policy::{PresentationPolicy, CredentialRanker, RankableCredential};
+    use marty_verification::policy::{PresentationPolicy, CredentialRanker};
+    use marty_verification::policy::ranking::RankableCredential;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
@@ -432,7 +437,8 @@ pub fn check_issuer_constraints(
     issuer_id: String,
     trust_profile_verified: bool,
 ) -> anyhow::Result<IssuerCheckResultOutput> {
-    use marty_verification::policy::{PresentationPolicy, IssuerConstraintChecker, IssuerCheckResult};
+    use marty_verification::policy::{PresentationPolicy, IssuerConstraintChecker};
+    use marty_verification::policy::issuer::IssuerCheckResult;
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
         .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
@@ -478,4 +484,460 @@ pub struct RankableCredentialInput {
 pub struct IssuerCheckResultOutput {
     pub is_trusted: bool,
     pub violation_message: Option<String>,
+}
+// ============================================================================
+// OID4VCI / OID4VP — FFI-safe DTOs
+// ============================================================================
+
+/// Parsed credential offer returned to Flutter.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbCredentialOffer {
+    pub credential_issuer: String,
+    pub credential_configuration_ids: Vec<String>,
+    pub pre_authorized_code: Option<String>,
+    pub tx_code_required: bool,
+    pub issuer_state: Option<String>,
+}
+
+/// Wallet-relevant issuer metadata.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbIssuerMetadata {
+    pub credential_issuer: String,
+    pub token_endpoint: String,
+    pub credential_endpoint: String,
+    pub authorization_endpoint: Option<String>,
+    pub grant_types_supported: Vec<String>,
+    pub credential_configurations_json: String,
+}
+
+impl From<marty_oid4vci::IssuerMetadata> for FrbIssuerMetadata {
+    fn from(m: marty_oid4vci::IssuerMetadata) -> Self {
+        let token_endpoint = m.token_endpoint();
+        let credential_configurations_json =
+            serde_json::to_string(&m.credential_configurations_supported)
+                .unwrap_or_else(|_| "{}".to_string());
+        Self {
+            credential_issuer: m.credential_issuer,
+            token_endpoint,
+            credential_endpoint: m.credential_endpoint,
+            authorization_endpoint: m.authorization_endpoint,
+            grant_types_supported: m.grant_types_supported,
+            credential_configurations_json,
+        }
+    }
+}
+
+/// OAuth 2.0 / OID4VCI token response.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbTokenResponse {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: Option<u64>,
+    pub c_nonce: Option<String>,
+    pub c_nonce_expires_in: Option<u64>,
+    pub scope: Option<String>,
+}
+
+impl From<marty_oid4vci::types::TokenResponse> for FrbTokenResponse {
+    fn from(t: marty_oid4vci::types::TokenResponse) -> Self {
+        Self {
+            access_token: t.access_token,
+            token_type: t.token_type,
+            expires_in: Some(t.expires_in),
+            c_nonce: t.nonce,
+            c_nonce_expires_in: t.nonce_expires_in,
+            scope: t.scope,
+        }
+    }
+}
+
+/// Everything Flutter needs to open the authorization redirect URL.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbAuthorizationRequest {
+    pub authorization_url: String,
+    pub code_verifier: String,
+    pub state: String,
+    pub redirect_uri: String,
+}
+
+/// Credential response from the issuer.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbCredentialResponse {
+    pub format: Option<String>,
+    pub credential: Option<String>,
+    pub transaction_id: Option<String>,
+    pub c_nonce: Option<String>,
+    pub c_nonce_expires_in: Option<u64>,
+}
+
+impl From<marty_oid4vci::types::CredentialResponse> for FrbCredentialResponse {
+    fn from(r: marty_oid4vci::types::CredentialResponse) -> Self {
+        let credential = r.credential.as_ref().map(|v| {
+            if v.is_string() {
+                v.as_str().unwrap_or("").to_string()
+            } else {
+                v.to_string()
+            }
+        });
+        Self {
+            format: None,
+            credential,
+            transaction_id: r.transaction_id,
+            c_nonce: r.nonce,
+            c_nonce_expires_in: r.nonce_expires_in,
+        }
+    }
+}
+
+/// Parsed OID4VP presentation request.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPresentationRequest {
+    pub client_id: String,
+    pub nonce: String,
+    pub response_uri: String,
+    pub presentation_definition_json: String,
+}
+
+/// One ZK proof to include in a presentation.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbZkProofEntry {
+    pub descriptor_id: String,
+    pub predicate_id: String,
+    pub proof_bytes: Vec<u8>,
+}
+
+impl From<FrbZkProofEntry> for marty_oid4vci::ZkProofEntry {
+    fn from(e: FrbZkProofEntry) -> Self {
+        marty_oid4vci::ZkProofEntry {
+            descriptor_id: e.descriptor_id,
+            predicate_id: e.predicate_id,
+            proof_bytes: e.proof_bytes,
+        }
+    }
+}
+
+/// The verifier's response after receiving a VP token.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPresentationResponse {
+    pub ok: bool,
+    pub redirect_uri: Option<String>,
+    pub error: Option<String>,
+    pub error_description: Option<String>,
+}
+
+impl From<marty_oid4vci::PresentationResponse> for FrbPresentationResponse {
+    fn from(r: marty_oid4vci::PresentationResponse) -> Self {
+        Self {
+            ok: r.ok,
+            redirect_uri: r.redirect_uri,
+            error: r.error,
+            error_description: r.error_description,
+        }
+    }
+}
+
+// ============================================================================
+// OID4VCI / OID4VP wallet entry points
+// ============================================================================
+
+/// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
+#[frb]
+pub async fn wallet_parse_credential_offer(offer_uri: String) -> anyhow::Result<FrbCredentialOffer> {
+    let engine = marty_oid4vci::WalletEngine::new();
+    let offer = engine
+        .parse_credential_offer(&offer_uri)
+        .await
+        .map_err(|e| anyhow::anyhow!("Credential offer parse error: {}", e))?;
+
+    let pre_authorized_code = offer.grants.pre_authorized_code.as_ref()
+        .map(|pa| pa.pre_authorized_code.clone());
+    let tx_code_required = offer.grants.pre_authorized_code.as_ref()
+        .and_then(|pa| pa.tx_code.as_ref()).is_some();
+    let issuer_state = offer.grants.authorization_code.as_ref()
+        .and_then(|ac| ac.issuer_state.clone());
+
+    Ok(FrbCredentialOffer {
+        credential_issuer: offer.credential_issuer,
+        credential_configuration_ids: offer.credential_configuration_ids,
+        pre_authorized_code,
+        tx_code_required,
+        issuer_state,
+    })
+}
+
+/// Fetch `.well-known/openid-credential-issuer` metadata.
+#[frb]
+pub async fn wallet_fetch_issuer_metadata(issuer_url: String) -> anyhow::Result<FrbIssuerMetadata> {
+    let engine = marty_oid4vci::WalletEngine::new();
+    let meta = engine
+        .fetch_issuer_metadata(&issuer_url)
+        .await
+        .map_err(|e| anyhow::anyhow!("Issuer metadata fetch error: {}", e))?;
+    Ok(FrbIssuerMetadata::from(meta))
+}
+
+/// Exchange a pre-authorized code for an access token.
+#[frb]
+pub async fn wallet_exchange_pre_auth_token(
+    token_endpoint: String,
+    pre_auth_code: String,
+    tx_code: Option<String>,
+) -> anyhow::Result<FrbTokenResponse> {
+    let engine = marty_oid4vci::WalletEngine::new();
+    let token = engine
+        .exchange_pre_auth_code(&token_endpoint, &pre_auth_code, tx_code.as_deref())
+        .await
+        .map_err(|e| anyhow::anyhow!("Token exchange error: {}", e))?;
+    Ok(FrbTokenResponse::from(token))
+}
+
+/// Build PKCE authorization request URL + code verifier.
+#[frb]
+pub fn wallet_build_auth_request(
+    issuer_metadata_json: String,
+    credential_configuration_id: String,
+    client_id: String,
+    redirect_uri: String,
+    issuer_state: Option<String>,
+) -> anyhow::Result<FrbAuthorizationRequest> {
+    let frb_meta: FrbIssuerMetadata = serde_json::from_str(&issuer_metadata_json)
+        .map_err(|e| anyhow::anyhow!("Invalid issuer_metadata_json: {}", e))?;
+    let meta = marty_oid4vci::IssuerMetadata {
+        credential_issuer: frb_meta.credential_issuer.clone(),
+        token_endpoint: Some(frb_meta.token_endpoint.clone()),
+        credential_endpoint: frb_meta.credential_endpoint.clone(),
+        authorization_endpoint: frb_meta.authorization_endpoint.clone(),
+        grant_types_supported: frb_meta.grant_types_supported.clone(),
+        credential_configurations_supported: serde_json::from_str(
+            &frb_meta.credential_configurations_json,
+        ).unwrap_or_default(),
+        extra: Default::default(),
+    };
+    let engine = marty_oid4vci::WalletEngine::new();
+    let (auth_req, code_verifier) = engine
+        .build_authorization_request(
+            &meta,
+            &credential_configuration_id,
+            &client_id,
+            &redirect_uri,
+            issuer_state,
+        )
+        .map_err(|e| anyhow::anyhow!("Authorization request build error: {}", e))?;
+    let auth_endpoint_fallback = format!("{}/authorize", frb_meta.credential_issuer);
+    let auth_endpoint = meta.authorization_endpoint.as_deref()
+        .unwrap_or(&auth_endpoint_fallback);
+    let authorization_url = engine
+        .authorization_redirect_url(auth_endpoint, &auth_req)
+        .map_err(|e| anyhow::anyhow!("Authorization URL build error: {}", e))?;
+    let state = auth_req.state.clone().unwrap_or_default();
+    let redir = auth_req.redirect_uri.clone().unwrap_or(redirect_uri);
+    Ok(FrbAuthorizationRequest { authorization_url, code_verifier, state, redirect_uri: redir })
+}
+
+/// Exchange authorization code + PKCE verifier for access token.
+#[frb]
+pub async fn wallet_exchange_auth_code_token(
+    token_endpoint: String,
+    code: String,
+    code_verifier: String,
+    redirect_uri: Option<String>,
+    client_id: Option<String>,
+) -> anyhow::Result<FrbTokenResponse> {
+    let engine = marty_oid4vci::WalletEngine::new();
+    let token = engine
+        .exchange_auth_code(
+            &token_endpoint,
+            &code,
+            &code_verifier,
+            redirect_uri.as_deref(),
+            client_id.as_deref(),
+        )
+        .await
+        .map_err(|e| anyhow::anyhow!("Auth code token exchange error: {}", e))?;
+    Ok(FrbTokenResponse::from(token))
+}
+
+/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
+#[frb]
+pub fn wallet_create_proof_jwt(
+    holder_kid: String,
+    c_nonce: String,
+    issuer_url: String,
+    jwk_json: String,
+) -> anyhow::Result<String> {
+    let engine = marty_oid4vci::WalletEngine::new();
+    engine
+        .create_proof_jwt(&holder_kid, &c_nonce, &issuer_url, &jwk_json)
+        .map_err(|e| anyhow::anyhow!("Proof JWT creation error: {}", e))
+}
+
+/// Request a credential from the issuer.
+#[frb]
+pub async fn wallet_request_credential(
+    credential_endpoint: String,
+    access_token: String,
+    credential_format: String,
+    credential_configuration_id: Option<String>,
+    proof_jwt: String,
+) -> anyhow::Result<FrbCredentialResponse> {
+    use marty_oid4vci::types::CredentialFormat;
+    let format = CredentialFormat::from_str_loose(&credential_format)
+        .ok_or_else(|| anyhow::anyhow!("Unknown credential format: {}", credential_format))?;
+    let engine = marty_oid4vci::WalletEngine::new();
+    let resp = engine
+        .request_credential(
+            &credential_endpoint,
+            &access_token,
+            &format,
+            credential_configuration_id.as_deref(),
+            &proof_jwt,
+        )
+        .await
+        .map_err(|e| anyhow::anyhow!("Credential request error: {}", e))?;
+    Ok(FrbCredentialResponse::from(resp))
+}
+
+/// Parse an `openid4vp://` or `https://…` presentation request URI.
+#[frb]
+pub async fn wallet_parse_presentation_request(
+    request_uri: String,
+) -> anyhow::Result<FrbPresentationRequest> {
+    let url_str = if request_uri.starts_with("openid4vp://") {
+        request_uri.replacen("openid4vp://", "https://vp.invalid/", 1)
+    } else {
+        request_uri.clone()
+    };
+    let parsed = url::Url::parse(&url_str)
+        .map_err(|e| anyhow::anyhow!("Invalid presentation request URI: {}", e))?;
+    let params: std::collections::HashMap<String, String> =
+        parsed.query_pairs().into_owned().collect();
+    let client_id = params.get("client_id").cloned()
+        .unwrap_or_else(|| parsed.host_str().unwrap_or("unknown").to_string());
+    let nonce = params.get("nonce").cloned().unwrap_or_default();
+    let response_uri = params.get("response_uri")
+        .or_else(|| params.get("redirect_uri"))
+        .cloned().unwrap_or_default();
+    let engine = marty_oid4vci::WalletEngine::new();
+    let pd = engine
+        .parse_presentation_request(&request_uri)
+        .await
+        .map_err(|e| anyhow::anyhow!("Presentation request parse error: {}", e))?;
+    let presentation_definition_json = serde_json::to_string(&pd)
+        .map_err(|e| anyhow::anyhow!("PresentationDefinition serialization error: {}", e))?;
+    Ok(FrbPresentationRequest { client_id, nonce, response_uri, presentation_definition_json })
+}
+
+/// Build and submit a standard VP presentation.
+#[frb]
+pub async fn wallet_build_and_submit_presentation(
+    response_uri: String,
+    presentation_definition_json: String,
+    credentials_json: String,
+) -> anyhow::Result<FrbPresentationResponse> {
+    use marty_oid4vci::verifier::PresentationDefinition;
+    let definition: PresentationDefinition = serde_json::from_str(&presentation_definition_json)
+        .map_err(|e| anyhow::anyhow!("Invalid presentation_definition_json: {}", e))?;
+    let credentials: std::collections::HashMap<String, String> =
+        serde_json::from_str(&credentials_json)
+            .map_err(|e| anyhow::anyhow!("Invalid credentials_json: {}", e))?;
+    let engine = marty_oid4vci::WalletEngine::new();
+    let (vp_token, submission) = engine
+        .build_presentation_submission(&definition, credentials)
+        .map_err(|e| anyhow::anyhow!("Presentation build error: {}", e))?;
+    let resp = engine
+        .submit_presentation(&response_uri, &vp_token, &submission)
+        .await
+        .map_err(|e| anyhow::anyhow!("Presentation submission error: {}", e))?;
+    Ok(FrbPresentationResponse::from(resp))
+}
+
+/// Build and submit a ZK VP presentation.
+#[frb]
+pub async fn wallet_build_and_submit_zk_presentation(
+    response_uri: String,
+    presentation_definition_json: String,
+    credentials_json: String,
+    zk_proofs: Vec<FrbZkProofEntry>,
+) -> anyhow::Result<FrbPresentationResponse> {
+    use marty_oid4vci::verifier::PresentationDefinition;
+    let definition: PresentationDefinition = serde_json::from_str(&presentation_definition_json)
+        .map_err(|e| anyhow::anyhow!("Invalid presentation_definition_json: {}", e))?;
+    let credentials: std::collections::HashMap<String, String> =
+        serde_json::from_str(&credentials_json)
+            .map_err(|e| anyhow::anyhow!("Invalid credentials_json: {}", e))?;
+    let proofs: Vec<marty_oid4vci::ZkProofEntry> =
+        zk_proofs.into_iter().map(Into::into).collect();
+    let engine = marty_oid4vci::WalletEngine::new();
+    let (vp_token, submission) = engine
+        .build_zk_presentation(&definition, credentials, proofs)
+        .map_err(|e| anyhow::anyhow!("ZK presentation build error: {}", e))?;
+    let resp = engine
+        .submit_presentation(&response_uri, &vp_token, &submission)
+        .await
+        .map_err(|e| anyhow::anyhow!("ZK presentation submission error: {}", e))?;
+    Ok(FrbPresentationResponse::from(resp))
+}
+
+// ============================================================================
+// ZK entry points
+// ============================================================================
+
+/// Prove all ZK predicates in a `PresentationDefinition`.
+#[frb]
+pub fn zk_prove_from_presentation_definition(
+    presentation_definition_json: String,
+    mso_bytes: Vec<u8>,
+    signature: Vec<u8>,
+    secrets_json: String,
+    session_nonce: Vec<u8>,
+) -> anyhow::Result<Vec<u8>> {
+    #[derive(serde::Deserialize)]
+    struct PD { input_descriptors: Vec<ID> }
+    #[derive(serde::Deserialize)]
+    struct ID { id: String }
+
+    let pd: PD = serde_json::from_str(&presentation_definition_json)
+        .map_err(|e| anyhow::anyhow!("Invalid Presentation Definition JSON: {}", e))?;
+    let secrets: std::collections::HashMap<String, String> = serde_json::from_str(&secrets_json)
+        .map_err(|e| anyhow::anyhow!("Invalid Secrets JSON: {}", e))?;
+
+    for descriptor in pd.input_descriptors {
+        let predicate = marty_zkp::ZkPredicate::from_id(&descriptor.id);
+        let claim_name = predicate.required_claim();
+        let claim_value = secrets.get(claim_name)
+            .ok_or_else(|| anyhow::anyhow!("Missing '{}' in secrets for predicate '{}'", claim_name, descriptor.id))?;
+        let transcript = marty_zkp::ZkTranscript::new(&session_nonce);
+        return marty_zkp::Prover::prove(&predicate, &transcript, &mso_bytes, &signature, claim_value)
+            .map_err(|e| anyhow::anyhow!("ZK proof generation failed: {}", e));
+    }
+    Err(anyhow::anyhow!("No input descriptors found in Presentation Definition"))
+}
+
+/// Generate a ZK proof for a single named predicate.
+#[frb]
+pub fn zk_prove(
+    predicate_id: String,
+    claim_value: String,
+    mso_bytes: Vec<u8>,
+    signature: Vec<u8>,
+    session_nonce: Vec<u8>,
+) -> anyhow::Result<Vec<u8>> {
+    let predicate = marty_zkp::ZkPredicate::from_id(&predicate_id);
+    let transcript = marty_zkp::ZkTranscript::new(&session_nonce);
+    marty_zkp::Prover::prove(&predicate, &transcript, &mso_bytes, &signature, &claim_value)
+        .map_err(|e| anyhow::anyhow!("ZK proof generation failed: {}", e))
+}
+
+/// Check whether ZK proofs are supported on this device.
+#[frb]
+pub fn zk_is_supported_on_device() -> bool {
+    true
 }

@@ -33,7 +33,9 @@ abstract class _$SettingsNotifier
     extends BuildlessAsyncNotifier<SettingsState> {
   late final SettingsRepository repo;
 
-  FutureOr<SettingsState> build({required SettingsRepository repo});
+  FutureOr<SettingsState> build({
+    required SettingsRepository repo,
+  });
 }
 
 /// See also [SettingsNotifier].
@@ -46,15 +48,21 @@ class SettingsNotifierFamily extends Family<AsyncValue<SettingsState>> {
   const SettingsNotifierFamily();
 
   /// See also [SettingsNotifier].
-  SettingsNotifierProvider call({required SettingsRepository repo}) {
-    return SettingsNotifierProvider(repo: repo);
+  SettingsNotifierProvider call({
+    required SettingsRepository repo,
+  }) {
+    return SettingsNotifierProvider(
+      repo: repo,
+    );
   }
 
   @override
   SettingsNotifierProvider getProviderOverride(
     covariant SettingsNotifierProvider provider,
   ) {
-    return call(repo: provider.repo);
+    return call(
+      repo: provider.repo,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -76,19 +84,21 @@ class SettingsNotifierFamily extends Family<AsyncValue<SettingsState>> {
 class SettingsNotifierProvider
     extends AsyncNotifierProviderImpl<SettingsNotifier, SettingsState> {
   /// See also [SettingsNotifier].
-  SettingsNotifierProvider({required SettingsRepository repo})
-    : this._internal(
-        () => SettingsNotifier()..repo = repo,
-        from: settingsNotifierProviderOf,
-        name: r'settingsNotifierProviderOf',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$settingsNotifierHash,
-        dependencies: SettingsNotifierFamily._dependencies,
-        allTransitiveDependencies:
-            SettingsNotifierFamily._allTransitiveDependencies,
-        repo: repo,
-      );
+  SettingsNotifierProvider({
+    required SettingsRepository repo,
+  }) : this._internal(
+          () => SettingsNotifier()..repo = repo,
+          from: settingsNotifierProviderOf,
+          name: r'settingsNotifierProviderOf',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$settingsNotifierHash,
+          dependencies: SettingsNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              SettingsNotifierFamily._allTransitiveDependencies,
+          repo: repo,
+        );
 
   SettingsNotifierProvider._internal(
     super._createNotifier, {
@@ -106,7 +116,9 @@ class SettingsNotifierProvider
   FutureOr<SettingsState> runNotifierBuild(
     covariant SettingsNotifier notifier,
   ) {
-    return notifier.build(repo: repo);
+    return notifier.build(
+      repo: repo,
+    );
   }
 
   @override
@@ -127,7 +139,7 @@ class SettingsNotifierProvider
 
   @override
   AsyncNotifierProviderElement<SettingsNotifier, SettingsState>
-  createElement() {
+      createElement() {
     return _SettingsNotifierProviderElement(this);
   }
 
@@ -158,6 +170,5 @@ class _SettingsNotifierProviderElement
   @override
   SettingsRepository get repo => (origin as SettingsNotifierProvider).repo;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

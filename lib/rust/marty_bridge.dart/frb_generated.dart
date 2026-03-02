@@ -65,7 +65,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1861125443;
+  int get rustContentHash => -13748832;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -76,6 +76,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<IssuerCheckResultOutput> crateApiCheckIssuerConstraints({
+    required String policyJson,
+    required String issuerId,
+    required bool trustProfileVerified,
+  });
+
   Future<SelectableCredential> crateApiCreateSelectableCredential({
     required Credential credential,
     required PrivacyLevel privacyLevel,
@@ -85,7 +91,18 @@ abstract class RustLibApi extends BaseApi {
 
   Future<String> crateApiCredentialToJson({required Credential credential});
 
+  Future<PolicyEvaluationResult> crateApiEvaluatePresentationRequest({
+    required String requestJson,
+    required List<String> policiesJson,
+    required List<Credential> credentials,
+  });
+
   Future<List<String>> crateApiGetCredentialClaims({
+    required Credential credential,
+  });
+
+  Future<List<String>> crateApiGetMinimumDisclosureSet({
+    required String policyJson,
     required Credential credential,
   });
 
@@ -105,6 +122,16 @@ abstract class RustLibApi extends BaseApi {
     required String json,
   });
 
+  Future<List<String>> crateApiRankMatchingCredentials({
+    required String policyJson,
+    required List<RankableCredentialInput> credentials,
+  });
+
+  Future<List<PresentationPolicy>> crateApiSyncPolicies({
+    required String licenseJwt,
+    required String endpoint,
+  });
+
   Future<MDocCredential> crateApiVerifyAndAttachTrust({
     required MDocCredential mdoc,
     required List<Uint8List> x5Chain,
@@ -113,6 +140,95 @@ abstract class RustLibApi extends BaseApi {
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
     required List<Uint8List> x5Chain,
   });
+
+  Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitPresentation({
+    required String responseUri,
+    required String presentationDefinitionJson,
+    required String credentialsJson,
+  });
+
+  Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitZkPresentation({
+    required String responseUri,
+    required String presentationDefinitionJson,
+    required String credentialsJson,
+    required List<FrbZkProofEntry> zkProofs,
+  });
+
+  Future<FrbAuthorizationRequest> crateApiWalletBuildAuthRequest({
+    required String issuerMetadataJson,
+    required String credentialConfigurationId,
+    required String clientId,
+    required String redirectUri,
+    String? issuerState,
+  });
+
+  Future<String> crateApiWalletCreateProofJwt({
+    required String holderKid,
+    required String cNonce,
+    required String issuerUrl,
+    required String jwkJson,
+  });
+
+  Future<FrbTokenResponse> crateApiWalletExchangeAuthCodeToken({
+    required String tokenEndpoint,
+    required String code,
+    required String codeVerifier,
+    String? redirectUri,
+    String? clientId,
+  });
+
+  Future<FrbTokenResponse> crateApiWalletExchangePreAuthToken({
+    required String tokenEndpoint,
+    required String preAuthCode,
+    String? txCode,
+  });
+
+  Future<FrbIssuerMetadata> crateApiWalletFetchIssuerMetadata({
+    required String issuerUrl,
+  });
+
+  Future<FrbCredentialOffer> crateApiWalletParseCredentialOffer({
+    required String offerUri,
+  });
+
+  Future<FrbPresentationRequest> crateApiWalletParsePresentationRequest({
+    required String requestUri,
+  });
+
+  Future<FrbCredentialResponse> crateApiWalletRequestCredential({
+    required String credentialEndpoint,
+    required String accessToken,
+    required String credentialFormat,
+    String? credentialConfigurationId,
+    required String proofJwt,
+  });
+
+  Future<bool> crateApiZkIsSupportedOnDevice();
+
+  Future<Uint8List> crateApiZkProve({
+    required String predicateId,
+    required String claimValue,
+    required List<int> msoBytes,
+    required List<int> signature,
+    required List<int> sessionNonce,
+  });
+
+  Future<Uint8List> crateApiZkProveFromPresentationDefinition({
+    required String presentationDefinitionJson,
+    required List<int> msoBytes,
+    required List<int> signature,
+    required String secretsJson,
+    required List<int> sessionNonce,
+  });
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_PresentationPolicy;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_PresentationPolicy;
+
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_PresentationPolicyPtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -122,6 +238,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
+
+  @override
+  Future<IssuerCheckResultOutput> crateApiCheckIssuerConstraints({
+    required String policyJson,
+    required String issuerId,
+    required bool trustProfileVerified,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(policyJson);
+          var arg1 = cst_encode_String(issuerId);
+          var arg2 = cst_encode_bool(trustProfileVerified);
+          return wire.wire__crate__api__check_issuer_constraints(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_issuer_check_result_output,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCheckIssuerConstraintsConstMeta,
+        argValues: [policyJson, issuerId, trustProfileVerified],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCheckIssuerConstraintsConstMeta =>
+      const TaskConstMeta(
+        debugName: "check_issuer_constraints",
+        argNames: ["policyJson", "issuerId", "trustProfileVerified"],
+      );
 
   @override
   Future<SelectableCredential> crateApiCreateSelectableCredential({
@@ -205,6 +357,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<PolicyEvaluationResult> crateApiEvaluatePresentationRequest({
+    required String requestJson,
+    required List<String> policiesJson,
+    required List<Credential> credentials,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(requestJson);
+          var arg1 = cst_encode_list_String(policiesJson);
+          var arg2 = cst_encode_list_credential(credentials);
+          return wire.wire__crate__api__evaluate_presentation_request(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_policy_evaluation_result,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiEvaluatePresentationRequestConstMeta,
+        argValues: [requestJson, policiesJson, credentials],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEvaluatePresentationRequestConstMeta =>
+      const TaskConstMeta(
+        debugName: "evaluate_presentation_request",
+        argNames: ["requestJson", "policiesJson", "credentials"],
+      );
+
+  @override
   Future<List<String>> crateApiGetCredentialClaims({
     required Credential credential,
   }) {
@@ -229,6 +417,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "get_credential_claims",
         argNames: ["credential"],
+      );
+
+  @override
+  Future<List<String>> crateApiGetMinimumDisclosureSet({
+    required String policyJson,
+    required Credential credential,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(policyJson);
+          var arg1 = cst_encode_box_autoadd_credential(credential);
+          return wire.wire__crate__api__get_minimum_disclosure_set(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_list_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiGetMinimumDisclosureSetConstMeta,
+        argValues: [policyJson, credential],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiGetMinimumDisclosureSetConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_minimum_disclosure_set",
+        argNames: ["policyJson", "credential"],
       );
 
   @override
@@ -371,6 +592,68 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<List<String>> crateApiRankMatchingCredentials({
+    required String policyJson,
+    required List<RankableCredentialInput> credentials,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(policyJson);
+          var arg1 = cst_encode_list_rankable_credential_input(credentials);
+          return wire.wire__crate__api__rank_matching_credentials(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_list_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiRankMatchingCredentialsConstMeta,
+        argValues: [policyJson, credentials],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiRankMatchingCredentialsConstMeta =>
+      const TaskConstMeta(
+        debugName: "rank_matching_credentials",
+        argNames: ["policyJson", "credentials"],
+      );
+
+  @override
+  Future<List<PresentationPolicy>> crateApiSyncPolicies({
+    required String licenseJwt,
+    required String endpoint,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(licenseJwt);
+          var arg1 = cst_encode_String(endpoint);
+          return wire.wire__crate__api__sync_policies(port_, arg0, arg1);
+        },
+        codec: DcoCodec(
+          decodeSuccessData:
+              dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiSyncPoliciesConstMeta,
+        argValues: [licenseJwt, endpoint],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSyncPoliciesConstMeta => const TaskConstMeta(
+    debugName: "sync_policies",
+    argNames: ["licenseJwt", "endpoint"],
+  );
+
+  @override
   Future<MDocCredential> crateApiVerifyAndAttachTrust({
     required MDocCredential mdoc,
     required List<Uint8List> x5Chain,
@@ -430,10 +713,568 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: ["x5Chain"],
       );
 
+  @override
+  Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitPresentation({
+    required String responseUri,
+    required String presentationDefinitionJson,
+    required String credentialsJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(responseUri);
+          var arg1 = cst_encode_String(presentationDefinitionJson);
+          var arg2 = cst_encode_String(credentialsJson);
+          return wire.wire__crate__api__wallet_build_and_submit_presentation(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_presentation_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletBuildAndSubmitPresentationConstMeta,
+        argValues: [responseUri, presentationDefinitionJson, credentialsJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletBuildAndSubmitPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_build_and_submit_presentation",
+        argNames: [
+          "responseUri",
+          "presentationDefinitionJson",
+          "credentialsJson",
+        ],
+      );
+
+  @override
+  Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitZkPresentation({
+    required String responseUri,
+    required String presentationDefinitionJson,
+    required String credentialsJson,
+    required List<FrbZkProofEntry> zkProofs,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(responseUri);
+          var arg1 = cst_encode_String(presentationDefinitionJson);
+          var arg2 = cst_encode_String(credentialsJson);
+          var arg3 = cst_encode_list_frb_zk_proof_entry(zkProofs);
+          return wire.wire__crate__api__wallet_build_and_submit_zk_presentation(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_presentation_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletBuildAndSubmitZkPresentationConstMeta,
+        argValues: [
+          responseUri,
+          presentationDefinitionJson,
+          credentialsJson,
+          zkProofs,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletBuildAndSubmitZkPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_build_and_submit_zk_presentation",
+        argNames: [
+          "responseUri",
+          "presentationDefinitionJson",
+          "credentialsJson",
+          "zkProofs",
+        ],
+      );
+
+  @override
+  Future<FrbAuthorizationRequest> crateApiWalletBuildAuthRequest({
+    required String issuerMetadataJson,
+    required String credentialConfigurationId,
+    required String clientId,
+    required String redirectUri,
+    String? issuerState,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(issuerMetadataJson);
+          var arg1 = cst_encode_String(credentialConfigurationId);
+          var arg2 = cst_encode_String(clientId);
+          var arg3 = cst_encode_String(redirectUri);
+          var arg4 = cst_encode_opt_String(issuerState);
+          return wire.wire__crate__api__wallet_build_auth_request(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+            arg4,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_authorization_request,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletBuildAuthRequestConstMeta,
+        argValues: [
+          issuerMetadataJson,
+          credentialConfigurationId,
+          clientId,
+          redirectUri,
+          issuerState,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletBuildAuthRequestConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_build_auth_request",
+        argNames: [
+          "issuerMetadataJson",
+          "credentialConfigurationId",
+          "clientId",
+          "redirectUri",
+          "issuerState",
+        ],
+      );
+
+  @override
+  Future<String> crateApiWalletCreateProofJwt({
+    required String holderKid,
+    required String cNonce,
+    required String issuerUrl,
+    required String jwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(holderKid);
+          var arg1 = cst_encode_String(cNonce);
+          var arg2 = cst_encode_String(issuerUrl);
+          var arg3 = cst_encode_String(jwkJson);
+          return wire.wire__crate__api__wallet_create_proof_jwt(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletCreateProofJwtConstMeta,
+        argValues: [holderKid, cNonce, issuerUrl, jwkJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletCreateProofJwtConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_create_proof_jwt",
+        argNames: ["holderKid", "cNonce", "issuerUrl", "jwkJson"],
+      );
+
+  @override
+  Future<FrbTokenResponse> crateApiWalletExchangeAuthCodeToken({
+    required String tokenEndpoint,
+    required String code,
+    required String codeVerifier,
+    String? redirectUri,
+    String? clientId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(tokenEndpoint);
+          var arg1 = cst_encode_String(code);
+          var arg2 = cst_encode_String(codeVerifier);
+          var arg3 = cst_encode_opt_String(redirectUri);
+          var arg4 = cst_encode_opt_String(clientId);
+          return wire.wire__crate__api__wallet_exchange_auth_code_token(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+            arg4,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_token_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletExchangeAuthCodeTokenConstMeta,
+        argValues: [tokenEndpoint, code, codeVerifier, redirectUri, clientId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletExchangeAuthCodeTokenConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_exchange_auth_code_token",
+        argNames: [
+          "tokenEndpoint",
+          "code",
+          "codeVerifier",
+          "redirectUri",
+          "clientId",
+        ],
+      );
+
+  @override
+  Future<FrbTokenResponse> crateApiWalletExchangePreAuthToken({
+    required String tokenEndpoint,
+    required String preAuthCode,
+    String? txCode,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(tokenEndpoint);
+          var arg1 = cst_encode_String(preAuthCode);
+          var arg2 = cst_encode_opt_String(txCode);
+          return wire.wire__crate__api__wallet_exchange_pre_auth_token(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_token_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletExchangePreAuthTokenConstMeta,
+        argValues: [tokenEndpoint, preAuthCode, txCode],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletExchangePreAuthTokenConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_exchange_pre_auth_token",
+        argNames: ["tokenEndpoint", "preAuthCode", "txCode"],
+      );
+
+  @override
+  Future<FrbIssuerMetadata> crateApiWalletFetchIssuerMetadata({
+    required String issuerUrl,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(issuerUrl);
+          return wire.wire__crate__api__wallet_fetch_issuer_metadata(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_issuer_metadata,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletFetchIssuerMetadataConstMeta,
+        argValues: [issuerUrl],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletFetchIssuerMetadataConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_fetch_issuer_metadata",
+        argNames: ["issuerUrl"],
+      );
+
+  @override
+  Future<FrbCredentialOffer> crateApiWalletParseCredentialOffer({
+    required String offerUri,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(offerUri);
+          return wire.wire__crate__api__wallet_parse_credential_offer(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_credential_offer,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletParseCredentialOfferConstMeta,
+        argValues: [offerUri],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletParseCredentialOfferConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_parse_credential_offer",
+        argNames: ["offerUri"],
+      );
+
+  @override
+  Future<FrbPresentationRequest> crateApiWalletParsePresentationRequest({
+    required String requestUri,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(requestUri);
+          return wire.wire__crate__api__wallet_parse_presentation_request(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_presentation_request,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletParsePresentationRequestConstMeta,
+        argValues: [requestUri],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletParsePresentationRequestConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_parse_presentation_request",
+        argNames: ["requestUri"],
+      );
+
+  @override
+  Future<FrbCredentialResponse> crateApiWalletRequestCredential({
+    required String credentialEndpoint,
+    required String accessToken,
+    required String credentialFormat,
+    String? credentialConfigurationId,
+    required String proofJwt,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(credentialEndpoint);
+          var arg1 = cst_encode_String(accessToken);
+          var arg2 = cst_encode_String(credentialFormat);
+          var arg3 = cst_encode_opt_String(credentialConfigurationId);
+          var arg4 = cst_encode_String(proofJwt);
+          return wire.wire__crate__api__wallet_request_credential(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+            arg4,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_credential_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletRequestCredentialConstMeta,
+        argValues: [
+          credentialEndpoint,
+          accessToken,
+          credentialFormat,
+          credentialConfigurationId,
+          proofJwt,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletRequestCredentialConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_request_credential",
+        argNames: [
+          "credentialEndpoint",
+          "accessToken",
+          "credentialFormat",
+          "credentialConfigurationId",
+          "proofJwt",
+        ],
+      );
+
+  @override
+  Future<bool> crateApiZkIsSupportedOnDevice() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          return wire.wire__crate__api__zk_is_supported_on_device(port_);
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiZkIsSupportedOnDeviceConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiZkIsSupportedOnDeviceConstMeta =>
+      const TaskConstMeta(debugName: "zk_is_supported_on_device", argNames: []);
+
+  @override
+  Future<Uint8List> crateApiZkProve({
+    required String predicateId,
+    required String claimValue,
+    required List<int> msoBytes,
+    required List<int> signature,
+    required List<int> sessionNonce,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(predicateId);
+          var arg1 = cst_encode_String(claimValue);
+          var arg2 = cst_encode_list_prim_u_8_loose(msoBytes);
+          var arg3 = cst_encode_list_prim_u_8_loose(signature);
+          var arg4 = cst_encode_list_prim_u_8_loose(sessionNonce);
+          return wire.wire__crate__api__zk_prove(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+            arg4,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_list_prim_u_8_strict,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiZkProveConstMeta,
+        argValues: [predicateId, claimValue, msoBytes, signature, sessionNonce],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiZkProveConstMeta => const TaskConstMeta(
+    debugName: "zk_prove",
+    argNames: [
+      "predicateId",
+      "claimValue",
+      "msoBytes",
+      "signature",
+      "sessionNonce",
+    ],
+  );
+
+  @override
+  Future<Uint8List> crateApiZkProveFromPresentationDefinition({
+    required String presentationDefinitionJson,
+    required List<int> msoBytes,
+    required List<int> signature,
+    required String secretsJson,
+    required List<int> sessionNonce,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(presentationDefinitionJson);
+          var arg1 = cst_encode_list_prim_u_8_loose(msoBytes);
+          var arg2 = cst_encode_list_prim_u_8_loose(signature);
+          var arg3 = cst_encode_String(secretsJson);
+          var arg4 = cst_encode_list_prim_u_8_loose(sessionNonce);
+          return wire.wire__crate__api__zk_prove_from_presentation_definition(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+            arg4,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_list_prim_u_8_strict,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiZkProveFromPresentationDefinitionConstMeta,
+        argValues: [
+          presentationDefinitionJson,
+          msoBytes,
+          signature,
+          secretsJson,
+          sessionNonce,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiZkProveFromPresentationDefinitionConstMeta =>
+      const TaskConstMeta(
+        debugName: "zk_prove_from_presentation_definition",
+        argNames: [
+          "presentationDefinitionJson",
+          "msoBytes",
+          "signature",
+          "secretsJson",
+          "sessionNonce",
+        ],
+      );
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_PresentationPolicy => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_PresentationPolicy => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return AnyhowException(raw as String);
+  }
+
+  @protected
+  PresentationPolicy
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return PresentationPolicyImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  PresentationPolicy
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return PresentationPolicyImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -482,6 +1323,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TrustInfo dco_decode_box_autoadd_trust_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_trust_info(raw);
+  }
+
+  @protected
+  BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_u_64(raw);
   }
 
   @protected
@@ -551,9 +1398,163 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double dco_decode_f_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
+  }
+
+  @protected
+  FrbAuthorizationRequest dco_decode_frb_authorization_request(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbAuthorizationRequest(
+      authorizationUrl: dco_decode_String(arr[0]),
+      codeVerifier: dco_decode_String(arr[1]),
+      state: dco_decode_String(arr[2]),
+      redirectUri: dco_decode_String(arr[3]),
+    );
+  }
+
+  @protected
+  FrbCredentialOffer dco_decode_frb_credential_offer(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return FrbCredentialOffer(
+      credentialIssuer: dco_decode_String(arr[0]),
+      credentialConfigurationIds: dco_decode_list_String(arr[1]),
+      preAuthorizedCode: dco_decode_opt_String(arr[2]),
+      txCodeRequired: dco_decode_bool(arr[3]),
+      issuerState: dco_decode_opt_String(arr[4]),
+    );
+  }
+
+  @protected
+  FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return FrbCredentialResponse(
+      format: dco_decode_opt_String(arr[0]),
+      credential: dco_decode_opt_String(arr[1]),
+      transactionId: dco_decode_opt_String(arr[2]),
+      cNonce: dco_decode_opt_String(arr[3]),
+      cNonceExpiresIn: dco_decode_opt_box_autoadd_u_64(arr[4]),
+    );
+  }
+
+  @protected
+  FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return FrbIssuerMetadata(
+      credentialIssuer: dco_decode_String(arr[0]),
+      tokenEndpoint: dco_decode_String(arr[1]),
+      credentialEndpoint: dco_decode_String(arr[2]),
+      authorizationEndpoint: dco_decode_opt_String(arr[3]),
+      grantTypesSupported: dco_decode_list_String(arr[4]),
+      credentialConfigurationsJson: dco_decode_String(arr[5]),
+    );
+  }
+
+  @protected
+  FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbPresentationRequest(
+      clientId: dco_decode_String(arr[0]),
+      nonce: dco_decode_String(arr[1]),
+      responseUri: dco_decode_String(arr[2]),
+      presentationDefinitionJson: dco_decode_String(arr[3]),
+    );
+  }
+
+  @protected
+  FrbPresentationResponse dco_decode_frb_presentation_response(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbPresentationResponse(
+      ok: dco_decode_bool(arr[0]),
+      redirectUri: dco_decode_opt_String(arr[1]),
+      error: dco_decode_opt_String(arr[2]),
+      errorDescription: dco_decode_opt_String(arr[3]),
+    );
+  }
+
+  @protected
+  FrbTokenResponse dco_decode_frb_token_response(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return FrbTokenResponse(
+      accessToken: dco_decode_String(arr[0]),
+      tokenType: dco_decode_String(arr[1]),
+      expiresIn: dco_decode_opt_box_autoadd_u_64(arr[2]),
+      cNonce: dco_decode_opt_String(arr[3]),
+      cNonceExpiresIn: dco_decode_opt_box_autoadd_u_64(arr[4]),
+      scope: dco_decode_opt_String(arr[5]),
+    );
+  }
+
+  @protected
+  FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return FrbZkProofEntry(
+      descriptorId: dco_decode_String(arr[0]),
+      predicateId: dco_decode_String(arr[1]),
+      proofBytes: dco_decode_list_prim_u_8_strict(arr[2]),
+    );
+  }
+
+  @protected
   int dco_decode_i_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
+  }
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeI64(raw);
+  }
+
+  @protected
+  IssuerCheckResultOutput dco_decode_issuer_check_result_output(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return IssuerCheckResultOutput(
+      isTrusted: dco_decode_bool(arr[0]),
+      violationMessage: dco_decode_opt_String(arr[1]),
+    );
+  }
+
+  @protected
+  List<PresentationPolicy>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(
+          dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy,
+        )
+        .toList();
   }
 
   @protected
@@ -575,6 +1576,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<FrbZkProofEntry> dco_decode_list_frb_zk_proof_entry(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_frb_zk_proof_entry).toList();
+  }
+
+  @protected
   List<Uint8List> dco_decode_list_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_list_prim_u_8_strict).toList();
@@ -590,6 +1597,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  List<RankableCredentialInput> dco_decode_list_rankable_credential_input(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(dco_decode_rankable_credential_input)
+        .toList();
   }
 
   @protected
@@ -636,6 +1653,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_64(raw);
+  }
+
+  @protected
+  PolicyEvaluationResult dco_decode_policy_evaluation_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return PolicyEvaluationResult(
+      isSatisfied: dco_decode_bool(arr[0]),
+      minimumDisclosureClaims: dco_decode_list_String(arr[1]),
+      missingRequiredClaims: dco_decode_list_String(arr[2]),
+      policyId: dco_decode_String(arr[3]),
+    );
+  }
+
+  @protected
   PrivacyLevel dco_decode_privacy_level(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return PrivacyLevel.values[raw as int];
@@ -653,6 +1690,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       verificationMethod: dco_decode_opt_String(arr[2]),
       proofPurpose: dco_decode_opt_String(arr[3]),
       proofValue: dco_decode_opt_String(arr[4]),
+    );
+  }
+
+  @protected
+  RankableCredentialInput dco_decode_rankable_credential_input(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return RankableCredentialInput(
+      credentialId: dco_decode_String(arr[0]),
+      issuerId: dco_decode_String(arr[1]),
+      issuedAtUnix: dco_decode_i_64(arr[2]),
+      trustLevel: dco_decode_f_64(arr[3]),
+      claimCount: dco_decode_usize(arr[4]),
     );
   }
 
@@ -703,6 +1755,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt dco_decode_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeU64(raw);
+  }
+
+  @protected
   int dco_decode_u_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -712,6 +1770,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void dco_decode_unit(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return;
+  }
+
+  @protected
+  BigInt dco_decode_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeU64(raw);
   }
 
   @protected
@@ -739,6 +1803,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_String(deserializer);
     return AnyhowException(inner);
+  }
+
+  @protected
+  PresentationPolicy
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return PresentationPolicyImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  PresentationPolicy
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return PresentationPolicyImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
@@ -794,6 +1882,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TrustInfo sse_decode_box_autoadd_trust_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_trust_info(deserializer));
+  }
+
+  @protected
+  BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_64(deserializer));
   }
 
   @protected
@@ -865,9 +1959,195 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double sse_decode_f_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getFloat64();
+  }
+
+  @protected
+  FrbAuthorizationRequest sse_decode_frb_authorization_request(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_authorizationUrl = sse_decode_String(deserializer);
+    var var_codeVerifier = sse_decode_String(deserializer);
+    var var_state = sse_decode_String(deserializer);
+    var var_redirectUri = sse_decode_String(deserializer);
+    return FrbAuthorizationRequest(
+      authorizationUrl: var_authorizationUrl,
+      codeVerifier: var_codeVerifier,
+      state: var_state,
+      redirectUri: var_redirectUri,
+    );
+  }
+
+  @protected
+  FrbCredentialOffer sse_decode_frb_credential_offer(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_credentialIssuer = sse_decode_String(deserializer);
+    var var_credentialConfigurationIds = sse_decode_list_String(deserializer);
+    var var_preAuthorizedCode = sse_decode_opt_String(deserializer);
+    var var_txCodeRequired = sse_decode_bool(deserializer);
+    var var_issuerState = sse_decode_opt_String(deserializer);
+    return FrbCredentialOffer(
+      credentialIssuer: var_credentialIssuer,
+      credentialConfigurationIds: var_credentialConfigurationIds,
+      preAuthorizedCode: var_preAuthorizedCode,
+      txCodeRequired: var_txCodeRequired,
+      issuerState: var_issuerState,
+    );
+  }
+
+  @protected
+  FrbCredentialResponse sse_decode_frb_credential_response(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_format = sse_decode_opt_String(deserializer);
+    var var_credential = sse_decode_opt_String(deserializer);
+    var var_transactionId = sse_decode_opt_String(deserializer);
+    var var_cNonce = sse_decode_opt_String(deserializer);
+    var var_cNonceExpiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
+    return FrbCredentialResponse(
+      format: var_format,
+      credential: var_credential,
+      transactionId: var_transactionId,
+      cNonce: var_cNonce,
+      cNonceExpiresIn: var_cNonceExpiresIn,
+    );
+  }
+
+  @protected
+  FrbIssuerMetadata sse_decode_frb_issuer_metadata(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_credentialIssuer = sse_decode_String(deserializer);
+    var var_tokenEndpoint = sse_decode_String(deserializer);
+    var var_credentialEndpoint = sse_decode_String(deserializer);
+    var var_authorizationEndpoint = sse_decode_opt_String(deserializer);
+    var var_grantTypesSupported = sse_decode_list_String(deserializer);
+    var var_credentialConfigurationsJson = sse_decode_String(deserializer);
+    return FrbIssuerMetadata(
+      credentialIssuer: var_credentialIssuer,
+      tokenEndpoint: var_tokenEndpoint,
+      credentialEndpoint: var_credentialEndpoint,
+      authorizationEndpoint: var_authorizationEndpoint,
+      grantTypesSupported: var_grantTypesSupported,
+      credentialConfigurationsJson: var_credentialConfigurationsJson,
+    );
+  }
+
+  @protected
+  FrbPresentationRequest sse_decode_frb_presentation_request(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_clientId = sse_decode_String(deserializer);
+    var var_nonce = sse_decode_String(deserializer);
+    var var_responseUri = sse_decode_String(deserializer);
+    var var_presentationDefinitionJson = sse_decode_String(deserializer);
+    return FrbPresentationRequest(
+      clientId: var_clientId,
+      nonce: var_nonce,
+      responseUri: var_responseUri,
+      presentationDefinitionJson: var_presentationDefinitionJson,
+    );
+  }
+
+  @protected
+  FrbPresentationResponse sse_decode_frb_presentation_response(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_ok = sse_decode_bool(deserializer);
+    var var_redirectUri = sse_decode_opt_String(deserializer);
+    var var_error = sse_decode_opt_String(deserializer);
+    var var_errorDescription = sse_decode_opt_String(deserializer);
+    return FrbPresentationResponse(
+      ok: var_ok,
+      redirectUri: var_redirectUri,
+      error: var_error,
+      errorDescription: var_errorDescription,
+    );
+  }
+
+  @protected
+  FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_accessToken = sse_decode_String(deserializer);
+    var var_tokenType = sse_decode_String(deserializer);
+    var var_expiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
+    var var_cNonce = sse_decode_opt_String(deserializer);
+    var var_cNonceExpiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
+    var var_scope = sse_decode_opt_String(deserializer);
+    return FrbTokenResponse(
+      accessToken: var_accessToken,
+      tokenType: var_tokenType,
+      expiresIn: var_expiresIn,
+      cNonce: var_cNonce,
+      cNonceExpiresIn: var_cNonceExpiresIn,
+      scope: var_scope,
+    );
+  }
+
+  @protected
+  FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_descriptorId = sse_decode_String(deserializer);
+    var var_predicateId = sse_decode_String(deserializer);
+    var var_proofBytes = sse_decode_list_prim_u_8_strict(deserializer);
+    return FrbZkProofEntry(
+      descriptorId: var_descriptorId,
+      predicateId: var_predicateId,
+      proofBytes: var_proofBytes,
+    );
+  }
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
+  }
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getPlatformInt64();
+  }
+
+  @protected
+  IssuerCheckResultOutput sse_decode_issuer_check_result_output(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_isTrusted = sse_decode_bool(deserializer);
+    var var_violationMessage = sse_decode_opt_String(deserializer);
+    return IssuerCheckResultOutput(
+      isTrusted: var_isTrusted,
+      violationMessage: var_violationMessage,
+    );
+  }
+
+  @protected
+  List<PresentationPolicy>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <PresentationPolicy>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(
+        sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+          deserializer,
+        ),
+      );
+    }
+    return ans_;
   }
 
   @protected
@@ -909,6 +2189,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<FrbZkProofEntry> sse_decode_list_frb_zk_proof_entry(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <FrbZkProofEntry>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_frb_zk_proof_entry(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<Uint8List> sse_decode_list_list_prim_u_8_strict(
     SseDeserializer deserializer,
   ) {
@@ -934,6 +2228,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  List<RankableCredentialInput> sse_decode_list_rankable_credential_input(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <RankableCredentialInput>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_rankable_credential_input(deserializer));
+    }
+    return ans_;
   }
 
   @protected
@@ -1010,6 +2318,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_64(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  PolicyEvaluationResult sse_decode_policy_evaluation_result(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_isSatisfied = sse_decode_bool(deserializer);
+    var var_minimumDisclosureClaims = sse_decode_list_String(deserializer);
+    var var_missingRequiredClaims = sse_decode_list_String(deserializer);
+    var var_policyId = sse_decode_String(deserializer);
+    return PolicyEvaluationResult(
+      isSatisfied: var_isSatisfied,
+      minimumDisclosureClaims: var_minimumDisclosureClaims,
+      missingRequiredClaims: var_missingRequiredClaims,
+      policyId: var_policyId,
+    );
+  }
+
+  @protected
   PrivacyLevel sse_decode_privacy_level(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_i_32(deserializer);
@@ -1030,6 +2366,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       verificationMethod: var_verificationMethod,
       proofPurpose: var_proofPurpose,
       proofValue: var_proofValue,
+    );
+  }
+
+  @protected
+  RankableCredentialInput sse_decode_rankable_credential_input(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_credentialId = sse_decode_String(deserializer);
+    var var_issuerId = sse_decode_String(deserializer);
+    var var_issuedAtUnix = sse_decode_i_64(deserializer);
+    var var_trustLevel = sse_decode_f_64(deserializer);
+    var var_claimCount = sse_decode_usize(deserializer);
+    return RankableCredentialInput(
+      credentialId: var_credentialId,
+      issuerId: var_issuerId,
+      issuedAtUnix: var_issuedAtUnix,
+      trustLevel: var_trustLevel,
+      claimCount: var_claimCount,
     );
   }
 
@@ -1089,6 +2444,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getBigUint64();
+  }
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8();
@@ -1097,6 +2458,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_decode_unit(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getBigUint64();
   }
 
   @protected
@@ -1129,7 +2496,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int
+  cst_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    // ignore: invalid_use_of_internal_member
+    return (raw as PresentationPolicyImpl).frbInternalCstEncode(move: true);
+  }
+
+  @protected
+  int
+  cst_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    // ignore: invalid_use_of_internal_member
+    return (raw as PresentationPolicyImpl).frbInternalCstEncode();
+  }
+
+  @protected
   bool cst_encode_bool(bool raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw;
+  }
+
+  @protected
+  double cst_encode_f_64(double raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw;
   }
@@ -1165,6 +2558,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
+  }
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as PresentationPolicyImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    PresentationPolicy self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as PresentationPolicyImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
@@ -1231,6 +2650,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_64(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_verifiable_credential(
     VerifiableCredential self,
     SseSerializer serializer,
@@ -1289,9 +2714,148 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_f_64(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putFloat64(self);
+  }
+
+  @protected
+  void sse_encode_frb_authorization_request(
+    FrbAuthorizationRequest self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.authorizationUrl, serializer);
+    sse_encode_String(self.codeVerifier, serializer);
+    sse_encode_String(self.state, serializer);
+    sse_encode_String(self.redirectUri, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_credential_offer(
+    FrbCredentialOffer self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.credentialIssuer, serializer);
+    sse_encode_list_String(self.credentialConfigurationIds, serializer);
+    sse_encode_opt_String(self.preAuthorizedCode, serializer);
+    sse_encode_bool(self.txCodeRequired, serializer);
+    sse_encode_opt_String(self.issuerState, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_credential_response(
+    FrbCredentialResponse self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_String(self.format, serializer);
+    sse_encode_opt_String(self.credential, serializer);
+    sse_encode_opt_String(self.transactionId, serializer);
+    sse_encode_opt_String(self.cNonce, serializer);
+    sse_encode_opt_box_autoadd_u_64(self.cNonceExpiresIn, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_issuer_metadata(
+    FrbIssuerMetadata self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.credentialIssuer, serializer);
+    sse_encode_String(self.tokenEndpoint, serializer);
+    sse_encode_String(self.credentialEndpoint, serializer);
+    sse_encode_opt_String(self.authorizationEndpoint, serializer);
+    sse_encode_list_String(self.grantTypesSupported, serializer);
+    sse_encode_String(self.credentialConfigurationsJson, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_presentation_request(
+    FrbPresentationRequest self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.clientId, serializer);
+    sse_encode_String(self.nonce, serializer);
+    sse_encode_String(self.responseUri, serializer);
+    sse_encode_String(self.presentationDefinitionJson, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_presentation_response(
+    FrbPresentationResponse self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.ok, serializer);
+    sse_encode_opt_String(self.redirectUri, serializer);
+    sse_encode_opt_String(self.error, serializer);
+    sse_encode_opt_String(self.errorDescription, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_token_response(
+    FrbTokenResponse self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.accessToken, serializer);
+    sse_encode_String(self.tokenType, serializer);
+    sse_encode_opt_box_autoadd_u_64(self.expiresIn, serializer);
+    sse_encode_opt_String(self.cNonce, serializer);
+    sse_encode_opt_box_autoadd_u_64(self.cNonceExpiresIn, serializer);
+    sse_encode_opt_String(self.scope, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_zk_proof_entry(
+    FrbZkProofEntry self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.descriptorId, serializer);
+    sse_encode_String(self.predicateId, serializer);
+    sse_encode_list_prim_u_8_strict(self.proofBytes, serializer);
+  }
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
+  }
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putPlatformInt64(self);
+  }
+
+  @protected
+  void sse_encode_issuer_check_result_output(
+    IssuerCheckResultOutput self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.isTrusted, serializer);
+    sse_encode_opt_String(self.violationMessage, serializer);
+  }
+
+  @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    List<PresentationPolicy> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+        item,
+        serializer,
+      );
+    }
   }
 
   @protected
@@ -1328,6 +2892,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_frb_zk_proof_entry(
+    List<FrbZkProofEntry> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_frb_zk_proof_entry(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_list_prim_u_8_strict(
     List<Uint8List> self,
     SseSerializer serializer,
@@ -1359,6 +2935,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_list_rankable_credential_input(
+    List<RankableCredentialInput> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_rankable_credential_input(item, serializer);
+    }
   }
 
   @protected
@@ -1425,6 +3013,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_64(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_policy_evaluation_result(
+    PolicyEvaluationResult self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.isSatisfied, serializer);
+    sse_encode_list_String(self.minimumDisclosureClaims, serializer);
+    sse_encode_list_String(self.missingRequiredClaims, serializer);
+    sse_encode_String(self.policyId, serializer);
+  }
+
+  @protected
   void sse_encode_privacy_level(PrivacyLevel self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
@@ -1438,6 +3048,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.verificationMethod, serializer);
     sse_encode_opt_String(self.proofPurpose, serializer);
     sse_encode_opt_String(self.proofValue, serializer);
+  }
+
+  @protected
+  void sse_encode_rankable_credential_input(
+    RankableCredentialInput self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.credentialId, serializer);
+    sse_encode_String(self.issuerId, serializer);
+    sse_encode_i_64(self.issuedAtUnix, serializer);
+    sse_encode_f_64(self.trustLevel, serializer);
+    sse_encode_usize(self.claimCount, serializer);
   }
 
   @protected
@@ -1478,6 +3101,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putBigUint64(self);
+  }
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self);
@@ -1486,6 +3115,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putBigUint64(self);
   }
 
   @protected
@@ -1505,4 +3140,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_credential_status(self.status, serializer);
     sse_encode_opt_String(self.rawJson, serializer);
   }
+}
+
+@sealed
+class PresentationPolicyImpl extends RustOpaque implements PresentationPolicy {
+  // Not to be used by end users
+  PresentationPolicyImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  PresentationPolicyImpl.frbInternalSseDecode(
+    BigInt ptr,
+    int externalSizeOnNative,
+  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_PresentationPolicy,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_PresentationPolicy,
+    rustArcDecrementStrongCountPtr: RustLib
+        .instance
+        .api
+        .rust_arc_decrement_strong_count_PresentationPolicyPtr,
+  );
 }

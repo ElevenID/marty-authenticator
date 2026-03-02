@@ -18,23 +18,20 @@
  * limitations under the License.
  */
 
-/// Enhanced QR scanner service with SDK credential handling
-///
-/// This service provides:
-/// - Advanced QR code processing with SDK integration
-/// - Credential offer/request parsing and validation
-/// - Automatic credential matching for presentation requests
-/// - Performance optimization for SDK operations
-/// - Background processing for complex credential workflows
+// Enhanced QR scanner service with SDK credential handling
+//
+// This service provides:
+// - Advanced QR code processing with SDK integration
+// - Credential offer/request parsing and validation
+// - Automatic credential matching for presentation requests
+// - Performance optimization for SDK operations
+// - Background processing for complex credential workflows
 
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../utils/logger.dart';
-import '../utils/spruce_channels.dart';
-import '../interfaces/spruce_interfaces_extended.dart';
 import 'spruce_sdk_services.dart';
 
 /// Enhanced QR scanner service provider
@@ -113,7 +110,8 @@ class QRScannerServiceEnhanced {
 
       // Handle special protocol schemes
       if (rawData.startsWith('openid-credential-offer://') ||
-          rawData.startsWith('openid-vc://')) {
+          rawData.startsWith('openid-vc://') ||
+          rawData.startsWith('openid4vp://')) {
         return await _parseOpenIDQR(rawData);
       }
 
@@ -255,20 +253,49 @@ class QRScannerServiceEnhanced {
 
   /// Parse OpenID-based QR codes
   Future<ParsedQRData> _parseOpenIDQR(String data) async {
-    final uri = Uri.parse(data);
+    final uri = Uri.parse(
+      data.startsWith('openid4vp://')
+          ? data.replaceFirst('openid4vp://', 'https://vp.invalid/')
+          : data.startsWith('openid-credential-offer://')
+              ? data.replaceFirst('openid-credential-offer://', 'https://offer.invalid/')
+              : data,
+    );
+
+    final isPresentation =
+        data.startsWith('openid4vp://') ||
+        uri.queryParameters.containsKey('presentation_definition') ||
+        uri.queryParameters.containsKey('presentation_definition_uri') ||
+        uri.queryParameters.containsKey('request_uri');
+
+    final isOffer =
+        data.startsWith('openid-credential-offer://') ||
+        data.contains('credential_offer') ||
+        data.contains('issuanceRequests');
 
     return ParsedQRData(
-      type:
-          (data.contains('credential-offer') ||
-              data.contains('issuanceRequests'))
-          ? QRType.credentialOffer
-          : QRType.presentationRequest,
+      type: isPresentation
+          ? QRType.presentationRequest
+          : isOffer
+              ? QRType.credentialOffer
+              : QRType.presentationRequest,
       format: QRFormat.openid,
       rawData: data,
-      parsedContent: {
-        'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
-        'issuer_state': uri.queryParameters['issuer_state'],
-      },
+      parsedContent: isPresentation
+          ? {
+              'request_uri': uri.queryParameters['request_uri'],
+              'client_id': uri.queryParameters['client_id'],
+              'response_uri': uri.queryParameters['response_uri'] ??
+                  uri.queryParameters['redirect_uri'],
+              'nonce': uri.queryParameters['nonce'],
+              'presentation_definition':
+                  uri.queryParameters['presentation_definition'],
+              'presentation_definition_uri':
+                  uri.queryParameters['presentation_definition_uri'],
+            }
+          : {
+              'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
+              'issuer_state': uri.queryParameters['issuer_state'],
+            },
       metadata: {'protocol': 'openid', 'query_params': uri.queryParameters},
     );
   }
@@ -809,7 +836,7 @@ class QRScannerServiceEnhanced {
           id: 'accept_credentials',
           title: 'Accept Credentials',
           description:
-              'Add ${supportedCredentials} credential${supportedCredentials == 1 ? '' : 's'} to wallet',
+              'Add $supportedCredentials credential${supportedCredentials == 1 ? '' : 's'} to wallet',
           type: ActionType.credentialAcceptance,
           priority: ActionPriority.high,
           requiresUserConsent: true,

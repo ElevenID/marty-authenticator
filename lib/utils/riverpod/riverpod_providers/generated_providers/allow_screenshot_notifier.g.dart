@@ -33,7 +33,9 @@ class _SystemHash {
 abstract class _$AllowScreenshotNotifier extends BuildlessAsyncNotifier<bool> {
   late final AllowScreenshotUtils screenshotUtils;
 
-  FutureOr<bool> build({required AllowScreenshotUtils screenshotUtils});
+  FutureOr<bool> build({
+    required AllowScreenshotUtils screenshotUtils,
+  });
 }
 
 /// See also [AllowScreenshotNotifier].
@@ -49,14 +51,18 @@ class AllowScreenshotNotifierFamily extends Family<AsyncValue<bool>> {
   AllowScreenshotNotifierProvider call({
     required AllowScreenshotUtils screenshotUtils,
   }) {
-    return AllowScreenshotNotifierProvider(screenshotUtils: screenshotUtils);
+    return AllowScreenshotNotifierProvider(
+      screenshotUtils: screenshotUtils,
+    );
   }
 
   @override
   AllowScreenshotNotifierProvider getProviderOverride(
     covariant AllowScreenshotNotifierProvider provider,
   ) {
-    return call(screenshotUtils: provider.screenshotUtils);
+    return call(
+      screenshotUtils: provider.screenshotUtils,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -81,17 +87,18 @@ class AllowScreenshotNotifierProvider
   AllowScreenshotNotifierProvider({
     required AllowScreenshotUtils screenshotUtils,
   }) : this._internal(
-         () => AllowScreenshotNotifier()..screenshotUtils = screenshotUtils,
-         from: allowScreenshotNotifierProviderOf,
-         name: r'allowScreenshotNotifierProviderOf',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$allowScreenshotNotifierHash,
-         dependencies: AllowScreenshotNotifierFamily._dependencies,
-         allTransitiveDependencies:
-             AllowScreenshotNotifierFamily._allTransitiveDependencies,
-         screenshotUtils: screenshotUtils,
-       );
+          () => AllowScreenshotNotifier()..screenshotUtils = screenshotUtils,
+          from: allowScreenshotNotifierProviderOf,
+          name: r'allowScreenshotNotifierProviderOf',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$allowScreenshotNotifierHash,
+          dependencies: AllowScreenshotNotifierFamily._dependencies,
+          allTransitiveDependencies:
+              AllowScreenshotNotifierFamily._allTransitiveDependencies,
+          screenshotUtils: screenshotUtils,
+        );
 
   AllowScreenshotNotifierProvider._internal(
     super._createNotifier, {
@@ -106,8 +113,12 @@ class AllowScreenshotNotifierProvider
   final AllowScreenshotUtils screenshotUtils;
 
   @override
-  FutureOr<bool> runNotifierBuild(covariant AllowScreenshotNotifier notifier) {
-    return notifier.build(screenshotUtils: screenshotUtils);
+  FutureOr<bool> runNotifierBuild(
+    covariant AllowScreenshotNotifier notifier,
+  ) {
+    return notifier.build(
+      screenshotUtils: screenshotUtils,
+    );
   }
 
   @override
@@ -160,6 +171,5 @@ class _AllowScreenshotNotifierProviderElement
   AllowScreenshotUtils get screenshotUtils =>
       (origin as AllowScreenshotNotifierProvider).screenshotUtils;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

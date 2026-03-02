@@ -12,14 +12,13 @@ String _$sortablesHash() => r'5b371a8916d3d17660a8d1e874456f4417e2ac06';
 @ProviderFor(sortables)
 final sortablesProvider =
     AutoDisposeFutureProvider<List<SortableMixin>>.internal(
-      sortables,
-      name: r'sortablesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$sortablesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  sortables,
+  name: r'sortablesProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$sortablesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef SortablesRef = AutoDisposeFutureProviderRef<List<SortableMixin>>;
 // ignore_for_file: type=lint

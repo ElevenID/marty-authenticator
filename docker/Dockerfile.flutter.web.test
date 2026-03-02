@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Flutter Web Test Build
 # Builds Flutter web app for E2E testing with Playwright
 #
@@ -6,6 +7,11 @@
 #   docker run -p 9081:80 marty-wallet-test
 
 # Build stage
+# NOTE: cirruslabs/flutter:stable bundles the full Android/iOS/Desktop SDK
+# (~4 GB uncompressed) even though we only need flutter build web.
+# TODO: migrate to a pre-published GHCR image (see GHCR_PUBLISH.md) so the
+#       integration test compose just does `docker pull` instead of a full
+#       Dart compilation on every test run.
 FROM ghcr.io/cirruslabs/flutter:stable AS builder
 
 WORKDIR /app
@@ -17,17 +23,25 @@ COPY pubspec.yaml pubspec.lock ./
 COPY local_wasm_overrides/ ./local_wasm_overrides/
 COPY local_plugins/ ./local_plugins/
 
-# Get dependencies
-RUN flutter pub get
+# Get dependencies — cache ~/.pub-cache on the host so re-builds skip network downloads
+RUN --mount=type=cache,target=/root/.pub-cache \
+    flutter pub get
 
 # Copy source code
 COPY . .
 
+# Allow callers to supply the API URL at build time
+# Default points to the gateway service in the Docker compose network
+ARG MARTY_API_URL=http://gateway:8000
+
 # Build web with test entry point
-RUN flutter build web \
+# Cache the dart2js output so incremental rebuilds only recompile changed files.
+RUN --mount=type=cache,target=/root/.pub-cache \
+    --mount=type=cache,target=/app/.dart_tool/flutter_build \
+    flutter build web \
     --target=lib/mains/main_web_test.dart \
     --release \
-    --dart-define=MARTY_API_URL=http://localhost:8000 \
+    --dart-define=MARTY_API_URL=${MARTY_API_URL} \
     --dart-define=TEST_MODE=true
 
 # Production stage with nginx
