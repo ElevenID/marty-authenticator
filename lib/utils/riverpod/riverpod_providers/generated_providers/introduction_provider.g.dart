@@ -34,9 +34,7 @@ abstract class _$IntroductionNotifier
     extends BuildlessAsyncNotifier<IntroductionState> {
   late final IntroductionRepository repo;
 
-  FutureOr<IntroductionState> build({
-    required IntroductionRepository repo,
-  });
+  FutureOr<IntroductionState> build({required IntroductionRepository repo});
 }
 
 /// See also [IntroductionNotifier].
@@ -49,21 +47,15 @@ class IntroductionNotifierFamily extends Family<AsyncValue<IntroductionState>> {
   const IntroductionNotifierFamily();
 
   /// See also [IntroductionNotifier].
-  IntroductionNotifierProvider call({
-    required IntroductionRepository repo,
-  }) {
-    return IntroductionNotifierProvider(
-      repo: repo,
-    );
+  IntroductionNotifierProvider call({required IntroductionRepository repo}) {
+    return IntroductionNotifierProvider(repo: repo);
   }
 
   @override
   IntroductionNotifierProvider getProviderOverride(
     covariant IntroductionNotifierProvider provider,
   ) {
-    return call(
-      repo: provider.repo,
-    );
+    return call(repo: provider.repo);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -85,21 +77,19 @@ class IntroductionNotifierFamily extends Family<AsyncValue<IntroductionState>> {
 class IntroductionNotifierProvider
     extends AsyncNotifierProviderImpl<IntroductionNotifier, IntroductionState> {
   /// See also [IntroductionNotifier].
-  IntroductionNotifierProvider({
-    required IntroductionRepository repo,
-  }) : this._internal(
-          () => IntroductionNotifier()..repo = repo,
-          from: introductionNotifierProviderOf,
-          name: r'introductionNotifierProviderOf',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$introductionNotifierHash,
-          dependencies: IntroductionNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              IntroductionNotifierFamily._allTransitiveDependencies,
-          repo: repo,
-        );
+  IntroductionNotifierProvider({required IntroductionRepository repo})
+    : this._internal(
+        () => IntroductionNotifier()..repo = repo,
+        from: introductionNotifierProviderOf,
+        name: r'introductionNotifierProviderOf',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$introductionNotifierHash,
+        dependencies: IntroductionNotifierFamily._dependencies,
+        allTransitiveDependencies:
+            IntroductionNotifierFamily._allTransitiveDependencies,
+        repo: repo,
+      );
 
   IntroductionNotifierProvider._internal(
     super._createNotifier, {
@@ -117,9 +107,7 @@ class IntroductionNotifierProvider
   FutureOr<IntroductionState> runNotifierBuild(
     covariant IntroductionNotifier notifier,
   ) {
-    return notifier.build(
-      repo: repo,
-    );
+    return notifier.build(repo: repo);
   }
 
   @override
@@ -140,7 +128,7 @@ class IntroductionNotifierProvider
 
   @override
   AsyncNotifierProviderElement<IntroductionNotifier, IntroductionState>
-      createElement() {
+  createElement() {
     return _IntroductionNotifierProviderElement(this);
   }
 
@@ -163,13 +151,16 @@ mixin IntroductionNotifierRef on AsyncNotifierProviderRef<IntroductionState> {
   IntroductionRepository get repo;
 }
 
-class _IntroductionNotifierProviderElement extends AsyncNotifierProviderElement<
-    IntroductionNotifier, IntroductionState> with IntroductionNotifierRef {
+class _IntroductionNotifierProviderElement
+    extends
+        AsyncNotifierProviderElement<IntroductionNotifier, IntroductionState>
+    with IntroductionNotifierRef {
   _IntroductionNotifierProviderElement(super.provider);
 
   @override
   IntroductionRepository get repo =>
       (origin as IntroductionNotifierProvider).repo;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

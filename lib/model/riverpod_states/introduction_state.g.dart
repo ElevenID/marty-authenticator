@@ -7,21 +7,22 @@ part of 'introduction_state.dart';
 // **************************************************************************
 
 _$IntroductionStateImpl _$$IntroductionStateImplFromJson(
-        Map<String, dynamic> json) =>
-    _$IntroductionStateImpl(
-      completedIntroductions: (json['completedIntroductions'] as List<dynamic>?)
-              ?.map((e) => $enumDecode(_$IntroductionEnumMap, e))
-              .toSet() ??
-          const {},
-    );
+  Map<String, dynamic> json,
+) => _$IntroductionStateImpl(
+  completedIntroductions:
+      (json['completedIntroductions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$IntroductionEnumMap, e))
+          .toSet() ??
+      const {},
+);
 
 Map<String, dynamic> _$$IntroductionStateImplToJson(
-        _$IntroductionStateImpl instance) =>
-    <String, dynamic>{
-      'completedIntroductions': instance.completedIntroductions
-          .map((e) => _$IntroductionEnumMap[e]!)
-          .toList(),
-    };
+  _$IntroductionStateImpl instance,
+) => <String, dynamic>{
+  'completedIntroductions': instance.completedIntroductions
+      .map((e) => _$IntroductionEnumMap[e]!)
+      .toList(),
+};
 
 const _$IntroductionEnumMap = {
   Introduction.introductionScreen: 'introductionScreen',

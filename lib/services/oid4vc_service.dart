@@ -70,13 +70,13 @@ class CredentialOffer {
   });
 
   factory CredentialOffer.fromMap(Map<String, dynamic> m) => CredentialOffer(
-        credentialIssuer: m['credential_issuer'] as String,
-        credentialConfigurationIds:
-            (m['credential_configuration_ids'] as List<dynamic>).cast<String>(),
-        preAuthorizedCode: m['pre_authorized_code'] as String?,
-        txCodeRequired: (m['tx_code_required'] as bool?) ?? false,
-        issuerState: m['issuer_state'] as String?,
-      );
+    credentialIssuer: m['credential_issuer'] as String,
+    credentialConfigurationIds:
+        (m['credential_configuration_ids'] as List<dynamic>).cast<String>(),
+    preAuthorizedCode: m['pre_authorized_code'] as String?,
+    txCodeRequired: (m['tx_code_required'] as bool?) ?? false,
+    issuerState: m['issuer_state'] as String?,
+  );
 }
 
 class IssuerMetadata {
@@ -97,13 +97,13 @@ class IssuerMetadata {
   });
 
   Map<String, dynamic> toMap() => {
-        'credential_issuer': credentialIssuer,
-        'token_endpoint': tokenEndpoint,
-        'credential_endpoint': credentialEndpoint,
-        'authorization_endpoint': authorizationEndpoint,
-        'grant_types_supported': grantTypesSupported,
-        'credential_configurations_json': credentialConfigurationsJson,
-      };
+    'credential_issuer': credentialIssuer,
+    'token_endpoint': tokenEndpoint,
+    'credential_endpoint': credentialEndpoint,
+    'authorization_endpoint': authorizationEndpoint,
+    'grant_types_supported': grantTypesSupported,
+    'credential_configurations_json': credentialConfigurationsJson,
+  };
 }
 
 class Oid4vciTokenResponse {
@@ -287,7 +287,7 @@ class OID4VCService {
     // use buildAuthRequestAsync() to await the result.
     throw UnimplementedError(
       'Use await buildAuthRequestAsync() — '
-      'walletBuildAuthRequest returns a Future in Dart.'
+      'walletBuildAuthRequest returns a Future in Dart.',
     );
   }
 
@@ -354,13 +354,12 @@ class OID4VCService {
     required String cNonce,
     required String issuerUrl,
     required String jwkJson,
-  }) =>
-      walletCreateProofJwt(
-        holderKid: holderKid,
-        cNonce: cNonce,
-        issuerUrl: issuerUrl,
-        jwkJson: jwkJson,
-      );
+  }) => walletCreateProofJwt(
+    holderKid: holderKid,
+    cNonce: cNonce,
+    issuerUrl: issuerUrl,
+    jwkJson: jwkJson,
+  );
 
   /// Request a credential from the issuer's credential endpoint.
   Future<Oid4vciCredentialResponse> requestCredential({
@@ -392,7 +391,9 @@ class OID4VCService {
   // --------------------------------------------------------------------------
 
   /// Parse an `openid4vp://` or `https://…` presentation request URI.
-  Future<PresentationRequest> parsePresentationRequest(String requestUri) async {
+  Future<PresentationRequest> parsePresentationRequest(
+    String requestUri,
+  ) async {
     Logger.info('Parsing presentation request', name: 'OID4VCService');
     final r = await walletParsePresentationRequest(requestUri: requestUri);
     return PresentationRequest(
@@ -431,11 +432,13 @@ class OID4VCService {
   }) async {
     Logger.info('Submitting ZK VP presentation', name: 'OID4VCService');
     final frbProofs = zkProofs
-        .map((p) => FrbZkProofEntry(
-              descriptorId: p.descriptorId,
-              predicateId: p.predicateId,
-              proofBytes: p.proofBytes,
-            ))
+        .map(
+          (p) => FrbZkProofEntry(
+            descriptorId: p.descriptorId,
+            predicateId: p.predicateId,
+            proofBytes: p.proofBytes,
+          ),
+        )
         .toList();
     final r = await walletBuildAndSubmitZkPresentation(
       responseUri: responseUri,

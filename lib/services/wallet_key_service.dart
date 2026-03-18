@@ -127,13 +127,7 @@ class WalletKeyService {
     final x = b64url(keyData.x);
     final y = b64url(keyData.y);
 
-    final privateJwk = {
-      'kty': 'EC',
-      'crv': 'P-256',
-      'x': x,
-      'y': y,
-      'd': d,
-    };
+    final privateJwk = {'kty': 'EC', 'crv': 'P-256', 'x': x, 'y': y, 'd': d};
 
     // RFC 7638 JWK thumbprint (SHA-256 of sorted public JWK members)
     final kid = _computeKid(x, y);
@@ -155,7 +149,8 @@ class WalletKeyService {
 
   /// Derive the public JWK by dropping the private key (`d`).
   static Map<String, dynamic> _publicJwkFromPrivate(
-      Map<String, dynamic> privateJwk) {
+    Map<String, dynamic> privateJwk,
+  ) {
     return {
       'kty': privateJwk['kty'],
       'crv': privateJwk['crv'],

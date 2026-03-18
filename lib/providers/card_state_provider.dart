@@ -73,8 +73,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       Logger.debug(
         'DEBUG: Loaded ${stored.length} credentials from WalletCredentialStore',
       );
-      final existingIds =
-          allCards.map((c) => c.id).whereType<String>().toSet();
+      final existingIds = allCards.map((c) => c.id).whereType<String>().toSet();
       for (final cred in stored) {
         if (!existingIds.contains(cred.id)) {
           allCards.add(_mapStoredCredentialToCardData(cred));

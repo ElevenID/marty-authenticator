@@ -12,7 +12,8 @@ part of 'introduction_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 IntroductionState _$IntroductionStateFromJson(Map<String, dynamic> json) {
   return _IntroductionState.fromJson(json);
@@ -32,8 +33,9 @@ mixin _$IntroductionState {
 /// @nodoc
 abstract class $IntroductionStateCopyWith<$Res> {
   factory $IntroductionStateCopyWith(
-          IntroductionState value, $Res Function(IntroductionState) then) =
-      _$IntroductionStateCopyWithImpl<$Res, IntroductionState>;
+    IntroductionState value,
+    $Res Function(IntroductionState) then,
+  ) = _$IntroductionStateCopyWithImpl<$Res, IntroductionState>;
   @useResult
   $Res call({Set<Introduction> completedIntroductions});
 }
@@ -50,24 +52,26 @@ class _$IntroductionStateCopyWithImpl<$Res, $Val extends IntroductionState>
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? completedIntroductions = null,
-  }) {
-    return _then(_value.copyWith(
-      completedIntroductions: null == completedIntroductions
-          ? _value.completedIntroductions
-          : completedIntroductions // ignore: cast_nullable_to_non_nullable
-              as Set<Introduction>,
-    ) as $Val);
+  $Res call({Object? completedIntroductions = null}) {
+    return _then(
+      _value.copyWith(
+            completedIntroductions: null == completedIntroductions
+                ? _value.completedIntroductions
+                : completedIntroductions // ignore: cast_nullable_to_non_nullable
+                      as Set<Introduction>,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$IntroductionStateImplCopyWith<$Res>
     implements $IntroductionStateCopyWith<$Res> {
-  factory _$$IntroductionStateImplCopyWith(_$IntroductionStateImpl value,
-          $Res Function(_$IntroductionStateImpl) then) =
-      __$$IntroductionStateImplCopyWithImpl<$Res>;
+  factory _$$IntroductionStateImplCopyWith(
+    _$IntroductionStateImpl value,
+    $Res Function(_$IntroductionStateImpl) then,
+  ) = __$$IntroductionStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({Set<Introduction> completedIntroductions});
@@ -77,31 +81,32 @@ abstract class _$$IntroductionStateImplCopyWith<$Res>
 class __$$IntroductionStateImplCopyWithImpl<$Res>
     extends _$IntroductionStateCopyWithImpl<$Res, _$IntroductionStateImpl>
     implements _$$IntroductionStateImplCopyWith<$Res> {
-  __$$IntroductionStateImplCopyWithImpl(_$IntroductionStateImpl _value,
-      $Res Function(_$IntroductionStateImpl) _then)
-      : super(_value, _then);
+  __$$IntroductionStateImplCopyWithImpl(
+    _$IntroductionStateImpl _value,
+    $Res Function(_$IntroductionStateImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? completedIntroductions = null,
-  }) {
-    return _then(_$IntroductionStateImpl(
-      completedIntroductions: null == completedIntroductions
-          ? _value._completedIntroductions
-          : completedIntroductions // ignore: cast_nullable_to_non_nullable
-              as Set<Introduction>,
-    ));
+  $Res call({Object? completedIntroductions = null}) {
+    return _then(
+      _$IntroductionStateImpl(
+        completedIntroductions: null == completedIntroductions
+            ? _value._completedIntroductions
+            : completedIntroductions // ignore: cast_nullable_to_non_nullable
+                  as Set<Introduction>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$IntroductionStateImpl extends _IntroductionState {
-  const _$IntroductionStateImpl(
-      {final Set<Introduction> completedIntroductions = const {}})
-      : _completedIntroductions = completedIntroductions,
-        super._();
+  const _$IntroductionStateImpl({
+    final Set<Introduction> completedIntroductions = const {},
+  }) : _completedIntroductions = completedIntroductions,
+       super._();
 
   factory _$IntroductionStateImpl.fromJson(Map<String, dynamic> json) =>
       _$$IntroductionStateImplFromJson(json);
@@ -127,33 +132,37 @@ class _$IntroductionStateImpl extends _IntroductionState {
         (other.runtimeType == runtimeType &&
             other is _$IntroductionStateImpl &&
             const DeepCollectionEquality().equals(
-                other._completedIntroductions, _completedIntroductions));
+              other._completedIntroductions,
+              _completedIntroductions,
+            ));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(_completedIntroductions));
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_completedIntroductions),
+  );
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$IntroductionStateImplCopyWith<_$IntroductionStateImpl> get copyWith =>
       __$$IntroductionStateImplCopyWithImpl<_$IntroductionStateImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$IntroductionStateImplToJson(
-      this,
-    );
+    return _$$IntroductionStateImplToJson(this);
   }
 }
 
 abstract class _IntroductionState extends IntroductionState {
-  const factory _IntroductionState(
-          {final Set<Introduction> completedIntroductions}) =
-      _$IntroductionStateImpl;
+  const factory _IntroductionState({
+    final Set<Introduction> completedIntroductions,
+  }) = _$IntroductionStateImpl;
   const _IntroductionState._() : super._();
 
   factory _IntroductionState.fromJson(Map<String, dynamic> json) =

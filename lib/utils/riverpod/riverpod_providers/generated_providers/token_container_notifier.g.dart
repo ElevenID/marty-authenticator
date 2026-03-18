@@ -93,31 +93,31 @@ class TokenContainerNotifierFamily
 }
 
 /// See also [TokenContainerNotifier].
-class TokenContainerNotifierProvider extends AsyncNotifierProviderImpl<
-    TokenContainerNotifier, TokenContainerState> {
+class TokenContainerNotifierProvider
+    extends
+        AsyncNotifierProviderImpl<TokenContainerNotifier, TokenContainerState> {
   /// See also [TokenContainerNotifier].
   TokenContainerNotifierProvider({
     required TokenContainerRepository repo,
     required TokenContainerApi containerApi,
     required EccUtils eccUtils,
   }) : this._internal(
-          () => TokenContainerNotifier()
-            ..repo = repo
-            ..containerApi = containerApi
-            ..eccUtils = eccUtils,
-          from: tokenContainerNotifierProviderOf,
-          name: r'tokenContainerNotifierProviderOf',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$tokenContainerNotifierHash,
-          dependencies: TokenContainerNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              TokenContainerNotifierFamily._allTransitiveDependencies,
-          repo: repo,
-          containerApi: containerApi,
-          eccUtils: eccUtils,
-        );
+         () => TokenContainerNotifier()
+           ..repo = repo
+           ..containerApi = containerApi
+           ..eccUtils = eccUtils,
+         from: tokenContainerNotifierProviderOf,
+         name: r'tokenContainerNotifierProviderOf',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$tokenContainerNotifierHash,
+         dependencies: TokenContainerNotifierFamily._dependencies,
+         allTransitiveDependencies:
+             TokenContainerNotifierFamily._allTransitiveDependencies,
+         repo: repo,
+         containerApi: containerApi,
+         eccUtils: eccUtils,
+       );
 
   TokenContainerNotifierProvider._internal(
     super._createNotifier, {
@@ -169,7 +169,7 @@ class TokenContainerNotifierProvider extends AsyncNotifierProviderImpl<
 
   @override
   AsyncNotifierProviderElement<TokenContainerNotifier, TokenContainerState>
-      createElement() {
+  createElement() {
     return _TokenContainerNotifierProviderElement(this);
   }
 
@@ -205,8 +205,12 @@ mixin TokenContainerNotifierRef
 }
 
 class _TokenContainerNotifierProviderElement
-    extends AsyncNotifierProviderElement<TokenContainerNotifier,
-        TokenContainerState> with TokenContainerNotifierRef {
+    extends
+        AsyncNotifierProviderElement<
+          TokenContainerNotifier,
+          TokenContainerState
+        >
+    with TokenContainerNotifierRef {
   _TokenContainerNotifierProviderElement(super.provider);
 
   @override
@@ -218,5 +222,6 @@ class _TokenContainerNotifierProviderElement
   @override
   EccUtils get eccUtils => (origin as TokenContainerNotifierProvider).eccUtils;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -226,7 +226,8 @@ class OID4VCSchemeProcessor extends TokenImportSchemeProcessor {
       // 3e. Persist credential ------------------------------------------------
       if (resp.credential != null) {
         try {
-          final id = '${offer.credentialIssuer}/$configId/${DateTime.now().millisecondsSinceEpoch}';
+          final id =
+              '${offer.credentialIssuer}/$configId/${DateTime.now().millisecondsSinceEpoch}';
           await WalletCredentialStore.store(
             StoredCredential(
               id: id,
@@ -248,14 +249,17 @@ class OID4VCSchemeProcessor extends TokenImportSchemeProcessor {
         }
       } else if (resp.transactionId != null) {
         // Deferred issuance — credential not immediately available
-        Logger.info('Deferred issuance for $configId, txId=${resp.transactionId}');
+        Logger.info(
+          'Deferred issuance for $configId, txId=${resp.transactionId}',
+        );
         // TODO: poll the deferred endpoint
       }
     }
 
     if (stored > 0) {
       showSuccessStatusMessage(
-        message: (_) => 'Added $stored credential${stored == 1 ? '' : 's'} to wallet.',
+        message: (_) =>
+            'Added $stored credential${stored == 1 ? '' : 's'} to wallet.',
       );
       // Trigger wallet card UI refresh so the new credential appears immediately.
       globalRef?.invalidate(cardStateProvider);
@@ -276,7 +280,9 @@ class OID4VCSchemeProcessor extends TokenImportSchemeProcessor {
   // OID4VP — Presentation request
   // ===========================================================================
 
-  Future<List<ProcessorResult<Token>>> _handlePresentationRequest(Uri uri) async {
+  Future<List<ProcessorResult<Token>>> _handlePresentationRequest(
+    Uri uri,
+  ) async {
     const svc = OID4VCService();
 
     // 1. Parse the presentation request ---------------------------------------
@@ -381,8 +387,8 @@ class OID4VCSchemeProcessor extends TokenImportSchemeProcessor {
   /// Falls back to `mso_mdoc` if the configuration cannot be parsed.
   String _credentialFormat(IssuerMetadata meta, String configId) {
     try {
-      final configs = jsonDecode(meta.credentialConfigurationsJson)
-          as Map<String, dynamic>;
+      final configs =
+          jsonDecode(meta.credentialConfigurationsJson) as Map<String, dynamic>;
       final cfg = configs[configId] as Map<String, dynamic>?;
       return (cfg?['format'] as String?) ?? 'mso_mdoc';
     } catch (_) {

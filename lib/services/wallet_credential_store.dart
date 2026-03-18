@@ -35,10 +35,10 @@ import '../utils/logger.dart';
 /// model when the UI reads them.
 class StoredCredential {
   final String id;
-  final String format;    // e.g. "mso_mdoc", "vc+sd-jwt", "ldp_vc"
-  final String issuer;    // credential_issuer URL
+  final String format; // e.g. "mso_mdoc", "vc+sd-jwt", "ldp_vc"
+  final String issuer; // credential_issuer URL
   final List<String> types;
-  final String rawJson;   // full credential response body (JSON)
+  final String rawJson; // full credential response body (JSON)
   final DateTime issuedAt;
 
   const StoredCredential({
@@ -51,13 +51,13 @@ class StoredCredential {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'format': format,
-        'issuer': issuer,
-        'types': types,
-        'rawJson': rawJson,
-        'issuedAt': issuedAt.toIso8601String(),
-      };
+    'id': id,
+    'format': format,
+    'issuer': issuer,
+    'types': types,
+    'rawJson': rawJson,
+    'issuedAt': issuedAt.toIso8601String(),
+  };
 
   factory StoredCredential.fromJson(Map<String, dynamic> json) =>
       StoredCredential(
@@ -111,7 +111,9 @@ class WalletCredentialStore {
       await _writeIndex(index);
     }
 
-    Logger.info('Stored credential id=${credential.id} format=${credential.format}');
+    Logger.info(
+      'Stored credential id=${credential.id} format=${credential.format}',
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -127,11 +129,13 @@ class WalletCredentialStore {
       final raw = await _storage.read(key: '$_prefix$id');
       if (raw == null) continue;
       try {
-        results.add(StoredCredential.fromJson(
-          jsonDecode(raw) as Map<String, dynamic>,
-        ));
+        results.add(
+          StoredCredential.fromJson(jsonDecode(raw) as Map<String, dynamic>),
+        );
       } catch (e) {
-        Logger.warning('WalletCredentialStore: failed to parse credential $id: $e');
+        Logger.warning(
+          'WalletCredentialStore: failed to parse credential $id: $e',
+        );
       }
     }
 
@@ -143,9 +147,7 @@ class WalletCredentialStore {
     final raw = await _storage.read(key: '$_prefix$id');
     if (raw == null) return null;
     try {
-      return StoredCredential.fromJson(
-        jsonDecode(raw) as Map<String, dynamic>,
-      );
+      return StoredCredential.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (e) {
       Logger.warning('WalletCredentialStore: parse error for $id: $e');
       return null;

@@ -12,7 +12,8 @@ part of 'progress_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$ProgressState {
@@ -22,40 +23,34 @@ mixin _$ProgressState {
   TResult when<TResult extends Object?>(
     TResult Function(int max, int value) $default, {
     required TResult Function(int max, int value) uninitialized,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(int max, int value)? $default, {
     TResult? Function(int max, int value)? uninitialized,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(int max, int value)? $default, {
     TResult Function(int max, int value)? uninitialized,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
     TResult Function(_ProgressState value) $default, {
     required TResult Function(ProgressStateUninitialized value) uninitialized,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
     TResult? Function(_ProgressState value)? $default, {
     TResult? Function(ProgressStateUninitialized value)? uninitialized,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
     TResult Function(_ProgressState value)? $default, {
     TResult Function(ProgressStateUninitialized value)? uninitialized,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProgressStateCopyWith<ProgressState> get copyWith =>
@@ -65,8 +60,9 @@ mixin _$ProgressState {
 /// @nodoc
 abstract class $ProgressStateCopyWith<$Res> {
   factory $ProgressStateCopyWith(
-          ProgressState value, $Res Function(ProgressState) then) =
-      _$ProgressStateCopyWithImpl<$Res, ProgressState>;
+    ProgressState value,
+    $Res Function(ProgressState) then,
+  ) = _$ProgressStateCopyWithImpl<$Res, ProgressState>;
   @useResult
   $Res call({int max, int value});
 }
@@ -83,20 +79,20 @@ class _$ProgressStateCopyWithImpl<$Res, $Val extends ProgressState>
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? max = null,
-    Object? value = null,
-  }) {
-    return _then(_value.copyWith(
-      max: null == max
-          ? _value.max
-          : max // ignore: cast_nullable_to_non_nullable
-              as int,
-      value: null == value
-          ? _value.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+  $Res call({Object? max = null, Object? value = null}) {
+    return _then(
+      _value.copyWith(
+            max: null == max
+                ? _value.max
+                : max // ignore: cast_nullable_to_non_nullable
+                      as int,
+            value: null == value
+                ? _value.value
+                : value // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -104,9 +100,9 @@ class _$ProgressStateCopyWithImpl<$Res, $Val extends ProgressState>
 abstract class _$$ProgressStateUninitializedImplCopyWith<$Res>
     implements $ProgressStateCopyWith<$Res> {
   factory _$$ProgressStateUninitializedImplCopyWith(
-          _$ProgressStateUninitializedImpl value,
-          $Res Function(_$ProgressStateUninitializedImpl) then) =
-      __$$ProgressStateUninitializedImplCopyWithImpl<$Res>;
+    _$ProgressStateUninitializedImpl value,
+    $Res Function(_$ProgressStateUninitializedImpl) then,
+  ) = __$$ProgressStateUninitializedImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({int max, int value});
@@ -117,26 +113,25 @@ class __$$ProgressStateUninitializedImplCopyWithImpl<$Res>
     extends _$ProgressStateCopyWithImpl<$Res, _$ProgressStateUninitializedImpl>
     implements _$$ProgressStateUninitializedImplCopyWith<$Res> {
   __$$ProgressStateUninitializedImplCopyWithImpl(
-      _$ProgressStateUninitializedImpl _value,
-      $Res Function(_$ProgressStateUninitializedImpl) _then)
-      : super(_value, _then);
+    _$ProgressStateUninitializedImpl _value,
+    $Res Function(_$ProgressStateUninitializedImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? max = null,
-    Object? value = null,
-  }) {
-    return _then(_$ProgressStateUninitializedImpl(
-      max: null == max
-          ? _value.max
-          : max // ignore: cast_nullable_to_non_nullable
-              as int,
-      value: null == value
-          ? _value.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+  $Res call({Object? max = null, Object? value = null}) {
+    return _then(
+      _$ProgressStateUninitializedImpl(
+        max: null == max
+            ? _value.max
+            : max // ignore: cast_nullable_to_non_nullable
+                  as int,
+        value: null == value
+            ? _value.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
@@ -144,7 +139,7 @@ class __$$ProgressStateUninitializedImplCopyWithImpl<$Res>
 
 class _$ProgressStateUninitializedImpl extends ProgressStateUninitialized {
   const _$ProgressStateUninitializedImpl({this.max = 0, this.value = 0})
-      : super._();
+    : super._();
 
   @override
   @JsonKey()
@@ -174,8 +169,10 @@ class _$ProgressStateUninitializedImpl extends ProgressStateUninitialized {
   @override
   @pragma('vm:prefer-inline')
   _$$ProgressStateUninitializedImplCopyWith<_$ProgressStateUninitializedImpl>
-      get copyWith => __$$ProgressStateUninitializedImplCopyWithImpl<
-          _$ProgressStateUninitializedImpl>(this, _$identity);
+  get copyWith =>
+      __$$ProgressStateUninitializedImplCopyWithImpl<
+        _$ProgressStateUninitializedImpl
+      >(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -252,15 +249,16 @@ abstract class ProgressStateUninitialized extends ProgressState {
   @override
   @JsonKey(ignore: true)
   _$$ProgressStateUninitializedImplCopyWith<_$ProgressStateUninitializedImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class _$$ProgressStateImplCopyWith<$Res>
     implements $ProgressStateCopyWith<$Res> {
   factory _$$ProgressStateImplCopyWith(
-          _$ProgressStateImpl value, $Res Function(_$ProgressStateImpl) then) =
-      __$$ProgressStateImplCopyWithImpl<$Res>;
+    _$ProgressStateImpl value,
+    $Res Function(_$ProgressStateImpl) then,
+  ) = __$$ProgressStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({int max, int value});
@@ -271,25 +269,25 @@ class __$$ProgressStateImplCopyWithImpl<$Res>
     extends _$ProgressStateCopyWithImpl<$Res, _$ProgressStateImpl>
     implements _$$ProgressStateImplCopyWith<$Res> {
   __$$ProgressStateImplCopyWithImpl(
-      _$ProgressStateImpl _value, $Res Function(_$ProgressStateImpl) _then)
-      : super(_value, _then);
+    _$ProgressStateImpl _value,
+    $Res Function(_$ProgressStateImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? max = null,
-    Object? value = null,
-  }) {
-    return _then(_$ProgressStateImpl(
-      max: null == max
-          ? _value.max
-          : max // ignore: cast_nullable_to_non_nullable
-              as int,
-      value: null == value
-          ? _value.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+  $Res call({Object? max = null, Object? value = null}) {
+    return _then(
+      _$ProgressStateImpl(
+        max: null == max
+            ? _value.max
+            : max // ignore: cast_nullable_to_non_nullable
+                  as int,
+        value: null == value
+            ? _value.value
+            : value // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
@@ -297,9 +295,9 @@ class __$$ProgressStateImplCopyWithImpl<$Res>
 
 class _$ProgressStateImpl extends _ProgressState {
   const _$ProgressStateImpl({required this.max, required this.value})
-      : assert(max >= 0, 'max must be greater than or equal to 0'),
-        assert(value <= max, 'value must be less than or equal to max'),
-        super._();
+    : assert(max >= 0, 'max must be greater than or equal to 0'),
+      assert(value <= max, 'value must be less than or equal to max'),
+      super._();
 
   @override
   final int max;
@@ -393,8 +391,10 @@ class _$ProgressStateImpl extends _ProgressState {
 }
 
 abstract class _ProgressState extends ProgressState {
-  const factory _ProgressState(
-      {required final int max, required final int value}) = _$ProgressStateImpl;
+  const factory _ProgressState({
+    required final int max,
+    required final int value,
+  }) = _$ProgressStateImpl;
   const _ProgressState._() : super._();
 
   @override

@@ -257,8 +257,11 @@ class QRScannerServiceEnhanced {
       data.startsWith('openid4vp://')
           ? data.replaceFirst('openid4vp://', 'https://vp.invalid/')
           : data.startsWith('openid-credential-offer://')
-              ? data.replaceFirst('openid-credential-offer://', 'https://offer.invalid/')
-              : data,
+          ? data.replaceFirst(
+              'openid-credential-offer://',
+              'https://offer.invalid/',
+            )
+          : data,
     );
 
     final isPresentation =
@@ -276,15 +279,16 @@ class QRScannerServiceEnhanced {
       type: isPresentation
           ? QRType.presentationRequest
           : isOffer
-              ? QRType.credentialOffer
-              : QRType.presentationRequest,
+          ? QRType.credentialOffer
+          : QRType.presentationRequest,
       format: QRFormat.openid,
       rawData: data,
       parsedContent: isPresentation
           ? {
               'request_uri': uri.queryParameters['request_uri'],
               'client_id': uri.queryParameters['client_id'],
-              'response_uri': uri.queryParameters['response_uri'] ??
+              'response_uri':
+                  uri.queryParameters['response_uri'] ??
                   uri.queryParameters['redirect_uri'],
               'nonce': uri.queryParameters['nonce'],
               'presentation_definition':
@@ -293,7 +297,8 @@ class QRScannerServiceEnhanced {
                   uri.queryParameters['presentation_definition_uri'],
             }
           : {
-              'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
+              'credential_offer_uri':
+                  uri.queryParameters['credential_offer_uri'],
               'issuer_state': uri.queryParameters['issuer_state'],
             },
       metadata: {'protocol': 'openid', 'query_params': uri.queryParameters},
