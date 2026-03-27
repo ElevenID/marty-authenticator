@@ -11,15 +11,15 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { path = "../../marty-core/marty-crypto" }
-marty-verification = { path = "../../marty-core/marty-verification", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = { path = "../../marty-core/marty-zkp" }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core.git", branch = "main" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core.git", branch = "main", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core.git", branch = "main" }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { path = "../../marty-core/marty-oid4vci", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core.git", branch = "main", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 
 # Sync for policy caching
-marty-sync = { path = "../../marty-verifier/crates/marty-sync" }
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier.git", branch = "main" }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.11.1"
