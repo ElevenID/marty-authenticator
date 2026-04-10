@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../utils/globals.dart';
 import '../utils/logger.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/app_constraints_notifier.dart';

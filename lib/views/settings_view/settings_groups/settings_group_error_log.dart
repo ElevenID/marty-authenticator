@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../settings_view_widgets/logging_menu.dart';
 import '../settings_view_widgets/settings_group.dart';
 

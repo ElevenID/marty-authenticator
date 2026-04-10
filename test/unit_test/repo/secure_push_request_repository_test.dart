@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/model/push_request.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/push_request_state.dart';
-import 'package:privacyidea_authenticator/repo/secure_push_request_repository.dart';
-import 'package:privacyidea_authenticator/repo/secure_storage.dart';
-import 'package:privacyidea_authenticator/utils/custom_int_buffer.dart';
+import 'package:marty_authenticator/model/push_request.dart';
+import 'package:marty_authenticator/model/riverpod_states/push_request_state.dart';
+import 'package:marty_authenticator/repo/secure_push_request_repository.dart';
+import 'package:marty_authenticator/repo/secure_storage.dart';
+import 'package:marty_authenticator/utils/custom_int_buffer.dart';
 
 import '../../tests_app_wrapper.mocks.dart';
 

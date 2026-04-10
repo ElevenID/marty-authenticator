@@ -22,16 +22,13 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
+import 'package:marty_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
 
-import '../../../../../../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../../model/enums/app_feature.dart';
 import '../../utils/app_info_utils.dart';
 import '../../utils/customization/application_customization.dart';
-import '../../utils/home_widget_utils.dart';
 import '../../utils/logger.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/introduction_provider.dart';
-import '../../utils/riverpod/riverpod_providers/generated_providers/token_folder_notifier.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../main_view/main_view.dart';
 
@@ -68,11 +65,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               Future.delayed(_splashScreenDuration),
               ref.read(tokenProvider.future),
               InfoUtils.init(),
-              (!kIsWeb && (Platform.isIOS || Platform.isAndroid))
-                  ? HomeWidgetUtils().homeWidgetInit()
-                  : Future<void>.value(),
               ref.read(allowScreenshotProvider.future),
-              ref.read(tokenFolderProvider.notifier).initState,
             ],
             eagerError: true,
             cleanUp: (_) {
@@ -87,19 +80,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             );
 
             if (!mounted) return [];
-            final tokenState = await ref.read(tokenProvider.future);
-            ref
-                .read(tokenContainerProvider.notifier)
-                .syncContainers(tokenState: tokenState, isManually: false);
             _navigate();
             return [];
           })
           .then((values) async {
             if (!mounted) return;
-            final tokenState = await ref.read(tokenProvider.future);
-            ref
-                .read(tokenContainerProvider.notifier)
-                .syncContainers(tokenState: tokenState, isManually: false);
             return _navigate();
           });
     });

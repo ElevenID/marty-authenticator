@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'biometrics.dart';
 import 'credential.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -51,6 +52,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialStatus dco_decode_box_autoadd_credential_status(dynamic raw);
 
   @protected
+  double dco_decode_box_autoadd_f_32(dynamic raw);
+
+  @protected
   MDocCredential dco_decode_box_autoadd_m_doc_credential(dynamic raw);
 
   @protected
@@ -83,7 +87,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject dco_decode_credential_subject(dynamic raw);
 
   @protected
+  double dco_decode_f_32(dynamic raw);
+
+  @protected
   double dco_decode_f_64(dynamic raw);
+
+  @protected
+  FrbAgeEstimate dco_decode_frb_age_estimate(dynamic raw);
 
   @protected
   FrbAuthorizationRequest dco_decode_frb_authorization_request(dynamic raw);
@@ -93,6 +103,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw);
+
+  @protected
+  FrbFaceMatchResult dco_decode_frb_face_match_result(dynamic raw);
+
+  @protected
+  FrbFaceQuality dco_decode_frb_face_quality(dynamic raw);
 
   @protected
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
@@ -160,6 +176,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialStatus? dco_decode_opt_box_autoadd_credential_status(dynamic raw);
 
   @protected
+  double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
+
+  @protected
   Proof? dco_decode_opt_box_autoadd_proof(dynamic raw);
 
   @protected
@@ -188,6 +207,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TrustInfo dco_decode_trust_info(dynamic raw);
+
+  @protected
+  int dco_decode_u_32(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -234,6 +256,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
   MDocCredential sse_decode_box_autoadd_m_doc_credential(
     SseDeserializer deserializer,
   );
@@ -270,7 +295,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject sse_decode_credential_subject(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_32(SseDeserializer deserializer);
+
+  @protected
   double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
+  FrbAgeEstimate sse_decode_frb_age_estimate(SseDeserializer deserializer);
 
   @protected
   FrbAuthorizationRequest sse_decode_frb_authorization_request(
@@ -286,6 +317,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbCredentialResponse sse_decode_frb_credential_response(
     SseDeserializer deserializer,
   );
+
+  @protected
+  FrbFaceMatchResult sse_decode_frb_face_match_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbFaceQuality sse_decode_frb_face_quality(SseDeserializer deserializer);
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
@@ -369,6 +408,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
   Proof? sse_decode_opt_box_autoadd_proof(SseDeserializer deserializer);
 
   @protected
@@ -405,6 +447,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TrustInfo sse_decode_trust_info(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
@@ -454,6 +499,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     final ptr = wire.cst_new_box_autoadd_credential_status();
     cst_api_fill_to_wire_credential_status(raw, ptr.ref);
     return ptr;
+  }
+
+  @protected
+  ffi.Pointer<ffi.Float> cst_encode_box_autoadd_f_32(double raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return wire.cst_new_box_autoadd_f_32(cst_encode_f_32(raw));
   }
 
   @protected
@@ -639,6 +690,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  ffi.Pointer<ffi.Float> cst_encode_opt_box_autoadd_f_32(double? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? ffi.nullptr : cst_encode_box_autoadd_f_32(raw);
+  }
+
+  @protected
   ffi.Pointer<wire_cst_proof> cst_encode_opt_box_autoadd_proof(Proof? raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? ffi.nullptr : cst_encode_box_autoadd_proof(raw);
@@ -786,6 +843,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_frb_age_estimate(
+    FrbAgeEstimate apiObj,
+    wire_cst_frb_age_estimate wireObj,
+  ) {
+    wireObj.estimated_age = cst_encode_u_8(apiObj.estimatedAge);
+    wireObj.confidence = cst_encode_f_32(apiObj.confidence);
+    wireObj.age_range_low = cst_encode_u_8(apiObj.ageRangeLow);
+    wireObj.age_range_high = cst_encode_u_8(apiObj.ageRangeHigh);
+  }
+
+  @protected
   void cst_api_fill_to_wire_frb_authorization_request(
     FrbAuthorizationRequest apiObj,
     wire_cst_frb_authorization_request wireObj,
@@ -824,6 +892,39 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     wireObj.c_nonce_expires_in = cst_encode_opt_box_autoadd_u_64(
       apiObj.cNonceExpiresIn,
     );
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_face_match_result(
+    FrbFaceMatchResult apiObj,
+    wire_cst_frb_face_match_result wireObj,
+  ) {
+    wireObj.verified = cst_encode_bool(apiObj.verified);
+    wireObj.similarity = cst_encode_f_32(apiObj.similarity);
+    wireObj.threshold = cst_encode_f_32(apiObj.threshold);
+    wireObj.provider = cst_encode_String(apiObj.provider);
+    wireObj.reference_quality = cst_encode_opt_box_autoadd_f_32(
+      apiObj.referenceQuality,
+    );
+    wireObj.probe_quality = cst_encode_opt_box_autoadd_f_32(
+      apiObj.probeQuality,
+    );
+    wireObj.processing_time_ms = cst_encode_u_64(apiObj.processingTimeMs);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_face_quality(
+    FrbFaceQuality apiObj,
+    wire_cst_frb_face_quality wireObj,
+  ) {
+    wireObj.overall_score = cst_encode_f_32(apiObj.overallScore);
+    wireObj.face_detected = cst_encode_bool(apiObj.faceDetected);
+    wireObj.face_count = cst_encode_u_32(apiObj.faceCount);
+    wireObj.sharpness = cst_encode_f_32(apiObj.sharpness);
+    wireObj.brightness = cst_encode_f_32(apiObj.brightness);
+    wireObj.contrast = cst_encode_f_32(apiObj.contrast);
+    wireObj.face_size = cst_encode_f_32(apiObj.faceSize);
+    wireObj.pose = cst_encode_f_32(apiObj.pose);
   }
 
   @protected
@@ -1035,6 +1136,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool cst_encode_bool(bool raw);
 
   @protected
+  double cst_encode_f_32(double raw);
+
+  @protected
   double cst_encode_f_64(double raw);
 
   @protected
@@ -1042,6 +1146,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int cst_encode_privacy_level(PrivacyLevel raw);
+
+  @protected
+  int cst_encode_u_32(int raw);
 
   @protected
   int cst_encode_u_8(int raw);
@@ -1086,6 +1193,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     CredentialStatus self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_m_doc_credential(
@@ -1139,7 +1249,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_f_32(double self, SseSerializer serializer);
+
+  @protected
   void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_frb_age_estimate(
+    FrbAgeEstimate self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_frb_authorization_request(
@@ -1156,6 +1275,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_credential_response(
     FrbCredentialResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_face_match_result(
+    FrbFaceMatchResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_face_quality(
+    FrbFaceQuality self,
     SseSerializer serializer,
   );
 
@@ -1266,6 +1397,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_box_autoadd_proof(Proof? self, SseSerializer serializer);
 
   @protected
@@ -1309,6 +1443,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_trust_info(TrustInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);
@@ -1365,6 +1502,40 @@ class RustLibWire implements BaseWire {
       );
   late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
       .asFunction<void Function(DartPostCObjectFnType)>();
+
+  void wire__crate__biometrics__assess_face_quality(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> image,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> models_dir,
+  ) {
+    return _wire__crate__biometrics__assess_face_quality(
+      port_,
+      image,
+      models_dir,
+    );
+  }
+
+  late final _wire__crate__biometrics__assess_face_qualityPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality',
+      );
+  late final _wire__crate__biometrics__assess_face_quality =
+      _wire__crate__biometrics__assess_face_qualityPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
 
   void wire__crate__api__check_issuer_constraints(
     int port_,
@@ -1476,6 +1647,40 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__credential_to_json =
       _wire__crate__api__credential_to_jsonPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
+
+  void wire__crate__biometrics__estimate_face_age(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> image,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> models_dir,
+  ) {
+    return _wire__crate__biometrics__estimate_face_age(
+      port_,
+      image,
+      models_dir,
+    );
+  }
+
+  late final _wire__crate__biometrics__estimate_face_agePtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age',
+      );
+  late final _wire__crate__biometrics__estimate_face_age =
+      _wire__crate__biometrics__estimate_face_agePtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
 
   void wire__crate__api__evaluate_presentation_request(
     int port_,
@@ -1769,6 +1974,48 @@ class RustLibWire implements BaseWire {
               int,
               ffi.Pointer<wire_cst_m_doc_credential>,
               ffi.Pointer<wire_cst_list_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__biometrics__verify_face_match(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> reference_image,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> probe_image,
+    ffi.Pointer<ffi.Float> threshold,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> models_dir,
+  ) {
+    return _wire__crate__biometrics__verify_face_match(
+      port_,
+      reference_image,
+      probe_image,
+      threshold,
+      models_dir,
+    );
+  }
+
+  late final _wire__crate__biometrics__verify_face_matchPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<ffi.Float>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match',
+      );
+  late final _wire__crate__biometrics__verify_face_match =
+      _wire__crate__biometrics__verify_face_matchPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<ffi.Float>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             )
           >();
 
@@ -2185,16 +2432,20 @@ class RustLibWire implements BaseWire {
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> predicate_id,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> claim_value,
-    ffi.Pointer<wire_cst_list_prim_u_8_loose> mso_bytes,
-    ffi.Pointer<wire_cst_list_prim_u_8_loose> signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> mdoc_bytes,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_pkx,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_pky,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> doc_type,
     ffi.Pointer<wire_cst_list_prim_u_8_loose> session_nonce,
   ) {
     return _wire__crate__api__zk_prove(
       port_,
       predicate_id,
       claim_value,
-      mso_bytes,
-      signature,
+      mdoc_bytes,
+      issuer_pkx,
+      issuer_pky,
+      doc_type,
       session_nonce,
     );
   }
@@ -2207,7 +2458,9 @@ class RustLibWire implements BaseWire {
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
-            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
           )
         >
@@ -2219,7 +2472,9 @@ class RustLibWire implements BaseWire {
           ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           ffi.Pointer<wire_cst_list_prim_u_8_loose>,
-          ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+          ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           ffi.Pointer<wire_cst_list_prim_u_8_loose>,
         )
       >();
@@ -2227,16 +2482,20 @@ class RustLibWire implements BaseWire {
   void wire__crate__api__zk_prove_from_presentation_definition(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> presentation_definition_json,
-    ffi.Pointer<wire_cst_list_prim_u_8_loose> mso_bytes,
-    ffi.Pointer<wire_cst_list_prim_u_8_loose> signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> mdoc_bytes,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_pkx,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_pky,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> doc_type,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> secrets_json,
     ffi.Pointer<wire_cst_list_prim_u_8_loose> session_nonce,
   ) {
     return _wire__crate__api__zk_prove_from_presentation_definition(
       port_,
       presentation_definition_json,
-      mso_bytes,
-      signature,
+      mdoc_bytes,
+      issuer_pkx,
+      issuer_pky,
+      doc_type,
       secrets_json,
       session_nonce,
     );
@@ -2249,7 +2508,9 @@ class RustLibWire implements BaseWire {
             ffi.Int64,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
-            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
           )
@@ -2264,7 +2525,9 @@ class RustLibWire implements BaseWire {
               int,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_loose>,
-              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_loose>,
             )
@@ -2330,6 +2593,17 @@ class RustLibWire implements BaseWire {
   late final _cst_new_box_autoadd_credential_status =
       _cst_new_box_autoadd_credential_statusPtr
           .asFunction<ffi.Pointer<wire_cst_credential_status> Function()>();
+
+  ffi.Pointer<ffi.Float> cst_new_box_autoadd_f_32(double value) {
+    return _cst_new_box_autoadd_f_32(value);
+  }
+
+  late final _cst_new_box_autoadd_f_32Ptr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Float> Function(ffi.Float)>>(
+        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32',
+      );
+  late final _cst_new_box_autoadd_f_32 = _cst_new_box_autoadd_f_32Ptr
+      .asFunction<ffi.Pointer<ffi.Float> Function(double)>();
 
   ffi.Pointer<wire_cst_m_doc_credential>
   cst_new_box_autoadd_m_doc_credential() {
@@ -2812,6 +3086,20 @@ final class wire_cst_list_credential_group extends ffi.Struct {
   external int len;
 }
 
+final class wire_cst_frb_age_estimate extends ffi.Struct {
+  @ffi.Uint8()
+  external int estimated_age;
+
+  @ffi.Float()
+  external double confidence;
+
+  @ffi.Uint8()
+  external int age_range_low;
+
+  @ffi.Uint8()
+  external int age_range_high;
+}
+
 final class wire_cst_frb_authorization_request extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> authorization_url;
 
@@ -2845,6 +3133,52 @@ final class wire_cst_frb_credential_response extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce;
 
   external ffi.Pointer<ffi.Uint64> c_nonce_expires_in;
+}
+
+final class wire_cst_frb_face_match_result extends ffi.Struct {
+  @ffi.Bool()
+  external bool verified;
+
+  @ffi.Float()
+  external double similarity;
+
+  @ffi.Float()
+  external double threshold;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> provider;
+
+  external ffi.Pointer<ffi.Float> reference_quality;
+
+  external ffi.Pointer<ffi.Float> probe_quality;
+
+  @ffi.Uint64()
+  external int processing_time_ms;
+}
+
+final class wire_cst_frb_face_quality extends ffi.Struct {
+  @ffi.Float()
+  external double overall_score;
+
+  @ffi.Bool()
+  external bool face_detected;
+
+  @ffi.Uint32()
+  external int face_count;
+
+  @ffi.Float()
+  external double sharpness;
+
+  @ffi.Float()
+  external double brightness;
+
+  @ffi.Float()
+  external double contrast;
+
+  @ffi.Float()
+  external double face_size;
+
+  @ffi.Float()
+  external double pose;
 }
 
 final class wire_cst_frb_issuer_metadata extends ffi.Struct {

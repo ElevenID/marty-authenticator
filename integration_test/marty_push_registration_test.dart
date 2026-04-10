@@ -22,15 +22,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/model/enums/introduction.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/introduction_state.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/settings_state.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/token_folder_state.dart';
-import 'package:privacyidea_authenticator/model/version.dart';
-import 'package:privacyidea_authenticator/models/marty_challenge.dart';
-import 'package:privacyidea_authenticator/processors/scheme_processors/marty_push_scheme_processor.dart';
-import 'package:privacyidea_authenticator/processors/scheme_processors/scheme_processor_interface.dart';
-import 'package:privacyidea_authenticator/services/marty_push_service.dart';
+import 'package:marty_authenticator/model/enums/introduction.dart';
+import 'package:marty_authenticator/model/riverpod_states/introduction_state.dart';
+import 'package:marty_authenticator/model/riverpod_states/settings_state.dart';
+import 'package:marty_authenticator/model/riverpod_states/token_folder_state.dart';
+import 'package:marty_authenticator/model/version.dart';
+import 'package:marty_authenticator/models/marty_challenge.dart';
+import 'package:marty_authenticator/processors/scheme_processors/marty_push_scheme_processor.dart';
+import 'package:marty_authenticator/processors/scheme_processors/scheme_processor_interface.dart';
+import 'package:marty_authenticator/services/marty_push_service.dart';
 
 import '../test/tests_app_wrapper.mocks.dart';
 

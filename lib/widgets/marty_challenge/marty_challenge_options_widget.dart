@@ -11,7 +11,6 @@
 import 'package:flutter/material.dart';
 
 import '../../models/marty_challenge.dart';
-import '../../utils/customization/theme_extentions/push_request_theme.dart';
 import '../button_widgets/cooldown_button.dart';
 
 /// Widget that displays Marty challenge options as interactive buttons.
@@ -92,11 +91,8 @@ class MartyChallengeOptionsWidget extends StatelessWidget {
     final isSelected = selectedOptionId == option.id;
     final isLoading = showLoading && isSelected;
 
-    final pushRequestTheme =
-        Theme.of(context).extensions[PushRequestTheme] as PushRequestTheme?;
-
     // Determine button color based on option ID
-    final buttonColor = _getButtonColor(context, option, pushRequestTheme);
+    final buttonColor = _getButtonColor(context, option);
 
     return CooldownButton(
       style: ButtonStyle(
@@ -145,18 +141,14 @@ class MartyChallengeOptionsWidget extends StatelessWidget {
   }
 
   /// Get the button color based on option type.
-  Color _getButtonColor(
-    BuildContext context,
-    ChallengeOption option,
-    PushRequestTheme? theme,
-  ) {
+  Color _getButtonColor(BuildContext context, ChallengeOption option) {
     // Use semantic colors for common actions
     final optionId = option.id.toLowerCase();
 
     if (optionId == 'accept' || optionId == 'approve' || optionId == 'yes') {
-      return theme?.acceptColor ?? Colors.green;
+      return Colors.green;
     } else if (optionId == 'reject' || optionId == 'deny' || optionId == 'no') {
-      return theme?.declineColor ?? Colors.red;
+      return Colors.red;
     }
 
     // Default: use primary color

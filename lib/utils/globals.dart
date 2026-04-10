@@ -18,19 +18,12 @@
   limitations under the License.
 */
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../model/enums/patch_note_type.dart';
 import '../model/version.dart';
-
-/// Get the default privacyIDEA server URL from environment variables
-String? getDefaultPrivacyideaServerUrl() {
-  const url = String.fromEnvironment('PRIVACYIDEA_URL');
-  return url.isNotEmpty ? url : null;
-}
 
 Map<Version, Map<PatchNoteType, List<String>>> getLocalizedPatchNotes(
   AppLocalizations localizations,
@@ -121,7 +114,6 @@ final piAuthenticatorGitHubUri = Uri.parse(
 );
 
 // The highest version of the pipush Tokentype that this client supports.
-const maxPushTokenVersion = 1;
 
 WidgetRef? globalRef;
 

@@ -1,7 +1,7 @@
 # Flutter Rust Bridge configuration for marty-authenticator
 # See: https://cjycode.com/flutter_rust_bridge/
 
-rust_input: crate::api
+rust_input: crate::api,crate::biometrics
 dart_output: lib/rust/marty_bridge.dart
 
 # Rust crate root

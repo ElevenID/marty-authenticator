@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import 'globals.dart';
 import 'logger.dart';
 import 'riverpod/riverpod_providers/state_providers/status_message_provider.dart';

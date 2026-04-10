@@ -6,7 +6,7 @@ part of 'token_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tokenNotifierHash() => r'efd5f84a819f806c68793f59ba403007504edac7';
+String _$tokenNotifierHash() => r'5655030440e74e9ab14ab5a1a809750d85938ece';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -31,16 +31,8 @@ class _SystemHash {
 
 abstract class _$TokenNotifier extends BuildlessAsyncNotifier<TokenState> {
   late final TokenRepository repo;
-  late final RsaUtils rsaUtils;
-  late final PrivacyideaIOClient ioClient;
-  late final FirebaseUtils firebaseUtils;
 
-  FutureOr<TokenState> build({
-    required TokenRepository repo,
-    required RsaUtils rsaUtils,
-    required PrivacyideaIOClient ioClient,
-    required FirebaseUtils firebaseUtils,
-  });
+  FutureOr<TokenState> build({required TokenRepository repo});
 }
 
 /// See also [TokenNotifier].
@@ -53,30 +45,15 @@ class TokenNotifierFamily extends Family<AsyncValue<TokenState>> {
   const TokenNotifierFamily();
 
   /// See also [TokenNotifier].
-  TokenNotifierProvider call({
-    required TokenRepository repo,
-    required RsaUtils rsaUtils,
-    required PrivacyideaIOClient ioClient,
-    required FirebaseUtils firebaseUtils,
-  }) {
-    return TokenNotifierProvider(
-      repo: repo,
-      rsaUtils: rsaUtils,
-      ioClient: ioClient,
-      firebaseUtils: firebaseUtils,
-    );
+  TokenNotifierProvider call({required TokenRepository repo}) {
+    return TokenNotifierProvider(repo: repo);
   }
 
   @override
   TokenNotifierProvider getProviderOverride(
     covariant TokenNotifierProvider provider,
   ) {
-    return call(
-      repo: provider.repo,
-      rsaUtils: provider.rsaUtils,
-      ioClient: provider.ioClient,
-      firebaseUtils: provider.firebaseUtils,
-    );
+    return call(repo: provider.repo);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -98,30 +75,19 @@ class TokenNotifierFamily extends Family<AsyncValue<TokenState>> {
 class TokenNotifierProvider
     extends AsyncNotifierProviderImpl<TokenNotifier, TokenState> {
   /// See also [TokenNotifier].
-  TokenNotifierProvider({
-    required TokenRepository repo,
-    required RsaUtils rsaUtils,
-    required PrivacyideaIOClient ioClient,
-    required FirebaseUtils firebaseUtils,
-  }) : this._internal(
-         () => TokenNotifier()
-           ..repo = repo
-           ..rsaUtils = rsaUtils
-           ..ioClient = ioClient
-           ..firebaseUtils = firebaseUtils,
-         from: tokenNotifierProviderOf,
-         name: r'tokenNotifierProviderOf',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$tokenNotifierHash,
-         dependencies: TokenNotifierFamily._dependencies,
-         allTransitiveDependencies:
-             TokenNotifierFamily._allTransitiveDependencies,
-         repo: repo,
-         rsaUtils: rsaUtils,
-         ioClient: ioClient,
-         firebaseUtils: firebaseUtils,
-       );
+  TokenNotifierProvider({required TokenRepository repo})
+    : this._internal(
+        () => TokenNotifier()..repo = repo,
+        from: tokenNotifierProviderOf,
+        name: r'tokenNotifierProviderOf',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tokenNotifierHash,
+        dependencies: TokenNotifierFamily._dependencies,
+        allTransitiveDependencies:
+            TokenNotifierFamily._allTransitiveDependencies,
+        repo: repo,
+      );
 
   TokenNotifierProvider._internal(
     super._createNotifier, {
@@ -131,24 +97,13 @@ class TokenNotifierProvider
     required super.debugGetCreateSourceHash,
     required super.from,
     required this.repo,
-    required this.rsaUtils,
-    required this.ioClient,
-    required this.firebaseUtils,
   }) : super.internal();
 
   final TokenRepository repo;
-  final RsaUtils rsaUtils;
-  final PrivacyideaIOClient ioClient;
-  final FirebaseUtils firebaseUtils;
 
   @override
   FutureOr<TokenState> runNotifierBuild(covariant TokenNotifier notifier) {
-    return notifier.build(
-      repo: repo,
-      rsaUtils: rsaUtils,
-      ioClient: ioClient,
-      firebaseUtils: firebaseUtils,
-    );
+    return notifier.build(repo: repo);
   }
 
   @override
@@ -156,20 +111,13 @@ class TokenNotifierProvider
     return ProviderOverride(
       origin: this,
       override: TokenNotifierProvider._internal(
-        () => create()
-          ..repo = repo
-          ..rsaUtils = rsaUtils
-          ..ioClient = ioClient
-          ..firebaseUtils = firebaseUtils,
+        () => create()..repo = repo,
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
         repo: repo,
-        rsaUtils: rsaUtils,
-        ioClient: ioClient,
-        firebaseUtils: firebaseUtils,
       ),
     );
   }
@@ -181,20 +129,13 @@ class TokenNotifierProvider
 
   @override
   bool operator ==(Object other) {
-    return other is TokenNotifierProvider &&
-        other.repo == repo &&
-        other.rsaUtils == rsaUtils &&
-        other.ioClient == ioClient &&
-        other.firebaseUtils == firebaseUtils;
+    return other is TokenNotifierProvider && other.repo == repo;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, repo.hashCode);
-    hash = _SystemHash.combine(hash, rsaUtils.hashCode);
-    hash = _SystemHash.combine(hash, ioClient.hashCode);
-    hash = _SystemHash.combine(hash, firebaseUtils.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -203,15 +144,6 @@ class TokenNotifierProvider
 mixin TokenNotifierRef on AsyncNotifierProviderRef<TokenState> {
   /// The parameter `repo` of this provider.
   TokenRepository get repo;
-
-  /// The parameter `rsaUtils` of this provider.
-  RsaUtils get rsaUtils;
-
-  /// The parameter `ioClient` of this provider.
-  PrivacyideaIOClient get ioClient;
-
-  /// The parameter `firebaseUtils` of this provider.
-  FirebaseUtils get firebaseUtils;
 }
 
 class _TokenNotifierProviderElement
@@ -221,14 +153,6 @@ class _TokenNotifierProviderElement
 
   @override
   TokenRepository get repo => (origin as TokenNotifierProvider).repo;
-  @override
-  RsaUtils get rsaUtils => (origin as TokenNotifierProvider).rsaUtils;
-  @override
-  PrivacyideaIOClient get ioClient =>
-      (origin as TokenNotifierProvider).ioClient;
-  @override
-  FirebaseUtils get firebaseUtils =>
-      (origin as TokenNotifierProvider).firebaseUtils;
 }
 
 // ignore_for_file: type=lint

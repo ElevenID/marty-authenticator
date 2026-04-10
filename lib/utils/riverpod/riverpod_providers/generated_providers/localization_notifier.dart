@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../l10n/app_localizations_en.dart';

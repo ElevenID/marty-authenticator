@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/widgets/dialogs/add_to_wallet_dialog.dart';
+import 'package:marty_authenticator/widgets/dialogs/add_to_wallet_dialog.dart';
 
 void main() {
   testWidgets('AddToWalletDialog shows correct content', (

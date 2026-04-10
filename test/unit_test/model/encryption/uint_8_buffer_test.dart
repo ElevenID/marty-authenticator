@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/encryption/uint_8_buffer.dart';
+import 'package:marty_authenticator/model/encryption/uint_8_buffer.dart';
 
 void main() {
   _testUint8Buffer();

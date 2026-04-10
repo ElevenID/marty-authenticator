@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 import '../../../../../../../model/mixins/sortable_mixin.dart';
-import '../../../../../../../model/token_folder.dart';
-import '../tokens/push_token.dart';
 import '../tokens/token.dart';
 
 class TokenFilter {
@@ -36,7 +34,7 @@ class TokenFilter {
     for (final token in tokens) {
       if (regExp.hasMatch(token.label) ||
           regExp.hasMatch(token.issuer) ||
-          token is PushToken && regExp.hasMatch(token.serial) ||
+          (token.serial != null && regExp.hasMatch(token.serial!)) ||
           regExp.hasMatch(token.type)) {
         filteredTokens.add(token);
       }
@@ -53,14 +51,10 @@ class TokenFilter {
       return [];
     }
     for (final sortable in sortables) {
-      if (sortable is TokenFolder) {
-        filteredSortables.add(sortable);
-        continue;
-      }
       if (sortable is Token &&
           (regExp.hasMatch(sortable.label) ||
               regExp.hasMatch(sortable.issuer) ||
-              sortable is PushToken && regExp.hasMatch(sortable.serial) ||
+              (sortable.serial != null && regExp.hasMatch(sortable.serial!)) ||
               regExp.hasMatch(sortable.type))) {
         filteredSortables.add(sortable);
       }

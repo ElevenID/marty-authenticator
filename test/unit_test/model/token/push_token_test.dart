@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/push_token_rollout_state.dart';
-import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/token.dart';
+import 'package:marty_authenticator/model/enums/push_token_rollout_state.dart';
+import 'package:marty_authenticator/model/tokens/push_token.dart';
+import 'package:marty_authenticator/model/tokens/token.dart';
 
 PushToken get pushToken => PushToken(
   serial: 'serial',

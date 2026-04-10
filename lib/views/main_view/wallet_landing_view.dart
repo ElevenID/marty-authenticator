@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 import 'main_view_widgets/credentials_list.dart';
 // import 'main_view_widgets/card_widgets/mdl_placeholder_card.dart'; // No longer needed
@@ -32,7 +32,6 @@ import '../../utils/view_utils.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
 import '../qr_scanner_view/qr_scanner_view.dart';
 import '../../model/processor_result.dart';
-import '../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 
 export 'wallet_landing_view.dart';
@@ -125,7 +124,6 @@ class _WalletLandingViewState extends ConsumerState<WalletLandingView> {
                         );
                         final resultHandlers = <ResultHandler>[
                           ref.read(tokenProvider.notifier),
-                          ref.read(tokenContainerProvider.notifier),
                         ];
                         if (qrCode == null || !context.mounted) return;
                         final handled = await scanQrCode(
@@ -251,7 +249,6 @@ class _WalletLandingViewState extends ConsumerState<WalletLandingView> {
                   );
                   final resultHandlers = <ResultHandler>[
                     ref.read(tokenProvider.notifier),
-                    ref.read(tokenContainerProvider.notifier),
                   ];
                   if (qrCode == null || !context.mounted) return;
                   final handled = await scanQrCode(

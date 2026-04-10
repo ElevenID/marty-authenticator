@@ -11,15 +11,18 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { git = "https://github.com/ElevenID/marty-core.git", branch = "main" }
-marty-verification = { git = "https://github.com/ElevenID/marty-core.git", branch = "main", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = { git = "https://github.com/ElevenID/marty-core.git", branch = "main" }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core.git", rev = "438d0f81" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core.git", rev = "438d0f81", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core.git", rev = "438d0f81" }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { git = "https://github.com/ElevenID/marty-core.git", branch = "main", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core.git", rev = "438d0f81", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 
 # Sync for policy caching
-marty-sync = { git = "https://github.com/ElevenID/marty-verifier.git", branch = "main" }
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier.git", rev = "9e494623" }
+
+# Biometric face verification (ONNX-backed for on-device matching)
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core.git", rev = "438d0f81", features = ["native", "onnx"] }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.11.1"
@@ -46,3 +49,17 @@ tokio = { version = "1.0", features = ["rt", "sync"] }
 
 [build-dependencies]
 flutter_rust_bridge_codegen = "2.0"
+
+# Patch marty-core git deps to local checkout during development.
+# Remove this section once changes are pushed to the main branch.
+[patch."https://github.com/ElevenID/marty-core.git"]
+marty-biometrics = { path = "../../marty-core/marty-biometrics" }
+marty-crypto = { path = "../../marty-core/marty-crypto" }
+marty-verification = { path = "../../marty-core/marty-verification" }
+marty-zkp = { path = "../../marty-core/marty-zkp" }
+marty-oid4vci = { path = "../../marty-core/marty-oid4vci" }
+marty-types = { path = "../../marty-core/marty-types" }
+marty-secure-storage = { path = "../../marty-core/marty-secure-storage" }
+
+[patch."https://github.com/ElevenID/marty-verifier.git"]
+marty-sync = { path = "../../marty-verifier/crates/marty-sync" }

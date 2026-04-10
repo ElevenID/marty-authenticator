@@ -1,3 +1,3 @@
-import 'mains/main_with_mocks.dart' as app;
+import 'mains/main_marty.dart' as app;
 
 void main() => app.main();

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/repo/secure_storage.dart';
-import 'package:privacyidea_authenticator/utils/firebase_utils.dart';
+import 'package:marty_authenticator/repo/secure_storage.dart';
+import 'package:marty_authenticator/utils/firebase_utils.dart';
 
 import '../../tests_app_wrapper.mocks.dart';
 

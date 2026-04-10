@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/version.dart';
+import 'package:marty_authenticator/model/version.dart';
 
 void main() {
   _testTokenVersion();

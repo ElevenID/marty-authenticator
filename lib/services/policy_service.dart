@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:privacyidea_authenticator/rust/marty_bridge.dart';
+import 'package:marty_authenticator/rust/marty_bridge.dart';
 
 /// Service for managing presentation policies with background sync.
 ///

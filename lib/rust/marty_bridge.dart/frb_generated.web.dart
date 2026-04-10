@@ -7,6 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api.dart';
+import 'biometrics.dart';
 import 'credential.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -53,6 +54,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialStatus dco_decode_box_autoadd_credential_status(dynamic raw);
 
   @protected
+  double dco_decode_box_autoadd_f_32(dynamic raw);
+
+  @protected
   MDocCredential dco_decode_box_autoadd_m_doc_credential(dynamic raw);
 
   @protected
@@ -85,7 +89,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject dco_decode_credential_subject(dynamic raw);
 
   @protected
+  double dco_decode_f_32(dynamic raw);
+
+  @protected
   double dco_decode_f_64(dynamic raw);
+
+  @protected
+  FrbAgeEstimate dco_decode_frb_age_estimate(dynamic raw);
 
   @protected
   FrbAuthorizationRequest dco_decode_frb_authorization_request(dynamic raw);
@@ -95,6 +105,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw);
+
+  @protected
+  FrbFaceMatchResult dco_decode_frb_face_match_result(dynamic raw);
+
+  @protected
+  FrbFaceQuality dco_decode_frb_face_quality(dynamic raw);
 
   @protected
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
@@ -162,6 +178,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialStatus? dco_decode_opt_box_autoadd_credential_status(dynamic raw);
 
   @protected
+  double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
+
+  @protected
   Proof? dco_decode_opt_box_autoadd_proof(dynamic raw);
 
   @protected
@@ -190,6 +209,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TrustInfo dco_decode_trust_info(dynamic raw);
+
+  @protected
+  int dco_decode_u_32(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -236,6 +258,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
   MDocCredential sse_decode_box_autoadd_m_doc_credential(
     SseDeserializer deserializer,
   );
@@ -272,7 +297,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   CredentialSubject sse_decode_credential_subject(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_32(SseDeserializer deserializer);
+
+  @protected
   double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
+  FrbAgeEstimate sse_decode_frb_age_estimate(SseDeserializer deserializer);
 
   @protected
   FrbAuthorizationRequest sse_decode_frb_authorization_request(
@@ -288,6 +319,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbCredentialResponse sse_decode_frb_credential_response(
     SseDeserializer deserializer,
   );
+
+  @protected
+  FrbFaceMatchResult sse_decode_frb_face_match_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbFaceQuality sse_decode_frb_face_quality(SseDeserializer deserializer);
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
@@ -371,6 +410,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
   Proof? sse_decode_opt_box_autoadd_proof(SseDeserializer deserializer);
 
   @protected
@@ -407,6 +449,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   TrustInfo sse_decode_trust_info(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
@@ -447,6 +492,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   JSAny cst_encode_box_autoadd_credential_status(CredentialStatus raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_credential_status(raw);
+  }
+
+  @protected
+  double cst_encode_box_autoadd_f_32(double raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return cst_encode_f_32(raw);
   }
 
   @protected
@@ -535,6 +586,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_frb_age_estimate(FrbAgeEstimate raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_u_8(raw.estimatedAge),
+      cst_encode_f_32(raw.confidence),
+      cst_encode_u_8(raw.ageRangeLow),
+      cst_encode_u_8(raw.ageRangeHigh),
+    ].jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_frb_authorization_request(FrbAuthorizationRequest raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return [
@@ -566,6 +628,35 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.transactionId),
       cst_encode_opt_String(raw.cNonce),
       cst_encode_opt_box_autoadd_u_64(raw.cNonceExpiresIn),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_face_match_result(FrbFaceMatchResult raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_bool(raw.verified),
+      cst_encode_f_32(raw.similarity),
+      cst_encode_f_32(raw.threshold),
+      cst_encode_String(raw.provider),
+      cst_encode_opt_box_autoadd_f_32(raw.referenceQuality),
+      cst_encode_opt_box_autoadd_f_32(raw.probeQuality),
+      cst_encode_u_64(raw.processingTimeMs),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_face_quality(FrbFaceQuality raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_f_32(raw.overallScore),
+      cst_encode_bool(raw.faceDetected),
+      cst_encode_u_32(raw.faceCount),
+      cst_encode_f_32(raw.sharpness),
+      cst_encode_f_32(raw.brightness),
+      cst_encode_f_32(raw.contrast),
+      cst_encode_f_32(raw.faceSize),
+      cst_encode_f_32(raw.pose),
     ].jsify()!;
   }
 
@@ -735,6 +826,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  double? cst_encode_opt_box_autoadd_f_32(double? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? null : cst_encode_box_autoadd_f_32(raw);
+  }
+
+  @protected
   JSAny? cst_encode_opt_box_autoadd_proof(Proof? raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? null : cst_encode_box_autoadd_proof(raw);
@@ -869,6 +966,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool cst_encode_bool(bool raw);
 
   @protected
+  double cst_encode_f_32(double raw);
+
+  @protected
   double cst_encode_f_64(double raw);
 
   @protected
@@ -876,6 +976,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int cst_encode_privacy_level(PrivacyLevel raw);
+
+  @protected
+  int cst_encode_u_32(int raw);
 
   @protected
   int cst_encode_u_8(int raw);
@@ -920,6 +1023,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     CredentialStatus self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_m_doc_credential(
@@ -973,7 +1079,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_f_32(double self, SseSerializer serializer);
+
+  @protected
   void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_frb_age_estimate(
+    FrbAgeEstimate self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_frb_authorization_request(
@@ -990,6 +1105,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_credential_response(
     FrbCredentialResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_face_match_result(
+    FrbFaceMatchResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_face_quality(
+    FrbFaceQuality self,
     SseSerializer serializer,
   );
 
@@ -1100,6 +1227,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_box_autoadd_proof(Proof? self, SseSerializer serializer);
 
   @protected
@@ -1145,6 +1275,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_trust_info(TrustInfo self, SseSerializer serializer);
 
   @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);
 
   @protected
@@ -1167,6 +1300,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
 class RustLibWire implements BaseWire {
   RustLibWire.fromExternalLibrary(ExternalLibrary lib);
+
+  void wire__crate__biometrics__assess_face_quality(
+    NativePortType port_,
+    String image,
+    String? models_dir,
+  ) => wasmModule.wire__crate__biometrics__assess_face_quality(
+    port_,
+    image,
+    models_dir,
+  );
 
   void wire__crate__api__check_issuer_constraints(
     NativePortType port_,
@@ -1199,6 +1342,16 @@ class RustLibWire implements BaseWire {
     NativePortType port_,
     JSAny credential,
   ) => wasmModule.wire__crate__api__credential_to_json(port_, credential);
+
+  void wire__crate__biometrics__estimate_face_age(
+    NativePortType port_,
+    String image,
+    String? models_dir,
+  ) => wasmModule.wire__crate__biometrics__estimate_face_age(
+    port_,
+    image,
+    models_dir,
+  );
 
   void wire__crate__api__evaluate_presentation_request(
     NativePortType port_,
@@ -1279,6 +1432,20 @@ class RustLibWire implements BaseWire {
     port_,
     mdoc,
     x5chain,
+  );
+
+  void wire__crate__biometrics__verify_face_match(
+    NativePortType port_,
+    String reference_image,
+    String probe_image,
+    double? threshold,
+    String? models_dir,
+  ) => wasmModule.wire__crate__biometrics__verify_face_match(
+    port_,
+    reference_image,
+    probe_image,
+    threshold,
+    models_dir,
   );
 
   void wire__crate__api__verify_mdoc_trust_chain(
@@ -1417,30 +1584,38 @@ class RustLibWire implements BaseWire {
     NativePortType port_,
     String predicate_id,
     String claim_value,
-    JSAny mso_bytes,
-    JSAny signature,
+    JSAny mdoc_bytes,
+    String issuer_pkx,
+    String issuer_pky,
+    String doc_type,
     JSAny session_nonce,
   ) => wasmModule.wire__crate__api__zk_prove(
     port_,
     predicate_id,
     claim_value,
-    mso_bytes,
-    signature,
+    mdoc_bytes,
+    issuer_pkx,
+    issuer_pky,
+    doc_type,
     session_nonce,
   );
 
   void wire__crate__api__zk_prove_from_presentation_definition(
     NativePortType port_,
     String presentation_definition_json,
-    JSAny mso_bytes,
-    JSAny signature,
+    JSAny mdoc_bytes,
+    String issuer_pkx,
+    String issuer_pky,
+    String doc_type,
     String secrets_json,
     JSAny session_nonce,
   ) => wasmModule.wire__crate__api__zk_prove_from_presentation_definition(
     port_,
     presentation_definition_json,
-    mso_bytes,
-    signature,
+    mdoc_bytes,
+    issuer_pkx,
+    issuer_pky,
+    doc_type,
     secrets_json,
     session_nonce,
   );
@@ -1468,6 +1643,12 @@ external RustLibWasmModule get wasmModule;
 @JS()
 @anonymous
 extension type RustLibWasmModule._(JSObject _) implements JSObject {
+  external void wire__crate__biometrics__assess_face_quality(
+    NativePortType port_,
+    String image,
+    String? models_dir,
+  );
+
   external void wire__crate__api__check_issuer_constraints(
     NativePortType port_,
     String policy_json,
@@ -1489,6 +1670,12 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
   external void wire__crate__api__credential_to_json(
     NativePortType port_,
     JSAny credential,
+  );
+
+  external void wire__crate__biometrics__estimate_face_age(
+    NativePortType port_,
+    String image,
+    String? models_dir,
   );
 
   external void wire__crate__api__evaluate_presentation_request(
@@ -1550,6 +1737,14 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     NativePortType port_,
     JSAny mdoc,
     JSAny x5chain,
+  );
+
+  external void wire__crate__biometrics__verify_face_match(
+    NativePortType port_,
+    String reference_image,
+    String probe_image,
+    double? threshold,
+    String? models_dir,
   );
 
   external void wire__crate__api__verify_mdoc_trust_chain(
@@ -1637,16 +1832,20 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     NativePortType port_,
     String predicate_id,
     String claim_value,
-    JSAny mso_bytes,
-    JSAny signature,
+    JSAny mdoc_bytes,
+    String issuer_pkx,
+    String issuer_pky,
+    String doc_type,
     JSAny session_nonce,
   );
 
   external void wire__crate__api__zk_prove_from_presentation_definition(
     NativePortType port_,
     String presentation_definition_json,
-    JSAny mso_bytes,
-    JSAny signature,
+    JSAny mdoc_bytes,
+    String issuer_pkx,
+    String issuer_pky,
+    String doc_type,
     String secrets_json,
     JSAny session_nonce,
   );

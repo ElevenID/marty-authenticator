@@ -26,9 +26,6 @@ HOTPToken _$HOTPTokenFromJson(Map<String, dynamic> json) => HOTPToken(
   isHidden: json['isHidden'] as bool?,
   sortIndex: (json['sortIndex'] as num?)?.toInt(),
   folderId: (json['folderId'] as num?)?.toInt(),
-  origin: json['origin'] == null
-      ? null
-      : TokenOriginData.fromJson(json['origin'] as Map<String, dynamic>),
   label: json['label'] as String? ?? '',
   issuer: json['issuer'] as String? ?? '',
   isOffline: json['isOffline'] as bool? ?? false,
@@ -48,7 +45,6 @@ Map<String, dynamic> _$HOTPTokenToJson(HOTPToken instance) => <String, dynamic>{
   'folderId': instance.folderId,
   'isOffline': instance.isOffline,
   'sortIndex': instance.sortIndex,
-  'origin': instance.origin,
   'type': instance.type,
   'algorithm': _$AlgorithmsEnumMap[instance.algorithm]!,
   'digits': instance.digits,

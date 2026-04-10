@@ -23,7 +23,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../utils/crypto_utils.dart';
 import '../../utils/logger.dart';
 import '../../utils/utils.dart';

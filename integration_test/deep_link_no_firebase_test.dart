@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/main.dart' as app;
-import 'package:privacyidea_authenticator/model/enums/introduction.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/introduction_state.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/settings_state.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/token_folder_state.dart';
-import 'package:privacyidea_authenticator/utils/customization/application_customization.dart';
-import 'package:privacyidea_authenticator/model/version.dart';
+import 'package:marty_authenticator/main.dart' as app;
+import 'package:marty_authenticator/model/enums/introduction.dart';
+import 'package:marty_authenticator/model/riverpod_states/introduction_state.dart';
+import 'package:marty_authenticator/model/riverpod_states/settings_state.dart';
+import 'package:marty_authenticator/model/riverpod_states/token_folder_state.dart';
+import 'package:marty_authenticator/utils/customization/application_customization.dart';
+import 'package:marty_authenticator/model/version.dart';
 
 import '../test/tests_app_wrapper.mocks.dart';
 

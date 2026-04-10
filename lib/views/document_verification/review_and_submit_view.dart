@@ -5,7 +5,7 @@ import '../../models/liveness_challenge.dart';
 import '../../providers/verification_state_provider.dart';
 import '../../widgets/common/back_button.dart';
 // import '../../utils/lock_auth.dart';
-// import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+// import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 class ReviewAndSubmitView extends ConsumerStatefulWidget {
   final LivenessChallenge? livenessChallenge;

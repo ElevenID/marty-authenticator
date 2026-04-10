@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/widgets/dialogs/add_to_wallet_dialog.dart';
+import 'package:marty_authenticator/widgets/dialogs/add_to_wallet_dialog.dart';
 
 class WalletHeader extends StatelessWidget implements PreferredSizeWidget {
   const WalletHeader({super.key});

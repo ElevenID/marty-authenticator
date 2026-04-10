@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 
-import 'package:privacyidea_authenticator/mains/main_netknights.dart'
+import 'package:marty_authenticator/mains/main_netknights.dart'
     show PrivacyIDEAAuthenticator;
-import 'package:privacyidea_authenticator/widgets/app_wrapper.dart';
-import 'package:privacyidea_authenticator/utils/customization/application_customization.dart';
-import 'package:privacyidea_authenticator/utils/logger.dart';
-import 'package:privacyidea_authenticator/utils/globals.dart';
-import 'package:privacyidea_authenticator/widgets/qr_scanner_enhanced.dart';
-import 'package:privacyidea_authenticator/views/main_view/document_view.dart';
+import 'package:marty_authenticator/widgets/app_wrapper.dart';
+import 'package:marty_authenticator/utils/customization/application_customization.dart';
+import 'package:marty_authenticator/utils/logger.dart';
+import 'package:marty_authenticator/utils/globals.dart';
+import 'package:marty_authenticator/widgets/qr_scanner_enhanced.dart';
+import 'package:marty_authenticator/views/main_view/document_view.dart';
 
 // Mock Service removed for production test
 

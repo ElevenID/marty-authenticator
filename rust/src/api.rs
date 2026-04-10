@@ -894,8 +894,10 @@ pub async fn wallet_build_and_submit_zk_presentation(
 #[frb]
 pub fn zk_prove_from_presentation_definition(
     presentation_definition_json: String,
-    mso_bytes: Vec<u8>,
-    signature: Vec<u8>,
+    mdoc_bytes: Vec<u8>,
+    issuer_pkx: String,
+    issuer_pky: String,
+    doc_type: String,
     secrets_json: String,
     session_nonce: Vec<u8>,
 ) -> anyhow::Result<Vec<u8>> {
@@ -914,8 +916,19 @@ pub fn zk_prove_from_presentation_definition(
         let claim_name = predicate.required_claim();
         let claim_value = secrets.get(claim_name)
             .ok_or_else(|| anyhow::anyhow!("Missing '{}' in secrets for predicate '{}'", claim_name, descriptor.id))?;
-        let transcript = marty_zkp::ZkTranscript::new(&session_nonce);
-        return marty_zkp::Prover::prove(&predicate, &transcript, &mso_bytes, &signature, claim_value)
+        let attr = marty_zkp::AttributeRequest::new("org.iso.18013.5.1", claim_name, claim_value.as_bytes().to_vec());
+        let input = marty_zkp::MdocProveInput {
+            mdoc: mdoc_bytes.clone(),
+            issuer_pkx: issuer_pkx.clone(),
+            issuer_pky: issuer_pky.clone(),
+            transcript: session_nonce.clone(),
+            attributes: vec![attr],
+            now: chrono::Utc::now().to_rfc3339(),
+            doc_type: doc_type.clone(),
+        };
+        let circuit = marty_zkp::Circuit::generate(input.attributes.len())
+            .map_err(|e| anyhow::anyhow!("Circuit generation failed: {}", e))?;
+        return marty_zkp::Prover::prove(&circuit, &input)
             .map_err(|e| anyhow::anyhow!("ZK proof generation failed: {}", e));
     }
     Err(anyhow::anyhow!("No input descriptors found in Presentation Definition"))
@@ -926,13 +939,27 @@ pub fn zk_prove_from_presentation_definition(
 pub fn zk_prove(
     predicate_id: String,
     claim_value: String,
-    mso_bytes: Vec<u8>,
-    signature: Vec<u8>,
+    mdoc_bytes: Vec<u8>,
+    issuer_pkx: String,
+    issuer_pky: String,
+    doc_type: String,
     session_nonce: Vec<u8>,
 ) -> anyhow::Result<Vec<u8>> {
     let predicate = marty_zkp::ZkPredicate::from_id(&predicate_id);
-    let transcript = marty_zkp::ZkTranscript::new(&session_nonce);
-    marty_zkp::Prover::prove(&predicate, &transcript, &mso_bytes, &signature, &claim_value)
+    let claim_name = predicate.required_claim();
+    let attr = marty_zkp::AttributeRequest::new("org.iso.18013.5.1", claim_name, claim_value.as_bytes().to_vec());
+    let input = marty_zkp::MdocProveInput {
+        mdoc: mdoc_bytes,
+        issuer_pkx,
+        issuer_pky,
+        transcript: session_nonce,
+        attributes: vec![attr],
+        now: chrono::Utc::now().to_rfc3339(),
+        doc_type,
+    };
+    let circuit = marty_zkp::Circuit::generate(input.attributes.len())
+        .map_err(|e| anyhow::anyhow!("Circuit generation failed: {}", e))?;
+    marty_zkp::Prover::prove(&circuit, &input)
         .map_err(|e| anyhow::anyhow!("ZK proof generation failed: {}", e))
 }
 

@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations_en.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
-import 'package:privacyidea_authenticator/model/tokens/day_password_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/hotp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/otp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
-import 'package:privacyidea_authenticator/processors/scheme_processors/token_import_scheme_processors/otp_auth_processor.dart';
-import 'package:privacyidea_authenticator/utils/customization/application_customization.dart';
+import 'package:marty_authenticator/l10n/app_localizations_en.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/model/tokens/day_password_token.dart';
+import 'package:marty_authenticator/model/tokens/hotp_token.dart';
+import 'package:marty_authenticator/model/tokens/otp_token.dart';
+import 'package:marty_authenticator/model/tokens/push_token.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/processors/scheme_processors/token_import_scheme_processors/otp_auth_processor.dart';
+import 'package:marty_authenticator/utils/customization/application_customization.dart';
 
 void main() {
   _testOtpAuthProcessor();

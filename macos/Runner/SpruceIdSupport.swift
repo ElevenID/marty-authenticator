@@ -77,35 +77,35 @@ class SpruceIdChannelHandler: NSObject {
   private var jwtHandler: JWTHandler?
   private var w3cHandler: W3CHandler?  // Only handler that uses DIDs
 
-  static func register(with registrar: FlutterPluginRegistrar) {
+  static func register(with binaryMessenger: FlutterBinaryMessenger) {
     let handler = SpruceIdChannelHandler()
 
     // W3C Verifiable Credentials channel (DID-based)
-    let w3cChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_w3c", binaryMessenger: registrar.messenger)
+    let w3cChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_w3c", binaryMessenger: binaryMessenger)
     w3cChannel.setMethodCallHandler { (call, result) in
       handler.w3cMethodHandler.handleMethodCall(call, result: result)
     }
 
     // mDoc/MDL channel (X.509-based)
-    let mdocChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_mdoc", binaryMessenger: registrar.messenger)
+    let mdocChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_mdoc", binaryMessenger: binaryMessenger)
     mdocChannel.setMethodCallHandler { (call, result) in
       handler.mdocMethodHandler.handleMethodCall(call, result: result)
     }
 
     // JWT/SD-JWT channel (URL issuer-based)
-    let jwtChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_jwt", binaryMessenger: registrar.messenger)
+    let jwtChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_jwt", binaryMessenger: binaryMessenger)
     jwtChannel.setMethodCallHandler { (call, result) in
       handler.jwtMethodHandler.handleMethodCall(call, result: result)
     }
 
     // PKI/X.509 channel (certificate-based)
-    let pkiChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_pki", binaryMessenger: registrar.messenger)
+    let pkiChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_pki", binaryMessenger: binaryMessenger)
     pkiChannel.setMethodCallHandler { (call, result) in
       handler.pkiMethodHandler.handleMethodCall(call, result: result)
     }
 
     // Wallet storage channel (agnostic)
-    let walletChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_wallet", binaryMessenger: registrar.messenger)
+    let walletChannel = FlutterMethodChannel(name: "com.netknights.authenticator/spruce_wallet", binaryMessenger: binaryMessenger)
     walletChannel.setMethodCallHandler { (call, result) in
       handler.walletMethodHandler.handleMethodCall(call, result: result)
     }

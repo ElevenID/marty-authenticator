@@ -4,7 +4,7 @@
 services:
   # Development convenience - code server for plugin development
   plugin-dev:
-    image: codercom/code-server:latest
+    image: codercom/code-server:4.96.4
     container_name: plugin-development
     ports:
       - "8443:8080"

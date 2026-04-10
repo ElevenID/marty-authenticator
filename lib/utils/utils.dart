@@ -25,14 +25,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gms_check/gms_check.dart';
 import 'package:http/http.dart';
 import 'package:image/image.dart' as img;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:zxing2/qrcode.dart';
 
-import '../../../../../../../mains/main_netknights.dart';
 import '../../../../../../../model/extensions/sortable_list.dart';
 import '../../../../../../../utils/logger.dart';
 import '../../../../../../../utils/riverpod/riverpod_providers/generated_providers/sortable_notifier.dart';
@@ -40,13 +38,11 @@ import '../../../../../../../views/main_view/main_view_widgets/loading_indicator
 import '../model/enums/token_origin_source_type.dart';
 import '../model/mixins/sortable_mixin.dart';
 import '../model/processor_result.dart';
-import '../model/token_folder.dart';
 import '../model/tokens/token.dart';
 import '../processors/scheme_processors/scheme_processor_interface.dart';
 import 'customization/application_customization.dart'
     show ApplicationCustomization;
 import 'object_validator.dart';
-import 'riverpod/riverpod_providers/generated_providers/token_folder_notifier.dart';
 import 'riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import 'riverpod/riverpod_providers/state_providers/dragging_sortable_provider.dart';
 import 'view_utils.dart';
@@ -143,7 +139,6 @@ bool doesThrow(Function() f) {
 }
 
 String getCurrentAppName() =>
-    PrivacyIDEAAuthenticator.currentCustomization?.appName ??
     ApplicationCustomization.defaultCustomization.appName;
 
 dynamic tryJsonDecode(String json) {
@@ -158,37 +153,19 @@ void dragSortableOnAccept({
   required SortableMixin? previousSortable,
   required SortableMixin dragedSortable,
   required SortableMixin? nextSortable,
-  TokenFolder? dependingFolder,
   required WidgetRef ref,
 }) async {
   var allSortables = await ref.read(sortablesProvider.future);
-  if (dragedSortable is TokenFolder) {
-    final tokensInFolder = (await ref.read(tokenProvider.future)).tokens
-        .where((element) => element.folderId == dragedSortable.folderId)
-        .toList();
-    final allMovingItems = [dragedSortable, ...tokensInFolder];
-    allSortables = allSortables.moveAllBetween(
-      moveAfter: previousSortable,
-      movedItems: allMovingItems,
-      moveBefore: nextSortable,
-    );
-  } else if (dragedSortable is Token) {
+  if (dragedSortable is Token) {
     allSortables = allSortables.moveBetween(
       moveAfter: previousSortable,
       movedItem: dragedSortable,
       moveBefore: nextSortable,
     );
-    allSortables = allSortables.map((e) {
-      return e is Token && e.id == dragedSortable.id
-          ? e.copyWith(folderId: () => dependingFolder?.folderId)
-          : e;
-    }).toList();
   }
   final modifiedTokens = allSortables.whereType<Token>().toList();
-  final modifiedFolders = allSortables.whereType<TokenFolder>().toList();
   final futures = [
     ref.read(tokenProvider.notifier).addOrReplaceTokens(modifiedTokens),
-    ref.read(tokenFolderProvider.notifier).addOrReplaceFolders(modifiedFolders),
   ];
   final draggingSortableProviderNotifier = ref.read(
     draggingSortableProvider.notifier,
@@ -324,7 +301,3 @@ Image generateQrCodeImage({required String data}) {
   }
   return Image.memory(img.encodePng(image));
 }
-
-bool get deviceHasFirebaseMessaging =>
-    !kIsWeb &&
-    (Platform.isAndroid ? GmsCheck().isGmsAvailable : Platform.isIOS);

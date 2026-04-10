@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/token_state.dart';
-import 'package:privacyidea_authenticator/model/tokens/token.dart';
+import 'package:marty_authenticator/model/riverpod_states/token_state.dart';
+import 'package:marty_authenticator/model/tokens/token.dart';
 import 'package:mockito/mockito.dart';
 
 // ignore: must_be_immutable

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/token_origin_source_type.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
-import 'package:privacyidea_authenticator/model/token_import/token_origin_data.dart';
-import 'package:privacyidea_authenticator/processors/scheme_processors/token_import_scheme_processors/google_authenticator_qr_processor.dart';
-import 'package:privacyidea_authenticator/utils/token_import_origins.dart';
+import 'package:marty_authenticator/model/enums/token_origin_source_type.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/model/token_import/token_origin_data.dart';
+import 'package:marty_authenticator/processors/scheme_processors/token_import_scheme_processors/google_authenticator_qr_processor.dart';
+import 'package:marty_authenticator/utils/token_import_origins.dart';
 
 void main() {
   _testGooleAuthenticatorQrProcessor();

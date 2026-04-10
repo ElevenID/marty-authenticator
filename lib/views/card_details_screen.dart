@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/widgets/card_details_header.dart';
+import 'package:marty_authenticator/widgets/card_details_header.dart';
 
 class CardDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> cardData;

@@ -17,8 +17,7 @@ class AppDelegate: FlutterAppDelegate {
     // Register SpruceID channel handler from SpruceIdSupport.swift
     if let window = NSApplication.shared.windows.first,
        let flutterViewController = window.contentViewController as? FlutterViewController {
-        let registrar = flutterViewController.registrar(forPlugin: "SpruceIdPlugin")
-        SpruceIdChannelHandler.register(with: registrar)
+        SpruceIdChannelHandler.register(with: flutterViewController.engine.binaryMessenger)
         print("SpruceID macOS: Channel handler registered")
     } else {
         print("SpruceID macOS: Warning - Could not get Flutter view controller")

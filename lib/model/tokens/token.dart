@@ -19,17 +19,11 @@
  */
 import 'package:flutter/material.dart';
 
-import '../../../../../../../model/token_container.dart';
 import '../../utils/object_validator.dart';
 import '../enums/token_types.dart';
 import '../extensions/enum_extension.dart';
 import '../mixins/sortable_mixin.dart';
-import '../token_import/token_origin_data.dart';
-import '../token_template.dart';
-import 'day_password_token.dart';
 import 'hotp_token.dart';
-import 'push_token.dart';
-import 'steam_token.dart';
 import 'totp_token.dart';
 
 @immutable
@@ -80,8 +74,6 @@ abstract class Token with SortableMixin {
   /// [String] (required for 2step)
   static const String TWO_STEP_ITERATIONS = '2step_difficulty';
 
-  bool? get isPrivacyIdeaToken => origin?.isPrivacyIdeaToken;
-  bool get isExportable => origin?.isExportable ?? false;
   final String tokenVersion =
       'v1.0.0'; // The version of this token, this is used for serialization.
   final List<String>
@@ -92,8 +84,7 @@ abstract class Token with SortableMixin {
   final String?
   containerSerial; // The serial of the container this token belongs to.
   final String id; // this is the identifier of the token
-  final String?
-  serial; // The serial of the token, this is used to identify the token in the privacyIDEA server.
+  final String? serial;
   final bool pin;
   final bool isLocked;
   final bool isHidden;
@@ -102,7 +93,6 @@ abstract class Token with SortableMixin {
   final bool isOffline;
   @override
   final int? sortIndex;
-  final TokenOriginData? origin;
 
   /// Must be string representation of TokenType enum.
   final String type; // Used to identify the token when deserializing.
@@ -120,13 +110,6 @@ abstract class Token with SortableMixin {
       return HOTPToken.fromJson(json);
     if (TokenTypes.TOTP.isName(type, caseSensitive: false))
       return TOTPToken.fromJson(json);
-    if (TokenTypes.PIPUSH.isName(type, caseSensitive: false) ||
-        TokenTypes.PUSH.isName(type, caseSensitive: false))
-      return PushToken.fromJson(json);
-    if (TokenTypes.DAYPASSWORD.isName(type, caseSensitive: false))
-      return DayPasswordToken.fromJson(json);
-    if (TokenTypes.STEAM.isName(type, caseSensitive: false))
-      return SteamToken.fromJson(json);
     throw ArgumentError.value(
       json,
       'Token#fromJson',
@@ -156,24 +139,6 @@ abstract class Token with SortableMixin {
         otpAuthMap,
         additionalData: additionalData,
       );
-    if (TokenTypes.PIPUSH.isName(type, caseSensitive: false) ||
-        TokenTypes.PUSH.isName(type, caseSensitive: false)) {
-      return PushToken.fromOtpAuthMap(
-        otpAuthMap,
-        additionalData: additionalData,
-      );
-    }
-    if (TokenTypes.DAYPASSWORD.isName(type, caseSensitive: false)) {
-      return DayPasswordToken.fromOtpAuthMap(
-        otpAuthMap,
-        additionalData: additionalData,
-      );
-    }
-    if (TokenTypes.STEAM.isName(type, caseSensitive: false))
-      return SteamToken.fromOtpAuthMap(
-        otpAuthMap,
-        additionalData: additionalData,
-      );
     throw ArgumentError.value(
       otpAuthMap,
       'Token#fromUriMap',
@@ -188,7 +153,6 @@ abstract class Token with SortableMixin {
     validators: {
       Token.CONTAINER_SERIAL: const ObjectValidatorNullable<String>(),
       Token.ID: const ObjectValidatorNullable<String>(),
-      Token.ORIGIN: const ObjectValidatorNullable<TokenOriginData>(),
       Token.HIDDEN: const ObjectValidatorNullable<bool>(),
       Token.CHECKED_CONTAINERS: const ObjectValidatorNullable<List<String>>(),
       Token.FOLDER_ID: const ObjectValidatorNullable<int>(),
@@ -208,7 +172,6 @@ abstract class Token with SortableMixin {
     this.tokenImage,
     this.sortIndex,
     this.folderId,
-    this.origin,
     this.isOffline = false,
     bool? pin,
     bool? isLocked,
@@ -253,7 +216,6 @@ abstract class Token with SortableMixin {
     String? tokenImage,
     int? sortIndex,
     int? Function()? folderId,
-    TokenOriginData? origin,
     bool? isOffline,
   });
 
@@ -277,7 +239,6 @@ abstract class Token with SortableMixin {
         'type: $type, '
         'sortIndex: $sortIndex, '
         'folderId: $folderId, '
-        'origin: $origin, '
         'containerSerial: $containerSerial, '
         'isOffline: $isOffline';
   }
@@ -285,18 +246,6 @@ abstract class Token with SortableMixin {
   /// This is used to create a map that can be used to serialize the token.
   Map<String, dynamic> toJson();
 
-  /// This is used to create a map that typically was created from a uri.
-  /// ```dart
-  ///  ------------------------- [Token] -------------------------
-  /// | SERIAL: serial, (optional)                                |
-  /// | TYPE: type,                                               |
-  /// | LABEL: label,                                             |
-  /// | ISSUER: issuer,                                           |
-  /// | PIN: pin,                                                 |
-  /// | IMAGE: tokenImage, (optional)                             |
-  ///  -----------------------------------------------------------
-  ///
-  /// ```
   Map<String, dynamic> toOtpAuthMap() {
     return {
       if (serial != null) SERIAL: serial!,
@@ -309,24 +258,12 @@ abstract class Token with SortableMixin {
     };
   }
 
-  Token copyUpdateByTemplate(TokenTemplate template);
-
   Map<String, dynamic> get additionalData => {
     ID: id,
-    ORIGIN: origin,
     SORT_INDEX: sortIndex,
     FOLDER_ID: folderId,
     HIDDEN: isHidden,
     CHECKED_CONTAINERS: checkedContainer,
     CONTAINER_SERIAL: containerSerial,
   };
-
-  TokenTemplate? toTemplate({TokenContainer? container}) => serial != null
-      ? TokenTemplate.withSerial(
-          otpAuthMap: toOtpAuthMap(),
-          additionalData: additionalData,
-          serial: serial!,
-          container: container,
-        )
-      : null;
 }

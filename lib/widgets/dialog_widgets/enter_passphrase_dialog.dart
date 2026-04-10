@@ -20,9 +20,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
-import 'package:privacyidea_authenticator/utils/view_utils.dart';
-import 'package:privacyidea_authenticator/widgets/dialog_widgets/default_dialog.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/utils/view_utils.dart';
+import 'package:marty_authenticator/widgets/dialog_widgets/default_dialog.dart';
 
 class EnterPassphraseDialog extends StatefulWidget {
   final String question;

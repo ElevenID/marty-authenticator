@@ -24,7 +24,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 /// A QR scanner widget that is compatible with macOS and other desktop platforms.
 /// On web, shows only an image uploader. On other platforms, uses camera with gallery functionality.

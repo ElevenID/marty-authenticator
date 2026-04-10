@@ -19,11 +19,11 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/enums/ec_key_algorithm.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
-import 'package:privacyidea_authenticator/model/token_container.dart';
-import 'package:privacyidea_authenticator/processors/scheme_processors/token_container_processor.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/enums/ec_key_algorithm.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/model/token_container.dart';
+import 'package:marty_authenticator/processors/scheme_processors/token_container_processor.dart';
 
 void main() {
   _testTokenContainerProcessor();

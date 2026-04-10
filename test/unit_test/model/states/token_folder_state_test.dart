@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/token_folder_state.dart';
-import 'package:privacyidea_authenticator/model/token_folder.dart';
+import 'package:marty_authenticator/model/riverpod_states/token_folder_state.dart';
+import 'package:marty_authenticator/model/token_folder.dart';
 
 void main() {
   _testTokenFolderState();

@@ -3,22 +3,12 @@ import 'dart:ui';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/utils/riverpod/state_listeners/push_token_state_listener.dart';
 
-import '../utils/home_widget_utils.dart';
 import '../utils/logger.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/deeplink_notifier.dart';
-import '../utils/riverpod/riverpod_providers/generated_providers/push_request_provider.dart';
-import '../utils/riverpod/riverpod_providers/generated_providers/token_folder_notifier.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
-import '../utils/riverpod/state_listeners/home_widget_deep_link_listener.dart';
-import '../utils/riverpod/state_listeners/home_widget_token_state_listener.dart';
-import '../utils/riverpod/state_listeners/marty_push_deep_link_listener.dart';
 import '../utils/riverpod/state_listeners/navigation_deep_link_listener.dart';
-import '../utils/riverpod/state_listeners/token_container_deep_link_listener.dart';
-import '../utils/riverpod/state_listeners/token_deep_link_listener.dart';
 import 'app_wrappers/single_touch_recognizer.dart';
 import 'app_wrappers/state_observer.dart';
 
@@ -51,36 +41,14 @@ class _AppWrapperState extends ConsumerState<_AppWrapper> {
     super.initState();
     _listener = AppLifecycleListener(
       onResume: () async {
-        final state = await ref
-            .read(tokenProvider.notifier)
-            .loadStateFromRepo();
+        await ref.read(tokenProvider.notifier).loadStateFromRepo();
         Logger.info('Refreshed tokens on resume');
-        final hasPushToken = state?.hasPushTokens == true;
-        if (hasPushToken) {
-          final prProvider = ref.read(pushRequestProvider.notifier);
-          await prProvider.loadStateFromRepo();
-          await prProvider.pollForChallenges(isManually: false);
-          Logger.info('Polled for challenges on resume');
-        }
-        final hidden = await HomeWidgetUtils().hideAllOtps();
-        if (hidden) Logger.info('Hid all HomeWidget OTPs on resume');
       },
       onHide: () async {
         if (await ref.read(tokenProvider.notifier).onMinimizeApp() == false) {
           Logger.error('Failed to save tokens on Hide');
         }
-        if ((await ref
-                .read(tokenFolderProvider.notifier)
-                .collapseLockedFolders())
-            .folders
-            .any((folder) => folder.isLocked && folder.isExpanded)) {
-          Logger.error('Failed to collapse locked folders on Hide');
-        }
-        // Skip notification cancellation on web platform where the plugin isn't supported
-        if (!kIsWeb) {
-          await FlutterLocalNotificationsPlugin().cancelAll();
-        }
-        Logger.info('Collapsed locked folders on Hide');
+        Logger.info('Saved tokens on Hide');
       },
       onExitRequested: () async {
         Logger.info('Exit requested');

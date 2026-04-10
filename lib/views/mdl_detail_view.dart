@@ -607,8 +607,10 @@ class _MdlDetailViewState extends ConsumerState<MdlDetailView>
             },
           ],
         },
-        msoBytes: Uint8List(0),
-        signature: Uint8List(0),
+        mdocBytes: Uint8List(0),
+        issuerPkx: '',
+        issuerPky: '',
+        docType: 'org.iso.18013.5.1.mDL',
         secrets: {"birth_date": "1990-01-01"},
         sessionNonce: Uint8List(0),
       );

@@ -22,7 +22,7 @@ import 'dart:js_util' as js_util;
 import 'dart:convert';
 import 'dart:async';
 
-import 'package:privacyidea_authenticator/utils/logger.dart';
+import 'package:marty_authenticator/utils/logger.dart';
 
 /// Result of a WASM key generation operation
 class WasmKeyResult {

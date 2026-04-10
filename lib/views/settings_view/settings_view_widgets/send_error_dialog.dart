@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/dialog_widgets/default_dialog.dart';
 import '../settings_view.dart';

@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../../model/enums/introduction.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/app_constraints_notifier.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/introduction_provider.dart';
@@ -29,8 +29,6 @@ import '../../add_token_manually_view/add_token_manually_view.dart';
 import '../../settings_view/settings_view.dart';
 import 'app_bar_item.dart';
 import 'custom_paint_navigation_bar.dart';
-import 'folder_widgets/add_token_folder_dialog.dart';
-import 'main_view_navigation_buttons/license_push_view_button.dart';
 import 'main_view_navigation_buttons/qr_scanner_button.dart';
 
 class MainViewNavigationBar extends ConsumerWidget {
@@ -91,7 +89,20 @@ class MainViewNavigationBar extends ConsumerWidget {
                               top: navHeight * 0.2,
                               bottom: navHeight * 0.1,
                             ),
-                            child: const LicensePushViewButton(),
+                            child: AppBarItem(
+                              a11y: AppLocalizations.of(
+                                context,
+                              )!.a11ySettingsButton,
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  SettingsView.routeName,
+                                );
+                              },
+                              icon: const FittedBox(
+                                child: Icon(Icons.settings),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -164,79 +175,6 @@ class MainViewNavigationBar extends ConsumerWidget {
                                       ?.resolve({})
                                       ?.color,
                                 ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: navHeight * 0.1,
-                              bottom: navHeight * 0.2,
-                            ),
-                            child: FocusedItemAsOverlay(
-                              isFocused:
-                                  introProv.whenOrNull(
-                                    data: (data) => data.isConditionFulfilled(
-                                      ref,
-                                      Introduction.addFolder,
-                                    ),
-                                  ) ??
-                                  false,
-                              tooltipWhenFocused: AppLocalizations.of(
-                                context,
-                              )!.introAddFolder,
-                              onComplete: () => ref
-                                  .read(introductionNotifierProvider.notifier)
-                                  .complete(Introduction.addFolder),
-                              child: AppBarItem(
-                                a11y: AppLocalizations.of(
-                                  context,
-                                )!.a11yAddFolderButton,
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        AddTokenFolderDialog(),
-                                    useRootNavigator: false,
-                                  );
-                                },
-                                icon: FittedBox(
-                                  child: Icon(
-                                    Icons.create_new_folder,
-                                    color: Theme.of(context)
-                                        .navigationBarTheme
-                                        .iconTheme
-                                        ?.resolve({})
-                                        ?.color,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: navHeight * 0.2,
-                              bottom: navHeight * 0.1,
-                            ),
-                            child: AppBarItem(
-                              a11y: AppLocalizations.of(
-                                context,
-                              )!.a11ySettingsButton,
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  SettingsView.routeName,
-                                );
-                              },
-                              icon: const FittedBox(
-                                child: Icon(Icons.settings),
                               ),
                             ),
                           ),

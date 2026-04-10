@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/extensions/enum_extension.dart';
+import 'package:marty_authenticator/model/extensions/enum_extension.dart';
 
 void main() {
   _testEnumExtension();

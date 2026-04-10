@@ -33,24 +33,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
-import 'package:privacyidea_authenticator/services/sprucekit_service_extended.dart';
-import 'package:privacyidea_authenticator/services/wallet_manager_extended.dart';
-import 'package:privacyidea_authenticator/services/presentation_builder_service.dart';
-import 'package:privacyidea_authenticator/services/credential_verification_service.dart';
-import 'package:privacyidea_authenticator/services/privacy_analysis_service.dart';
-import 'package:privacyidea_authenticator/services/did_management_service_extended.dart';
-import 'package:privacyidea_authenticator/services/qr_scanner_service_enhanced.dart';
-import 'package:privacyidea_authenticator/services/background_sync_service.dart';
+import 'package:marty_authenticator/services/presentation_builder_service.dart';
+import 'package:marty_authenticator/services/credential_verification_service.dart';
+import 'package:marty_authenticator/services/privacy_analysis_service.dart';
+import 'package:marty_authenticator/services/qr_scanner_service_enhanced.dart';
+import 'package:marty_authenticator/services/background_sync_service.dart';
 
 import 'sprucekit_integration_test.mocks.dart';
 
 @GenerateMocks([
-  SpruceKitServiceExtended,
-  WalletManagerExtended,
   PresentationBuilderService,
   CredentialVerificationService,
   PrivacyAnalysisService,
-  DIDManagementServiceExtended,
   QRScannerServiceEnhanced,
   BackgroundSyncService,
 ])

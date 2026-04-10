@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
-import 'package:privacyidea_authenticator/repo/secure_storage.dart';
-import 'package:privacyidea_authenticator/repo/secure_token_repository.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/repo/secure_storage.dart';
+import 'package:marty_authenticator/repo/secure_token_repository.dart';
 
 import '../../tests_app_wrapper.mocks.dart';
 

@@ -25,8 +25,6 @@ import '../../utils/object_validator.dart';
 import '../enums/algorithms.dart';
 import '../enums/token_types.dart';
 import '../extensions/enums/algorithms_extension.dart';
-import '../token_import/token_origin_data.dart';
-import '../token_template.dart';
 import 'otp_token.dart';
 import 'token.dart';
 
@@ -60,7 +58,6 @@ class HOTPToken extends OTPToken {
     super.isHidden,
     super.sortIndex,
     super.folderId,
-    super.origin,
     super.label = '',
     super.issuer = '',
     super.isOffline,
@@ -116,7 +113,6 @@ class HOTPToken extends OTPToken {
     bool? isHidden,
     int? sortIndex,
     int? Function()? folderId,
-    TokenOriginData? origin,
     bool? isOffline,
   }) => HOTPToken(
     serial: serial ?? this.serial,
@@ -137,44 +133,12 @@ class HOTPToken extends OTPToken {
     isHidden: isHidden ?? this.isHidden,
     sortIndex: sortIndex ?? this.sortIndex,
     folderId: folderId != null ? folderId() : this.folderId,
-    origin: origin ?? this.origin,
     isOffline: isOffline ?? this.isOffline,
   );
 
   @override
   String toString() {
     return 'H${super.toString()}counter: $counter}';
-  }
-
-  @override
-  HOTPToken copyUpdateByTemplate(TokenTemplate template) {
-    final uriMap = validateMap(
-      map: template.otpAuthMap,
-      validators: {
-        Token.LABEL: const ObjectValidatorNullable<String>(),
-        Token.ISSUER: const ObjectValidatorNullable<String>(),
-        Token.SERIAL: const ObjectValidatorNullable<String>(),
-        Token.IMAGE: const ObjectValidatorNullable<String>(),
-        Token.PIN: boolValidatorNullable,
-        OTPToken.ALGORITHM: stringToAlgorithmsValidatorNullable,
-        OTPToken.DIGITS: intValidatorNullable,
-        OTPToken.SECRET_BASE32: base32SecretValidatorNullable,
-        COUNTER: otpAuthCounterValidator,
-      },
-      name: 'HOTPToken',
-    );
-    return copyWith(
-      label: uriMap[Token.LABEL] as String?,
-      issuer: uriMap[Token.ISSUER] as String?,
-      serial: uriMap[Token.SERIAL] as String?,
-      tokenImage: uriMap[Token.IMAGE] as String?,
-      pin: uriMap[Token.PIN] as bool?,
-      isLocked: uriMap[Token.PIN] as bool?,
-      algorithm: uriMap[OTPToken.ALGORITHM] as Algorithms?,
-      digits: uriMap[OTPToken.DIGITS] as int?,
-      secret: uriMap[OTPToken.SECRET_BASE32] as String?,
-      counter: uriMap[COUNTER] as int?,
-    );
   }
 
   factory HOTPToken.fromOtpAuthMap(
@@ -211,7 +175,6 @@ class HOTPToken extends OTPToken {
       isLocked: validatedMap[Token.PIN] as bool?,
       containerSerial: validatedAdditionalData[Token.CONTAINER_SERIAL],
       id: validatedAdditionalData[Token.ID] ?? const Uuid().v4(),
-      origin: validatedAdditionalData[Token.ORIGIN],
       isHidden: validatedAdditionalData[Token.HIDDEN],
       checkedContainer: validatedAdditionalData[Token.CHECKED_CONTAINERS] ?? [],
       folderId: validatedAdditionalData[Token.FOLDER_ID],

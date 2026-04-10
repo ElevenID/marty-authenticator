@@ -25,7 +25,6 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../model/deeplink.dart';
-import '../../../home_widget_utils.dart';
 import '../../../logger.dart';
 import '../../state_notifiers/deeplink_notifier.dart';
 
@@ -36,11 +35,6 @@ final sources = [
     name: 'uni_links',
     stream: AppLinks().uriLinkStream,
     initialUri: AppLinks().getInitialLink(),
-  ),
-  DeeplinkSource(
-    name: 'home_widget',
-    stream: HomeWidgetUtils().widgetClicked,
-    initialUri: HomeWidgetUtils().initiallyLaunchedFromHomeWidget(),
   ),
 ];
 

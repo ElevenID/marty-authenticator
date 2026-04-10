@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/model/extensions/color_extension.dart';
-import 'package:privacyidea_authenticator/utils/animations/unscaled_animation_controller.dart';
+import 'package:marty_authenticator/model/extensions/color_extension.dart';
+import 'package:marty_authenticator/utils/animations/unscaled_animation_controller.dart';
 
 class TotpAnimation {
   final BuildContext context;

@@ -20,8 +20,7 @@
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
-import '../../../utils/home_widget_utils.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../settings_view_widgets/settings_group.dart';
 
 class SettingsGroupTheme extends StatelessWidget {
@@ -38,23 +37,19 @@ class SettingsGroupTheme extends StatelessWidget {
             EasyDynamicTheme.of(
               context,
             ).changeTheme(dynamic: false, dark: true);
-            HomeWidgetUtils().setCurrentThemeMode(ThemeMode.dark);
             break;
           case ThemeMode.dark:
             EasyDynamicTheme.of(context).changeTheme(dynamic: true);
-            HomeWidgetUtils().setCurrentThemeMode(ThemeMode.system);
             break;
           case ThemeMode.system:
             EasyDynamicTheme.of(
               context,
             ).changeTheme(dynamic: false, dark: false);
-            HomeWidgetUtils().setCurrentThemeMode(ThemeMode.light);
             break;
           case null:
             EasyDynamicTheme.of(
               context,
             ).changeTheme(dynamic: false, dark: false);
-            HomeWidgetUtils().setCurrentThemeMode(ThemeMode.light);
             break;
         }
       },

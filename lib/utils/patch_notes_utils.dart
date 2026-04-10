@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../model/enums/patch_note_type.dart';
 import '../model/version.dart';
 import '../widgets/dialog_widgets/patch_notes_dialog.dart';

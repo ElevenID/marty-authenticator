@@ -239,14 +239,18 @@ Future<FrbPresentationResponse> walletBuildAndSubmitZkPresentation({
 /// Prove all ZK predicates in a `PresentationDefinition`.
 Future<Uint8List> zkProveFromPresentationDefinition({
   required String presentationDefinitionJson,
-  required List<int> msoBytes,
-  required List<int> signature,
+  required List<int> mdocBytes,
+  required String issuerPkx,
+  required String issuerPky,
+  required String docType,
   required String secretsJson,
   required List<int> sessionNonce,
 }) => RustLib.instance.api.crateApiZkProveFromPresentationDefinition(
   presentationDefinitionJson: presentationDefinitionJson,
-  msoBytes: msoBytes,
-  signature: signature,
+  mdocBytes: mdocBytes,
+  issuerPkx: issuerPkx,
+  issuerPky: issuerPky,
+  docType: docType,
   secretsJson: secretsJson,
   sessionNonce: sessionNonce,
 );
@@ -255,14 +259,18 @@ Future<Uint8List> zkProveFromPresentationDefinition({
 Future<Uint8List> zkProve({
   required String predicateId,
   required String claimValue,
-  required List<int> msoBytes,
-  required List<int> signature,
+  required List<int> mdocBytes,
+  required String issuerPkx,
+  required String issuerPky,
+  required String docType,
   required List<int> sessionNonce,
 }) => RustLib.instance.api.crateApiZkProve(
   predicateId: predicateId,
   claimValue: claimValue,
-  msoBytes: msoBytes,
-  signature: signature,
+  mdocBytes: mdocBytes,
+  issuerPkx: issuerPkx,
+  issuerPky: issuerPky,
+  docType: docType,
   sessionNonce: sessionNonce,
 );
 

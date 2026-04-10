@@ -35,3 +35,4 @@ library marty_bridge;
 export 'marty_bridge.dart/frb_generated.dart' show RustLib;
 export 'marty_bridge.dart/api.dart';
 export 'marty_bridge.dart/credential.dart';
+export 'biometrics_bridge.dart';

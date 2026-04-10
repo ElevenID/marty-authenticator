@@ -4,7 +4,7 @@ This project includes multiple demo main entry points for testing different mDoc
 
 ## Available Demo Modes
 
-### 1. MDL Only (`main_demo_mdl.dart`)
+### 1. MDL Only (`example/lib/main_demo_mdl.dart`)
 
 **Purpose**: Test with a single Mobile Driver License credential
 
@@ -15,14 +15,14 @@ This project includes multiple demo main entry points for testing different mDoc
 **Run Command**:
 
 ```bash
-flutter run -t lib/main_demo_mdl.dart -d chrome
+flutter run -t example/lib/main_demo_mdl.dart -d chrome
 ```
 
 **Use Case**: Minimal credential testing, verifying single credential display and interactions.
 
 ---
 
-### 2. MDL + Passport (`main_demo_mdl_passport.dart`)
+### 2. MDL + Passport (`example/lib/main_demo_mdl_passport.dart`)
 
 **Purpose**: Test with two common travel document types
 
@@ -34,14 +34,14 @@ flutter run -t lib/main_demo_mdl.dart -d chrome
 **Run Command**:
 
 ```bash
-flutter run -t lib/main_demo_mdl_passport.dart -d chrome
+flutter run -t example/lib/main_demo_mdl_passport.dart -d chrome
 ```
 
 **Use Case**: Testing credential selection, multiple credential display, and switching between credentials.
 
 ---
 
-### 3. All mDoc Types (`main_demo_all_mdocs.dart`)
+### 3. All mDoc Types (`example/lib/main_demo_all_mdocs.dart`)
 
 **Purpose**: Test with all available mDoc credential types
 
@@ -54,14 +54,14 @@ flutter run -t lib/main_demo_mdl_passport.dart -d chrome
 **Run Command**:
 
 ```bash
-flutter run -t lib/main_demo_all_mdocs.dart -d chrome
+flutter run -t example/lib/main_demo_all_mdocs.dart -d chrome
 ```
 
 **Use Case**: Comprehensive testing of all credential types, UI layouts with multiple credentials, and credential type-specific features.
 
 ---
 
-### 4. mDocs Multiple States (`main_demo_mdocs_states.dart`)
+### 4. mDocs Multiple States (`example/lib/main_demo_mdocs_states.dart`)
 
 **Purpose**: Test credential state handling (valid, expiring, expired)
 
@@ -76,7 +76,7 @@ flutter run -t lib/main_demo_all_mdocs.dart -d chrome
 **Run Command**:
 
 ```bash
-flutter run -t lib/main_demo_mdocs_states.dart -d chrome
+flutter run -t example/lib/main_demo_mdocs_states.dart -d chrome
 ```
 
 **Use Case**: Testing UI warnings for expiring credentials, expired credential handling, and state-based visual indicators.
@@ -91,16 +91,16 @@ Run any demo mode using the Flutter CLI:
 
 ```bash
 # MDL Only
-flutter run -t lib/main_demo_mdl.dart -d chrome
+flutter run -t example/lib/main_demo_mdl.dart -d chrome
 
 # MDL + Passport
-flutter run -t lib/main_demo_mdl_passport.dart -d chrome
+flutter run -t example/lib/main_demo_mdl_passport.dart -d chrome
 
 # All mDoc Types
-flutter run -t lib/main_demo_all_mdocs.dart -d chrome
+flutter run -t example/lib/main_demo_all_mdocs.dart -d chrome
 
 # Multiple States
-flutter run -t lib/main_demo_mdocs_states.dart -d chrome
+flutter run -t example/lib/main_demo_mdocs_states.dart -d chrome
 ```
 
 ### VS Code Launch Configurations
@@ -159,13 +159,13 @@ credentialsLoader: (mockServices) async {
 
 To add a new demo mode:
 
-1. **Create a new main file** in `lib/` (e.g., `main_demo_custom.dart`)
+1. **Create a new main file** in `example/lib/` (e.g., `main_demo_custom.dart`)
 
 2. **Use the demo base pattern**:
 
 ```dart
-import 'mains/demo_base.dart';
-import 'fixtures/spruce_credentials_fixtures.dart';
+import 'package:privacyidea_authenticator/fixtures/spruce_credentials_fixtures.dart';
+import 'package:privacyidea_authenticator/mains/demo_base.dart';
 
 void main() async {
   await runDemoApp(
@@ -187,7 +187,7 @@ void main() async {
   "name": "Demo: Your Demo Name",
   "request": "launch",
   "type": "dart",
-  "program": "lib/main_demo_custom.dart"
+  "program": "example/lib/main_demo_custom.dart"
 }
 ```
 
@@ -233,6 +233,7 @@ Verify that:
 
 ## Related Files
 
+- **Demo Entry Points**: `example/lib/main_demo_*.dart`
 - **Demo Base**: `lib/mains/demo_base.dart`
 - **Credential Fixtures**: `lib/fixtures/spruce_credentials_fixtures.dart`
 - **Mock Services**: `lib/mocks/mock_spruce_services.dart`

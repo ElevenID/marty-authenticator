@@ -26,8 +26,6 @@ import '../../utils/object_validator.dart';
 import '../enums/algorithms.dart';
 import '../enums/token_types.dart';
 import '../extensions/enums/algorithms_extension.dart';
-import '../token_import/token_origin_data.dart';
-import '../token_template.dart';
 import 'otp_token.dart';
 import 'token.dart';
 
@@ -83,7 +81,6 @@ class TOTPToken extends OTPToken {
     super.isHidden,
     super.sortIndex,
     super.folderId,
-    super.origin,
     super.label = '',
     super.issuer = '',
     super.isOffline,
@@ -122,7 +119,6 @@ class TOTPToken extends OTPToken {
     bool? isHidden,
     int? sortIndex,
     int? Function()? folderId,
-    TokenOriginData? origin,
     bool? isOffline,
   }) {
     return TOTPToken(
@@ -144,39 +140,7 @@ class TOTPToken extends OTPToken {
       isHidden: isHidden ?? this.isHidden,
       sortIndex: sortIndex ?? this.sortIndex,
       folderId: folderId != null ? folderId() : this.folderId,
-      origin: origin ?? this.origin,
       isOffline: isOffline ?? this.isOffline,
-    );
-  }
-
-  @override
-  TOTPToken copyUpdateByTemplate(TokenTemplate template) {
-    final uriMap = validateMap(
-      map: template.otpAuthMap,
-      validators: {
-        Token.LABEL: const ObjectValidatorNullable<String>(),
-        Token.ISSUER: const ObjectValidatorNullable<String>(),
-        Token.SERIAL: const ObjectValidatorNullable<String>(),
-        Token.IMAGE: const ObjectValidatorNullable<String>(),
-        Token.PIN: boolValidatorNullable,
-        OTPToken.ALGORITHM: stringToAlgorithmsValidatorNullable,
-        OTPToken.DIGITS: intValidatorNullable,
-        OTPToken.SECRET_BASE32: base32SecretValidatorNullable,
-        PERIOD_SECONDS: intValidatorNullable,
-      },
-      name: 'TOTPToken',
-    );
-    return copyWith(
-      label: uriMap[Token.LABEL] as String?,
-      issuer: uriMap[Token.ISSUER] as String?,
-      serial: uriMap[Token.SERIAL] as String?,
-      tokenImage: uriMap[Token.IMAGE] as String?,
-      pin: uriMap[Token.PIN] as bool?,
-      isLocked: uriMap[Token.PIN] as bool?,
-      algorithm: uriMap[OTPToken.ALGORITHM] as Algorithms?,
-      digits: uriMap[OTPToken.DIGITS] as int?,
-      secret: uriMap[OTPToken.SECRET_BASE32] as String?,
-      period: uriMap[PERIOD_SECONDS] as int?,
     );
   }
 
@@ -222,7 +186,6 @@ class TOTPToken extends OTPToken {
       checkedContainer: validatedAdditionalData[Token.CHECKED_CONTAINERS] ?? [],
       sortIndex: validatedAdditionalData[Token.SORT_INDEX],
       folderId: validatedAdditionalData[Token.FOLDER_ID],
-      origin: validatedAdditionalData[Token.ORIGIN],
       isHidden: validatedAdditionalData[Token.HIDDEN],
       isOffline: validatedMap[Token.OFFLINE] as bool? ?? false,
       algorithm: validatedMap[OTPToken.ALGORITHM] as Algorithms,

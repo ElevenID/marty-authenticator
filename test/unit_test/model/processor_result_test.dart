@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations_en.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/l10n/app_localizations_en.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
 
 void main() {
   _testProcessorResult();

@@ -21,9 +21,9 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/encodings.dart';
-import 'package:privacyidea_authenticator/model/extensions/enums/encodings_extension.dart';
-import 'package:privacyidea_authenticator/utils/crypto_utils.dart';
+import 'package:marty_authenticator/model/enums/encodings.dart';
+import 'package:marty_authenticator/model/extensions/enums/encodings_extension.dart';
+import 'package:marty_authenticator/utils/crypto_utils.dart';
 
 void main() {
   _testGeneratePhoneChecksum();

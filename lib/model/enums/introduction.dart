@@ -27,7 +27,5 @@ enum Introduction {
   lockToken, // 1st token && editToken
   dragToken, // 2nd token && tokenSwipe
   addFolder, // 3 tokens && 0 groups
-  pollForChallenges, // 1st push token && lockToken
-  hidePushTokens, // hiding is enabled
   exportTokens, // has to be accepted to export tokens
 }

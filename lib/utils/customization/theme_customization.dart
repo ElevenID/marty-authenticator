@@ -25,7 +25,6 @@ import '../../../../../../../model/extensions/color_extension.dart';
 import 'theme_extentions/action_theme.dart';
 import 'theme_extentions/elevated_delete_button_theme.dart';
 import 'theme_extentions/extended_text_theme.dart';
-import 'theme_extentions/push_request_theme.dart';
 import 'theme_extentions/status_colors.dart';
 
 class ThemeCustomization {
@@ -858,10 +857,6 @@ class ThemeCustomization {
       ExtendedTextTheme(
         tokenTile: TextStyle(color: primaryColor),
         tokenTileSubtitle: TextStyle(color: tileSubtitleColor),
-      ),
-      PushRequestTheme(
-        acceptColor: pushAuthRequestAcceptColor,
-        declineColor: pushAuthRequestDeclineColor,
       ),
       StatusColors(
         error: deleteColor,

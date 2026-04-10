@@ -23,10 +23,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:privacyidea_authenticator/widgets/elevated_delete_button.dart';
+import 'package:marty_authenticator/widgets/elevated_delete_button.dart';
 
 import '../interfaces/repo/token_repository.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../model/tokens/token.dart';
 import '../utils/globals.dart';
 import '../utils/identifiers.dart';

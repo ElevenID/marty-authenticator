@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/utils/customization/theme_customization.dart';
+import 'package:marty_authenticator/utils/customization/theme_customization.dart';
 
 void main() {
   _testThemeCustomization();

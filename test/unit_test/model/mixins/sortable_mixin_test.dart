@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/mixins/sortable_mixin.dart';
+import 'package:marty_authenticator/model/mixins/sortable_mixin.dart';
 
 void main() {
   _testSortableMixin();

@@ -2,11 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:mockito/mockito.dart';
-import 'package:privacyidea_authenticator/model/push_request.dart';
-import 'package:privacyidea_authenticator/model/riverpod_states/push_request_state.dart';
-import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
-import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/push_request_provider.dart';
-import 'package:privacyidea_authenticator/utils/custom_int_buffer.dart';
+import 'package:marty_authenticator/model/push_request.dart';
+import 'package:marty_authenticator/model/riverpod_states/push_request_state.dart';
+import 'package:marty_authenticator/model/tokens/push_token.dart';
+import 'package:marty_authenticator/utils/riverpod/riverpod_providers/generated_providers/push_request_provider.dart';
+import 'package:marty_authenticator/utils/custom_int_buffer.dart';
 
 import '../../tests_app_wrapper.mocks.dart';
 

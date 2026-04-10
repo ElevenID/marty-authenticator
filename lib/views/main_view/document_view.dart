@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 import '../../models/card_data.dart';
 import '../../providers/card_state_provider.dart';
@@ -12,7 +12,6 @@ import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
 import '../../utils/view_utils.dart';
 import '../../utils/utils.dart';
-import '../../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../../utils/riverpod/providers/credentials_provider.dart';
 import '../../model/processor_result.dart';
@@ -160,7 +159,6 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     final qrCode = await Navigator.pushNamed(context, QRScannerView.routeName);
     final resultHandlers = <ResultHandler>[
       ref.read(tokenProvider.notifier),
-      ref.read(tokenContainerProvider.notifier),
       ref.read(credentialsProvider.notifier),
     ];
     if (qrCode == null || !mounted) return;

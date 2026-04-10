@@ -6,7 +6,7 @@ part of 'sortable_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sortablesHash() => r'5b371a8916d3d17660a8d1e874456f4417e2ac06'; // pragma: allowlist secret
+String _$sortablesHash() => r'55ee2e15147f0323620fab2ac0bd9e97d6113e05';
 
 /// See also [sortables].
 @ProviderFor(sortables)

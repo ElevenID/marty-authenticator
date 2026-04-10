@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/widgets/dialogs/previous_cards_dialog.dart';
-import 'package:privacyidea_authenticator/widgets/dialogs/transit_card_dialog.dart';
-import 'package:privacyidea_authenticator/widgets/dialogs/driver_license_dialog.dart';
+import 'package:marty_authenticator/widgets/dialogs/previous_cards_dialog.dart';
+import 'package:marty_authenticator/widgets/dialogs/transit_card_dialog.dart';
+import 'package:marty_authenticator/widgets/dialogs/driver_license_dialog.dart';
 
 class AddToWalletDialog {
   static void show(BuildContext context) {

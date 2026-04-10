@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/services/policy_service.dart';
+import 'package:marty_authenticator/services/policy_service.dart';
 
 /// Widget to display policy-driven disclosure requirements.
 ///

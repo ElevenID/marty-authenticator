@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/widgets/common/back_button.dart'
-    as common;
+import 'package:marty_authenticator/widgets/common/back_button.dart' as common;
 
 class CardDetailsHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;

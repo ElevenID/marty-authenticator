@@ -30,10 +30,9 @@ import 'package:logger/logger.dart' as printer;
 import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
-import '../mains/main_netknights.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
+import '../mains/main_marty.dart';
 import '../utils/app_info_utils.dart';
-import '../utils/pi_mailer.dart';
 import '../views/settings_view/settings_view_widgets/send_error_dialog.dart';
 import 'globals.dart';
 import 'riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
@@ -49,8 +48,8 @@ class Logger {
       : 'Error Log File Attached';
   static Set<String> get _mailRecipients => {
     ...globalRef?.read(settingsProvider).value?.crashReportRecipients ?? {},
-    ...PrivacyIDEAAuthenticator.currentCustomization != null
-        ? {PrivacyIDEAAuthenticator.currentCustomization!.crashRecipient}
+    ...MartyAuthenticator.currentCustomization != null
+        ? {MartyAuthenticator.currentCustomization!.crashRecipient}
         : {},
   };
   static printer.Logger print = printer.Logger(
@@ -348,14 +347,7 @@ class Logger {
 ---------------------------------------------------------
 
 Device Parameters $deviceInfo""";
-    return PiMailer.sendMail(
-      mailRecipients: _mailRecipients,
-      subjectPrefix:
-          PrivacyIDEAAuthenticator.currentCustomization?.crashSubjectPrefix,
-      subject: _lastError,
-      body: completeMailBody,
-      attachments: [_fullPath!],
-    );
+    return Future.value(false); // Mail sending disabled — PiMailer removed
   }
 
   static void clearErrorLog() {

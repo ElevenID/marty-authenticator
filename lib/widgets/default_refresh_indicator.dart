@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/push_provider.dart';
-import '../utils/riverpod/riverpod_providers/generated_providers/token_container_notifier.dart';
 import '../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../views/main_view/main_view_widgets/loading_indicator.dart';
 import 'deactivateable_refresh_indicator.dart';
@@ -29,11 +27,9 @@ class _DefaultRefreshIndicatorState
   bool isRefreshing = false;
   @override
   Widget build(BuildContext context) {
-    final hasRolledOutPushTokens =
-        ref.watch(tokenProvider).value?.hasRolledOutPushTokens ?? false;
-    final hasFinalizedContainers =
-        ref.watch(tokenContainerProvider).value?.hasFinalizedContainers == true;
-    final allowToRefresh = hasRolledOutPushTokens || hasFinalizedContainers;
+    final hasTokens =
+        ref.watch(tokenProvider).value?.tokens.isNotEmpty ?? false;
+    final allowToRefresh = hasTokens;
     return DeactivateableRefreshIndicator(
       onRefresh: () async {
         setState(() {
@@ -42,15 +38,8 @@ class _DefaultRefreshIndicatorState
         await LoadingIndicator.show(
           context: context,
           action: () async {
-            final tokenState = await ref.read(tokenProvider.future);
-            if (!mounted) return Future.value();
-            return Future.wait([
-              if (PushProvider.instance != null)
-                PushProvider.instance!.pollForChallenges(isManually: true),
-              ref
-                  .read(tokenContainerProvider.notifier)
-                  .syncContainers(tokenState: tokenState, isManually: true),
-            ]);
+            await ref.read(tokenProvider.future);
+            return Future.value();
           },
         );
         if (mounted) setState(() => isRefreshing = false);

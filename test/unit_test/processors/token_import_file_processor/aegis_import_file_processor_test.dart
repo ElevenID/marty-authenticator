@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
-import 'package:privacyidea_authenticator/model/tokens/hotp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
-import 'package:privacyidea_authenticator/processors/token_import_file_processor/aegis_import_file_processor.dart';
-import 'package:privacyidea_authenticator/processors/token_import_file_processor/two_fas_import_file_processor.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/model/tokens/hotp_token.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/processors/token_import_file_processor/aegis_import_file_processor.dart';
+import 'package:marty_authenticator/processors/token_import_file_processor/two_fas_import_file_processor.dart';
 
 void main() {
   _testAegisImportFileProcessor();

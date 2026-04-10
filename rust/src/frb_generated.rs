@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -13748832;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -530338748;
 
 // Section: executor
 
@@ -48,6 +48,32 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__biometrics__assess_face_quality_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    image: impl CstDecode<String>,
+    models_dir: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "assess_face_quality",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_image = image.cst_decode();
+            let api_models_dir = models_dir.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::biometrics::assess_face_quality(api_image, api_models_dir)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__check_issuer_constraints_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     policy_json: impl CstDecode<String>,
@@ -144,6 +170,32 @@ fn wire__crate__api__credential_to_json_impl(
                 transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::credential_to_json(&api_credential)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__biometrics__estimate_face_age_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    image: impl CstDecode<String>,
+    models_dir: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "estimate_face_age",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_image = image.cst_decode();
+            let api_models_dir = models_dir.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::biometrics::estimate_face_age(api_image, api_models_dir)?;
                         Ok(output_ok)
                     })(),
                 )
@@ -419,6 +471,40 @@ fn wire__crate__api__verify_and_attach_trust_impl(
                 transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::verify_and_attach_trust(api_mdoc, api_x5chain)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__biometrics__verify_face_match_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    reference_image: impl CstDecode<String>,
+    probe_image: impl CstDecode<String>,
+    threshold: impl CstDecode<Option<f32>>,
+    models_dir: impl CstDecode<Option<String>>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "verify_face_match",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_reference_image = reference_image.cst_decode();
+            let api_probe_image = probe_image.cst_decode();
+            let api_threshold = threshold.cst_decode();
+            let api_models_dir = models_dir.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::biometrics::verify_face_match(
+                            api_reference_image,
+                            api_probe_image,
+                            api_threshold,
+                            api_models_dir,
+                        )?;
                         Ok(output_ok)
                     })(),
                 )
@@ -798,8 +884,10 @@ fn wire__crate__api__zk_prove_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     predicate_id: impl CstDecode<String>,
     claim_value: impl CstDecode<String>,
-    mso_bytes: impl CstDecode<Vec<u8>>,
-    signature: impl CstDecode<Vec<u8>>,
+    mdoc_bytes: impl CstDecode<Vec<u8>>,
+    issuer_pkx: impl CstDecode<String>,
+    issuer_pky: impl CstDecode<String>,
+    doc_type: impl CstDecode<String>,
     session_nonce: impl CstDecode<Vec<u8>>,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
@@ -811,8 +899,10 @@ fn wire__crate__api__zk_prove_impl(
         move || {
             let api_predicate_id = predicate_id.cst_decode();
             let api_claim_value = claim_value.cst_decode();
-            let api_mso_bytes = mso_bytes.cst_decode();
-            let api_signature = signature.cst_decode();
+            let api_mdoc_bytes = mdoc_bytes.cst_decode();
+            let api_issuer_pkx = issuer_pkx.cst_decode();
+            let api_issuer_pky = issuer_pky.cst_decode();
+            let api_doc_type = doc_type.cst_decode();
             let api_session_nonce = session_nonce.cst_decode();
             move |context| {
                 transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -820,8 +910,10 @@ fn wire__crate__api__zk_prove_impl(
                         let output_ok = crate::api::zk_prove(
                             api_predicate_id,
                             api_claim_value,
-                            api_mso_bytes,
-                            api_signature,
+                            api_mdoc_bytes,
+                            api_issuer_pkx,
+                            api_issuer_pky,
+                            api_doc_type,
                             api_session_nonce,
                         )?;
                         Ok(output_ok)
@@ -834,8 +926,10 @@ fn wire__crate__api__zk_prove_impl(
 fn wire__crate__api__zk_prove_from_presentation_definition_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     presentation_definition_json: impl CstDecode<String>,
-    mso_bytes: impl CstDecode<Vec<u8>>,
-    signature: impl CstDecode<Vec<u8>>,
+    mdoc_bytes: impl CstDecode<Vec<u8>>,
+    issuer_pkx: impl CstDecode<String>,
+    issuer_pky: impl CstDecode<String>,
+    doc_type: impl CstDecode<String>,
     secrets_json: impl CstDecode<String>,
     session_nonce: impl CstDecode<Vec<u8>>,
 ) {
@@ -847,8 +941,10 @@ fn wire__crate__api__zk_prove_from_presentation_definition_impl(
         },
         move || {
             let api_presentation_definition_json = presentation_definition_json.cst_decode();
-            let api_mso_bytes = mso_bytes.cst_decode();
-            let api_signature = signature.cst_decode();
+            let api_mdoc_bytes = mdoc_bytes.cst_decode();
+            let api_issuer_pkx = issuer_pkx.cst_decode();
+            let api_issuer_pky = issuer_pky.cst_decode();
+            let api_doc_type = doc_type.cst_decode();
             let api_secrets_json = secrets_json.cst_decode();
             let api_session_nonce = session_nonce.cst_decode();
             move |context| {
@@ -856,8 +952,10 @@ fn wire__crate__api__zk_prove_from_presentation_definition_impl(
                     (move || {
                         let output_ok = crate::api::zk_prove_from_presentation_definition(
                             api_presentation_definition_json,
-                            api_mso_bytes,
-                            api_signature,
+                            api_mdoc_bytes,
+                            api_issuer_pkx,
+                            api_issuer_pky,
+                            api_doc_type,
                             api_secrets_json,
                             api_session_nonce,
                         )?;
@@ -874,6 +972,12 @@ fn wire__crate__api__zk_prove_from_presentation_definition_impl(
 impl CstDecode<bool> for bool {
     // Codec=Cst (C-struct based), see doc to use other codecs
     fn cst_decode(self) -> bool {
+        self
+    }
+}
+impl CstDecode<f32> for f32 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> f32 {
         self
     }
 }
@@ -904,6 +1008,12 @@ impl CstDecode<crate::credential::PrivacyLevel> for i32 {
             2 => crate::credential::PrivacyLevel::Custom,
             _ => unreachable!("Invalid variant for PrivacyLevel: {}", self),
         }
+    }
+}
+impl CstDecode<u32> for u32 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> u32 {
+        self
     }
 }
 impl CstDecode<u64> for u64 {
@@ -1034,10 +1144,33 @@ impl SseDecode for crate::credential::CredentialSubject {
     }
 }
 
+impl SseDecode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_f32::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for f64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_f64::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::biometrics::FrbAgeEstimate {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_estimatedAge = <u8>::sse_decode(deserializer);
+        let mut var_confidence = <f32>::sse_decode(deserializer);
+        let mut var_ageRangeLow = <u8>::sse_decode(deserializer);
+        let mut var_ageRangeHigh = <u8>::sse_decode(deserializer);
+        return crate::biometrics::FrbAgeEstimate {
+            estimated_age: var_estimatedAge,
+            confidence: var_confidence,
+            age_range_low: var_ageRangeLow,
+            age_range_high: var_ageRangeHigh,
+        };
     }
 }
 
@@ -1089,6 +1222,52 @@ impl SseDecode for crate::api::FrbCredentialResponse {
             transaction_id: var_transactionId,
             c_nonce: var_cNonce,
             c_nonce_expires_in: var_cNonceExpiresIn,
+        };
+    }
+}
+
+impl SseDecode for crate::biometrics::FrbFaceMatchResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_verified = <bool>::sse_decode(deserializer);
+        let mut var_similarity = <f32>::sse_decode(deserializer);
+        let mut var_threshold = <f32>::sse_decode(deserializer);
+        let mut var_provider = <String>::sse_decode(deserializer);
+        let mut var_referenceQuality = <Option<f32>>::sse_decode(deserializer);
+        let mut var_probeQuality = <Option<f32>>::sse_decode(deserializer);
+        let mut var_processingTimeMs = <u64>::sse_decode(deserializer);
+        return crate::biometrics::FrbFaceMatchResult {
+            verified: var_verified,
+            similarity: var_similarity,
+            threshold: var_threshold,
+            provider: var_provider,
+            reference_quality: var_referenceQuality,
+            probe_quality: var_probeQuality,
+            processing_time_ms: var_processingTimeMs,
+        };
+    }
+}
+
+impl SseDecode for crate::biometrics::FrbFaceQuality {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_overallScore = <f32>::sse_decode(deserializer);
+        let mut var_faceDetected = <bool>::sse_decode(deserializer);
+        let mut var_faceCount = <u32>::sse_decode(deserializer);
+        let mut var_sharpness = <f32>::sse_decode(deserializer);
+        let mut var_brightness = <f32>::sse_decode(deserializer);
+        let mut var_contrast = <f32>::sse_decode(deserializer);
+        let mut var_faceSize = <f32>::sse_decode(deserializer);
+        let mut var_pose = <f32>::sse_decode(deserializer);
+        return crate::biometrics::FrbFaceQuality {
+            overall_score: var_overallScore,
+            face_detected: var_faceDetected,
+            face_count: var_faceCount,
+            sharpness: var_sharpness,
+            brightness: var_brightness,
+            contrast: var_contrast,
+            face_size: var_faceSize,
+            pose: var_pose,
         };
     }
 }
@@ -1355,6 +1534,17 @@ impl SseDecode for Option<crate::credential::CredentialStatus> {
     }
 }
 
+impl SseDecode for Option<f32> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<f32>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::credential::Proof> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1506,6 +1696,13 @@ impl SseDecode for crate::credential::TrustInfo {
             status_message: var_statusMessage,
             certificate_chain: var_certificateChain,
         };
+    }
+}
+
+impl SseDecode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u32::<NativeEndian>().unwrap()
     }
 }
 
@@ -1703,6 +1900,29 @@ impl flutter_rust_bridge::IntoIntoDart<crate::credential::CredentialSubject>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbAgeEstimate {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.estimated_age.into_into_dart().into_dart(),
+            self.confidence.into_into_dart().into_dart(),
+            self.age_range_low.into_into_dart().into_dart(),
+            self.age_range_high.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::biometrics::FrbAgeEstimate
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbAgeEstimate>
+    for crate::biometrics::FrbAgeEstimate
+{
+    fn into_into_dart(self) -> crate::biometrics::FrbAgeEstimate {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::FrbAuthorizationRequest {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -1772,6 +1992,59 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbCredentialResponse>
     for crate::api::FrbCredentialResponse
 {
     fn into_into_dart(self) -> crate::api::FrbCredentialResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbFaceMatchResult {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.verified.into_into_dart().into_dart(),
+            self.similarity.into_into_dart().into_dart(),
+            self.threshold.into_into_dart().into_dart(),
+            self.provider.into_into_dart().into_dart(),
+            self.reference_quality.into_into_dart().into_dart(),
+            self.probe_quality.into_into_dart().into_dart(),
+            self.processing_time_ms.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::biometrics::FrbFaceMatchResult
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbFaceMatchResult>
+    for crate::biometrics::FrbFaceMatchResult
+{
+    fn into_into_dart(self) -> crate::biometrics::FrbFaceMatchResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbFaceQuality {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.overall_score.into_into_dart().into_dart(),
+            self.face_detected.into_into_dart().into_dart(),
+            self.face_count.into_into_dart().into_dart(),
+            self.sharpness.into_into_dart().into_dart(),
+            self.brightness.into_into_dart().into_dart(),
+            self.contrast.into_into_dart().into_dart(),
+            self.face_size.into_into_dart().into_dart(),
+            self.pose.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::biometrics::FrbFaceQuality
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbFaceQuality>
+    for crate::biometrics::FrbFaceQuality
+{
+    fn into_into_dart(self) -> crate::biometrics::FrbFaceQuality {
         self
     }
 }
@@ -2214,10 +2487,27 @@ impl SseEncode for crate::credential::CredentialSubject {
     }
 }
 
+impl SseEncode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_f32::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for f64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_f64::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::biometrics::FrbAgeEstimate {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u8>::sse_encode(self.estimated_age, serializer);
+        <f32>::sse_encode(self.confidence, serializer);
+        <u8>::sse_encode(self.age_range_low, serializer);
+        <u8>::sse_encode(self.age_range_high, serializer);
     }
 }
 
@@ -2250,6 +2540,33 @@ impl SseEncode for crate::api::FrbCredentialResponse {
         <Option<String>>::sse_encode(self.transaction_id, serializer);
         <Option<String>>::sse_encode(self.c_nonce, serializer);
         <Option<u64>>::sse_encode(self.c_nonce_expires_in, serializer);
+    }
+}
+
+impl SseEncode for crate::biometrics::FrbFaceMatchResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.verified, serializer);
+        <f32>::sse_encode(self.similarity, serializer);
+        <f32>::sse_encode(self.threshold, serializer);
+        <String>::sse_encode(self.provider, serializer);
+        <Option<f32>>::sse_encode(self.reference_quality, serializer);
+        <Option<f32>>::sse_encode(self.probe_quality, serializer);
+        <u64>::sse_encode(self.processing_time_ms, serializer);
+    }
+}
+
+impl SseEncode for crate::biometrics::FrbFaceQuality {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <f32>::sse_encode(self.overall_score, serializer);
+        <bool>::sse_encode(self.face_detected, serializer);
+        <u32>::sse_encode(self.face_count, serializer);
+        <f32>::sse_encode(self.sharpness, serializer);
+        <f32>::sse_encode(self.brightness, serializer);
+        <f32>::sse_encode(self.contrast, serializer);
+        <f32>::sse_encode(self.face_size, serializer);
+        <f32>::sse_encode(self.pose, serializer);
     }
 }
 
@@ -2443,6 +2760,16 @@ impl SseEncode for Option<crate::credential::CredentialStatus> {
     }
 }
 
+impl SseEncode for Option<f32> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <f32>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::credential::Proof> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2553,6 +2880,13 @@ impl SseEncode for crate::credential::TrustInfo {
         <Option<String>>::sse_encode(self.trust_anchor, serializer);
         <Option<String>>::sse_encode(self.status_message, serializer);
         <Vec<String>>::sse_encode(self.certificate_chain, serializer);
+    }
+}
+
+impl SseEncode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u32::<NativeEndian>(self).unwrap();
     }
 }
 
@@ -2681,6 +3015,12 @@ mod io {
             CstDecode::<crate::credential::CredentialStatus>::cst_decode(*wrap).into()
         }
     }
+    impl CstDecode<f32> for *mut f32 {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> f32 {
+            unsafe { *flutter_rust_bridge::for_generated::box_from_leak_ptr(self) }
+        }
+    }
     impl CstDecode<crate::credential::MDocCredential> for *mut wire_cst_m_doc_credential {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::credential::MDocCredential {
@@ -2772,6 +3112,17 @@ mod io {
             }
         }
     }
+    impl CstDecode<crate::biometrics::FrbAgeEstimate> for wire_cst_frb_age_estimate {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbAgeEstimate {
+            crate::biometrics::FrbAgeEstimate {
+                estimated_age: self.estimated_age.cst_decode(),
+                confidence: self.confidence.cst_decode(),
+                age_range_low: self.age_range_low.cst_decode(),
+                age_range_high: self.age_range_high.cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::api::FrbAuthorizationRequest> for wire_cst_frb_authorization_request {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::api::FrbAuthorizationRequest {
@@ -2804,6 +3155,35 @@ mod io {
                 transaction_id: self.transaction_id.cst_decode(),
                 c_nonce: self.c_nonce.cst_decode(),
                 c_nonce_expires_in: self.c_nonce_expires_in.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::biometrics::FrbFaceMatchResult> for wire_cst_frb_face_match_result {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbFaceMatchResult {
+            crate::biometrics::FrbFaceMatchResult {
+                verified: self.verified.cst_decode(),
+                similarity: self.similarity.cst_decode(),
+                threshold: self.threshold.cst_decode(),
+                provider: self.provider.cst_decode(),
+                reference_quality: self.reference_quality.cst_decode(),
+                probe_quality: self.probe_quality.cst_decode(),
+                processing_time_ms: self.processing_time_ms.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::biometrics::FrbFaceQuality> for wire_cst_frb_face_quality {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbFaceQuality {
+            crate::biometrics::FrbFaceQuality {
+                overall_score: self.overall_score.cst_decode(),
+                face_detected: self.face_detected.cst_decode(),
+                face_count: self.face_count.cst_decode(),
+                sharpness: self.sharpness.cst_decode(),
+                brightness: self.brightness.cst_decode(),
+                contrast: self.contrast.cst_decode(),
+                face_size: self.face_size.cst_decode(),
+                pose: self.pose.cst_decode(),
             }
         }
     }
@@ -3124,6 +3504,21 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
+    impl NewWithNullPtr for wire_cst_frb_age_estimate {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                estimated_age: Default::default(),
+                confidence: Default::default(),
+                age_range_low: Default::default(),
+                age_range_high: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_age_estimate {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
     impl NewWithNullPtr for wire_cst_frb_authorization_request {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -3167,6 +3562,43 @@ mod io {
         }
     }
     impl Default for wire_cst_frb_credential_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_face_match_result {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                verified: Default::default(),
+                similarity: Default::default(),
+                threshold: Default::default(),
+                provider: core::ptr::null_mut(),
+                reference_quality: core::ptr::null_mut(),
+                probe_quality: core::ptr::null_mut(),
+                processing_time_ms: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_face_match_result {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_face_quality {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                overall_score: Default::default(),
+                face_detected: Default::default(),
+                face_count: Default::default(),
+                sharpness: Default::default(),
+                brightness: Default::default(),
+                contrast: Default::default(),
+                face_size: Default::default(),
+                pose: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_face_quality {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -3401,6 +3833,15 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality(
+        port_: i64,
+        image: *mut wire_cst_list_prim_u_8_strict,
+        models_dir: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__biometrics__assess_face_quality_impl(port_, image, models_dir)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints(
         port_: i64,
         policy_json: *mut wire_cst_list_prim_u_8_strict,
@@ -3438,6 +3879,15 @@ mod io {
         credential: *mut wire_cst_credential,
     ) {
         wire__crate__api__credential_to_json_impl(port_, credential)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age(
+        port_: i64,
+        image: *mut wire_cst_list_prim_u_8_strict,
+        models_dir: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__biometrics__estimate_face_age_impl(port_, image, models_dir)
     }
 
     #[unsafe(no_mangle)]
@@ -3537,6 +3987,23 @@ mod io {
         x5chain: *mut wire_cst_list_list_prim_u_8_strict,
     ) {
         wire__crate__api__verify_and_attach_trust_impl(port_, mdoc, x5chain)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match(
+        port_: i64,
+        reference_image: *mut wire_cst_list_prim_u_8_strict,
+        probe_image: *mut wire_cst_list_prim_u_8_strict,
+        threshold: *mut f32,
+        models_dir: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__biometrics__verify_face_match_impl(
+            port_,
+            reference_image,
+            probe_image,
+            threshold,
+            models_dir,
+        )
     }
 
     #[unsafe(no_mangle)]
@@ -3700,16 +4167,20 @@ mod io {
         port_: i64,
         predicate_id: *mut wire_cst_list_prim_u_8_strict,
         claim_value: *mut wire_cst_list_prim_u_8_strict,
-        mso_bytes: *mut wire_cst_list_prim_u_8_loose,
-        signature: *mut wire_cst_list_prim_u_8_loose,
+        mdoc_bytes: *mut wire_cst_list_prim_u_8_loose,
+        issuer_pkx: *mut wire_cst_list_prim_u_8_strict,
+        issuer_pky: *mut wire_cst_list_prim_u_8_strict,
+        doc_type: *mut wire_cst_list_prim_u_8_strict,
         session_nonce: *mut wire_cst_list_prim_u_8_loose,
     ) {
         wire__crate__api__zk_prove_impl(
             port_,
             predicate_id,
             claim_value,
-            mso_bytes,
-            signature,
+            mdoc_bytes,
+            issuer_pkx,
+            issuer_pky,
+            doc_type,
             session_nonce,
         )
     }
@@ -3718,16 +4189,20 @@ mod io {
     pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition(
         port_: i64,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
-        mso_bytes: *mut wire_cst_list_prim_u_8_loose,
-        signature: *mut wire_cst_list_prim_u_8_loose,
+        mdoc_bytes: *mut wire_cst_list_prim_u_8_loose,
+        issuer_pkx: *mut wire_cst_list_prim_u_8_strict,
+        issuer_pky: *mut wire_cst_list_prim_u_8_strict,
+        doc_type: *mut wire_cst_list_prim_u_8_strict,
         secrets_json: *mut wire_cst_list_prim_u_8_strict,
         session_nonce: *mut wire_cst_list_prim_u_8_loose,
     ) {
         wire__crate__api__zk_prove_from_presentation_definition_impl(
             port_,
             presentation_definition_json,
-            mso_bytes,
-            signature,
+            mdoc_bytes,
+            issuer_pkx,
+            issuer_pky,
+            doc_type,
             secrets_json,
             session_nonce,
         )
@@ -3765,6 +4240,13 @@ mod io {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_credential_status::new_with_null_ptr(),
         )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32(
+        value: f32,
+    ) -> *mut f32 {
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
     }
 
     #[unsafe(no_mangle)]
@@ -3976,6 +4458,14 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_age_estimate {
+        estimated_age: u8,
+        confidence: f32,
+        age_range_low: u8,
+        age_range_high: u8,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
     pub struct wire_cst_frb_authorization_request {
         authorization_url: *mut wire_cst_list_prim_u_8_strict,
         code_verifier: *mut wire_cst_list_prim_u_8_strict,
@@ -3999,6 +4489,29 @@ mod io {
         transaction_id: *mut wire_cst_list_prim_u_8_strict,
         c_nonce: *mut wire_cst_list_prim_u_8_strict,
         c_nonce_expires_in: *mut u64,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_face_match_result {
+        verified: bool,
+        similarity: f32,
+        threshold: f32,
+        provider: *mut wire_cst_list_prim_u_8_strict,
+        reference_quality: *mut f32,
+        probe_quality: *mut f32,
+        processing_time_ms: u64,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_face_quality {
+        overall_score: f32,
+        face_detected: bool,
+        face_count: u32,
+        sharpness: f32,
+        brightness: f32,
+        contrast: f32,
+        face_size: f32,
+        pose: f32,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -4304,6 +4817,28 @@ mod web {
             }
         }
     }
+    impl CstDecode<crate::biometrics::FrbAgeEstimate>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbAgeEstimate {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::biometrics::FrbAgeEstimate {
+                estimated_age: self_.get(0).cst_decode(),
+                confidence: self_.get(1).cst_decode(),
+                age_range_low: self_.get(2).cst_decode(),
+                age_range_high: self_.get(3).cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::api::FrbAuthorizationRequest>
         for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
     {
@@ -4369,6 +4904,57 @@ mod web {
                 transaction_id: self_.get(2).cst_decode(),
                 c_nonce: self_.get(3).cst_decode(),
                 c_nonce_expires_in: self_.get(4).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::biometrics::FrbFaceMatchResult>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbFaceMatchResult {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                7,
+                "Expected 7 elements, got {}",
+                self_.length()
+            );
+            crate::biometrics::FrbFaceMatchResult {
+                verified: self_.get(0).cst_decode(),
+                similarity: self_.get(1).cst_decode(),
+                threshold: self_.get(2).cst_decode(),
+                provider: self_.get(3).cst_decode(),
+                reference_quality: self_.get(4).cst_decode(),
+                probe_quality: self_.get(5).cst_decode(),
+                processing_time_ms: self_.get(6).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::biometrics::FrbFaceQuality>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbFaceQuality {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                8,
+                "Expected 8 elements, got {}",
+                self_.length()
+            );
+            crate::biometrics::FrbFaceQuality {
+                overall_score: self_.get(0).cst_decode(),
+                face_detected: self_.get(1).cst_decode(),
+                face_count: self_.get(2).cst_decode(),
+                sharpness: self_.get(3).cst_decode(),
+                brightness: self_.get(4).cst_decode(),
+                contrast: self_.get(5).cst_decode(),
+                face_size: self_.get(6).cst_decode(),
+                pose: self_.get(7).cst_decode(),
             }
         }
     }
@@ -4842,6 +5428,12 @@ mod web {
             self.is_truthy()
         }
     }
+    impl CstDecode<f32> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> f32 {
+            self.unchecked_into_f64() as _
+        }
+    }
     impl CstDecode<f64> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> f64 {
@@ -4876,6 +5468,12 @@ mod web {
             (self.unchecked_into_f64() as i32).cst_decode()
         }
     }
+    impl CstDecode<u32> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> u32 {
+            self.unchecked_into_f64() as _
+        }
+    }
     impl CstDecode<u64> for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> u64 {
@@ -4893,6 +5491,15 @@ mod web {
         fn cst_decode(self) -> usize {
             ::std::convert::TryInto::<u64>::try_into(self).unwrap() as _
         }
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__biometrics__assess_face_quality(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        image: String,
+        models_dir: Option<String>,
+    ) {
+        wire__crate__biometrics__assess_face_quality_impl(port_, image, models_dir)
     }
 
     #[wasm_bindgen]
@@ -4933,6 +5540,15 @@ mod web {
         credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
     ) {
         wire__crate__api__credential_to_json_impl(port_, credential)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__biometrics__estimate_face_age(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        image: String,
+        models_dir: Option<String>,
+    ) {
+        wire__crate__biometrics__estimate_face_age_impl(port_, image, models_dir)
     }
 
     #[wasm_bindgen]
@@ -5032,6 +5648,23 @@ mod web {
         x5chain: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
     ) {
         wire__crate__api__verify_and_attach_trust_impl(port_, mdoc, x5chain)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__biometrics__verify_face_match(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        reference_image: String,
+        probe_image: String,
+        threshold: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        models_dir: Option<String>,
+    ) {
+        wire__crate__biometrics__verify_face_match_impl(
+            port_,
+            reference_image,
+            probe_image,
+            threshold,
+            models_dir,
+        )
     }
 
     #[wasm_bindgen]
@@ -5195,16 +5828,20 @@ mod web {
         port_: flutter_rust_bridge::for_generated::MessagePort,
         predicate_id: String,
         claim_value: String,
-        mso_bytes: Box<[u8]>,
-        signature: Box<[u8]>,
+        mdoc_bytes: Box<[u8]>,
+        issuer_pkx: String,
+        issuer_pky: String,
+        doc_type: String,
         session_nonce: Box<[u8]>,
     ) {
         wire__crate__api__zk_prove_impl(
             port_,
             predicate_id,
             claim_value,
-            mso_bytes,
-            signature,
+            mdoc_bytes,
+            issuer_pkx,
+            issuer_pky,
+            doc_type,
             session_nonce,
         )
     }
@@ -5213,16 +5850,20 @@ mod web {
     pub fn wire__crate__api__zk_prove_from_presentation_definition(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         presentation_definition_json: String,
-        mso_bytes: Box<[u8]>,
-        signature: Box<[u8]>,
+        mdoc_bytes: Box<[u8]>,
+        issuer_pkx: String,
+        issuer_pky: String,
+        doc_type: String,
         secrets_json: String,
         session_nonce: Box<[u8]>,
     ) {
         wire__crate__api__zk_prove_from_presentation_definition_impl(
             port_,
             presentation_definition_json,
-            mso_bytes,
-            signature,
+            mdoc_bytes,
+            issuer_pkx,
+            issuer_pky,
+            doc_type,
             secrets_json,
             session_nonce,
         )

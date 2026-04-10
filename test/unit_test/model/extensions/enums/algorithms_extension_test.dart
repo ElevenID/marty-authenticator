@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/extensions/enums/algorithms_extension.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/extensions/enums/algorithms_extension.dart';
 
 void main() {
   _testAlgorithmsExtension();

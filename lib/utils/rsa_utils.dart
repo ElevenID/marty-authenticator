@@ -25,7 +25,6 @@ import 'package:base32/base32.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart';
 
-import '../model/tokens/push_token.dart';
 import '../utils/crypto_utils.dart';
 import '../utils/identifiers.dart';
 import '../utils/logger.dart';
@@ -237,25 +236,6 @@ class RsaUtils {
     }
 
     return isVerified;
-  }
-
-  /// Tries to sign the [message] with the private key of the [token]. If the token is a
-  /// legacy token (enrolled prior to v3), the Legacy plugin will be used for that operation.
-  /// If an error occurs during the operation of the legacy plugin, a dialog will be shown
-  /// if a [context] is provided, telling the users that it might be better to enroll a new
-  /// push token so that the app can directly access the private key.
-  /// Returns the signature on success and null on failure.
-  Future<String?> trySignWithToken(PushToken token, String message) async {
-    if (token.privateTokenKey != null) {
-      return createBase32Signature(
-        token.rsaPrivateTokenKey!,
-        utf8.encode(message),
-      );
-    }
-    Logger.warning(
-      'Token ${token.serial} does not have a private key. Cannot sign message.',
-    );
-    return null;
   }
 
   Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>>

@@ -5,28 +5,28 @@
       "name": "Demo: MDL Only",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_demo_mdl.dart",
+      "program": "example/lib/main_demo_mdl.dart",
       "args": ["-d", "chrome"]
     },
     {
       "name": "Demo: MDL + Passport",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_demo_mdl_passport.dart",
+      "program": "example/lib/main_demo_mdl_passport.dart",
       "args": ["-d", "chrome"]
     },
     {
       "name": "Demo: All mDoc Types",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_demo_all_mdocs.dart",
+      "program": "example/lib/main_demo_all_mdocs.dart",
       "args": ["-d", "chrome"]
     },
     {
       "name": "Demo: mDocs Multiple States",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_demo_mdocs_states.dart",
+      "program": "example/lib/main_demo_mdocs_states.dart",
       "args": ["-d", "chrome"]
     },
     {

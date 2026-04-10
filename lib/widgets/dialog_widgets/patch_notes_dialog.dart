@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../model/enums/patch_note_type.dart';
 import '../../model/extensions/enums/patch_note_type_extension.dart';
 import '../../model/version.dart';

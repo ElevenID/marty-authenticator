@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/enums/token_origin_source_type.dart';
-import 'package:privacyidea_authenticator/model/extensions/enums/token_origin_source_type.dart';
-import 'package:privacyidea_authenticator/model/token_import/token_origin_data.dart';
-import 'package:privacyidea_authenticator/model/tokens/hotp_token.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/enums/token_origin_source_type.dart';
+import 'package:marty_authenticator/model/extensions/enums/token_origin_source_type.dart';
+import 'package:marty_authenticator/model/token_import/token_origin_data.dart';
+import 'package:marty_authenticator/model/tokens/hotp_token.dart';
 
 void main() {
   _testTokenOriginSourceTypeExtension();

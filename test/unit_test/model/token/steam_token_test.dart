@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/enums/encodings.dart';
-import 'package:privacyidea_authenticator/model/extensions/enums/encodings_extension.dart';
-import 'package:privacyidea_authenticator/model/tokens/otp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/steam_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/token.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/enums/encodings.dart';
+import 'package:marty_authenticator/model/extensions/enums/encodings_extension.dart';
+import 'package:marty_authenticator/model/tokens/otp_token.dart';
+import 'package:marty_authenticator/model/tokens/steam_token.dart';
+import 'package:marty_authenticator/model/tokens/token.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
 
 SteamToken get steamToken => SteamToken(
   label: 'label',

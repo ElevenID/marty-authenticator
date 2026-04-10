@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/push_token_rollout_state.dart';
-import 'package:privacyidea_authenticator/model/extensions/enums/push_token_rollout_state_extension.dart';
+import 'package:marty_authenticator/model/enums/push_token_rollout_state.dart';
+import 'package:marty_authenticator/model/extensions/enums/push_token_rollout_state_extension.dart';
 
 void main() {
   _testPushTokenRolloutstateExtension();

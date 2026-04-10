@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/push_request.dart';
-import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
+import 'package:marty_authenticator/model/push_request.dart';
+import 'package:marty_authenticator/model/tokens/push_token.dart';
 
 void main() {
   _testPushRequest();

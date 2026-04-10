@@ -3,16 +3,16 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/enums/token_origin_source_type.dart';
-import 'package:privacyidea_authenticator/model/enums/token_types.dart';
-import 'package:privacyidea_authenticator/model/processor_result.dart';
-import 'package:privacyidea_authenticator/model/tokens/hotp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/steam_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/token.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
-import 'package:privacyidea_authenticator/processors/token_import_file_processor/two_fas_import_file_processor.dart';
-import 'package:privacyidea_authenticator/utils/token_import_origins.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/enums/token_origin_source_type.dart';
+import 'package:marty_authenticator/model/enums/token_types.dart';
+import 'package:marty_authenticator/model/processor_result.dart';
+import 'package:marty_authenticator/model/tokens/hotp_token.dart';
+import 'package:marty_authenticator/model/tokens/steam_token.dart';
+import 'package:marty_authenticator/model/tokens/token.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/processors/token_import_file_processor/two_fas_import_file_processor.dart';
+import 'package:marty_authenticator/utils/token_import_origins.dart';
 
 void main() {
   _testTwoFasImportFileProcessor();

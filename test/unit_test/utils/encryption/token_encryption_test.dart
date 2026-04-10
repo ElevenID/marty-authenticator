@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/model/enums/algorithms.dart';
-import 'package:privacyidea_authenticator/model/tokens/day_password_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/hotp_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/push_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/steam_token.dart';
-import 'package:privacyidea_authenticator/model/tokens/token.dart';
-import 'package:privacyidea_authenticator/model/tokens/totp_token.dart';
-import 'package:privacyidea_authenticator/utils/encryption/token_encryption.dart';
+import 'package:marty_authenticator/model/enums/algorithms.dart';
+import 'package:marty_authenticator/model/tokens/day_password_token.dart';
+import 'package:marty_authenticator/model/tokens/hotp_token.dart';
+import 'package:marty_authenticator/model/tokens/push_token.dart';
+import 'package:marty_authenticator/model/tokens/steam_token.dart';
+import 'package:marty_authenticator/model/tokens/token.dart';
+import 'package:marty_authenticator/model/tokens/totp_token.dart';
+import 'package:marty_authenticator/utils/encryption/token_encryption.dart';
 import 'package:zxing2/qrcode.dart';
 
 void main() {

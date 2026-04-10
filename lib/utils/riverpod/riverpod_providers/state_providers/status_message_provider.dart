@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations_en.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations_en.dart';
 
 import '../../../logger.dart';
 

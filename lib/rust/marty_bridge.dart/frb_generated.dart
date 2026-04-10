@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'biometrics.dart';
 import 'credential.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -65,7 +66,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -13748832;
+  int get rustContentHash => -530338748;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -76,6 +77,11 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<FrbFaceQuality> crateBiometricsAssessFaceQuality({
+    required String image,
+    String? modelsDir,
+  });
+
   Future<IssuerCheckResultOutput> crateApiCheckIssuerConstraints({
     required String policyJson,
     required String issuerId,
@@ -90,6 +96,11 @@ abstract class RustLibApi extends BaseApi {
   Future<Credential> crateApiCredentialFromJson({required String json});
 
   Future<String> crateApiCredentialToJson({required Credential credential});
+
+  Future<FrbAgeEstimate> crateBiometricsEstimateFaceAge({
+    required String image,
+    String? modelsDir,
+  });
 
   Future<PolicyEvaluationResult> crateApiEvaluatePresentationRequest({
     required String requestJson,
@@ -135,6 +146,13 @@ abstract class RustLibApi extends BaseApi {
   Future<MDocCredential> crateApiVerifyAndAttachTrust({
     required MDocCredential mdoc,
     required List<Uint8List> x5Chain,
+  });
+
+  Future<FrbFaceMatchResult> crateBiometricsVerifyFaceMatch({
+    required String referenceImage,
+    required String probeImage,
+    double? threshold,
+    String? modelsDir,
   });
 
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
@@ -208,15 +226,19 @@ abstract class RustLibApi extends BaseApi {
   Future<Uint8List> crateApiZkProve({
     required String predicateId,
     required String claimValue,
-    required List<int> msoBytes,
-    required List<int> signature,
+    required List<int> mdocBytes,
+    required String issuerPkx,
+    required String issuerPky,
+    required String docType,
     required List<int> sessionNonce,
   });
 
   Future<Uint8List> crateApiZkProveFromPresentationDefinition({
     required String presentationDefinitionJson,
-    required List<int> msoBytes,
-    required List<int> signature,
+    required List<int> mdocBytes,
+    required String issuerPkx,
+    required String issuerPky,
+    required String docType,
     required String secretsJson,
     required List<int> sessionNonce,
   });
@@ -238,6 +260,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
+
+  @override
+  Future<FrbFaceQuality> crateBiometricsAssessFaceQuality({
+    required String image,
+    String? modelsDir,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(image);
+          var arg1 = cst_encode_opt_String(modelsDir);
+          return wire.wire__crate__biometrics__assess_face_quality(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_face_quality,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsAssessFaceQualityConstMeta,
+        argValues: [image, modelsDir],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsAssessFaceQualityConstMeta =>
+      const TaskConstMeta(
+        debugName: "assess_face_quality",
+        argNames: ["image", "modelsDir"],
+      );
 
   @override
   Future<IssuerCheckResultOutput> crateApiCheckIssuerConstraints({
@@ -355,6 +410,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     debugName: "credential_to_json",
     argNames: ["credential"],
   );
+
+  @override
+  Future<FrbAgeEstimate> crateBiometricsEstimateFaceAge({
+    required String image,
+    String? modelsDir,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(image);
+          var arg1 = cst_encode_opt_String(modelsDir);
+          return wire.wire__crate__biometrics__estimate_face_age(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_age_estimate,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsEstimateFaceAgeConstMeta,
+        argValues: [image, modelsDir],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsEstimateFaceAgeConstMeta =>
+      const TaskConstMeta(
+        debugName: "estimate_face_age",
+        argNames: ["image", "modelsDir"],
+      );
 
   @override
   Future<PolicyEvaluationResult> crateApiEvaluatePresentationRequest({
@@ -684,6 +772,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "verify_and_attach_trust",
         argNames: ["mdoc", "x5Chain"],
+      );
+
+  @override
+  Future<FrbFaceMatchResult> crateBiometricsVerifyFaceMatch({
+    required String referenceImage,
+    required String probeImage,
+    double? threshold,
+    String? modelsDir,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(referenceImage);
+          var arg1 = cst_encode_String(probeImage);
+          var arg2 = cst_encode_opt_box_autoadd_f_32(threshold);
+          var arg3 = cst_encode_opt_String(modelsDir);
+          return wire.wire__crate__biometrics__verify_face_match(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_face_match_result,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsVerifyFaceMatchConstMeta,
+        argValues: [referenceImage, probeImage, threshold, modelsDir],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsVerifyFaceMatchConstMeta =>
+      const TaskConstMeta(
+        debugName: "verify_face_match",
+        argNames: ["referenceImage", "probeImage", "threshold", "modelsDir"],
       );
 
   @override
@@ -1148,8 +1275,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<Uint8List> crateApiZkProve({
     required String predicateId,
     required String claimValue,
-    required List<int> msoBytes,
-    required List<int> signature,
+    required List<int> mdocBytes,
+    required String issuerPkx,
+    required String issuerPky,
+    required String docType,
     required List<int> sessionNonce,
   }) {
     return handler.executeNormal(
@@ -1157,9 +1286,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: (port_) {
           var arg0 = cst_encode_String(predicateId);
           var arg1 = cst_encode_String(claimValue);
-          var arg2 = cst_encode_list_prim_u_8_loose(msoBytes);
-          var arg3 = cst_encode_list_prim_u_8_loose(signature);
-          var arg4 = cst_encode_list_prim_u_8_loose(sessionNonce);
+          var arg2 = cst_encode_list_prim_u_8_loose(mdocBytes);
+          var arg3 = cst_encode_String(issuerPkx);
+          var arg4 = cst_encode_String(issuerPky);
+          var arg5 = cst_encode_String(docType);
+          var arg6 = cst_encode_list_prim_u_8_loose(sessionNonce);
           return wire.wire__crate__api__zk_prove(
             port_,
             arg0,
@@ -1167,6 +1298,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             arg2,
             arg3,
             arg4,
+            arg5,
+            arg6,
           );
         },
         codec: DcoCodec(
@@ -1174,7 +1307,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: dco_decode_AnyhowException,
         ),
         constMeta: kCrateApiZkProveConstMeta,
-        argValues: [predicateId, claimValue, msoBytes, signature, sessionNonce],
+        argValues: [
+          predicateId,
+          claimValue,
+          mdocBytes,
+          issuerPkx,
+          issuerPky,
+          docType,
+          sessionNonce,
+        ],
         apiImpl: this,
       ),
     );
@@ -1185,8 +1326,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     argNames: [
       "predicateId",
       "claimValue",
-      "msoBytes",
-      "signature",
+      "mdocBytes",
+      "issuerPkx",
+      "issuerPky",
+      "docType",
       "sessionNonce",
     ],
   );
@@ -1194,8 +1337,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Future<Uint8List> crateApiZkProveFromPresentationDefinition({
     required String presentationDefinitionJson,
-    required List<int> msoBytes,
-    required List<int> signature,
+    required List<int> mdocBytes,
+    required String issuerPkx,
+    required String issuerPky,
+    required String docType,
     required String secretsJson,
     required List<int> sessionNonce,
   }) {
@@ -1203,10 +1348,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           var arg0 = cst_encode_String(presentationDefinitionJson);
-          var arg1 = cst_encode_list_prim_u_8_loose(msoBytes);
-          var arg2 = cst_encode_list_prim_u_8_loose(signature);
-          var arg3 = cst_encode_String(secretsJson);
-          var arg4 = cst_encode_list_prim_u_8_loose(sessionNonce);
+          var arg1 = cst_encode_list_prim_u_8_loose(mdocBytes);
+          var arg2 = cst_encode_String(issuerPkx);
+          var arg3 = cst_encode_String(issuerPky);
+          var arg4 = cst_encode_String(docType);
+          var arg5 = cst_encode_String(secretsJson);
+          var arg6 = cst_encode_list_prim_u_8_loose(sessionNonce);
           return wire.wire__crate__api__zk_prove_from_presentation_definition(
             port_,
             arg0,
@@ -1214,6 +1361,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             arg2,
             arg3,
             arg4,
+            arg5,
+            arg6,
           );
         },
         codec: DcoCodec(
@@ -1223,8 +1372,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         constMeta: kCrateApiZkProveFromPresentationDefinitionConstMeta,
         argValues: [
           presentationDefinitionJson,
-          msoBytes,
-          signature,
+          mdocBytes,
+          issuerPkx,
+          issuerPky,
+          docType,
           secretsJson,
           sessionNonce,
         ],
@@ -1238,8 +1389,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         debugName: "zk_prove_from_presentation_definition",
         argNames: [
           "presentationDefinitionJson",
-          "msoBytes",
-          "signature",
+          "mdocBytes",
+          "issuerPkx",
+          "issuerPky",
+          "docType",
           "secretsJson",
           "sessionNonce",
         ],
@@ -1299,6 +1452,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   CredentialStatus dco_decode_box_autoadd_credential_status(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_credential_status(raw);
+  }
+
+  @protected
+  double dco_decode_box_autoadd_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
   }
 
   @protected
@@ -1398,9 +1557,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double dco_decode_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
+  }
+
+  @protected
   double dco_decode_f_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as double;
+  }
+
+  @protected
+  FrbAgeEstimate dco_decode_frb_age_estimate(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbAgeEstimate(
+      estimatedAge: dco_decode_u_8(arr[0]),
+      confidence: dco_decode_f_32(arr[1]),
+      ageRangeLow: dco_decode_u_8(arr[2]),
+      ageRangeHigh: dco_decode_u_8(arr[3]),
+    );
   }
 
   @protected
@@ -1444,6 +1623,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       transactionId: dco_decode_opt_String(arr[2]),
       cNonce: dco_decode_opt_String(arr[3]),
       cNonceExpiresIn: dco_decode_opt_box_autoadd_u_64(arr[4]),
+    );
+  }
+
+  @protected
+  FrbFaceMatchResult dco_decode_frb_face_match_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    return FrbFaceMatchResult(
+      verified: dco_decode_bool(arr[0]),
+      similarity: dco_decode_f_32(arr[1]),
+      threshold: dco_decode_f_32(arr[2]),
+      provider: dco_decode_String(arr[3]),
+      referenceQuality: dco_decode_opt_box_autoadd_f_32(arr[4]),
+      probeQuality: dco_decode_opt_box_autoadd_f_32(arr[5]),
+      processingTimeMs: dco_decode_u_64(arr[6]),
+    );
+  }
+
+  @protected
+  FrbFaceQuality dco_decode_frb_face_quality(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 8)
+      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
+    return FrbFaceQuality(
+      overallScore: dco_decode_f_32(arr[0]),
+      faceDetected: dco_decode_bool(arr[1]),
+      faceCount: dco_decode_u_32(arr[2]),
+      sharpness: dco_decode_f_32(arr[3]),
+      brightness: dco_decode_f_32(arr[4]),
+      contrast: dco_decode_f_32(arr[5]),
+      faceSize: dco_decode_f_32(arr[6]),
+      pose: dco_decode_f_32(arr[7]),
     );
   }
 
@@ -1641,6 +1855,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double? dco_decode_opt_box_autoadd_f_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_f_32(raw);
+  }
+
+  @protected
   Proof? dco_decode_opt_box_autoadd_proof(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_proof(raw);
@@ -1755,6 +1975,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
   BigInt dco_decode_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeU64(raw);
@@ -1854,6 +2080,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_credential_status(deserializer));
+  }
+
+  @protected
+  double sse_decode_box_autoadd_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_f_32(deserializer));
   }
 
   @protected
@@ -1959,9 +2191,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double sse_decode_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getFloat32();
+  }
+
+  @protected
   double sse_decode_f_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getFloat64();
+  }
+
+  @protected
+  FrbAgeEstimate sse_decode_frb_age_estimate(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_estimatedAge = sse_decode_u_8(deserializer);
+    var var_confidence = sse_decode_f_32(deserializer);
+    var var_ageRangeLow = sse_decode_u_8(deserializer);
+    var var_ageRangeHigh = sse_decode_u_8(deserializer);
+    return FrbAgeEstimate(
+      estimatedAge: var_estimatedAge,
+      confidence: var_confidence,
+      ageRangeLow: var_ageRangeLow,
+      ageRangeHigh: var_ageRangeHigh,
+    );
   }
 
   @protected
@@ -2016,6 +2269,52 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       transactionId: var_transactionId,
       cNonce: var_cNonce,
       cNonceExpiresIn: var_cNonceExpiresIn,
+    );
+  }
+
+  @protected
+  FrbFaceMatchResult sse_decode_frb_face_match_result(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_verified = sse_decode_bool(deserializer);
+    var var_similarity = sse_decode_f_32(deserializer);
+    var var_threshold = sse_decode_f_32(deserializer);
+    var var_provider = sse_decode_String(deserializer);
+    var var_referenceQuality = sse_decode_opt_box_autoadd_f_32(deserializer);
+    var var_probeQuality = sse_decode_opt_box_autoadd_f_32(deserializer);
+    var var_processingTimeMs = sse_decode_u_64(deserializer);
+    return FrbFaceMatchResult(
+      verified: var_verified,
+      similarity: var_similarity,
+      threshold: var_threshold,
+      provider: var_provider,
+      referenceQuality: var_referenceQuality,
+      probeQuality: var_probeQuality,
+      processingTimeMs: var_processingTimeMs,
+    );
+  }
+
+  @protected
+  FrbFaceQuality sse_decode_frb_face_quality(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_overallScore = sse_decode_f_32(deserializer);
+    var var_faceDetected = sse_decode_bool(deserializer);
+    var var_faceCount = sse_decode_u_32(deserializer);
+    var var_sharpness = sse_decode_f_32(deserializer);
+    var var_brightness = sse_decode_f_32(deserializer);
+    var var_contrast = sse_decode_f_32(deserializer);
+    var var_faceSize = sse_decode_f_32(deserializer);
+    var var_pose = sse_decode_f_32(deserializer);
+    return FrbFaceQuality(
+      overallScore: var_overallScore,
+      faceDetected: var_faceDetected,
+      faceCount: var_faceCount,
+      sharpness: var_sharpness,
+      brightness: var_brightness,
+      contrast: var_contrast,
+      faceSize: var_faceSize,
+      pose: var_pose,
     );
   }
 
@@ -2294,6 +2593,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_f_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   Proof? sse_decode_opt_box_autoadd_proof(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -2444,6 +2754,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
+  }
+
+  @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getBigUint64();
@@ -2522,6 +2838,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double cst_encode_f_32(double raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw;
+  }
+
+  @protected
   double cst_encode_f_64(double raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw;
@@ -2537,6 +2859,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   int cst_encode_privacy_level(PrivacyLevel raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_i_32(raw.index);
+  }
+
+  @protected
+  int cst_encode_u_32(int raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw;
   }
 
   @protected
@@ -2614,6 +2942,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_credential_status(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_f_32(self, serializer);
   }
 
   @protected
@@ -2714,9 +3048,27 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_f_32(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putFloat32(self);
+  }
+
+  @protected
   void sse_encode_f_64(double self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putFloat64(self);
+  }
+
+  @protected
+  void sse_encode_frb_age_estimate(
+    FrbAgeEstimate self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_8(self.estimatedAge, serializer);
+    sse_encode_f_32(self.confidence, serializer);
+    sse_encode_u_8(self.ageRangeLow, serializer);
+    sse_encode_u_8(self.ageRangeHigh, serializer);
   }
 
   @protected
@@ -2755,6 +3107,37 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.transactionId, serializer);
     sse_encode_opt_String(self.cNonce, serializer);
     sse_encode_opt_box_autoadd_u_64(self.cNonceExpiresIn, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_face_match_result(
+    FrbFaceMatchResult self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.verified, serializer);
+    sse_encode_f_32(self.similarity, serializer);
+    sse_encode_f_32(self.threshold, serializer);
+    sse_encode_String(self.provider, serializer);
+    sse_encode_opt_box_autoadd_f_32(self.referenceQuality, serializer);
+    sse_encode_opt_box_autoadd_f_32(self.probeQuality, serializer);
+    sse_encode_u_64(self.processingTimeMs, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_face_quality(
+    FrbFaceQuality self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_f_32(self.overallScore, serializer);
+    sse_encode_bool(self.faceDetected, serializer);
+    sse_encode_u_32(self.faceCount, serializer);
+    sse_encode_f_32(self.sharpness, serializer);
+    sse_encode_f_32(self.brightness, serializer);
+    sse_encode_f_32(self.contrast, serializer);
+    sse_encode_f_32(self.faceSize, serializer);
+    sse_encode_f_32(self.pose, serializer);
   }
 
   @protected
@@ -2990,6 +3373,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_f_32(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_proof(Proof? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -3098,6 +3491,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.trustAnchor, serializer);
     sse_encode_opt_String(self.statusMessage, serializer);
     sse_encode_list_String(self.certificateChain, serializer);
+  }
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
   }
 
   @protected

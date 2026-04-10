@@ -21,9 +21,7 @@ import SpruceIDMobileSdkRs
     let controller = window?.rootViewController as! FlutterViewController
 
     // Register SpruceID platform channels
-    if let registrar = controller.registrar(forPlugin: "SpruceIdPlugin") {
-      SpruceIdChannelHandler.register(with: registrar)
-    }
+    SpruceIdChannelHandler.register(with: controller.binaryMessenger)
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

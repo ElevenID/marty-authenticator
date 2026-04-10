@@ -2,9 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/utils/animations/unscaled_animation_controller.dart';
+import 'package:marty_authenticator/utils/animations/unscaled_animation_controller.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../utils/customization/theme_extentions/status_colors.dart';
 import '../utils/riverpod/riverpod_providers/state_providers/status_message_provider.dart';
 import '../utils/utils.dart';

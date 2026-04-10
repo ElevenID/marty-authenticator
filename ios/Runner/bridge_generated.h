@@ -165,6 +165,13 @@ typedef struct wire_cst_list_credential_group {
   int32_t len;
 } wire_cst_list_credential_group;
 
+typedef struct wire_cst_frb_age_estimate {
+  uint8_t estimated_age;
+  float confidence;
+  uint8_t age_range_low;
+  uint8_t age_range_high;
+} wire_cst_frb_age_estimate;
+
 typedef struct wire_cst_frb_authorization_request {
   struct wire_cst_list_prim_u_8_strict *authorization_url;
   struct wire_cst_list_prim_u_8_strict *code_verifier;
@@ -187,6 +194,27 @@ typedef struct wire_cst_frb_credential_response {
   struct wire_cst_list_prim_u_8_strict *c_nonce;
   uint64_t *c_nonce_expires_in;
 } wire_cst_frb_credential_response;
+
+typedef struct wire_cst_frb_face_match_result {
+  bool verified;
+  float similarity;
+  float threshold;
+  struct wire_cst_list_prim_u_8_strict *provider;
+  float *reference_quality;
+  float *probe_quality;
+  uint64_t processing_time_ms;
+} wire_cst_frb_face_match_result;
+
+typedef struct wire_cst_frb_face_quality {
+  float overall_score;
+  bool face_detected;
+  uint32_t face_count;
+  float sharpness;
+  float brightness;
+  float contrast;
+  float face_size;
+  float pose;
+} wire_cst_frb_face_quality;
 
 typedef struct wire_cst_frb_issuer_metadata {
   struct wire_cst_list_prim_u_8_strict *credential_issuer;
@@ -239,6 +267,10 @@ typedef struct wire_cst_selectable_credential {
   int32_t privacy_level;
 } wire_cst_selectable_credential;
 
+void frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality(int64_t port_,
+                                                                                   struct wire_cst_list_prim_u_8_strict *image,
+                                                                                   struct wire_cst_list_prim_u_8_strict *models_dir);
+
 void frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints(int64_t port_,
                                                                                  struct wire_cst_list_prim_u_8_strict *policy_json,
                                                                                  struct wire_cst_list_prim_u_8_strict *issuer_id,
@@ -253,6 +285,10 @@ void frbgen_privacyidea_authenticator_wire__crate__api__credential_from_json(int
 
 void frbgen_privacyidea_authenticator_wire__crate__api__credential_to_json(int64_t port_,
                                                                            struct wire_cst_credential *credential);
+
+void frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age(int64_t port_,
+                                                                                 struct wire_cst_list_prim_u_8_strict *image,
+                                                                                 struct wire_cst_list_prim_u_8_strict *models_dir);
 
 void frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request(int64_t port_,
                                                                                       struct wire_cst_list_prim_u_8_strict *request_json,
@@ -292,6 +328,12 @@ void frbgen_privacyidea_authenticator_wire__crate__api__sync_policies(int64_t po
 void frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust(int64_t port_,
                                                                                 struct wire_cst_m_doc_credential *mdoc,
                                                                                 struct wire_cst_list_list_prim_u_8_strict *x5chain);
+
+void frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match(int64_t port_,
+                                                                                 struct wire_cst_list_prim_u_8_strict *reference_image,
+                                                                                 struct wire_cst_list_prim_u_8_strict *probe_image,
+                                                                                 float *threshold,
+                                                                                 struct wire_cst_list_prim_u_8_strict *models_dir);
 
 void frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain(int64_t port_,
                                                                                 struct wire_cst_list_list_prim_u_8_strict *x5chain);
@@ -353,14 +395,18 @@ void frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_devic
 void frbgen_privacyidea_authenticator_wire__crate__api__zk_prove(int64_t port_,
                                                                  struct wire_cst_list_prim_u_8_strict *predicate_id,
                                                                  struct wire_cst_list_prim_u_8_strict *claim_value,
-                                                                 struct wire_cst_list_prim_u_8_loose *mso_bytes,
-                                                                 struct wire_cst_list_prim_u_8_loose *signature,
+                                                                 struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
+                                                                 struct wire_cst_list_prim_u_8_strict *issuer_pkx,
+                                                                 struct wire_cst_list_prim_u_8_strict *issuer_pky,
+                                                                 struct wire_cst_list_prim_u_8_strict *doc_type,
                                                                  struct wire_cst_list_prim_u_8_loose *session_nonce);
 
 void frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition(int64_t port_,
                                                                                               struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
-                                                                                              struct wire_cst_list_prim_u_8_loose *mso_bytes,
-                                                                                              struct wire_cst_list_prim_u_8_loose *signature,
+                                                                                              struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
+                                                                                              struct wire_cst_list_prim_u_8_strict *issuer_pkx,
+                                                                                              struct wire_cst_list_prim_u_8_strict *issuer_pky,
+                                                                                              struct wire_cst_list_prim_u_8_strict *doc_type,
                                                                                               struct wire_cst_list_prim_u_8_strict *secrets_json,
                                                                                               struct wire_cst_list_prim_u_8_loose *session_nonce);
 
@@ -371,6 +417,8 @@ void frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque
 struct wire_cst_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential(void);
 
 struct wire_cst_credential_status *frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status(void);
+
+float *frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32(float value);
 
 struct wire_cst_m_doc_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential(void);
 
@@ -405,6 +453,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     int64_t dummy_var = 0;
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status);
+    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_proof);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_sd_jwt_credential);
@@ -451,6 +500,9 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_prove);
     dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition);
+    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality);
+    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age);
+    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);
     return dummy_var;
 }

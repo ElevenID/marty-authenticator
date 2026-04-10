@@ -22,7 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../../model/riverpod_states/settings_state.dart';
 import '../../../../../../../widgets/dialog_widgets/default_dialog.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import '../settings_view_widgets/settings_group.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
-import 'package:privacyidea_authenticator/utils/app_scroll_behavior.dart';
-import 'package:privacyidea_authenticator/views/main_view/document_view.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/utils/app_scroll_behavior.dart';
+import 'package:marty_authenticator/views/main_view/document_view.dart';
 
 void main() {
   runApp(const DocumentApp());

@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/mains/main_netknights.dart';
+import 'package:marty_authenticator/mains/main_marty.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../../utils/riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import '../settings_view_widgets/settings_group.dart';
 
@@ -30,7 +30,7 @@ class SettingsGroupBackroundImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (PrivacyIDEAAuthenticator.currentCustomization?.backgroundImage == null)
+    if (MartyAuthenticator.currentCustomization?.backgroundImage == null)
       return const SizedBox();
     return SettingsGroup(
       title: AppLocalizations.of(context)!.backgroundImage,

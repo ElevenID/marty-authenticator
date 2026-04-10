@@ -21,9 +21,6 @@ import 'dart:convert';
 
 import '../../utils/logger.dart';
 import '../enums/algorithms.dart';
-import '../token_container.dart';
-import '../token_import/token_origin_data.dart';
-import '../token_template.dart';
 import 'token.dart';
 
 abstract class OTPToken extends Token {
@@ -70,7 +67,6 @@ abstract class OTPToken extends Token {
     super.isHidden,
     super.sortIndex,
     super.folderId,
-    super.origin,
     super.label = '',
     super.issuer = '',
     super.isOffline,
@@ -107,7 +103,6 @@ abstract class OTPToken extends Token {
     String? tokenImage,
     int? sortIndex,
     int? Function()? folderId,
-    TokenOriginData? origin,
     bool? isOffline,
   });
 
@@ -150,14 +145,4 @@ abstract class OTPToken extends Token {
       if (serial == null) OTP_VALUES: [otpValue, nextValue],
     });
   }
-
-  @override
-  TokenTemplate toTemplate({TokenContainer? container}) =>
-      super.toTemplate(container: container) ??
-      TokenTemplate.withOtps(
-        otpAuthMap: toOtpAuthMap(),
-        otps: [otpValue, nextValue],
-        container: container,
-        additionalData: additionalData,
-      );
 }

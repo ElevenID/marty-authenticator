@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/utils/http_status_checker.dart';
+import 'package:marty_authenticator/utils/http_status_checker.dart';
 
 void main() {
   group('HttpStatusChecker', () {

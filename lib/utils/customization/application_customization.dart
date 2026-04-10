@@ -21,7 +21,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:privacyidea_authenticator/utils/app_info_utils.dart';
+import 'package:marty_authenticator/utils/app_info_utils.dart';
 
 import '../../../utils/customization/theme_customization.dart';
 import '../../model/enums/app_feature.dart';

@@ -1,7 +1,7 @@
-name: privacyidea_authenticator
-description: A Digital Document Wallet and Authenticator App.
-homepage: https://netknights.it
-repository: https://github.com/privacyidea/pi-authenticator
+name: marty_authenticator
+description: A Digital Document Wallet and Authenticator App — Marty Identity Platform.
+homepage: https://github.com/burdettadam/marty-authenticator
+repository: https://github.com/burdettadam/marty-authenticator
 publish_to: none
 
 # The following defines the version and build number for your application.
@@ -39,28 +39,21 @@ dependencies:
   encrypt: ^5.0.3
   file_selector: ^1.0.3
   expandable: ^5.0.1
-  firebase_core: ^4.1.0
-  firebase_messaging: ^16.0.1
   fixnum: ^1.1.1
   fluentui_system_icons: ^1.1.260
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^19.4.1
   flutter_localizations:
     sdk: flutter
-  flutter_mailer: ^3.0.0
   flutter_riverpod: ^2.6.1
   flutter_secure_storage: ^9.2.4
-  flutter_slidable: ^4.0.0
   flutter_svg: ^2.0.16
   flutter_zxing: ^2.1.0
   font_awesome_flutter: ^10.8.0
   getwidget: ^7.0.0
   freezed_annotation: ^2.4.4
-  gms_check: ^1.0.3
   google_mlkit_face_detection: ^0.13.1
   hex: ^0.2.0
-  home_widget: ^0.8.0
   http: ^1.6.0
   image: ^4.3.0
   image_cropper: ^11.0.0
@@ -79,7 +72,6 @@ dependencies:
   path_provider: ^2.1.4
   permission_handler: ^12.0.1
   pointycastle: ^3.9.1
-  protobuf: ^5.1.0
   riverpod_annotation: ^2.6.0
   shared_preferences: ^2.3.2
   simple_icons: ^14.6.1

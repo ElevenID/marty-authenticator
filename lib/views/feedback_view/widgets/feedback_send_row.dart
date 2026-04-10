@@ -19,11 +19,10 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:privacyidea_authenticator/mains/main_netknights.dart';
+import 'package:marty_authenticator/mains/main_marty.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../../utils/app_info_utils.dart';
-import '../../../utils/pi_mailer.dart';
 import '../../../utils/view_utils.dart';
 import '../../../widgets/dialog_widgets/default_dialog.dart';
 import '../../main_view/main_view.dart';
@@ -145,17 +144,11 @@ class _FeedbackSendRowState extends State<FeedbackSendRow> {
 
   String _addDeviceInfoToMail(String feedback) =>
       '$feedback\n\n[${InfoUtils.currentVersionAndBuildNumber}] ${InfoUtils.deviceInfoString}';
-  Future<bool> _sendMail(String mailText) => PiMailer.sendMail(
-    mailRecipients: _mailRecipients,
-    subjectPrefix:
-        PrivacyIDEAAuthenticator.currentCustomization?.feedbackSubjectPrefix,
-    subject: '',
-    body: mailText,
-    subjectAppVersion: false,
-  );
+  Future<bool> _sendMail(String mailText) =>
+      Future.value(false); // Mail sending disabled — PiMailer removed
 
   Set<String> get _mailRecipients =>
-      PrivacyIDEAAuthenticator.currentCustomization != null
-      ? {PrivacyIDEAAuthenticator.currentCustomization!.feedbackRecipient}
+      MartyAuthenticator.currentCustomization != null
+      ? {MartyAuthenticator.currentCustomization!.feedbackRecipient}
       : {};
 }

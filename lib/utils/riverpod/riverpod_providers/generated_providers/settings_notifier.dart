@@ -35,9 +35,6 @@ part 'settings_notifier.g.dart';
 final settingsProvider = settingsNotifierProviderOf(
   repo: PreferenceSettingsRepository(),
 );
-final hidePushTokensProvider = settingsProvider.select<bool>(
-  (asyncValue) => asyncValue.value?.hidePushTokens ?? false,
-);
 
 @Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
@@ -140,7 +137,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   Future<SettingsState> setPolling(bool value) {
     Logger.info('Polling set to $value');
-    return updateState((oldState) => oldState.copyWith(enablePolling: value));
+    return updateState((oldState) => oldState);
   }
 
   Future<SettingsState> setVerboseLogging(bool value) async {
@@ -157,11 +154,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     return updateState(
       (oldState) => oldState.copyWith(verboseLogging: !oldState.verboseLogging),
     );
-  }
-
-  Future<SettingsState> setHidePushTokens(bool value) {
-    Logger.info('Hide push tokens set to $value');
-    return updateState((oldState) => oldState.copyWith(hidePushTokens: value));
   }
 
   Future<SettingsState> setLatestStartedVersion(Version version) {
@@ -183,14 +175,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     return updateState(
       (oldState) =>
           oldState.copyWith(showBackgroundImage: !oldState.showBackgroundImage),
-    );
-  }
-
-  Future<SettingsState> setAutoCloseAppAfterAcceptingPushRequest(bool value) {
-    Logger.info('Auto close app after accepting push request set to $value');
-    return updateState(
-      (oldState) =>
-          oldState.copyWith(autoCloseAppAfterAcceptingPushRequest: value),
     );
   }
 }

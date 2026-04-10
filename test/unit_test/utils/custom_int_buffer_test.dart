@@ -19,7 +19,7 @@
 */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:privacyidea_authenticator/utils/custom_int_buffer.dart';
+import 'package:marty_authenticator/utils/custom_int_buffer.dart';
 
 void main() {
   verifyCustomStringBufferWorks();

@@ -20,10 +20,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:privacyidea_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
-import 'package:privacyidea_authenticator/views/settings_view/settings_groups/settings_group_allow_screenshot/dialogs/allow_screenshot_dialog.dart';
+import 'package:marty_authenticator/utils/riverpod/riverpod_providers/generated_providers/allow_screenshot_notifier.dart';
+import 'package:marty_authenticator/views/settings_view/settings_groups/settings_group_allow_screenshot/dialogs/allow_screenshot_dialog.dart';
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 import '../../settings_view_widgets/settings_group.dart';
 
 class SettingsGroupAllowScreenshot extends ConsumerWidget {

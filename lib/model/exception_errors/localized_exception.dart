@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import 'package:privacyidea_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 class LocalizedException implements Exception {
   final String Function(AppLocalizations localizations) localizedMessage;
