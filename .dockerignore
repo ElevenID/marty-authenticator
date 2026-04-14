@@ -52,3 +52,16 @@ docs/
 # Docker files (don't need to copy these into context)
 docker/
 !docker/Dockerfile.flutter.web.test
+
+# Local development overrides (not for production builds)
+local_wasm_overrides/
+local_plugins/
+
+# Icon source assets (generated icons not needed in build)
+launcher_icons/
+
+# Playwright browser binaries
+.playwright-mcp/
+
+# Pre-commit cache
+.precommit/
