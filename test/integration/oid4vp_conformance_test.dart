@@ -74,6 +74,18 @@ void main() {
         equals(kResponseUri),
         reason: 'OID4VP §6: response_uri MUST be present for direct_post',
       );
+      expect(
+        req.dcqlQuery,
+        isNotNull,
+        reason:
+            'OID4VP §6: the default verifier request should carry dcql_query',
+      );
+      expect(
+        req.presentationDefinition,
+        isNull,
+        reason:
+            'PE is legacy compat only; the default verifier request should omit presentation_definition',
+      );
     });
 
     /// OID4VP §5: All three REQUIRED fields from §5 must be non-null.
@@ -100,6 +112,16 @@ void main() {
         req.responseType,
         isNotEmpty,
         reason: 'OID4VP §5: response_type is REQUIRED',
+      );
+      expect(
+        req.dcqlQuery,
+        isNotNull,
+        reason: 'Default OID4VP requests should expose dcql_query',
+      );
+      expect(
+        req.presentationDefinition,
+        isNull,
+        reason: 'Default OID4VP requests should not expose presentation_definition',
       );
     });
 
@@ -160,10 +182,30 @@ void main() {
             'JWT-encoded request MUST be decoded and nonce MUST match fixture',
       );
       expect(req.clientId, equals(kVerifierId));
+      expect(req.dcqlQuery, isNotNull);
+      expect(req.presentationDefinition, isNull);
+    });
+
+    /// Legacy PE requests must still parse so compat flows (e.g. lissi) survive.
+    test('parsePresentationRequest_legacyPeRequest_stillSupported', () async {
+      final mockClient = MockClient(
+        (_) async => http.Response(
+          kLegacyPresentationRequestJson,
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+
+      final req = await OID4VCHttpClient(
+        mockClient,
+      ).fetchPresentationRequest('https://verifier.example.com/request/legacy-pe');
+
+      expect(req.presentationDefinition, isNotNull);
+      expect(req.dcqlQuery, isNull);
     });
   });
 
-  // ── §2  Presentation Definition ───────────────────────────────────────────
+  // ── §2  Credential Query / Legacy Presentation Definition ────────────────
 
   group('§2 OID4VP / PE v2 — Presentation Definition (VP_W_X.002–003)', () {
     /// PE v2.1 §5: PD in fixture has required `id` and `input_descriptors`.
@@ -232,7 +274,8 @@ void main() {
 
     /// The PD embedded in the presentation request matches the standalone PD fixture.
     test('presentationRequest_embeddedPD_matchesFixture', () {
-      final req = jsonDecode(kPresentationRequestJson) as Map<String, dynamic>;
+      final req =
+        jsonDecode(kLegacyPresentationRequestJson) as Map<String, dynamic>;
       final pd =
           jsonDecode(kPresentationDefinitionJson) as Map<String, dynamic>;
 
@@ -267,13 +310,9 @@ void main() {
         return http.Response('', 200);
       });
 
-      final ps =
-          jsonDecode(kPresentationSubmissionJson) as Map<String, dynamic>;
-
       await OID4VCHttpClient(mockClient).submitVpToken(
         responseUri: kResponseUri,
         vpToken: kFakeVpToken,
-        presentationSubmission: ps,
       );
 
       expect(
@@ -289,8 +328,34 @@ void main() {
       );
     });
 
-    /// OID4VP §7: vp_token and presentation_submission MUST appear in form body.
-    test('submitVpToken_includesVpTokenAndPresentationSubmission', () async {
+    /// DCQL-originated submissions should not require PE metadata.
+    test('submitVpToken_dcqlDefault_omitsPresentationSubmission', () async {
+      String? capturedBody;
+      final mockClient = MockClient((request) async {
+        capturedBody = request.body;
+        return http.Response('', 200);
+      });
+
+      await OID4VCHttpClient(mockClient).submitVpToken(
+        responseUri: kResponseUri,
+        vpToken: kFakeVpToken,
+      );
+
+      expect(
+        capturedBody,
+        contains('vp_token='),
+        reason: 'OID4VP §7: vp_token MUST be in form body',
+      );
+      expect(
+        capturedBody,
+        isNot(contains('presentation_submission=')),
+        reason:
+            'DCQL-originated submissions should omit PE presentation_submission metadata',
+      );
+    });
+
+    /// Legacy PE requests still include presentation_submission when provided.
+    test('submitVpToken_legacyPe_includesPresentationSubmission', () async {
       String? capturedBody;
       final mockClient = MockClient((request) async {
         capturedBody = request.body;
@@ -308,13 +373,9 @@ void main() {
 
       expect(
         capturedBody,
-        contains('vp_token='),
-        reason: 'OID4VP §7: vp_token MUST be in form body',
-      );
-      expect(
-        capturedBody,
         contains('presentation_submission='),
-        reason: 'OID4VP §7: presentation_submission MUST be in form body',
+        reason:
+            'Legacy PE requests should still forward presentation_submission',
       );
     });
 
@@ -326,13 +387,9 @@ void main() {
         return http.Response('', 200);
       });
 
-      final ps =
-          jsonDecode(kPresentationSubmissionJson) as Map<String, dynamic>;
-
       await OID4VCHttpClient(mockClient).submitVpToken(
         responseUri: kResponseUri,
         vpToken: kFakeVpToken,
-        presentationSubmission: ps,
         state: 'abc-state-xyz',
       );
 
@@ -352,13 +409,9 @@ void main() {
         ),
       );
 
-      final ps =
-          jsonDecode(kPresentationSubmissionJson) as Map<String, dynamic>;
-
       final resp = await OID4VCHttpClient(mockClient).submitVpToken(
         responseUri: kResponseUri,
         vpToken: kFakeVpToken,
-        presentationSubmission: ps,
       );
 
       expect(resp.statusCode, equals(200));
@@ -370,13 +423,9 @@ void main() {
         (_) async => http.Response('{"error":"vp_token_invalid"}', 400),
       );
 
-      final ps =
-          jsonDecode(kPresentationSubmissionJson) as Map<String, dynamic>;
-
       final resp = await OID4VCHttpClient(mockClient).submitVpToken(
         responseUri: kResponseUri,
         vpToken: 'tampered.jwt.token',
-        presentationSubmission: ps,
       );
 
       expect(

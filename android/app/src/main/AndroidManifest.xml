@@ -53,7 +53,10 @@
                 <data android:scheme="openid-credential-offer" />
                 <data android:scheme="openid4vp" />
                 <data android:scheme="openid-credential" />
+                <data android:scheme="marty-authenticator" />
+                <data android:scheme="martywallet" />
                 <!-- ElevenID Push Registration -->
+                <data android:scheme="marty" />
                 <data android:scheme="elevenid" />
             </intent-filter>
             <!-- Specifies an Android theme to apply to this Activity as soon as

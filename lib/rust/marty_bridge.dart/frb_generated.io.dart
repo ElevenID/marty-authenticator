@@ -954,9 +954,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     wireObj.client_id = cst_encode_String(apiObj.clientId);
     wireObj.nonce = cst_encode_String(apiObj.nonce);
     wireObj.response_uri = cst_encode_String(apiObj.responseUri);
-    wireObj.presentation_definition_json = cst_encode_String(
+    wireObj.query_type = cst_encode_String(apiObj.queryType);
+    wireObj.presentation_definition_json = cst_encode_opt_String(
       apiObj.presentationDefinitionJson,
     );
+    wireObj.dcql_query_json = cst_encode_opt_String(apiObj.dcqlQueryJson);
   }
 
   @protected
@@ -2047,12 +2049,14 @@ class RustLibWire implements BaseWire {
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> response_uri,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> presentation_definition_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> dcql_query_json,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> credentials_json,
   ) {
     return _wire__crate__api__wallet_build_and_submit_presentation(
       port_,
       response_uri,
       presentation_definition_json,
+      dcql_query_json,
       credentials_json,
     );
   }
@@ -2062,6 +2066,7 @@ class RustLibWire implements BaseWire {
         ffi.NativeFunction<
           ffi.Void Function(
             ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2075,6 +2080,7 @@ class RustLibWire implements BaseWire {
           .asFunction<
             void Function(
               int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -3203,8 +3209,12 @@ final class wire_cst_frb_presentation_request extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> response_uri;
 
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> query_type;
+
   external ffi.Pointer<wire_cst_list_prim_u_8_strict>
   presentation_definition_json;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> dcql_query_json;
 }
 
 final class wire_cst_frb_presentation_response extends ffi.Struct {

@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
+import '../utils/oid4vci_offer_uri.dart';
 import '../utils/spruce_channels.dart';
 import 'spruce_platform_service.dart';
 
@@ -66,10 +67,18 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
+      final normalizedOffer = normalizeOid4vciCredentialOfferUri(
+        credentialOffer,
+      );
+
       // Use refactored Android/iOS handlers with SDK integration
       final result = await w3cChannel.invokeMethod(
         'handleOID4VCOfferRefactored',
-        {'offer': credentialOffer, 'pin': pin, 'keyId': keyId ?? 'default-key'},
+        {
+          'offer': normalizedOffer,
+          'pin': pin,
+          'keyId': keyId ?? 'default-key',
+        },
       );
 
       return Map<String, dynamic>.from(result);

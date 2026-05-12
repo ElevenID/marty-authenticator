@@ -312,18 +312,21 @@ class OID4VCHttpClient {
   ///
   /// POST `application/x-www-form-urlencoded` with:
   ///   `vp_token=<token>`
-  ///   `presentation_submission=<json>`
+  ///   `presentation_submission=<json>` when the request uses Presentation
+  ///   Exchange
   ///   `state=<state>` (if provided)
   Future<http.Response> submitVpToken({
     required String responseUri,
     required String vpToken,
-    required Map<String, dynamic> presentationSubmission,
+    Map<String, dynamic>? presentationSubmission,
     String? state,
   }) async {
     final body = <String, String>{
       'vp_token': vpToken,
-      'presentation_submission': jsonEncode(presentationSubmission),
     };
+    if (presentationSubmission != null) {
+      body['presentation_submission'] = jsonEncode(presentationSubmission);
+    }
     if (state != null) body['state'] = state;
 
     return _http.post(

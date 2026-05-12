@@ -193,12 +193,42 @@ const String kCredentialResponseMdocJson = r'''
 
 // ── OID4VP — Presentation Flow ────────────────────────────────────────────────
 
-/// OID4VP 1.0 Final §5 — authorization request with embedded PD.
+/// OID4VP 1.0 Final §5/§6 — default authorization request with embedded DCQL.
 const String kPresentationRequestJson = r'''
 {
   "response_type": "vp_token",
   "client_id": "https://verifier.example.com",
-  "client_id_scheme": "redirect_uri",
+  "client_id_scheme": "entity_id",
+  "nonce": "n-0S6_WzA2Mj",
+  "response_mode": "direct_post",
+  "response_uri": "https://verifier.example.com/callback",
+  "state": "test-state-abc",
+  "dcql_query": {
+    "credentials": [
+      {
+        "id": "university_degree",
+        "format": "jwt_vc_json",
+        "meta": {
+          "type_values": [["VerifiableCredential", "UniversityDegreeCredential"]]
+        },
+        "claims": [
+          {
+            "id": "claim_degree",
+            "path": ["degree"]
+          }
+        ]
+      }
+    ]
+  }
+}
+''';
+
+/// Legacy PE-shaped authorization request retained for compatibility coverage.
+const String kLegacyPresentationRequestJson = r'''
+{
+  "response_type": "vp_token",
+  "client_id": "https://verifier.example.com",
+  "client_id_scheme": "entity_id",
   "nonce": "n-0S6_WzA2Mj",
   "response_mode": "direct_post",
   "response_uri": "https://verifier.example.com/callback",

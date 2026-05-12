@@ -40,7 +40,11 @@
 /// // --- Credential presentation (OID4VP) ---
 /// final req = await svc.parsePresentationRequest(scannedUri);
 /// await svc.buildAndSubmitPresentation(
-///   req.responseUri, req.presentationDefinitionJson, credentialsJson);
+///   responseUri: req.responseUri,
+///   presentationDefinitionJson: req.presentationDefinitionJson,
+///   dcqlQueryJson: req.dcqlQueryJson,
+///   credentialsJson: credentialsJson,
+/// );
 /// ```
 library;
 
@@ -49,6 +53,7 @@ import 'dart:typed_data';
 
 import '../rust/marty_bridge.dart/api.dart';
 import '../utils/logger.dart';
+import '../utils/oid4vci_offer_uri.dart';
 
 // ============================================================================
 // Re-exported Dart models (generated types from FRB codegen match these)
@@ -165,13 +170,17 @@ class PresentationRequest {
   final String clientId;
   final String nonce;
   final String responseUri;
-  final String presentationDefinitionJson;
+  final String queryType;
+  final String? presentationDefinitionJson;
+  final String? dcqlQueryJson;
 
   const PresentationRequest({
     required this.clientId,
     required this.nonce,
     required this.responseUri,
-    required this.presentationDefinitionJson,
+    required this.queryType,
+    this.presentationDefinitionJson,
+    this.dcqlQueryJson,
   });
 }
 
@@ -219,7 +228,8 @@ class OID4VCService {
   /// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
   Future<CredentialOffer> parseCredentialOffer(String offerUri) async {
     Logger.info('Parsing credential offer URI', name: 'OID4VCService');
-    final r = await walletParseCredentialOffer(offerUri: offerUri);
+    final normalizedOfferUri = normalizeOid4vciCredentialOfferUri(offerUri);
+    final r = await walletParseCredentialOffer(offerUri: normalizedOfferUri);
     return CredentialOffer(
       credentialIssuer: r.credentialIssuer,
       credentialConfigurationIds: r.credentialConfigurationIds,
@@ -400,7 +410,9 @@ class OID4VCService {
       clientId: r.clientId,
       nonce: r.nonce,
       responseUri: r.responseUri,
+      queryType: r.queryType,
       presentationDefinitionJson: r.presentationDefinitionJson,
+      dcqlQueryJson: r.dcqlQueryJson,
     );
   }
 
@@ -409,13 +421,20 @@ class OID4VCService {
   /// [credentialsJson] — JSON object mapping descriptor ID → credential string.
   Future<PresentationResult> buildAndSubmitPresentation({
     required String responseUri,
-    required String presentationDefinitionJson,
+    String? presentationDefinitionJson,
+    String? dcqlQueryJson,
     required String credentialsJson,
   }) async {
     Logger.info('Submitting VP presentation', name: 'OID4VCService');
+    if (presentationDefinitionJson == null && dcqlQueryJson == null) {
+      throw ArgumentError(
+        'Either presentationDefinitionJson or dcqlQueryJson is required.',
+      );
+    }
     final r = await walletBuildAndSubmitPresentation(
       responseUri: responseUri,
       presentationDefinitionJson: presentationDefinitionJson,
+      dcqlQueryJson: dcqlQueryJson,
       credentialsJson: credentialsJson,
     );
     return _presentationResultFromFrb(r);

@@ -215,11 +215,13 @@ Future<FrbPresentationRequest> walletParsePresentationRequest({
 /// Build and submit a standard VP presentation.
 Future<FrbPresentationResponse> walletBuildAndSubmitPresentation({
   required String responseUri,
-  required String presentationDefinitionJson,
+  String? presentationDefinitionJson,
+  String? dcqlQueryJson,
   required String credentialsJson,
 }) => RustLib.instance.api.crateApiWalletBuildAndSubmitPresentation(
   responseUri: responseUri,
   presentationDefinitionJson: presentationDefinitionJson,
+  dcqlQueryJson: dcqlQueryJson,
   credentialsJson: credentialsJson,
 );
 
@@ -430,13 +432,17 @@ class FrbPresentationRequest {
   final String clientId;
   final String nonce;
   final String responseUri;
-  final String presentationDefinitionJson;
+  final String queryType;
+  final String? presentationDefinitionJson;
+  final String? dcqlQueryJson;
 
   const FrbPresentationRequest({
     required this.clientId,
     required this.nonce,
     required this.responseUri,
-    required this.presentationDefinitionJson,
+    required this.queryType,
+    this.presentationDefinitionJson,
+    this.dcqlQueryJson,
   });
 
   @override
@@ -444,7 +450,9 @@ class FrbPresentationRequest {
       clientId.hashCode ^
       nonce.hashCode ^
       responseUri.hashCode ^
-      presentationDefinitionJson.hashCode;
+      queryType.hashCode ^
+      presentationDefinitionJson.hashCode ^
+      dcqlQueryJson.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -454,7 +462,9 @@ class FrbPresentationRequest {
           clientId == other.clientId &&
           nonce == other.nonce &&
           responseUri == other.responseUri &&
-          presentationDefinitionJson == other.presentationDefinitionJson;
+          queryType == other.queryType &&
+          presentationDefinitionJson == other.presentationDefinitionJson &&
+          dcqlQueryJson == other.dcqlQueryJson;
 }
 
 /// The verifier's response after receiving a VP token.

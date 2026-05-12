@@ -32,6 +32,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../utils/logger.dart';
+import '../utils/oid4vci_offer_uri.dart';
 import 'spruce_sdk_services.dart';
 
 /// Enhanced QR scanner service provider
@@ -140,16 +141,22 @@ class QRScannerServiceEnhanced {
   /// Parse URL-based QR codes
   Future<ParsedQRData> _parseURLQR(String url) async {
     final uri = Uri.parse(url);
+    final normalizedOfferUri = normalizeOid4vciCredentialOfferUri(url);
+    final path = uri.path.toLowerCase();
 
     // Check for credential offer URLs
-    if (uri.path.contains('credential-offer') ||
-        uri.queryParameters.containsKey('credential_offer_uri')) {
+    if (path.contains('credential-offer') ||
+        path.contains('/offers/') ||
+        uri.queryParameters.containsKey('credential_offer_uri') ||
+        uri.queryParameters.containsKey('credential_offer')) {
       return ParsedQRData(
         type: QRType.credentialOffer,
         format: QRFormat.url,
         rawData: url,
         parsedContent: {
-          'offer_uri': uri.queryParameters['credential_offer_uri'] ?? url,
+          'offer_uri': normalizedOfferUri,
+          'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
+          'credential_offer': uri.queryParameters['credential_offer'],
           'issuer_state': uri.queryParameters['issuer_state'],
         },
         metadata: {
@@ -297,8 +304,10 @@ class QRScannerServiceEnhanced {
                   uri.queryParameters['presentation_definition_uri'],
             }
           : {
+              'offer_uri': normalizeOid4vciCredentialOfferUri(data),
               'credential_offer_uri':
                   uri.queryParameters['credential_offer_uri'],
+              'credential_offer': uri.queryParameters['credential_offer'],
               'issuer_state': uri.queryParameters['issuer_state'],
             },
       metadata: {'protocol': 'openid', 'query_params': uri.queryParameters},

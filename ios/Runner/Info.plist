@@ -42,6 +42,9 @@
 				<string>openid-credential-offer</string>
 				<string>openid4vp</string>
 				<string>openid-credential</string>
+				<string>marty-authenticator</string>
+				<string>martywallet</string>
+				<string>marty</string>
 				<string>elevenid</string>
 			</array>
 		</dict>

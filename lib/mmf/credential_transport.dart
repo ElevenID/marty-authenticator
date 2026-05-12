@@ -219,6 +219,12 @@ class PresentationRequest {
   /// Presentation definition (raw)
   final Map<String, dynamic>? presentationDefinition;
 
+  /// DCQL query (raw)
+  final Map<String, dynamic>? dcqlQuery;
+
+  /// The original credential query shape (`presentation_definition` or `dcql_query`).
+  final String? queryType;
+
   const PresentationRequest({
     required this.id,
     required this.verifierId,
@@ -227,6 +233,8 @@ class PresentationRequest {
     required this.responseUri,
     required this.nonce,
     this.presentationDefinition,
+    this.dcqlQuery,
+    this.queryType,
   });
 }
 

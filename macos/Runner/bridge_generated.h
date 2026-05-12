@@ -229,7 +229,9 @@ typedef struct wire_cst_frb_presentation_request {
   struct wire_cst_list_prim_u_8_strict *client_id;
   struct wire_cst_list_prim_u_8_strict *nonce;
   struct wire_cst_list_prim_u_8_strict *response_uri;
+  struct wire_cst_list_prim_u_8_strict *query_type;
   struct wire_cst_list_prim_u_8_strict *presentation_definition_json;
+  struct wire_cst_list_prim_u_8_strict *dcql_query_json;
 } wire_cst_frb_presentation_request;
 
 typedef struct wire_cst_frb_presentation_response {
@@ -341,6 +343,7 @@ void frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain(
 void frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation(int64_t port_,
                                                                                              struct wire_cst_list_prim_u_8_strict *response_uri,
                                                                                              struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
+                                                                                             struct wire_cst_list_prim_u_8_strict *dcql_query_json,
                                                                                              struct wire_cst_list_prim_u_8_strict *credentials_json);
 
 void frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(int64_t port_,

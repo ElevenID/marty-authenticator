@@ -312,7 +312,10 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   Future<void> _acceptCredentialOffer(EnrichedQRResult enrichedResult) async {
     try {
       final client = ref.read(spruceIdClientExtendedProvider);
-      final offerUri = enrichedResult.validatedResult.parsedData.rawData;
+      final offerUri =
+          enrichedResult.validatedResult.parsedData.parsedContent?['offer_uri']
+              as String? ??
+          enrichedResult.validatedResult.parsedData.rawData;
 
       await client.handleOID4VCOfferSDK(credentialOffer: offerUri);
 

@@ -161,7 +161,8 @@ abstract class RustLibApi extends BaseApi {
 
   Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitPresentation({
     required String responseUri,
-    required String presentationDefinitionJson,
+    String? presentationDefinitionJson,
+    String? dcqlQueryJson,
     required String credentialsJson,
   });
 
@@ -843,20 +844,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Future<FrbPresentationResponse> crateApiWalletBuildAndSubmitPresentation({
     required String responseUri,
-    required String presentationDefinitionJson,
+    String? presentationDefinitionJson,
+    String? dcqlQueryJson,
     required String credentialsJson,
   }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           var arg0 = cst_encode_String(responseUri);
-          var arg1 = cst_encode_String(presentationDefinitionJson);
-          var arg2 = cst_encode_String(credentialsJson);
+          var arg1 = cst_encode_opt_String(presentationDefinitionJson);
+          var arg2 = cst_encode_opt_String(dcqlQueryJson);
+          var arg3 = cst_encode_String(credentialsJson);
           return wire.wire__crate__api__wallet_build_and_submit_presentation(
             port_,
             arg0,
             arg1,
             arg2,
+            arg3,
           );
         },
         codec: DcoCodec(
@@ -864,7 +868,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: dco_decode_AnyhowException,
         ),
         constMeta: kCrateApiWalletBuildAndSubmitPresentationConstMeta,
-        argValues: [responseUri, presentationDefinitionJson, credentialsJson],
+        argValues: [
+          responseUri,
+          presentationDefinitionJson,
+          dcqlQueryJson,
+          credentialsJson,
+        ],
         apiImpl: this,
       ),
     );
@@ -876,6 +885,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: [
           "responseUri",
           "presentationDefinitionJson",
+          "dcqlQueryJson",
           "credentialsJson",
         ],
       );
@@ -1681,13 +1691,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
     return FrbPresentationRequest(
       clientId: dco_decode_String(arr[0]),
       nonce: dco_decode_String(arr[1]),
       responseUri: dco_decode_String(arr[2]),
-      presentationDefinitionJson: dco_decode_String(arr[3]),
+      queryType: dco_decode_String(arr[3]),
+      presentationDefinitionJson: dco_decode_opt_String(arr[4]),
+      dcqlQueryJson: dco_decode_opt_String(arr[5]),
     );
   }
 
@@ -2347,12 +2359,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_clientId = sse_decode_String(deserializer);
     var var_nonce = sse_decode_String(deserializer);
     var var_responseUri = sse_decode_String(deserializer);
-    var var_presentationDefinitionJson = sse_decode_String(deserializer);
+    var var_queryType = sse_decode_String(deserializer);
+    var var_presentationDefinitionJson = sse_decode_opt_String(deserializer);
+    var var_dcqlQueryJson = sse_decode_opt_String(deserializer);
     return FrbPresentationRequest(
       clientId: var_clientId,
       nonce: var_nonce,
       responseUri: var_responseUri,
+      queryType: var_queryType,
       presentationDefinitionJson: var_presentationDefinitionJson,
+      dcqlQueryJson: var_dcqlQueryJson,
     );
   }
 
@@ -3163,7 +3179,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.clientId, serializer);
     sse_encode_String(self.nonce, serializer);
     sse_encode_String(self.responseUri, serializer);
-    sse_encode_String(self.presentationDefinitionJson, serializer);
+    sse_encode_String(self.queryType, serializer);
+    sse_encode_opt_String(self.presentationDefinitionJson, serializer);
+    sse_encode_opt_String(self.dcqlQueryJson, serializer);
   }
 
   @protected

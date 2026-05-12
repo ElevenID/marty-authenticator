@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 
 import '../../mmf/credential_transport.dart';
 import '../../interfaces/spruce_interfaces.dart';
+import '../../utils/oid4vci_offer_uri.dart';
 import '../../utils/spruce_channels.dart';
 import '../../utils/logger.dart';
 
@@ -54,9 +55,12 @@ class SpruceCredentialTransport implements ICredentialTransport {
   @override
   Future<IssuanceSession> initiateIssuance(String credentialOfferUri) async {
     try {
+      final normalizedOfferUri = normalizeOid4vciCredentialOfferUri(
+        credentialOfferUri,
+      );
       final result = await _walletChannel.invokeMethod<Map<dynamic, dynamic>>(
         'initiateIssuance',
-        {'credentialOfferUri': credentialOfferUri},
+        {'credentialOfferUri': normalizedOfferUri},
       );
 
       if (result == null) {
@@ -232,6 +236,14 @@ class SpruceCredentialTransport implements ICredentialTransport {
         nonce: result['nonce'] as String? ?? '',
         presentationDefinition:
             result['presentationDefinition'] as Map<String, dynamic>?,
+        dcqlQuery: result['dcqlQuery'] as Map<String, dynamic>?,
+        queryType:
+          result['queryType'] as String? ??
+          (result['dcqlQuery'] != null
+            ? 'dcql_query'
+            : (result['presentationDefinition'] != null
+              ? 'presentation_definition'
+              : null)),
       );
     } on PlatformException catch (e) {
       Logger.error('Failed to parse presentation request', error: e);

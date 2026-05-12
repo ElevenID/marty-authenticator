@@ -680,7 +680,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_String(raw.clientId),
       cst_encode_String(raw.nonce),
       cst_encode_String(raw.responseUri),
-      cst_encode_String(raw.presentationDefinitionJson),
+      cst_encode_String(raw.queryType),
+      cst_encode_opt_String(raw.presentationDefinitionJson),
+      cst_encode_opt_String(raw.dcqlQueryJson),
     ].jsify()!;
   }
 
@@ -1456,12 +1458,14 @@ class RustLibWire implements BaseWire {
   void wire__crate__api__wallet_build_and_submit_presentation(
     NativePortType port_,
     String response_uri,
-    String presentation_definition_json,
+    String? presentation_definition_json,
+    String? dcql_query_json,
     String credentials_json,
   ) => wasmModule.wire__crate__api__wallet_build_and_submit_presentation(
     port_,
     response_uri,
     presentation_definition_json,
+    dcql_query_json,
     credentials_json,
   );
 
@@ -1755,7 +1759,8 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
   external void wire__crate__api__wallet_build_and_submit_presentation(
     NativePortType port_,
     String response_uri,
-    String presentation_definition_json,
+    String? presentation_definition_json,
+    String? dcql_query_json,
     String credentials_json,
   );
 

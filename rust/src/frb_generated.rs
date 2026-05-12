@@ -538,7 +538,8 @@ fn wire__crate__api__verify_mdoc_trust_chain_impl(
 fn wire__crate__api__wallet_build_and_submit_presentation_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     response_uri: impl CstDecode<String>,
-    presentation_definition_json: impl CstDecode<String>,
+    presentation_definition_json: impl CstDecode<Option<String>>,
+    dcql_query_json: impl CstDecode<Option<String>>,
     credentials_json: impl CstDecode<String>,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
@@ -550,6 +551,7 @@ fn wire__crate__api__wallet_build_and_submit_presentation_impl(
         move || {
             let api_response_uri = response_uri.cst_decode();
             let api_presentation_definition_json = presentation_definition_json.cst_decode();
+            let api_dcql_query_json = dcql_query_json.cst_decode();
             let api_credentials_json = credentials_json.cst_decode();
             move |context| async move {
                 transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -557,6 +559,7 @@ fn wire__crate__api__wallet_build_and_submit_presentation_impl(
                         let output_ok = crate::api::wallet_build_and_submit_presentation(
                             api_response_uri,
                             api_presentation_definition_json,
+                            api_dcql_query_json,
                             api_credentials_json,
                         )
                         .await?;
@@ -1298,12 +1301,16 @@ impl SseDecode for crate::api::FrbPresentationRequest {
         let mut var_clientId = <String>::sse_decode(deserializer);
         let mut var_nonce = <String>::sse_decode(deserializer);
         let mut var_responseUri = <String>::sse_decode(deserializer);
-        let mut var_presentationDefinitionJson = <String>::sse_decode(deserializer);
+        let mut var_queryType = <String>::sse_decode(deserializer);
+        let mut var_presentationDefinitionJson = <Option<String>>::sse_decode(deserializer);
+        let mut var_dcqlQueryJson = <Option<String>>::sse_decode(deserializer);
         return crate::api::FrbPresentationRequest {
             client_id: var_clientId,
             nonce: var_nonce,
             response_uri: var_responseUri,
+            query_type: var_queryType,
             presentation_definition_json: var_presentationDefinitionJson,
+            dcql_query_json: var_dcqlQueryJson,
         };
     }
 }
@@ -2079,9 +2086,11 @@ impl flutter_rust_bridge::IntoDart for crate::api::FrbPresentationRequest {
             self.client_id.into_into_dart().into_dart(),
             self.nonce.into_into_dart().into_dart(),
             self.response_uri.into_into_dart().into_dart(),
+            self.query_type.into_into_dart().into_dart(),
             self.presentation_definition_json
                 .into_into_dart()
                 .into_dart(),
+            self.dcql_query_json.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2588,7 +2597,9 @@ impl SseEncode for crate::api::FrbPresentationRequest {
         <String>::sse_encode(self.client_id, serializer);
         <String>::sse_encode(self.nonce, serializer);
         <String>::sse_encode(self.response_uri, serializer);
-        <String>::sse_encode(self.presentation_definition_json, serializer);
+        <String>::sse_encode(self.query_type, serializer);
+        <Option<String>>::sse_encode(self.presentation_definition_json, serializer);
+        <Option<String>>::sse_encode(self.dcql_query_json, serializer);
     }
 }
 
@@ -3207,7 +3218,9 @@ mod io {
                 client_id: self.client_id.cst_decode(),
                 nonce: self.nonce.cst_decode(),
                 response_uri: self.response_uri.cst_decode(),
+                query_type: self.query_type.cst_decode(),
                 presentation_definition_json: self.presentation_definition_json.cst_decode(),
+                dcql_query_json: self.dcql_query_json.cst_decode(),
             }
         }
     }
@@ -3626,7 +3639,9 @@ mod io {
                 client_id: core::ptr::null_mut(),
                 nonce: core::ptr::null_mut(),
                 response_uri: core::ptr::null_mut(),
+                query_type: core::ptr::null_mut(),
                 presentation_definition_json: core::ptr::null_mut(),
+                dcql_query_json: core::ptr::null_mut(),
             }
         }
     }
@@ -4019,12 +4034,14 @@ mod io {
         port_: i64,
         response_uri: *mut wire_cst_list_prim_u_8_strict,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+        dcql_query_json: *mut wire_cst_list_prim_u_8_strict,
         credentials_json: *mut wire_cst_list_prim_u_8_strict,
     ) {
         wire__crate__api__wallet_build_and_submit_presentation_impl(
             port_,
             response_uri,
             presentation_definition_json,
+            dcql_query_json,
             credentials_json,
         )
     }
@@ -4529,7 +4546,9 @@ mod io {
         client_id: *mut wire_cst_list_prim_u_8_strict,
         nonce: *mut wire_cst_list_prim_u_8_strict,
         response_uri: *mut wire_cst_list_prim_u_8_strict,
+        query_type: *mut wire_cst_list_prim_u_8_strict,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
+        dcql_query_json: *mut wire_cst_list_prim_u_8_strict,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -4992,15 +5011,17 @@ mod web {
                 .unwrap();
             assert_eq!(
                 self_.length(),
-                4,
-                "Expected 4 elements, got {}",
+                6,
+                "Expected 6 elements, got {}",
                 self_.length()
             );
             crate::api::FrbPresentationRequest {
                 client_id: self_.get(0).cst_decode(),
                 nonce: self_.get(1).cst_decode(),
                 response_uri: self_.get(2).cst_decode(),
-                presentation_definition_json: self_.get(3).cst_decode(),
+                query_type: self_.get(3).cst_decode(),
+                presentation_definition_json: self_.get(4).cst_decode(),
+                dcql_query_json: self_.get(5).cst_decode(),
             }
         }
     }
@@ -5679,13 +5700,15 @@ mod web {
     pub fn wire__crate__api__wallet_build_and_submit_presentation(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         response_uri: String,
-        presentation_definition_json: String,
+        presentation_definition_json: Option<String>,
+        dcql_query_json: Option<String>,
         credentials_json: String,
     ) {
         wire__crate__api__wallet_build_and_submit_presentation_impl(
             port_,
             response_uri,
             presentation_definition_json,
+            dcql_query_json,
             credentials_json,
         )
     }

@@ -26,6 +26,7 @@ import '../../../services/spruce_client_extended.dart';
 import '../../../model/processor_result.dart';
 import '../../../model/promotional_credential.dart';
 import '../../../models/credentials.dart';
+import '../../oid4vci_offer_uri.dart';
 import 'spruce_providers.dart';
 
 /// Provider for managing the list of credentials
@@ -210,8 +211,12 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
     Logger.info('CredentialsNotifier: Handling SpruceID URI: $uri');
 
     try {
+      final credentialOffer = normalizeOid4vciCredentialOfferUri(
+        uri.toString(),
+      );
+
       // Check if it is a credential offer
-      if (uri.scheme == 'openid-credential-offer') {
+      if (isOid4vciCredentialOfferUri(credentialOffer)) {
         state = state.copyWith(isLoading: true);
 
         // Get the extended client
@@ -224,7 +229,9 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
         );
 
         if (client is SpruceIdClientExtended) {
-          await client.handleOID4VCOfferSDK(credentialOffer: uri.toString());
+          await client.handleOID4VCOfferSDK(
+            credentialOffer: credentialOffer,
+          );
         } else {
           // Fallback if we can't access the specific method, though this shouldn't happen
           // with the current provider setup
@@ -234,7 +241,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
           // Note: handleOID4VCFlow is in the interface but might not be implemented by the class
           // This is a safety check
           try {
-            await client.handleOID4VCFlow(credentialOffer: uri.toString());
+            await client.handleOID4VCFlow(credentialOffer: credentialOffer);
           } catch (e) {
             throw Exception(
               'Client does not support OID4VC offer handling: $e',

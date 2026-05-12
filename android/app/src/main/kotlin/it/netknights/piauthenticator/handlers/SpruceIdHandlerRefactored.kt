@@ -97,7 +97,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
                 "verifyCredential" -> verifyCredential(call, result)
 
                 // OID4VC operations - Using SDK Oid4vci + HttpClientWrapper
-                "handleCredentialOffer" -> handleCredentialOfferAsync(call, result)
+                "handleCredentialOffer", "handleOID4VCOffer", "handleOID4VCOfferRefactored" -> handleCredentialOfferAsync(call, result)
 
                 // VP operations - Using SDK Holder + Signer
                 "handleVpRequest" -> handleVpRequestAsync(call, result)
@@ -260,6 +260,9 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
     private fun handleCredentialOfferAsync(call: MethodCall, result: MethodChannel.Result) {
         val offerUrl = call.argument<String>("offer")
+            ?: call.argument<String>("offerUrl")
+            ?: call.argument<String>("credentialOffer")
+            ?: call.argument<String>("credentialOfferUri")
         if (offerUrl == null) {
             result.error("INVALID_ARGUMENTS", "Invalid arguments: offer URL required", null)
             return

@@ -601,7 +601,9 @@ pub struct FrbPresentationRequest {
     pub client_id: String,
     pub nonce: String,
     pub response_uri: String,
-    pub presentation_definition_json: String,
+    pub query_type: String,
+    pub presentation_definition_json: Option<String>,
+    pub dcql_query_json: Option<String>,
 }
 
 /// One ZK proof to include in a presentation.
@@ -810,50 +812,84 @@ pub async fn wallet_request_credential(
 pub async fn wallet_parse_presentation_request(
     request_uri: String,
 ) -> anyhow::Result<FrbPresentationRequest> {
-    let url_str = if request_uri.starts_with("openid4vp://") {
-        request_uri.replacen("openid4vp://", "https://vp.invalid/", 1)
-    } else {
-        request_uri.clone()
-    };
-    let parsed = url::Url::parse(&url_str)
-        .map_err(|e| anyhow::anyhow!("Invalid presentation request URI: {}", e))?;
-    let params: std::collections::HashMap<String, String> =
-        parsed.query_pairs().into_owned().collect();
-    let client_id = params.get("client_id").cloned()
-        .unwrap_or_else(|| parsed.host_str().unwrap_or("unknown").to_string());
-    let nonce = params.get("nonce").cloned().unwrap_or_default();
-    let response_uri = params.get("response_uri")
-        .or_else(|| params.get("redirect_uri"))
-        .cloned().unwrap_or_default();
     let engine = marty_oid4vci::WalletEngine::new();
-    let pd = engine
+    let request = engine
         .parse_presentation_request(&request_uri)
         .await
         .map_err(|e| anyhow::anyhow!("Presentation request parse error: {}", e))?;
-    let presentation_definition_json = serde_json::to_string(&pd)
+    let presentation_definition_json = request
+        .presentation_definition
+        .as_ref()
+        .map(|definition| serde_json::to_string(definition))
+        .transpose()
         .map_err(|e| anyhow::anyhow!("PresentationDefinition serialization error: {}", e))?;
-    Ok(FrbPresentationRequest { client_id, nonce, response_uri, presentation_definition_json })
+    let dcql_query_json = request
+        .dcql_query
+        .as_ref()
+        .map(|query| serde_json::to_string(query))
+        .transpose()
+        .map_err(|e| anyhow::anyhow!("DCQL query serialization error: {}", e))?;
+    let query_type = match request.query_type {
+        marty_oid4vci::PresentationRequestQueryType::PresentationDefinition => "presentation_definition",
+        marty_oid4vci::PresentationRequestQueryType::DcqlQuery => "dcql_query",
+    }
+    .to_string();
+    Ok(FrbPresentationRequest {
+        client_id: request.client_id,
+        nonce: request.nonce,
+        response_uri: request.response_uri,
+        query_type,
+        presentation_definition_json,
+        dcql_query_json,
+    })
 }
 
 /// Build and submit a standard VP presentation.
 #[frb]
 pub async fn wallet_build_and_submit_presentation(
     response_uri: String,
-    presentation_definition_json: String,
+    presentation_definition_json: Option<String>,
+    dcql_query_json: Option<String>,
     credentials_json: String,
 ) -> anyhow::Result<FrbPresentationResponse> {
-    use marty_oid4vci::verifier::PresentationDefinition;
-    let definition: PresentationDefinition = serde_json::from_str(&presentation_definition_json)
-        .map_err(|e| anyhow::anyhow!("Invalid presentation_definition_json: {}", e))?;
     let credentials: std::collections::HashMap<String, String> =
         serde_json::from_str(&credentials_json)
             .map_err(|e| anyhow::anyhow!("Invalid credentials_json: {}", e))?;
+    let query_type = if dcql_query_json.is_some() {
+        marty_oid4vci::PresentationRequestQueryType::DcqlQuery
+    } else if presentation_definition_json.is_some() {
+        marty_oid4vci::PresentationRequestQueryType::PresentationDefinition
+    } else {
+        return Err(anyhow::anyhow!(
+            "Either presentation_definition_json or dcql_query_json is required"
+        ));
+    };
+    let presentation_definition = presentation_definition_json
+        .as_ref()
+        .map(|json| serde_json::from_str(json))
+        .transpose()
+        .map_err(|e| anyhow::anyhow!("Invalid presentation_definition_json: {}", e))?;
+    let dcql_query = dcql_query_json
+        .as_ref()
+        .map(|json| serde_json::from_str(json))
+        .transpose()
+        .map_err(|e| anyhow::anyhow!("Invalid dcql_query_json: {}", e))?;
     let engine = marty_oid4vci::WalletEngine::new();
+    let request = marty_oid4vci::ParsedPresentationRequest {
+        client_id: String::new(),
+        nonce: String::new(),
+        response_uri: response_uri.clone(),
+        response_mode: None,
+        state: None,
+        query_type,
+        presentation_definition,
+        dcql_query,
+    };
     let (vp_token, submission) = engine
-        .build_presentation_submission(&definition, credentials)
+        .build_presentation_for_request(&request, credentials)
         .map_err(|e| anyhow::anyhow!("Presentation build error: {}", e))?;
     let resp = engine
-        .submit_presentation(&response_uri, &vp_token, &submission)
+        .submit_presentation_optional(&response_uri, &vp_token, submission.as_ref())
         .await
         .map_err(|e| anyhow::anyhow!("Presentation submission error: {}", e))?;
     Ok(FrbPresentationResponse::from(resp))
@@ -967,4 +1003,48 @@ pub fn zk_prove(
 #[frb]
 pub fn zk_is_supported_on_device() -> bool {
     true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn encode_query_json(value: &str) -> String {
+        url::form_urlencoded::byte_serialize(value.as_bytes()).collect()
+    }
+
+    #[tokio::test]
+    async fn wallet_parse_presentation_request_reports_dcql_shape() {
+        let dcql_query = r#"{"credentials":[{"id":"member_credential","format":"dc+sd-jwt"}]}"#;
+        let request_uri = format!(
+            "openid4vp://authorize?client_id={}&nonce=nonce-123&response_uri={}&dcql_query={}",
+            encode_query_json("https://verifier.example"),
+            encode_query_json("https://verifier.example/submit"),
+            encode_query_json(dcql_query),
+        );
+
+        let parsed = wallet_parse_presentation_request(request_uri).await.unwrap();
+
+        assert_eq!(parsed.query_type, "dcql_query");
+        assert!(parsed.presentation_definition_json.is_none());
+        assert!(parsed.dcql_query_json.is_some());
+        assert_eq!(parsed.response_uri, "https://verifier.example/submit");
+    }
+
+    #[tokio::test]
+    async fn wallet_parse_presentation_request_preserves_legacy_pe_shape() {
+        let presentation_definition = r#"{"id":"pd-1","input_descriptors":[{"id":"member_credential","constraints":{"fields":[]}}]}"#;
+        let request_uri = format!(
+            "openid4vp://authorize?client_id={}&nonce=nonce-123&response_uri={}&presentation_definition={}",
+            encode_query_json("https://verifier.example"),
+            encode_query_json("https://verifier.example/submit"),
+            encode_query_json(presentation_definition),
+        );
+
+        let parsed = wallet_parse_presentation_request(request_uri).await.unwrap();
+
+        assert_eq!(parsed.query_type, "presentation_definition");
+        assert!(parsed.presentation_definition_json.is_some());
+        assert!(parsed.dcql_query_json.is_none());
+    }
 }
