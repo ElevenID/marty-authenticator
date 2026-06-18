@@ -1,0 +1,86 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+name: License Compliance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM UTC
+  push:
+    branches: [main]
+    paths:
+      - 'pubspec.yaml'
+      - 'LICENSE'
+      - 'README.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'pubspec.yaml'
+      - 'LICENSE'
+      - 'README.md'
+
+jobs:
+  metadata-consistency:
+    name: License Metadata Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check license metadata consistency
+        run: |
+          set -euo pipefail
+          FAIL=0
+
+          # LICENSE file must exist
+          if [ ! -f "LICENSE" ]; then
+            echo "FAIL: LICENSE file is missing"
+            FAIL=1
+          else
+            # Must contain AGPL text
+            if ! grep -q "GNU AFFERO GENERAL PUBLIC LICENSE" LICENSE; then
+              echo "FAIL: LICENSE does not contain AGPL text"
+              FAIL=1
+            else
+              echo "OK: LICENSE present and contains AGPL text"
+            fi
+          fi
+
+          # README.md must contain a License section
+          if ! grep -q "^## License" README.md; then
+            echo "FAIL: README.md is missing a ## License section"
+            FAIL=1
+          else
+            echo "OK: README.md has ## License section"
+          fi
+
+          # pubspec.yaml must exist and have a name field
+          if ! grep -q "^name:" pubspec.yaml; then
+            echo "FAIL: pubspec.yaml is missing a name field"
+            FAIL=1
+          else
+            echo "OK: pubspec.yaml has name field"
+          fi
+
+          exit $FAIL
+
+  dependency-inventory:
+    name: Dependency Inventory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Export dependency tree
+        run: flutter pub deps --style=compact > dependency-tree.txt
+
+      - name: Upload dependency tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-tree
+          path: dependency-tree.txt
