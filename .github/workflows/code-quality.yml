@@ -125,27 +125,46 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Python changes
+        id: python-changes
+        shell: bash
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if git diff --quiet "$BASE_SHA" HEAD -- '*.py' pyproject.toml requirements.txt; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Python
+        if: steps.python-changes.outputs.changed == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Python dependencies
+        if: steps.python-changes.outputs.changed == 'true'
         run: |
           pip install -r requirements.txt || echo "No requirements.txt found"
           pip install ruff mypy vulture pydocstyle xenon
 
       - name: Run Ruff format check
+        if: steps.python-changes.outputs.changed == 'true'
         run: ruff format --check .
 
       - name: Run Ruff lint
+        if: steps.python-changes.outputs.changed == 'true'
         run: ruff check .
 
       - name: Run MyPy
+        if: steps.python-changes.outputs.changed == 'true'
         run: mypy lib/ docker/plugins/ || echo "MyPy checks completed with warnings"
 
       - name: Check complexity with Xenon
+        if: steps.python-changes.outputs.changed == 'true'
         run: xenon --max-absolute B --max-modules A --max-average A lib/ docker/plugins/
 
   flutter-tests:
