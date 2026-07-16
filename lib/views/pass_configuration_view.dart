@@ -65,7 +65,7 @@ class _PassConfigurationViewState extends State<PassConfigurationView> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
               const Text(
-                'burdettadam@gmail.com',
+                'holder@example.com',
                 style: TextStyle(color: Colors.blue, fontSize: 16),
               ),
               const SizedBox(height: 20),
@@ -74,7 +74,7 @@ class _PassConfigurationViewState extends State<PassConfigurationView> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
               const Text(
-                'Admission | Spanish Fork Farm\n5788 South 3600 West\nSpanish Fork, UT 84660',
+                'Example Event\n100 Example Avenue\nDenver, CO 80202',
                 style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],

@@ -25,8 +25,14 @@ We use the [Flutter](https://flutter.dev/) framework for developing our applicat
 
 - **`local_plugins/` directory**: Contains legacy migration plugin (`pi-authenticator-legacy`) that is not currently used. Can be removed if no migration from older native app versions is needed. Keeping as reference for now.
 
-The app can be build for android by running `flutter build apk [--release | --debug]` at the root of the project, for building the iOS version the command is `flutter build ipa`. Building for iOS requires to run this on an Apple device.
+The app can be built for Android by running `flutter build apk [--release | --debug]` at the root of the project. Building an iOS IPA requires Apple tooling and signing credentials.
 For testing purposes the application can be run in release mode by running `flutter run --release`.
+
+Tagged OSS releases always publish an attested source archive, SBOM, and
+checksums. Android APK/AAB installers are added only when the protected release
+environment enables `ENABLE_ANDROID_RELEASE_SIGNING` and supplies the Android
+keystore secrets. The project does not publish an iOS installer and does not
+require Apple release-signing credentials.
 
 For serializing the model of this application (i.e., the tokens) we use generated files. If the model was changed, run the script `update_serialization.sh` to update the generated files.
 

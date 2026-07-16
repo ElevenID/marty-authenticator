@@ -1,7 +1,7 @@
 name: marty_authenticator
 description: A Digital Document Wallet and Authenticator App — Marty Identity Platform.
-homepage: https://github.com/burdettadam/marty-authenticator
-repository: https://github.com/burdettadam/marty-authenticator
+homepage: https://github.com/ElevenID/marty-authenticator
+repository: https://github.com/ElevenID/marty-authenticator
 publish_to: none
 
 # The following defines the version and build number for your application.
