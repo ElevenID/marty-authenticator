@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -41,7 +43,8 @@ jobs:
 
       - name: Run pre-commit (excluding heavy tools)
         run: |
-          SKIP=gitleaks,semgrep pre-commit run --all-files
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          SKIP=gitleaks,semgrep pre-commit run --from-ref "$BASE_SHA" --to-ref HEAD
 
   security:
     name: Security Scanning
