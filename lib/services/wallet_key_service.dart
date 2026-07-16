@@ -63,9 +63,10 @@ class HolderKeyInfo {
 /// Usage:
 /// ```dart
 /// final key = await WalletKeyService.getOrCreateHolderKey();
+/// final nonce = await svc.fetchNonceForIssuer(issuer);
 /// final proofJwt = await svc.createProofJwtAsync(
 ///   holderKid: key.kid,
-///   cNonce: token.cNonce!,
+///   cNonce: nonce,
 ///   issuerUrl: issuer,
 ///   jwkJson: key.privateJwkJson,
 /// );

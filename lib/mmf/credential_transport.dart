@@ -158,19 +158,11 @@ class TokenResponse {
   /// Refresh token, if provided
   final String? refreshToken;
 
-  /// C_nonce for proof generation
-  final String? cNonce;
-
-  /// C_nonce expiration in seconds
-  final int? cNonceExpiresIn;
-
   const TokenResponse({
     required this.accessToken,
     required this.tokenType,
     this.expiresIn,
     this.refreshToken,
-    this.cNonce,
-    this.cNonceExpiresIn,
   });
 }
 
@@ -182,16 +174,12 @@ class CredentialResponse {
   /// Raw credential data (to be parsed by Marty Rust layer)
   final dynamic credential;
 
-  /// C_nonce for next request
-  final String? cNonce;
-
   /// Transaction ID for deferred issuance
   final String? transactionId;
 
   const CredentialResponse({
     required this.format,
     required this.credential,
-    this.cNonce,
     this.transactionId,
   });
 }

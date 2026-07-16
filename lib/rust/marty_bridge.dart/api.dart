@@ -356,24 +356,16 @@ class FrbCredentialResponse {
   final String? format;
   final String? credential;
   final String? transactionId;
-  final String? cNonce;
-  final BigInt? cNonceExpiresIn;
 
   const FrbCredentialResponse({
     this.format,
     this.credential,
     this.transactionId,
-    this.cNonce,
-    this.cNonceExpiresIn,
   });
 
   @override
   int get hashCode =>
-      format.hashCode ^
-      credential.hashCode ^
-      transactionId.hashCode ^
-      cNonce.hashCode ^
-      cNonceExpiresIn.hashCode;
+      format.hashCode ^ credential.hashCode ^ transactionId.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -382,9 +374,7 @@ class FrbCredentialResponse {
           runtimeType == other.runtimeType &&
           format == other.format &&
           credential == other.credential &&
-          transactionId == other.transactionId &&
-          cNonce == other.cNonce &&
-          cNonceExpiresIn == other.cNonceExpiresIn;
+          transactionId == other.transactionId;
 }
 
 /// Wallet-relevant issuer metadata.
@@ -504,16 +494,12 @@ class FrbTokenResponse {
   final String accessToken;
   final String tokenType;
   final BigInt? expiresIn;
-  final String? cNonce;
-  final BigInt? cNonceExpiresIn;
   final String? scope;
 
   const FrbTokenResponse({
     required this.accessToken,
     required this.tokenType,
     this.expiresIn,
-    this.cNonce,
-    this.cNonceExpiresIn,
     this.scope,
   });
 
@@ -522,8 +508,6 @@ class FrbTokenResponse {
       accessToken.hashCode ^
       tokenType.hashCode ^
       expiresIn.hashCode ^
-      cNonce.hashCode ^
-      cNonceExpiresIn.hashCode ^
       scope.hashCode;
 
   @override
@@ -534,8 +518,6 @@ class FrbTokenResponse {
           accessToken == other.accessToken &&
           tokenType == other.tokenType &&
           expiresIn == other.expiresIn &&
-          cNonce == other.cNonce &&
-          cNonceExpiresIn == other.cNonceExpiresIn &&
           scope == other.scope;
 }
 

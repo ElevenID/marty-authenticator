@@ -56,15 +56,11 @@ class Oid4vciTokenResponse {
   final String accessToken;
   final String tokenType;
   final int? expiresIn;
-  final String? cNonce;
-  final int? cNonceExpiresIn;
 
   const Oid4vciTokenResponse({
     required this.accessToken,
     required this.tokenType,
     this.expiresIn,
-    this.cNonce,
-    this.cNonceExpiresIn,
   });
 
   factory Oid4vciTokenResponse.fromJson(Map<String, dynamic> j) =>
@@ -72,22 +68,16 @@ class Oid4vciTokenResponse {
         accessToken: j['access_token'] as String,
         tokenType: j['token_type'] as String,
         expiresIn: j['expires_in'] as int?,
-        cNonce: j['c_nonce'] as String?,
-        cNonceExpiresIn: j['c_nonce_expires_in'] as int?,
       );
 }
 
 class Oid4vciNonceResponse {
   final String cNonce;
-  final int? cNonceExpiresIn;
 
-  const Oid4vciNonceResponse({required this.cNonce, this.cNonceExpiresIn});
+  const Oid4vciNonceResponse({required this.cNonce});
 
   factory Oid4vciNonceResponse.fromJson(Map<String, dynamic> j) =>
-      Oid4vciNonceResponse(
-        cNonce: j['c_nonce'] as String,
-        cNonceExpiresIn: j['c_nonce_expires_in'] as int?,
-      );
+      Oid4vciNonceResponse(cNonce: j['c_nonce'] as String);
 }
 
 class Oid4vciCredentialResponse {
@@ -95,16 +85,12 @@ class Oid4vciCredentialResponse {
   final List<String> credentials;
   final String? credential; // draft-era single credential
   final String? transactionId;
-  final String? cNonce;
-  final int? cNonceExpiresIn;
 
   const Oid4vciCredentialResponse({
     this.format,
     this.credentials = const [],
     this.credential,
     this.transactionId,
-    this.cNonce,
-    this.cNonceExpiresIn,
   });
 
   factory Oid4vciCredentialResponse.fromJson(Map<String, dynamic> j) =>
@@ -113,8 +99,6 @@ class Oid4vciCredentialResponse {
         credentials: (j['credentials'] as List<dynamic>?)?.cast<String>() ?? [],
         credential: j['credential'] as String?,
         transactionId: j['transaction_id'] as String?,
-        cNonce: j['c_nonce'] as String?,
-        cNonceExpiresIn: j['c_nonce_expires_in'] as int?,
       );
 }
 
@@ -228,14 +212,10 @@ class OID4VCHttpClient {
   /// OID4VCI 1.0 Final §7.2: POST to nonce endpoint; returns a fresh c_nonce.
   Future<Oid4vciNonceResponse> requestNonce({
     required String nonceEndpoint,
-    required String accessToken,
   }) async {
     final response = await _http.post(
       Uri.parse(nonceEndpoint),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: '{}',
     );
     _assertStatus(response, 200, 'requestNonce');
@@ -321,9 +301,7 @@ class OID4VCHttpClient {
     Map<String, dynamic>? presentationSubmission,
     String? state,
   }) async {
-    final body = <String, String>{
-      'vp_token': vpToken,
-    };
+    final body = <String, String>{'vp_token': vpToken};
     if (presentationSubmission != null) {
       body['presentation_submission'] = jsonEncode(presentationSubmission);
     }

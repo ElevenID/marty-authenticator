@@ -63,3 +63,9 @@ marty-secure-storage = { path = "../../marty-core/marty-secure-storage" }
 
 [patch."https://github.com/ElevenID/marty-verifier.git"]
 marty-sync = { path = "../../marty-verifier/crates/marty-sync" }
+
+[patch.crates-io]
+# `libipld-core` still requires core2 ^0.4, whose only crates.io release was
+# yanked. Reuse marty-core's audited vendor copy so this bridge remains
+# buildable without relying on a yanked registry selection.
+core2 = { path = "../../marty-core/vendor/core2-0.4.0" }

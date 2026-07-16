@@ -888,10 +888,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     wireObj.format = cst_encode_opt_String(apiObj.format);
     wireObj.credential = cst_encode_opt_String(apiObj.credential);
     wireObj.transaction_id = cst_encode_opt_String(apiObj.transactionId);
-    wireObj.c_nonce = cst_encode_opt_String(apiObj.cNonce);
-    wireObj.c_nonce_expires_in = cst_encode_opt_box_autoadd_u_64(
-      apiObj.cNonceExpiresIn,
-    );
   }
 
   @protected
@@ -980,10 +976,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     wireObj.access_token = cst_encode_String(apiObj.accessToken);
     wireObj.token_type = cst_encode_String(apiObj.tokenType);
     wireObj.expires_in = cst_encode_opt_box_autoadd_u_64(apiObj.expiresIn);
-    wireObj.c_nonce = cst_encode_opt_String(apiObj.cNonce);
-    wireObj.c_nonce_expires_in = cst_encode_opt_box_autoadd_u_64(
-      apiObj.cNonceExpiresIn,
-    );
     wireObj.scope = cst_encode_opt_String(apiObj.scope);
   }
 
@@ -1494,16 +1486,16 @@ class RustLibWire implements BaseWire {
     ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName) lookup,
   ) : _lookup = lookup;
 
-  void store_dart_post_cobject(DartPostCObjectFnType ptr) {
+  void store_dart_post_cobject(int ptr) {
     return _store_dart_post_cobject(ptr);
   }
 
   late final _store_dart_post_cobjectPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(DartPostCObjectFnType)>>(
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>(
         'store_dart_post_cobject',
       );
   late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
-      .asFunction<void Function(DartPostCObjectFnType)>();
+      .asFunction<void Function(int)>();
 
   void wire__crate__biometrics__assess_face_quality(
     int port_,
@@ -1521,13 +1513,13 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality',
+        'frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality',
       );
   late final _wire__crate__biometrics__assess_face_quality =
       _wire__crate__biometrics__assess_face_qualityPtr
@@ -1543,7 +1535,7 @@ class RustLibWire implements BaseWire {
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_json,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_id,
-    bool trust_profile_verified,
+    ffi.Pointer<bool> trust_profile_verified,
   ) {
     return _wire__crate__api__check_issuer_constraints(
       port_,
@@ -1557,14 +1549,14 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-            ffi.Bool,
+            ffi.Pointer<bool>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints',
+        'frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints',
       );
   late final _wire__crate__api__check_issuer_constraints =
       _wire__crate__api__check_issuer_constraintsPtr
@@ -1573,7 +1565,7 @@ class RustLibWire implements BaseWire {
               int,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-              bool,
+              ffi.Pointer<bool>,
             )
           >();
 
@@ -1592,14 +1584,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__create_selectable_credentialPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_credential>,
-            ffi.Int32,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_credential>, ffi.Int)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__create_selectable_credential',
+        'frbgen_marty_authenticator_wire__crate__api__create_selectable_credential',
       );
   late final _wire__crate__api__create_selectable_credential =
       _wire__crate__api__create_selectable_credentialPtr
@@ -1617,14 +1605,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__credential_from_jsonPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__credential_from_json',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__credential_from_json');
   late final _wire__crate__api__credential_from_json =
       _wire__crate__api__credential_from_jsonPtr
           .asFunction<
@@ -1641,11 +1624,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__credential_to_jsonPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_cst_credential>)
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_credential>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__credential_to_json',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__credential_to_json');
   late final _wire__crate__api__credential_to_json =
       _wire__crate__api__credential_to_jsonPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
@@ -1666,13 +1647,13 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age',
+        'frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age',
       );
   late final _wire__crate__biometrics__estimate_face_age =
       _wire__crate__biometrics__estimate_face_agePtr
@@ -1702,14 +1683,14 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_String>,
             ffi.Pointer<wire_cst_list_credential>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request',
+        'frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request',
       );
   late final _wire__crate__api__evaluate_presentation_request =
       _wire__crate__api__evaluate_presentation_requestPtr
@@ -1732,11 +1713,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__get_credential_claimsPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_cst_credential>)
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_credential>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__get_credential_claims',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__get_credential_claims');
   late final _wire__crate__api__get_credential_claims =
       _wire__crate__api__get_credential_claimsPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
@@ -1757,13 +1736,13 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_credential>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set',
+        'frbgen_marty_authenticator_wire__crate__api__get_minimum_disclosure_set',
       );
   late final _wire__crate__api__get_minimum_disclosure_set =
       _wire__crate__api__get_minimum_disclosure_setPtr
@@ -1785,10 +1764,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__group_credentials_by_issuerPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_cst_list_credential>)
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_credential>)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__group_credentials_by_issuer',
+        'frbgen_marty_authenticator_wire__crate__api__group_credentials_by_issuer',
       );
   late final _wire__crate__api__group_credentials_by_issuer =
       _wire__crate__api__group_credentials_by_issuerPtr
@@ -1806,11 +1785,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__is_credential_expiredPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_cst_credential>)
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_credential>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__is_credential_expired',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__is_credential_expired');
   late final _wire__crate__api__is_credential_expired =
       _wire__crate__api__is_credential_expiredPtr
           .asFunction<void Function(int, ffi.Pointer<wire_cst_credential>)>();
@@ -1825,14 +1802,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__parse_mdoc_credentialPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_loose>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__parse_mdoc_credential',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__parse_mdoc_credential');
   late final _wire__crate__api__parse_mdoc_credential =
       _wire__crate__api__parse_mdoc_credentialPtr
           .asFunction<
@@ -1849,14 +1821,9 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__parse_sd_jwt_credentialPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__parse_sd_jwt_credential',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__parse_sd_jwt_credential');
   late final _wire__crate__api__parse_sd_jwt_credential =
       _wire__crate__api__parse_sd_jwt_credentialPtr
           .asFunction<
@@ -1873,13 +1840,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__parse_verifiable_credentialPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__parse_verifiable_credential',
+        'frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential',
       );
   late final _wire__crate__api__parse_verifiable_credential =
       _wire__crate__api__parse_verifiable_credentialPtr
@@ -1903,13 +1867,13 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_rankable_credential_input>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials',
+        'frbgen_marty_authenticator_wire__crate__api__rank_matching_credentials',
       );
   late final _wire__crate__api__rank_matching_credentials =
       _wire__crate__api__rank_matching_credentialsPtr
@@ -1933,12 +1897,12 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           )
         >
-      >('frbgen_privacyidea_authenticator_wire__crate__api__sync_policies');
+      >('frbgen_marty_authenticator_wire__crate__api__sync_policies');
   late final _wire__crate__api__sync_policies =
       _wire__crate__api__sync_policiesPtr
           .asFunction<
@@ -1961,14 +1925,12 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_m_doc_credential>,
             ffi.Pointer<wire_cst_list_list_prim_u_8_strict>,
           )
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__verify_and_attach_trust');
   late final _wire__crate__api__verify_and_attach_trust =
       _wire__crate__api__verify_and_attach_trustPtr
           .asFunction<
@@ -1999,7 +1961,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<ffi.Float>,
@@ -2007,7 +1969,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match',
+        'frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match',
       );
   late final _wire__crate__biometrics__verify_face_match =
       _wire__crate__biometrics__verify_face_matchPtr
@@ -2032,13 +1994,11 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_list_prim_u_8_strict>,
           )
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain');
   late final _wire__crate__api__verify_mdoc_trust_chain =
       _wire__crate__api__verify_mdoc_trust_chainPtr
           .asFunction<
@@ -2065,7 +2025,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2073,7 +2033,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_presentation',
       );
   late final _wire__crate__api__wallet_build_and_submit_presentation =
       _wire__crate__api__wallet_build_and_submit_presentationPtr
@@ -2107,7 +2067,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2115,7 +2075,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation',
       );
   late final _wire__crate__api__wallet_build_and_submit_zk_presentation =
       _wire__crate__api__wallet_build_and_submit_zk_presentationPtr
@@ -2151,7 +2111,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2160,7 +2120,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request',
       );
   late final _wire__crate__api__wallet_build_auth_request =
       _wire__crate__api__wallet_build_auth_requestPtr
@@ -2195,16 +2155,14 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           )
         >
-      >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt',
-      );
+      >('frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt');
   late final _wire__crate__api__wallet_create_proof_jwt =
       _wire__crate__api__wallet_create_proof_jwtPtr
           .asFunction<
@@ -2239,7 +2197,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2248,7 +2206,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token',
       );
   late final _wire__crate__api__wallet_exchange_auth_code_token =
       _wire__crate__api__wallet_exchange_auth_code_tokenPtr
@@ -2281,14 +2239,14 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token',
       );
   late final _wire__crate__api__wallet_exchange_pre_auth_token =
       _wire__crate__api__wallet_exchange_pre_auth_tokenPtr
@@ -2311,13 +2269,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__wallet_fetch_issuer_metadataPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata',
       );
   late final _wire__crate__api__wallet_fetch_issuer_metadata =
       _wire__crate__api__wallet_fetch_issuer_metadataPtr
@@ -2335,13 +2290,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__wallet_parse_credential_offerPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer',
       );
   late final _wire__crate__api__wallet_parse_credential_offer =
       _wire__crate__api__wallet_parse_credential_offerPtr
@@ -2362,13 +2314,10 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__wallet_parse_presentation_requestPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Void Function(
-            ffi.Int64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
+          ffi.Void Function(ffi.Int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_parse_presentation_request',
       );
   late final _wire__crate__api__wallet_parse_presentation_request =
       _wire__crate__api__wallet_parse_presentation_requestPtr
@@ -2398,7 +2347,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2407,7 +2356,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential',
+        'frbgen_marty_authenticator_wire__crate__api__wallet_request_credential',
       );
   late final _wire__crate__api__wallet_request_credential =
       _wire__crate__api__wallet_request_credentialPtr
@@ -2427,8 +2376,8 @@ class RustLibWire implements BaseWire {
   }
 
   late final _wire__crate__api__zk_is_supported_on_devicePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-        'frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device',
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>(
+        'frbgen_marty_authenticator_wire__crate__api__zk_is_supported_on_device',
       );
   late final _wire__crate__api__zk_is_supported_on_device =
       _wire__crate__api__zk_is_supported_on_devicePtr
@@ -2460,7 +2409,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
@@ -2470,7 +2419,7 @@ class RustLibWire implements BaseWire {
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
           )
         >
-      >('frbgen_privacyidea_authenticator_wire__crate__api__zk_prove');
+      >('frbgen_marty_authenticator_wire__crate__api__zk_prove');
   late final _wire__crate__api__zk_prove = _wire__crate__api__zk_provePtr
       .asFunction<
         void Function(
@@ -2511,7 +2460,7 @@ class RustLibWire implements BaseWire {
       _lookup<
         ffi.NativeFunction<
           ffi.Void Function(
-            ffi.Int64,
+            ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_loose>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -2522,7 +2471,7 @@ class RustLibWire implements BaseWire {
           )
         >
       >(
-        'frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition',
+        'frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition',
       );
   late final _wire__crate__api__zk_prove_from_presentation_definition =
       _wire__crate__api__zk_prove_from_presentation_definitionPtr
@@ -2550,7 +2499,7 @@ class RustLibWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+        'frbgen_marty_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
       );
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
@@ -2567,7 +2516,7 @@ class RustLibWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+        'frbgen_marty_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
       );
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
@@ -2579,7 +2528,7 @@ class RustLibWire implements BaseWire {
 
   late final _cst_new_box_autoadd_credentialPtr =
       _lookup<ffi.NativeFunction<ffi.Pointer<wire_cst_credential> Function()>>(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential',
+        'frbgen_marty_authenticator_cst_new_box_autoadd_credential',
       );
   late final _cst_new_box_autoadd_credential =
       _cst_new_box_autoadd_credentialPtr
@@ -2593,9 +2542,7 @@ class RustLibWire implements BaseWire {
   late final _cst_new_box_autoadd_credential_statusPtr =
       _lookup<
         ffi.NativeFunction<ffi.Pointer<wire_cst_credential_status> Function()>
-      >(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status',
-      );
+      >('frbgen_marty_authenticator_cst_new_box_autoadd_credential_status');
   late final _cst_new_box_autoadd_credential_status =
       _cst_new_box_autoadd_credential_statusPtr
           .asFunction<ffi.Pointer<wire_cst_credential_status> Function()>();
@@ -2606,7 +2553,7 @@ class RustLibWire implements BaseWire {
 
   late final _cst_new_box_autoadd_f_32Ptr =
       _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Float> Function(ffi.Float)>>(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32',
+        'frbgen_marty_authenticator_cst_new_box_autoadd_f_32',
       );
   late final _cst_new_box_autoadd_f_32 = _cst_new_box_autoadd_f_32Ptr
       .asFunction<ffi.Pointer<ffi.Float> Function(double)>();
@@ -2619,9 +2566,7 @@ class RustLibWire implements BaseWire {
   late final _cst_new_box_autoadd_m_doc_credentialPtr =
       _lookup<
         ffi.NativeFunction<ffi.Pointer<wire_cst_m_doc_credential> Function()>
-      >(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential',
-      );
+      >('frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential');
   late final _cst_new_box_autoadd_m_doc_credential =
       _cst_new_box_autoadd_m_doc_credentialPtr
           .asFunction<ffi.Pointer<wire_cst_m_doc_credential> Function()>();
@@ -2632,7 +2577,7 @@ class RustLibWire implements BaseWire {
 
   late final _cst_new_box_autoadd_proofPtr =
       _lookup<ffi.NativeFunction<ffi.Pointer<wire_cst_proof> Function()>>(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_proof',
+        'frbgen_marty_authenticator_cst_new_box_autoadd_proof',
       );
   late final _cst_new_box_autoadd_proof = _cst_new_box_autoadd_proofPtr
       .asFunction<ffi.Pointer<wire_cst_proof> Function()>();
@@ -2645,9 +2590,7 @@ class RustLibWire implements BaseWire {
   late final _cst_new_box_autoadd_sd_jwt_credentialPtr =
       _lookup<
         ffi.NativeFunction<ffi.Pointer<wire_cst_sd_jwt_credential> Function()>
-      >(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_sd_jwt_credential',
-      );
+      >('frbgen_marty_authenticator_cst_new_box_autoadd_sd_jwt_credential');
   late final _cst_new_box_autoadd_sd_jwt_credential =
       _cst_new_box_autoadd_sd_jwt_credentialPtr
           .asFunction<ffi.Pointer<wire_cst_sd_jwt_credential> Function()>();
@@ -2658,22 +2601,22 @@ class RustLibWire implements BaseWire {
 
   late final _cst_new_box_autoadd_trust_infoPtr =
       _lookup<ffi.NativeFunction<ffi.Pointer<wire_cst_trust_info> Function()>>(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_trust_info',
+        'frbgen_marty_authenticator_cst_new_box_autoadd_trust_info',
       );
   late final _cst_new_box_autoadd_trust_info =
       _cst_new_box_autoadd_trust_infoPtr
           .asFunction<ffi.Pointer<wire_cst_trust_info> Function()>();
 
-  ffi.Pointer<ffi.Uint64> cst_new_box_autoadd_u_64(int value) {
+  ffi.Pointer<ffi.Int> cst_new_box_autoadd_u_64(int value) {
     return _cst_new_box_autoadd_u_64(value);
   }
 
   late final _cst_new_box_autoadd_u_64Ptr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Uint64> Function(ffi.Uint64)>>(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64',
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Int> Function(ffi.Int)>>(
+        'frbgen_marty_authenticator_cst_new_box_autoadd_u_64',
       );
   late final _cst_new_box_autoadd_u_64 = _cst_new_box_autoadd_u_64Ptr
-      .asFunction<ffi.Pointer<ffi.Uint64> Function(int)>();
+      .asFunction<ffi.Pointer<ffi.Int> Function(int)>();
 
   ffi.Pointer<wire_cst_verifiable_credential>
   cst_new_box_autoadd_verifiable_credential() {
@@ -2685,9 +2628,7 @@ class RustLibWire implements BaseWire {
         ffi.NativeFunction<
           ffi.Pointer<wire_cst_verifiable_credential> Function()
         >
-      >(
-        'frbgen_privacyidea_authenticator_cst_new_box_autoadd_verifiable_credential',
-      );
+      >('frbgen_marty_authenticator_cst_new_box_autoadd_verifiable_credential');
   late final _cst_new_box_autoadd_verifiable_credential =
       _cst_new_box_autoadd_verifiable_credentialPtr
           .asFunction<ffi.Pointer<wire_cst_verifiable_credential> Function()>();
@@ -2709,10 +2650,10 @@ class RustLibWire implements BaseWire {
           ffi.Pointer<
             wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
           >
-          Function(ffi.Int32)
+          Function(ffi.Int)
         >
       >(
-        'frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
+        'frbgen_marty_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy',
       );
   late final _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy =
       _cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicyPtr
@@ -2729,10 +2670,8 @@ class RustLibWire implements BaseWire {
 
   late final _cst_new_list_StringPtr =
       _lookup<
-        ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_String> Function(ffi.Int32)
-        >
-      >('frbgen_privacyidea_authenticator_cst_new_list_String');
+        ffi.NativeFunction<ffi.Pointer<wire_cst_list_String> Function(ffi.Int)>
+      >('frbgen_marty_authenticator_cst_new_list_String');
   late final _cst_new_list_String = _cst_new_list_StringPtr
       .asFunction<ffi.Pointer<wire_cst_list_String> Function(int)>();
 
@@ -2743,9 +2682,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_credentialPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_credential> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_credential> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_credential');
+      >('frbgen_marty_authenticator_cst_new_list_credential');
   late final _cst_new_list_credential = _cst_new_list_credentialPtr
       .asFunction<ffi.Pointer<wire_cst_list_credential> Function(int)>();
 
@@ -2758,9 +2697,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_credential_groupPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_credential_group> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_credential_group> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_credential_group');
+      >('frbgen_marty_authenticator_cst_new_list_credential_group');
   late final _cst_new_list_credential_group = _cst_new_list_credential_groupPtr
       .asFunction<ffi.Pointer<wire_cst_list_credential_group> Function(int)>();
 
@@ -2773,9 +2712,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_frb_zk_proof_entryPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_frb_zk_proof_entry> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_frb_zk_proof_entry> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry');
+      >('frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry');
   late final _cst_new_list_frb_zk_proof_entry =
       _cst_new_list_frb_zk_proof_entryPtr
           .asFunction<
@@ -2790,9 +2729,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_list_prim_u_8_strictPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_list_prim_u_8_strict> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_list_prim_u_8_strict> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_list_prim_u_8_strict');
+      >('frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict');
   late final _cst_new_list_list_prim_u_8_strict =
       _cst_new_list_list_prim_u_8_strictPtr
           .asFunction<
@@ -2808,9 +2747,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_prim_u_8_loosePtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_prim_u_8_loose> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_prim_u_8_loose> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_loose');
+      >('frbgen_marty_authenticator_cst_new_list_prim_u_8_loose');
   late final _cst_new_list_prim_u_8_loose = _cst_new_list_prim_u_8_loosePtr
       .asFunction<ffi.Pointer<wire_cst_list_prim_u_8_loose> Function(int)>();
 
@@ -2823,9 +2762,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_prim_u_8_strictPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_prim_u_8_strict> Function(ffi.Int32)
+          ffi.Pointer<wire_cst_list_prim_u_8_strict> Function(ffi.Int)
         >
-      >('frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_strict');
+      >('frbgen_marty_authenticator_cst_new_list_prim_u_8_strict');
   late final _cst_new_list_prim_u_8_strict = _cst_new_list_prim_u_8_strictPtr
       .asFunction<ffi.Pointer<wire_cst_list_prim_u_8_strict> Function(int)>();
 
@@ -2837,13 +2776,9 @@ class RustLibWire implements BaseWire {
   late final _cst_new_list_rankable_credential_inputPtr =
       _lookup<
         ffi.NativeFunction<
-          ffi.Pointer<wire_cst_list_rankable_credential_input> Function(
-            ffi.Int32,
-          )
+          ffi.Pointer<wire_cst_list_rankable_credential_input> Function(ffi.Int)
         >
-      >(
-        'frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input',
-      );
+      >('frbgen_marty_authenticator_cst_new_list_rankable_credential_input');
   late final _cst_new_list_rankable_credential_input =
       _cst_new_list_rankable_credential_inputPtr
           .asFunction<
@@ -2855,33 +2790,24 @@ class RustLibWire implements BaseWire {
   }
 
   late final _dummy_method_to_enforce_bundlingPtr =
-      _lookup<ffi.NativeFunction<ffi.Int64 Function()>>(
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>(
         'dummy_method_to_enforce_bundling',
       );
   late final _dummy_method_to_enforce_bundling =
       _dummy_method_to_enforce_bundlingPtr.asFunction<int Function()>();
 }
 
-typedef DartPostCObjectFnType =
-    ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnTypeFunction>>;
-typedef DartPostCObjectFnTypeFunction =
-    ffi.Bool Function(DartPort port_id, ffi.Pointer<ffi.Void> message);
-typedef DartDartPostCObjectFnTypeFunction =
-    bool Function(DartDartPort port_id, ffi.Pointer<ffi.Void> message);
-typedef DartPort = ffi.Int64;
-typedef DartDartPort = int;
-
 final class wire_cst_list_prim_u_8_strict extends ffi.Struct {
-  external ffi.Pointer<ffi.Uint8> ptr;
+  external ffi.Pointer<ffi.Int> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
 final class wire_cst_list_String extends ffi.Struct {
   external ffi.Pointer<ffi.Pointer<wire_cst_list_prim_u_8_strict>> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
@@ -2938,7 +2864,6 @@ final class wire_cst_Credential_VerifiableCredential extends ffi.Struct {
 }
 
 final class wire_cst_trust_info extends ffi.Struct {
-  @ffi.Bool()
   external bool is_valid;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> trust_anchor;
@@ -2947,6 +2872,8 @@ final class wire_cst_trust_info extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_String> certificate_chain;
 }
+
+typedef bool = ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Int>)>;
 
 final class wire_cst_m_doc_credential extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> id;
@@ -3003,7 +2930,7 @@ final class CredentialKind extends ffi.Union {
 }
 
 final class wire_cst_credential extends ffi.Struct {
-  @ffi.Int32()
+  @ffi.Int()
   external int tag;
 
   external CredentialKind kind;
@@ -3012,14 +2939,14 @@ final class wire_cst_credential extends ffi.Struct {
 final class wire_cst_list_credential extends ffi.Struct {
   external ffi.Pointer<wire_cst_credential> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
 final class wire_cst_list_prim_u_8_loose extends ffi.Struct {
-  external ffi.Pointer<ffi.Uint8> ptr;
+  external ffi.Pointer<ffi.Int> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
@@ -3028,27 +2955,27 @@ final class wire_cst_rankable_credential_input extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_id;
 
-  @ffi.Int64()
+  @ffi.Int()
   external int issued_at_unix;
 
   @ffi.Double()
   external double trust_level;
 
-  @ffi.UintPtr()
+  @ffi.Int()
   external int claim_count;
 }
 
 final class wire_cst_list_rankable_credential_input extends ffi.Struct {
   external ffi.Pointer<wire_cst_rankable_credential_input> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
 final class wire_cst_list_list_prim_u_8_strict extends ffi.Struct {
   external ffi.Pointer<ffi.Pointer<wire_cst_list_prim_u_8_strict>> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
@@ -3063,15 +2990,15 @@ final class wire_cst_frb_zk_proof_entry extends ffi.Struct {
 final class wire_cst_list_frb_zk_proof_entry extends ffi.Struct {
   external ffi.Pointer<wire_cst_frb_zk_proof_entry> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
 final class wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
     extends ffi.Struct {
-  external ffi.Pointer<ffi.UintPtr> ptr;
+  external ffi.Pointer<ffi.Int> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
@@ -3088,21 +3015,21 @@ final class wire_cst_credential_group extends ffi.Struct {
 final class wire_cst_list_credential_group extends ffi.Struct {
   external ffi.Pointer<wire_cst_credential_group> ptr;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int len;
 }
 
 final class wire_cst_frb_age_estimate extends ffi.Struct {
-  @ffi.Uint8()
+  @ffi.Int()
   external int estimated_age;
 
   @ffi.Float()
   external double confidence;
 
-  @ffi.Uint8()
+  @ffi.Int()
   external int age_range_low;
 
-  @ffi.Uint8()
+  @ffi.Int()
   external int age_range_high;
 }
 
@@ -3123,7 +3050,6 @@ final class wire_cst_frb_credential_offer extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> pre_authorized_code;
 
-  @ffi.Bool()
   external bool tx_code_required;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_state;
@@ -3135,14 +3061,9 @@ final class wire_cst_frb_credential_response extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> transaction_id;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce;
-
-  external ffi.Pointer<ffi.Uint64> c_nonce_expires_in;
 }
 
 final class wire_cst_frb_face_match_result extends ffi.Struct {
-  @ffi.Bool()
   external bool verified;
 
   @ffi.Float()
@@ -3157,7 +3078,7 @@ final class wire_cst_frb_face_match_result extends ffi.Struct {
 
   external ffi.Pointer<ffi.Float> probe_quality;
 
-  @ffi.Uint64()
+  @ffi.Int()
   external int processing_time_ms;
 }
 
@@ -3165,10 +3086,9 @@ final class wire_cst_frb_face_quality extends ffi.Struct {
   @ffi.Float()
   external double overall_score;
 
-  @ffi.Bool()
   external bool face_detected;
 
-  @ffi.Uint32()
+  @ffi.Int()
   external int face_count;
 
   @ffi.Float()
@@ -3218,7 +3138,6 @@ final class wire_cst_frb_presentation_request extends ffi.Struct {
 }
 
 final class wire_cst_frb_presentation_response extends ffi.Struct {
-  @ffi.Bool()
   external bool ok;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri;
@@ -3233,24 +3152,18 @@ final class wire_cst_frb_token_response extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> token_type;
 
-  external ffi.Pointer<ffi.Uint64> expires_in;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> c_nonce;
-
-  external ffi.Pointer<ffi.Uint64> c_nonce_expires_in;
+  external ffi.Pointer<ffi.Int> expires_in;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> scope;
 }
 
 final class wire_cst_issuer_check_result_output extends ffi.Struct {
-  @ffi.Bool()
   external bool is_trusted;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> violation_message;
 }
 
 final class wire_cst_policy_evaluation_result extends ffi.Struct {
-  @ffi.Bool()
   external bool is_satisfied;
 
   external ffi.Pointer<wire_cst_list_String> minimum_disclosure_claims;
@@ -3263,11 +3176,10 @@ final class wire_cst_policy_evaluation_result extends ffi.Struct {
 final class wire_cst_selectable_credential extends ffi.Struct {
   external wire_cst_credential credential;
 
-  @ffi.Bool()
   external bool is_selected;
 
   external ffi.Pointer<wire_cst_list_String> selected_claims;
 
-  @ffi.Int32()
+  @ffi.Int()
   external int privacy_level;
 }

@@ -2,8 +2,8 @@
 
 use crate::credential::TrustInfo;
 use marty_verification::{
-    IacaRegistry, Jurisdiction, MdlVerificationResult,
     verification::mdl::{verify_x5chain, ValidationRuleset, X5Chain},
+    IacaRegistry, Jurisdiction, MdlVerificationResult,
 };
 
 /// Trust registry for mDL verification.
@@ -60,10 +60,12 @@ impl MdlTrustRegistry {
         // Build X5Chain from raw DER bytes using the builder pattern
         let mut builder = X5Chain::builder();
         for cert_der in cert_chain {
-            builder = builder.with_der_certificate(cert_der)
-                .map_err(|e| anyhow::anyhow!("Certificate error: Failed to parse certificate: {}", e))?;
+            builder = builder.with_der_certificate(cert_der).map_err(|e| {
+                anyhow::anyhow!("Certificate error: Failed to parse certificate: {}", e)
+            })?;
         }
-        let x5chain = builder.build()
+        let x5chain = builder
+            .build()
             .map_err(|e| anyhow::anyhow!("Certificate error: Failed to build X5Chain: {}", e))?;
 
         // Verify using AAMVA ruleset

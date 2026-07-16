@@ -304,8 +304,8 @@ void main() {
       );
     });
 
-    /// OID4VCI §7: Token response MUST contain access_token, token_type,
-    /// c_nonce, and c_nonce_expires_in.
+    /// OID4VCI Final §6: the token response contains OAuth token fields;
+    /// proof nonces are obtained from the nonce endpoint.
     test('tokenExchange_responseFields_allPresent', () async {
       final client = OID4VCHttpClient(
         _buildMockClient({'token': kTokenResponseJson}),
@@ -326,24 +326,14 @@ void main() {
         equalsIgnoringCase('Bearer'),
         reason: 'RFC 6749: token_type MUST be Bearer',
       );
-      expect(
-        token.cNonce,
-        equals(kCNonce),
-        reason: 'OID4VCI §7: c_nonce MUST be present and parseable',
-      );
-      expect(
-        token.cNonceExpiresIn,
-        isNotNull,
-        reason: 'OID4VCI §7: c_nonce_expires_in MUST be present',
-      );
     });
   });
 
   // ── §4  Nonce Endpoint ───────────────────────────────────────────────────────
 
   group('§4 OID4VCI 1.0 Final §7.2 — Nonce Endpoint', () {
-    /// OID4VCI 1.0 Final §7.2: POST to nonce endpoint; must send Bearer token.
-    test('nonceEndpoint_sendsBearerAuthorization', () async {
+    /// OID4VCI 1.0 Final §7.2: POST to the nonce endpoint without a bearer token.
+    test('nonceEndpoint_isUnauthenticated', () async {
       String? capturedAuth;
       final mockClient = MockClient((request) async {
         capturedAuth = request.headers['authorization'];
@@ -356,13 +346,12 @@ void main() {
 
       await OID4VCHttpClient(
         mockClient,
-      ).requestNonce(nonceEndpoint: kNonceEndpoint, accessToken: kAccessToken);
+      ).requestNonce(nonceEndpoint: kNonceEndpoint);
 
       expect(
         capturedAuth,
-        equals('Bearer $kAccessToken'),
-        reason:
-            'OID4VCI 1.0 Final §7.2: Authorization header MUST be Bearer <token>',
+        isNull,
+        reason: 'OID4VCI 1.0 Final §7.2: nonce requests are unauthenticated',
       );
     });
 
@@ -374,20 +363,12 @@ void main() {
 
       final nonceResp = await client.requestNonce(
         nonceEndpoint: kNonceEndpoint,
-        accessToken: kAccessToken,
       );
 
       expect(
         nonceResp.cNonce,
         isNotEmpty,
         reason: 'OID4VCI 1.0 Final §7.2: c_nonce MUST be present',
-      );
-      expect(
-        nonceResp.cNonce,
-        isNot(equals(kCNonce)),
-        reason:
-            'Nonce from nonce endpoint MUST differ from token endpoint nonce '
-            '(VCIIssuerHappyFlowAdditionalRequests — nonce rotation)',
       );
     });
 
@@ -398,21 +379,15 @@ void main() {
       final mockClient = MockClient((_) async {
         final n = nonces[callCount++ % nonces.length];
         return http.Response(
-          '{"c_nonce":"$n","c_nonce_expires_in":86400}',
+          '{"c_nonce":"$n"}',
           200,
           headers: {'content-type': 'application/json'},
         );
       });
 
       final svc = OID4VCHttpClient(mockClient);
-      final n1 = await svc.requestNonce(
-        nonceEndpoint: kNonceEndpoint,
-        accessToken: kAccessToken,
-      );
-      final n2 = await svc.requestNonce(
-        nonceEndpoint: kNonceEndpoint,
-        accessToken: kAccessToken,
-      );
+      final n1 = await svc.requestNonce(nonceEndpoint: kNonceEndpoint);
+      final n2 = await svc.requestNonce(nonceEndpoint: kNonceEndpoint);
 
       expect(
         n1.cNonce,
@@ -480,11 +455,6 @@ void main() {
         isNotEmpty,
         reason: 'OID4VCI 1.0 Final §8: credentials array MUST be non-empty',
       );
-      expect(
-        resp.cNonce,
-        isNotNull,
-        reason: 'OID4VCI §8: c_nonce in response enables nonce rotation',
-      );
     });
 
     /// OID4VCI §8: SD-JWT credential response is accepted and parseable.
@@ -536,71 +506,65 @@ void main() {
     });
   });
 
-  // ── §6  Nonce Rotation ───────────────────────────────────────────────────────
+  // ── §6  Additional Proof Nonces ─────────────────────────────────────────────
 
-  group(
-    '§6 OID4VCI 1.0 Final §7 — Nonce Rotation (VCIIssuerHappyFlowAdditionalRequests)',
-    () {
-      /// The c_nonce returned from the credential endpoint MUST be used for the
-      /// NEXT proof JWT — this is the nonce rotation / re-use pattern.
-      test('nonceRotation_credentialResponseNonceUsedForNextProof', () async {
-        // First credential response returns a new nonce
-        const rotatedNonce = 'rotatedNonce999';
-        String? secondRequestBody;
-        int callCount = 0;
+  group('§6 OID4VCI 1.0 Final §7 — Additional Proof Nonces', () {
+    /// Each additional proof obtains a fresh c_nonce from the nonce endpoint.
+    test('additionalRequest_usesNonceEndpointForNextProof', () async {
+      const nextNonce = 'nextProofNonce999';
+      String? secondRequestBody;
+      int callCount = 0;
 
-        final mockClient = MockClient((request) async {
-          callCount++;
-          if (callCount == 1) {
-            // First credential request
-            return http.Response(
-              '{"format":"jwt_vc_json","credentials":["cred1"],"c_nonce":"$rotatedNonce","c_nonce_expires_in":86400}',
-              200,
-              headers: {'content-type': 'application/json'},
-            );
-          }
-          secondRequestBody = request.body;
+      final mockClient = MockClient((request) async {
+        callCount++;
+        if (callCount == 1) {
           return http.Response(
-            kCredentialResponseJwtVcJson,
+            '{"format":"jwt_vc_json","credentials":["cred1"]}',
             200,
             headers: {'content-type': 'application/json'},
           );
-        });
-
-        final svc = OID4VCHttpClient(mockClient);
-
-        // First request — simulates initial credential request
-        final firstResp = await svc.requestCredential(
-          credentialEndpoint: kCredentialEndpoint,
-          accessToken: kAccessToken,
-          credentialFormat: 'jwt_vc_json',
-          proofJwt: 'proof.using.original.nonce',
-        );
-
-        // Second request — proof should include the rotated nonce from first response
-        final newProofJwt = 'proof.using.${firstResp.cNonce}';
-        await svc.requestCredential(
-          credentialEndpoint: kCredentialEndpoint,
-          accessToken: kAccessToken,
-          credentialFormat: 'jwt_vc_json',
-          proofJwt: newProofJwt,
-        );
-
-        expect(
-          firstResp.cNonce,
-          equals(rotatedNonce),
-          reason:
-              'c_nonce from first credential response MUST be usable for next proof',
-        );
-        expect(
-          secondRequestBody,
-          contains(rotatedNonce),
-          reason:
-              'OID4VCI 1.0 Final §7: rotated c_nonce MUST appear in the next proof JWT',
+        }
+        if (callCount == 2) {
+          return http.Response(
+            '{"c_nonce":"$nextNonce"}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        secondRequestBody = request.body;
+        return http.Response(
+          kCredentialResponseJwtVcJson,
+          200,
+          headers: {'content-type': 'application/json'},
         );
       });
-    },
-  );
+
+      final svc = OID4VCHttpClient(mockClient);
+
+      await svc.requestCredential(
+        credentialEndpoint: kCredentialEndpoint,
+        accessToken: kAccessToken,
+        credentialFormat: 'jwt_vc_json',
+        proofJwt: 'proof.using.original.nonce',
+      );
+
+      final nonce = await svc.requestNonce(nonceEndpoint: kNonceEndpoint);
+      final newProofJwt = 'proof.using.${nonce.cNonce}';
+      await svc.requestCredential(
+        credentialEndpoint: kCredentialEndpoint,
+        accessToken: kAccessToken,
+        credentialFormat: 'jwt_vc_json',
+        proofJwt: newProofJwt,
+      );
+
+      expect(
+        secondRequestBody,
+        contains(nextNonce),
+        reason:
+            'OID4VCI Final §7: the nonce endpoint value must be used in the next proof',
+      );
+    });
+  });
 
   // ── §7  Error Handling ───────────────────────────────────────────────────────
 
@@ -649,20 +613,12 @@ void main() {
 
     /// OID4VCI §8: A 400 with `invalid_proof` and a new c_nonce SHOULD
     /// allow the wallet to retry with a fresh nonce.
-    test('errorHandling_invalidProof400_newNonceReadable', () {
-      // The server returns 400 invalid_proof with a refreshed c_nonce
-      const responseBody =
-          '{"error":"invalid_proof","c_nonce":"newNonce999","c_nonce_expires_in":86400}';
+    test('errorHandling_invalidProof400_parseable', () {
+      const responseBody = '{"error":"invalid_proof"}';
       final body = jsonDecode(responseBody) as Map<String, dynamic>;
 
       expect(body['error'], equals('invalid_proof'));
-      expect(
-        body['c_nonce'],
-        equals('newNonce999'),
-        reason:
-            'OID4VCI §8: 400 invalid_proof response MUST include a fresh c_nonce '
-            'so the wallet can build a new proof and retry',
-      );
+      expect(body, isNot(contains('c_nonce')));
     });
   });
 

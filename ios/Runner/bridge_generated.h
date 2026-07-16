@@ -191,8 +191,6 @@ typedef struct wire_cst_frb_credential_response {
   struct wire_cst_list_prim_u_8_strict *format;
   struct wire_cst_list_prim_u_8_strict *credential;
   struct wire_cst_list_prim_u_8_strict *transaction_id;
-  struct wire_cst_list_prim_u_8_strict *c_nonce;
-  uint64_t *c_nonce_expires_in;
 } wire_cst_frb_credential_response;
 
 typedef struct wire_cst_frb_face_match_result {
@@ -245,8 +243,6 @@ typedef struct wire_cst_frb_token_response {
   struct wire_cst_list_prim_u_8_strict *access_token;
   struct wire_cst_list_prim_u_8_strict *token_type;
   uint64_t *expires_in;
-  struct wire_cst_list_prim_u_8_strict *c_nonce;
-  uint64_t *c_nonce_expires_in;
   struct wire_cst_list_prim_u_8_strict *scope;
 } wire_cst_frb_token_response;
 
@@ -269,243 +265,243 @@ typedef struct wire_cst_selectable_credential {
   int32_t privacy_level;
 } wire_cst_selectable_credential;
 
-void frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality(int64_t port_,
-                                                                                   struct wire_cst_list_prim_u_8_strict *image,
-                                                                                   struct wire_cst_list_prim_u_8_strict *models_dir);
+void frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality(int64_t port_,
+                                                                             struct wire_cst_list_prim_u_8_strict *image,
+                                                                             struct wire_cst_list_prim_u_8_strict *models_dir);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints(int64_t port_,
-                                                                                 struct wire_cst_list_prim_u_8_strict *policy_json,
-                                                                                 struct wire_cst_list_prim_u_8_strict *issuer_id,
-                                                                                 bool trust_profile_verified);
+void frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints(int64_t port_,
+                                                                           struct wire_cst_list_prim_u_8_strict *policy_json,
+                                                                           struct wire_cst_list_prim_u_8_strict *issuer_id,
+                                                                           bool trust_profile_verified);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__create_selectable_credential(int64_t port_,
-                                                                                     struct wire_cst_credential *credential,
-                                                                                     int32_t privacy_level);
+void frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(int64_t port_,
+                                                                               struct wire_cst_credential *credential,
+                                                                               int32_t privacy_level);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__credential_from_json(int64_t port_,
-                                                                             struct wire_cst_list_prim_u_8_strict *json);
+void frbgen_marty_authenticator_wire__crate__api__credential_from_json(int64_t port_,
+                                                                       struct wire_cst_list_prim_u_8_strict *json);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__credential_to_json(int64_t port_,
-                                                                           struct wire_cst_credential *credential);
+void frbgen_marty_authenticator_wire__crate__api__credential_to_json(int64_t port_,
+                                                                     struct wire_cst_credential *credential);
 
-void frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age(int64_t port_,
-                                                                                 struct wire_cst_list_prim_u_8_strict *image,
-                                                                                 struct wire_cst_list_prim_u_8_strict *models_dir);
+void frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age(int64_t port_,
+                                                                           struct wire_cst_list_prim_u_8_strict *image,
+                                                                           struct wire_cst_list_prim_u_8_strict *models_dir);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request(int64_t port_,
-                                                                                      struct wire_cst_list_prim_u_8_strict *request_json,
-                                                                                      struct wire_cst_list_String *policies_json,
-                                                                                      struct wire_cst_list_credential *credentials);
+void frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request(int64_t port_,
+                                                                                struct wire_cst_list_prim_u_8_strict *request_json,
+                                                                                struct wire_cst_list_String *policies_json,
+                                                                                struct wire_cst_list_credential *credentials);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__get_credential_claims(int64_t port_,
-                                                                              struct wire_cst_credential *credential);
+void frbgen_marty_authenticator_wire__crate__api__get_credential_claims(int64_t port_,
+                                                                        struct wire_cst_credential *credential);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set(int64_t port_,
-                                                                                   struct wire_cst_list_prim_u_8_strict *policy_json,
-                                                                                   struct wire_cst_credential *credential);
+void frbgen_marty_authenticator_wire__crate__api__get_minimum_disclosure_set(int64_t port_,
+                                                                             struct wire_cst_list_prim_u_8_strict *policy_json,
+                                                                             struct wire_cst_credential *credential);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__group_credentials_by_issuer(int64_t port_,
-                                                                                    struct wire_cst_list_credential *credentials);
+void frbgen_marty_authenticator_wire__crate__api__group_credentials_by_issuer(int64_t port_,
+                                                                              struct wire_cst_list_credential *credentials);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__is_credential_expired(int64_t port_,
-                                                                              struct wire_cst_credential *credential);
+void frbgen_marty_authenticator_wire__crate__api__is_credential_expired(int64_t port_,
+                                                                        struct wire_cst_credential *credential);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__parse_mdoc_credential(int64_t port_,
-                                                                              struct wire_cst_list_prim_u_8_loose *cbor_bytes);
+void frbgen_marty_authenticator_wire__crate__api__parse_mdoc_credential(int64_t port_,
+                                                                        struct wire_cst_list_prim_u_8_loose *cbor_bytes);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__parse_sd_jwt_credential(int64_t port_,
-                                                                                struct wire_cst_list_prim_u_8_strict *sd_jwt);
+void frbgen_marty_authenticator_wire__crate__api__parse_sd_jwt_credential(int64_t port_,
+                                                                          struct wire_cst_list_prim_u_8_strict *sd_jwt);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__parse_verifiable_credential(int64_t port_,
-                                                                                    struct wire_cst_list_prim_u_8_strict *json);
+void frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential(int64_t port_,
+                                                                              struct wire_cst_list_prim_u_8_strict *json);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials(int64_t port_,
-                                                                                  struct wire_cst_list_prim_u_8_strict *policy_json,
-                                                                                  struct wire_cst_list_rankable_credential_input *credentials);
+void frbgen_marty_authenticator_wire__crate__api__rank_matching_credentials(int64_t port_,
+                                                                            struct wire_cst_list_prim_u_8_strict *policy_json,
+                                                                            struct wire_cst_list_rankable_credential_input *credentials);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__sync_policies(int64_t port_,
-                                                                      struct wire_cst_list_prim_u_8_strict *license_jwt,
-                                                                      struct wire_cst_list_prim_u_8_strict *endpoint);
+void frbgen_marty_authenticator_wire__crate__api__sync_policies(int64_t port_,
+                                                                struct wire_cst_list_prim_u_8_strict *license_jwt,
+                                                                struct wire_cst_list_prim_u_8_strict *endpoint);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust(int64_t port_,
-                                                                                struct wire_cst_m_doc_credential *mdoc,
-                                                                                struct wire_cst_list_list_prim_u_8_strict *x5chain);
+void frbgen_marty_authenticator_wire__crate__api__verify_and_attach_trust(int64_t port_,
+                                                                          struct wire_cst_m_doc_credential *mdoc,
+                                                                          struct wire_cst_list_list_prim_u_8_strict *x5chain);
 
-void frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match(int64_t port_,
-                                                                                 struct wire_cst_list_prim_u_8_strict *reference_image,
-                                                                                 struct wire_cst_list_prim_u_8_strict *probe_image,
-                                                                                 float *threshold,
-                                                                                 struct wire_cst_list_prim_u_8_strict *models_dir);
+void frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match(int64_t port_,
+                                                                           struct wire_cst_list_prim_u_8_strict *reference_image,
+                                                                           struct wire_cst_list_prim_u_8_strict *probe_image,
+                                                                           float *threshold,
+                                                                           struct wire_cst_list_prim_u_8_strict *models_dir);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain(int64_t port_,
-                                                                                struct wire_cst_list_list_prim_u_8_strict *x5chain);
+void frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain(int64_t port_,
+                                                                          struct wire_cst_list_list_prim_u_8_strict *x5chain);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation(int64_t port_,
-                                                                                             struct wire_cst_list_prim_u_8_strict *response_uri,
-                                                                                             struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
-                                                                                             struct wire_cst_list_prim_u_8_strict *dcql_query_json,
-                                                                                             struct wire_cst_list_prim_u_8_strict *credentials_json);
+void frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_presentation(int64_t port_,
+                                                                                       struct wire_cst_list_prim_u_8_strict *response_uri,
+                                                                                       struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
+                                                                                       struct wire_cst_list_prim_u_8_strict *dcql_query_json,
+                                                                                       struct wire_cst_list_prim_u_8_strict *credentials_json);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(int64_t port_,
-                                                                                                struct wire_cst_list_prim_u_8_strict *response_uri,
-                                                                                                struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
-                                                                                                struct wire_cst_list_prim_u_8_strict *credentials_json,
-                                                                                                struct wire_cst_list_frb_zk_proof_entry *zk_proofs);
+void frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(int64_t port_,
+                                                                                          struct wire_cst_list_prim_u_8_strict *response_uri,
+                                                                                          struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
+                                                                                          struct wire_cst_list_prim_u_8_strict *credentials_json,
+                                                                                          struct wire_cst_list_frb_zk_proof_entry *zk_proofs);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request(int64_t port_,
-                                                                                  struct wire_cst_list_prim_u_8_strict *issuer_metadata_json,
-                                                                                  struct wire_cst_list_prim_u_8_strict *credential_configuration_id,
-                                                                                  struct wire_cst_list_prim_u_8_strict *client_id,
+void frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request(int64_t port_,
+                                                                            struct wire_cst_list_prim_u_8_strict *issuer_metadata_json,
+                                                                            struct wire_cst_list_prim_u_8_strict *credential_configuration_id,
+                                                                            struct wire_cst_list_prim_u_8_strict *client_id,
+                                                                            struct wire_cst_list_prim_u_8_strict *redirect_uri,
+                                                                            struct wire_cst_list_prim_u_8_strict *issuer_state);
+
+void frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt(int64_t port_,
+                                                                          struct wire_cst_list_prim_u_8_strict *holder_kid,
+                                                                          struct wire_cst_list_prim_u_8_strict *c_nonce,
+                                                                          struct wire_cst_list_prim_u_8_strict *issuer_url,
+                                                                          struct wire_cst_list_prim_u_8_strict *jwk_json);
+
+void frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token(int64_t port_,
+                                                                                  struct wire_cst_list_prim_u_8_strict *token_endpoint,
+                                                                                  struct wire_cst_list_prim_u_8_strict *code,
+                                                                                  struct wire_cst_list_prim_u_8_strict *code_verifier,
                                                                                   struct wire_cst_list_prim_u_8_strict *redirect_uri,
-                                                                                  struct wire_cst_list_prim_u_8_strict *issuer_state);
+                                                                                  struct wire_cst_list_prim_u_8_strict *client_id);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt(int64_t port_,
-                                                                                struct wire_cst_list_prim_u_8_strict *holder_kid,
-                                                                                struct wire_cst_list_prim_u_8_strict *c_nonce,
-                                                                                struct wire_cst_list_prim_u_8_strict *issuer_url,
-                                                                                struct wire_cst_list_prim_u_8_strict *jwk_json);
+void frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token(int64_t port_,
+                                                                                 struct wire_cst_list_prim_u_8_strict *token_endpoint,
+                                                                                 struct wire_cst_list_prim_u_8_strict *pre_auth_code,
+                                                                                 struct wire_cst_list_prim_u_8_strict *tx_code);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token(int64_t port_,
-                                                                                        struct wire_cst_list_prim_u_8_strict *token_endpoint,
-                                                                                        struct wire_cst_list_prim_u_8_strict *code,
-                                                                                        struct wire_cst_list_prim_u_8_strict *code_verifier,
-                                                                                        struct wire_cst_list_prim_u_8_strict *redirect_uri,
-                                                                                        struct wire_cst_list_prim_u_8_strict *client_id);
+void frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(int64_t port_,
+                                                                               struct wire_cst_list_prim_u_8_strict *issuer_url);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token(int64_t port_,
-                                                                                       struct wire_cst_list_prim_u_8_strict *token_endpoint,
-                                                                                       struct wire_cst_list_prim_u_8_strict *pre_auth_code,
-                                                                                       struct wire_cst_list_prim_u_8_strict *tx_code);
+void frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer(int64_t port_,
+                                                                                struct wire_cst_list_prim_u_8_strict *offer_uri);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(int64_t port_,
-                                                                                     struct wire_cst_list_prim_u_8_strict *issuer_url);
+void frbgen_marty_authenticator_wire__crate__api__wallet_parse_presentation_request(int64_t port_,
+                                                                                    struct wire_cst_list_prim_u_8_strict *request_uri);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer(int64_t port_,
-                                                                                      struct wire_cst_list_prim_u_8_strict *offer_uri);
+void frbgen_marty_authenticator_wire__crate__api__wallet_request_credential(int64_t port_,
+                                                                            struct wire_cst_list_prim_u_8_strict *credential_endpoint,
+                                                                            struct wire_cst_list_prim_u_8_strict *access_token,
+                                                                            struct wire_cst_list_prim_u_8_strict *credential_format,
+                                                                            struct wire_cst_list_prim_u_8_strict *credential_configuration_id,
+                                                                            struct wire_cst_list_prim_u_8_strict *proof_jwt);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request(int64_t port_,
-                                                                                          struct wire_cst_list_prim_u_8_strict *request_uri);
+void frbgen_marty_authenticator_wire__crate__api__zk_is_supported_on_device(int64_t port_);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential(int64_t port_,
-                                                                                  struct wire_cst_list_prim_u_8_strict *credential_endpoint,
-                                                                                  struct wire_cst_list_prim_u_8_strict *access_token,
-                                                                                  struct wire_cst_list_prim_u_8_strict *credential_format,
-                                                                                  struct wire_cst_list_prim_u_8_strict *credential_configuration_id,
-                                                                                  struct wire_cst_list_prim_u_8_strict *proof_jwt);
+void frbgen_marty_authenticator_wire__crate__api__zk_prove(int64_t port_,
+                                                           struct wire_cst_list_prim_u_8_strict *predicate_id,
+                                                           struct wire_cst_list_prim_u_8_strict *claim_value,
+                                                           struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
+                                                           struct wire_cst_list_prim_u_8_strict *issuer_pkx,
+                                                           struct wire_cst_list_prim_u_8_strict *issuer_pky,
+                                                           struct wire_cst_list_prim_u_8_strict *doc_type,
+                                                           struct wire_cst_list_prim_u_8_loose *session_nonce);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device(int64_t port_);
+void frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition(int64_t port_,
+                                                                                        struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
+                                                                                        struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
+                                                                                        struct wire_cst_list_prim_u_8_strict *issuer_pkx,
+                                                                                        struct wire_cst_list_prim_u_8_strict *issuer_pky,
+                                                                                        struct wire_cst_list_prim_u_8_strict *doc_type,
+                                                                                        struct wire_cst_list_prim_u_8_strict *secrets_json,
+                                                                                        struct wire_cst_list_prim_u_8_loose *session_nonce);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__zk_prove(int64_t port_,
-                                                                 struct wire_cst_list_prim_u_8_strict *predicate_id,
-                                                                 struct wire_cst_list_prim_u_8_strict *claim_value,
-                                                                 struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
-                                                                 struct wire_cst_list_prim_u_8_strict *issuer_pkx,
-                                                                 struct wire_cst_list_prim_u_8_strict *issuer_pky,
-                                                                 struct wire_cst_list_prim_u_8_strict *doc_type,
-                                                                 struct wire_cst_list_prim_u_8_loose *session_nonce);
+void frbgen_marty_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(const void *ptr);
 
-void frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition(int64_t port_,
-                                                                                              struct wire_cst_list_prim_u_8_strict *presentation_definition_json,
-                                                                                              struct wire_cst_list_prim_u_8_loose *mdoc_bytes,
-                                                                                              struct wire_cst_list_prim_u_8_strict *issuer_pkx,
-                                                                                              struct wire_cst_list_prim_u_8_strict *issuer_pky,
-                                                                                              struct wire_cst_list_prim_u_8_strict *doc_type,
-                                                                                              struct wire_cst_list_prim_u_8_strict *secrets_json,
-                                                                                              struct wire_cst_list_prim_u_8_loose *session_nonce);
+void frbgen_marty_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(const void *ptr);
 
-void frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(const void *ptr);
+struct wire_cst_credential *frbgen_marty_authenticator_cst_new_box_autoadd_credential(void);
 
-void frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(const void *ptr);
+struct wire_cst_credential_status *frbgen_marty_authenticator_cst_new_box_autoadd_credential_status(void);
 
-struct wire_cst_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential(void);
+float *frbgen_marty_authenticator_cst_new_box_autoadd_f_32(float value);
 
-struct wire_cst_credential_status *frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status(void);
+struct wire_cst_m_doc_credential *frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential(void);
 
-float *frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32(float value);
+struct wire_cst_proof *frbgen_marty_authenticator_cst_new_box_autoadd_proof(void);
 
-struct wire_cst_m_doc_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential(void);
+struct wire_cst_sd_jwt_credential *frbgen_marty_authenticator_cst_new_box_autoadd_sd_jwt_credential(void);
 
-struct wire_cst_proof *frbgen_privacyidea_authenticator_cst_new_box_autoadd_proof(void);
+struct wire_cst_trust_info *frbgen_marty_authenticator_cst_new_box_autoadd_trust_info(void);
 
-struct wire_cst_sd_jwt_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_sd_jwt_credential(void);
+uint64_t *frbgen_marty_authenticator_cst_new_box_autoadd_u_64(uint64_t value);
 
-struct wire_cst_trust_info *frbgen_privacyidea_authenticator_cst_new_box_autoadd_trust_info(void);
+struct wire_cst_verifiable_credential *frbgen_marty_authenticator_cst_new_box_autoadd_verifiable_credential(void);
 
-uint64_t *frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64(uint64_t value);
+struct wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy *frbgen_marty_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(int32_t len);
 
-struct wire_cst_verifiable_credential *frbgen_privacyidea_authenticator_cst_new_box_autoadd_verifiable_credential(void);
+struct wire_cst_list_String *frbgen_marty_authenticator_cst_new_list_String(int32_t len);
 
-struct wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy *frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(int32_t len);
+struct wire_cst_list_credential *frbgen_marty_authenticator_cst_new_list_credential(int32_t len);
 
-struct wire_cst_list_String *frbgen_privacyidea_authenticator_cst_new_list_String(int32_t len);
+struct wire_cst_list_credential_group *frbgen_marty_authenticator_cst_new_list_credential_group(int32_t len);
 
-struct wire_cst_list_credential *frbgen_privacyidea_authenticator_cst_new_list_credential(int32_t len);
+struct wire_cst_list_frb_zk_proof_entry *frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry(int32_t len);
 
-struct wire_cst_list_credential_group *frbgen_privacyidea_authenticator_cst_new_list_credential_group(int32_t len);
+struct wire_cst_list_list_prim_u_8_strict *frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict(int32_t len);
 
-struct wire_cst_list_frb_zk_proof_entry *frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry(int32_t len);
+struct wire_cst_list_prim_u_8_loose *frbgen_marty_authenticator_cst_new_list_prim_u_8_loose(int32_t len);
 
-struct wire_cst_list_list_prim_u_8_strict *frbgen_privacyidea_authenticator_cst_new_list_list_prim_u_8_strict(int32_t len);
+struct wire_cst_list_prim_u_8_strict *frbgen_marty_authenticator_cst_new_list_prim_u_8_strict(int32_t len);
 
-struct wire_cst_list_prim_u_8_loose *frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_loose(int32_t len);
-
-struct wire_cst_list_prim_u_8_strict *frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_strict(int32_t len);
-
-struct wire_cst_list_rankable_credential_input *frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input(int32_t len);
+struct wire_cst_list_rankable_credential_input *frbgen_marty_authenticator_cst_new_list_rankable_credential_input(int32_t len);
 static int64_t dummy_method_to_enforce_bundling(void) {
     int64_t dummy_var = 0;
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_proof);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_sd_jwt_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_trust_info);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_box_autoadd_verifiable_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_String);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_credential_group);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_list_prim_u_8_strict);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_loose);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_strict);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__create_selectable_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__credential_from_json);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__credential_to_json);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__get_credential_claims);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__group_credentials_by_issuer);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__is_credential_expired);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__parse_mdoc_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__parse_sd_jwt_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__parse_verifiable_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__sync_policies);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_prove);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age);
-    dummy_var ^= ((int64_t) (void*) frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_credential_status);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_f_32);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_proof);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_sd_jwt_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_trust_info);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_u_64);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_verifiable_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_String);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_credential_group);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_prim_u_8_loose);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_prim_u_8_strict);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_rankable_credential_input);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__create_selectable_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__credential_from_json);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__credential_to_json);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__get_credential_claims);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__get_minimum_disclosure_set);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__group_credentials_by_issuer);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__is_credential_expired);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__parse_mdoc_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__parse_sd_jwt_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__rank_matching_credentials);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__sync_policies);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__verify_and_attach_trust);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_presentation);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_parse_presentation_request);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_request_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_is_supported_on_device);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);
     return dummy_var;
 }

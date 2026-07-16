@@ -4,8 +4,8 @@
 //! These are the entry points for all credential operations.
 
 use crate::credential::{
-    Credential, CredentialGroup, MDocCredential, PrivacyLevel, SelectableCredential,
-    SdJwtCredential, TrustInfo, VerifiableCredential,
+    Credential, CredentialGroup, MDocCredential, PrivacyLevel, SdJwtCredential,
+    SelectableCredential, TrustInfo, VerifiableCredential,
 };
 use crate::trust;
 use flutter_rust_bridge::frb;
@@ -35,14 +35,15 @@ pub fn parse_verifiable_credential(json: String) -> anyhow::Result<VerifiableCre
         let subject_id = subject.get("id").and_then(|v| v.as_str()).map(String::from);
 
         // Get all claims except 'id'
-        let claims: std::collections::HashMap<String, serde_json::Value> = if let Some(obj) = subject.as_object() {
-            obj.iter()
-                .filter(|(k, _)| *k != "id")
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect()
-        } else {
-            std::collections::HashMap::new()
-        };
+        let claims: std::collections::HashMap<String, serde_json::Value> =
+            if let Some(obj) = subject.as_object() {
+                obj.iter()
+                    .filter(|(k, _)| *k != "id")
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
+            } else {
+                std::collections::HashMap::new()
+            };
 
         vc.subject = CredentialSubject {
             id: subject_id,
@@ -70,10 +71,7 @@ pub fn parse_mdoc_credential(cbor_bytes: Vec<u8>) -> anyhow::Result<MDocCredenti
     for (ns, items) in &doc.namespaces {
         let mut claim_map = std::collections::HashMap::new();
         for item in items {
-            claim_map.insert(
-                item.element_identifier.clone(),
-                item.element_value.clone(),
-            );
+            claim_map.insert(item.element_identifier.clone(), item.element_value.clone());
         }
         namespaces.insert(ns.clone(), claim_map);
     }
@@ -88,8 +86,7 @@ pub fn parse_mdoc_credential(cbor_bytes: Vec<u8>) -> anyhow::Result<MDocCredenti
     let signature = extract_claim(&namespaces, "org.iso.18013.5.1", "signature_usual_mark");
 
     // Serialize namespaces to JSON string for FFI compatibility
-    let namespaces_json = serde_json::to_string(&namespaces)
-        .unwrap_or_else(|_| "{}".to_string());
+    let namespaces_json = serde_json::to_string(&namespaces).unwrap_or_else(|_| "{}".to_string());
 
     Ok(MDocCredential {
         id: uuid::Uuid::new_v4().to_string(), // Generate unique ID
@@ -105,7 +102,10 @@ pub fn parse_mdoc_credential(cbor_bytes: Vec<u8>) -> anyhow::Result<MDocCredenti
 }
 
 fn extract_claim(
-    namespaces: &std::collections::HashMap<String, std::collections::HashMap<String, serde_json::Value>>,
+    namespaces: &std::collections::HashMap<
+        String,
+        std::collections::HashMap<String, serde_json::Value>,
+    >,
     namespace: &str,
     claim: &str,
 ) -> Option<String> {
@@ -118,27 +118,39 @@ fn extract_claim(
 
 /// Parse SD-JWT string into an SdJwtCredential.
 pub fn parse_sd_jwt_credential(sd_jwt: String) -> anyhow::Result<SdJwtCredential> {
+    use ssi_claims::jwt::{ExpirationTime, IssuedAt, Issuer, Subject};
     use ssi_sd_jwt::SdJwt;
-    use ssi_claims::jwt::{Issuer, Subject, IssuedAt, ExpirationTime};
 
     // Parse the SD-JWT using ssi-sd-jwt
-    let sd_jwt_ref = SdJwt::new(&sd_jwt)
-        .map_err(|e| anyhow::anyhow!("Credential parsing failed: Invalid SD-JWT format: {:?}", e.0))?;
+    let sd_jwt_ref = SdJwt::new(&sd_jwt).map_err(|e| {
+        anyhow::anyhow!(
+            "Credential parsing failed: Invalid SD-JWT format: {:?}",
+            e.0
+        )
+    })?;
 
     // Decode and reveal claims
-    let revealed = sd_jwt_ref.decode_reveal_any()
-        .map_err(|e| anyhow::anyhow!("Credential parsing failed: Failed to reveal SD-JWT claims: {}", e))?;
+    let revealed = sd_jwt_ref.decode_reveal_any().map_err(|e| {
+        anyhow::anyhow!(
+            "Credential parsing failed: Failed to reveal SD-JWT claims: {}",
+            e
+        )
+    })?;
 
     // Extract JWT claims
     let claims = revealed.claims();
 
     // Extract issuer from registered claims (Issuer wraps StringOrURI, which wraps the value)
-    let issuer = claims.registered.get::<Issuer>()
+    let issuer = claims
+        .registered
+        .get::<Issuer>()
         .map(|iss| iss.0.as_str().to_string())
         .unwrap_or_else(|| "unknown".to_string());
 
     // Extract issuance date (iat) from registered claims (IssuedAt wraps NumericDate)
-    let issuance_date = claims.registered.get::<IssuedAt>()
+    let issuance_date = claims
+        .registered
+        .get::<IssuedAt>()
         .map(|iat| {
             chrono::DateTime::from_timestamp(iat.0.as_seconds() as i64, 0)
                 .map(|dt| dt.to_rfc3339())
@@ -168,11 +180,12 @@ pub fn parse_sd_jwt_credential(sd_jwt: String) -> anyhow::Result<SdJwtCredential
     }
 
     // Serialize disclosed claims to JSON string for FFI compatibility
-    let disclosed_claims_json = serde_json::to_string(&disclosed_claims)
-        .unwrap_or_else(|_| "{}".to_string());
+    let disclosed_claims_json =
+        serde_json::to_string(&disclosed_claims).unwrap_or_else(|_| "{}".to_string());
 
     // Get disclosable claims from the disclosure map
-    let disclosable_claims: Vec<String> = revealed.disclosures
+    let disclosable_claims: Vec<String> = revealed
+        .disclosures
         .iter()
         .filter_map(|(pointer, _disclosure)| {
             // Extract the claim name from the JSON pointer
@@ -184,7 +197,9 @@ pub fn parse_sd_jwt_credential(sd_jwt: String) -> anyhow::Result<SdJwtCredential
     let key_binding: Option<String> = None; // Key binding detection requires JWT header inspection
 
     // Extract subject as ID if present (Subject wraps StringOrURI)
-    let id = claims.registered.get::<Subject>()
+    let id = claims
+        .registered
+        .get::<Subject>()
         .map(|sub| sub.0.as_str().to_string())
         .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
 
@@ -194,7 +209,11 @@ pub fn parse_sd_jwt_credential(sd_jwt: String) -> anyhow::Result<SdJwtCredential
         .or_else(|| disclosed_claims.get("vct"))
         .and_then(|v| {
             if let Some(arr) = v.as_array() {
-                Some(arr.iter().filter_map(|t| t.as_str().map(String::from)).collect())
+                Some(
+                    arr.iter()
+                        .filter_map(|t| t.as_str().map(String::from))
+                        .collect(),
+                )
             } else if let Some(s) = v.as_str() {
                 Some(vec![s.to_string()])
             } else {
@@ -245,12 +264,14 @@ pub fn group_credentials_by_issuer(credentials: Vec<Credential>) -> Vec<Credenti
 
     for cred in credentials {
         let issuer = cred.issuer().to_string();
-        let group = groups.entry(issuer.clone()).or_insert_with(|| CredentialGroup {
-            issuer: issuer.clone(),
-            issuer_name: issuer.clone(), // TODO: Resolve from metadata
-            credentials: vec![],
-            logo_url: None,
-        });
+        let group = groups
+            .entry(issuer.clone())
+            .or_insert_with(|| CredentialGroup {
+                issuer: issuer.clone(),
+                issuer_name: issuer.clone(), // TODO: Resolve from metadata
+                credentials: vec![],
+                logo_url: None,
+            });
         group.credentials.push(cred);
     }
 
@@ -284,21 +305,30 @@ pub fn get_credential_claims(credential: &Credential) -> Vec<String> {
     match credential {
         Credential::VerifiableCredential(vc) => {
             // Parse claims from JSON string
-            serde_json::from_str::<std::collections::HashMap<String, serde_json::Value>>(&vc.subject.claims_json)
-                .map(|m| m.keys().cloned().collect())
-                .unwrap_or_default()
+            serde_json::from_str::<std::collections::HashMap<String, serde_json::Value>>(
+                &vc.subject.claims_json,
+            )
+            .map(|m| m.keys().cloned().collect())
+            .unwrap_or_default()
         }
         Credential::MDoc(mdoc) => {
             // Parse namespaces from JSON string
-            serde_json::from_str::<std::collections::HashMap<String, std::collections::HashMap<String, serde_json::Value>>>(&mdoc.namespaces_json)
-                .map(|ns| ns.values().flat_map(|m| m.keys().cloned()).collect())
-                .unwrap_or_default()
+            serde_json::from_str::<
+                std::collections::HashMap<
+                    String,
+                    std::collections::HashMap<String, serde_json::Value>,
+                >,
+            >(&mdoc.namespaces_json)
+            .map(|ns| ns.values().flat_map(|m| m.keys().cloned()).collect())
+            .unwrap_or_default()
         }
         Credential::SdJwt(sd) => {
             // Parse disclosed claims from JSON string
-            serde_json::from_str::<std::collections::HashMap<String, serde_json::Value>>(&sd.disclosed_claims_json)
-                .map(|m| m.keys().cloned().collect())
-                .unwrap_or_default()
+            serde_json::from_str::<std::collections::HashMap<String, serde_json::Value>>(
+                &sd.disclosed_claims_json,
+            )
+            .map(|m| m.keys().cloned().collect())
+            .unwrap_or_default()
         }
     }
 }
@@ -309,14 +339,12 @@ pub fn get_credential_claims(credential: &Credential) -> Vec<String> {
 
 /// Serialize a credential to JSON for storage.
 pub fn credential_to_json(credential: &Credential) -> anyhow::Result<String> {
-    serde_json::to_string(credential)
-        .map_err(|e| anyhow::anyhow!("Internal error: {}", e))
+    serde_json::to_string(credential).map_err(|e| anyhow::anyhow!("Internal error: {}", e))
 }
 
 /// Deserialize a credential from JSON.
 pub fn credential_from_json(json: String) -> anyhow::Result<Credential> {
-    serde_json::from_str(&json)
-        .map_err(|e| anyhow::anyhow!("Credential parsing failed: {}", e))
+    serde_json::from_str(&json).map_err(|e| anyhow::anyhow!("Credential parsing failed: {}", e))
 }
 
 // ============================================================================
@@ -335,7 +363,9 @@ pub async fn sync_policies(
     use marty_sync::PolicySyncProvider;
 
     let provider = PolicySyncProvider::new(endpoint, license_jwt);
-    let policies = provider.fetch_all().await
+    let policies = provider
+        .fetch_all()
+        .await
         .map_err(|e| anyhow::anyhow!("Policy sync failed: {}", e))?;
 
     Ok(policies)
@@ -349,7 +379,7 @@ pub fn evaluate_presentation_request(
     policies_json: Vec<String>,
     credentials: Vec<Credential>,
 ) -> anyhow::Result<PolicyEvaluationResult> {
-    use marty_verification::policy::{PresentationPolicy, MinimumDisclosureResolver};
+    use marty_verification::policy::{MinimumDisclosureResolver, PresentationPolicy};
     use std::collections::HashMap;
 
     // Parse policies
@@ -360,7 +390,8 @@ pub fn evaluate_presentation_request(
         .map_err(|e| anyhow::anyhow!("Failed to parse policies: {}", e))?;
 
     // For now, use first policy (TODO: match by verifier ID)
-    let policy = policies.first()
+    let policy = policies
+        .first()
         .ok_or_else(|| anyhow::anyhow!("No policies provided"))?;
 
     // Get all available claims from credentials
@@ -386,7 +417,7 @@ pub fn get_minimum_disclosure_set(
     policy_json: String,
     credential: Credential,
 ) -> anyhow::Result<Vec<String>> {
-    use marty_verification::policy::{PresentationPolicy, MinimumDisclosureResolver};
+    use marty_verification::policy::{MinimumDisclosureResolver, PresentationPolicy};
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
         .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
@@ -403,8 +434,8 @@ pub fn rank_matching_credentials(
     policy_json: String,
     credentials: Vec<RankableCredentialInput>,
 ) -> anyhow::Result<Vec<String>> {
-    use marty_verification::policy::{PresentationPolicy, CredentialRanker};
     use marty_verification::policy::ranking::RankableCredential;
+    use marty_verification::policy::{CredentialRanker, PresentationPolicy};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
@@ -415,7 +446,8 @@ pub fn rank_matching_credentials(
     let mut rankable: Vec<RankableCredential> = credentials
         .into_iter()
         .map(|c| {
-            let issued_at = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(c.issued_at_unix as u64);
+            let issued_at =
+                SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(c.issued_at_unix as u64);
             RankableCredential {
                 credential_id: c.credential_id,
                 issuer_id: c.issuer_id,
@@ -437,16 +469,14 @@ pub fn check_issuer_constraints(
     issuer_id: String,
     trust_profile_verified: bool,
 ) -> anyhow::Result<IssuerCheckResultOutput> {
-    use marty_verification::policy::{PresentationPolicy, IssuerConstraintChecker};
     use marty_verification::policy::issuer::IssuerCheckResult;
+    use marty_verification::policy::{IssuerConstraintChecker, PresentationPolicy};
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
         .map_err(|e| anyhow::anyhow!("Failed to parse policy: {}", e))?;
 
-    let checker = IssuerConstraintChecker::new(
-        policy.trust_profile_id.as_ref(),
-        &policy.allowed_issuers,
-    );
+    let checker =
+        IssuerConstraintChecker::new(policy.trust_profile_id.as_ref(), &policy.allowed_issuers);
 
     let result = checker.check_issuer(&issuer_id, trust_profile_verified);
 
@@ -536,8 +566,6 @@ pub struct FrbTokenResponse {
     pub access_token: String,
     pub token_type: String,
     pub expires_in: Option<u64>,
-    pub c_nonce: Option<String>,
-    pub c_nonce_expires_in: Option<u64>,
     pub scope: Option<String>,
 }
 
@@ -547,8 +575,6 @@ impl From<marty_oid4vci::types::TokenResponse> for FrbTokenResponse {
             access_token: t.access_token,
             token_type: t.token_type,
             expires_in: Some(t.expires_in),
-            c_nonce: t.nonce,
-            c_nonce_expires_in: t.nonce_expires_in,
             scope: t.scope,
         }
     }
@@ -571,8 +597,6 @@ pub struct FrbCredentialResponse {
     pub format: Option<String>,
     pub credential: Option<String>,
     pub transaction_id: Option<String>,
-    pub c_nonce: Option<String>,
-    pub c_nonce_expires_in: Option<u64>,
 }
 
 impl From<marty_oid4vci::types::CredentialResponse> for FrbCredentialResponse {
@@ -588,8 +612,6 @@ impl From<marty_oid4vci::types::CredentialResponse> for FrbCredentialResponse {
             format: None,
             credential,
             transaction_id: r.transaction_id,
-            c_nonce: r.nonce,
-            c_nonce_expires_in: r.nonce_expires_in,
         }
     }
 }
@@ -652,18 +674,30 @@ impl From<marty_oid4vci::PresentationResponse> for FrbPresentationResponse {
 
 /// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
 #[frb]
-pub async fn wallet_parse_credential_offer(offer_uri: String) -> anyhow::Result<FrbCredentialOffer> {
+pub async fn wallet_parse_credential_offer(
+    offer_uri: String,
+) -> anyhow::Result<FrbCredentialOffer> {
     let engine = marty_oid4vci::WalletEngine::new();
     let offer = engine
         .parse_credential_offer(&offer_uri)
         .await
         .map_err(|e| anyhow::anyhow!("Credential offer parse error: {}", e))?;
 
-    let pre_authorized_code = offer.grants.pre_authorized_code.as_ref()
+    let pre_authorized_code = offer
+        .grants
+        .pre_authorized_code
+        .as_ref()
         .map(|pa| pa.pre_authorized_code.clone());
-    let tx_code_required = offer.grants.pre_authorized_code.as_ref()
-        .and_then(|pa| pa.tx_code.as_ref()).is_some();
-    let issuer_state = offer.grants.authorization_code.as_ref()
+    let tx_code_required = offer
+        .grants
+        .pre_authorized_code
+        .as_ref()
+        .and_then(|pa| pa.tx_code.as_ref())
+        .is_some();
+    let issuer_state = offer
+        .grants
+        .authorization_code
+        .as_ref()
         .and_then(|ac| ac.issuer_state.clone());
 
     Ok(FrbCredentialOffer {
@@ -715,12 +749,14 @@ pub fn wallet_build_auth_request(
     let meta = marty_oid4vci::IssuerMetadata {
         credential_issuer: frb_meta.credential_issuer.clone(),
         token_endpoint: Some(frb_meta.token_endpoint.clone()),
+        nonce_endpoint: None,
         credential_endpoint: frb_meta.credential_endpoint.clone(),
         authorization_endpoint: frb_meta.authorization_endpoint.clone(),
         grant_types_supported: frb_meta.grant_types_supported.clone(),
         credential_configurations_supported: serde_json::from_str(
             &frb_meta.credential_configurations_json,
-        ).unwrap_or_default(),
+        )
+        .unwrap_or_default(),
         extra: Default::default(),
     };
     let engine = marty_oid4vci::WalletEngine::new();
@@ -734,14 +770,21 @@ pub fn wallet_build_auth_request(
         )
         .map_err(|e| anyhow::anyhow!("Authorization request build error: {}", e))?;
     let auth_endpoint_fallback = format!("{}/authorize", frb_meta.credential_issuer);
-    let auth_endpoint = meta.authorization_endpoint.as_deref()
+    let auth_endpoint = meta
+        .authorization_endpoint
+        .as_deref()
         .unwrap_or(&auth_endpoint_fallback);
     let authorization_url = engine
         .authorization_redirect_url(auth_endpoint, &auth_req)
         .map_err(|e| anyhow::anyhow!("Authorization URL build error: {}", e))?;
     let state = auth_req.state.clone().unwrap_or_default();
     let redir = auth_req.redirect_uri.clone().unwrap_or(redirect_uri);
-    Ok(FrbAuthorizationRequest { authorization_url, code_verifier, state, redirect_uri: redir })
+    Ok(FrbAuthorizationRequest {
+        authorization_url,
+        code_verifier,
+        state,
+        redirect_uri: redir,
+    })
 }
 
 /// Exchange authorization code + PKCE verifier for access token.
@@ -830,7 +873,9 @@ pub async fn wallet_parse_presentation_request(
         .transpose()
         .map_err(|e| anyhow::anyhow!("DCQL query serialization error: {}", e))?;
     let query_type = match request.query_type {
-        marty_oid4vci::PresentationRequestQueryType::PresentationDefinition => "presentation_definition",
+        marty_oid4vci::PresentationRequestQueryType::PresentationDefinition => {
+            "presentation_definition"
+        }
         marty_oid4vci::PresentationRequestQueryType::DcqlQuery => "dcql_query",
     }
     .to_string();
@@ -909,8 +954,7 @@ pub async fn wallet_build_and_submit_zk_presentation(
     let credentials: std::collections::HashMap<String, String> =
         serde_json::from_str(&credentials_json)
             .map_err(|e| anyhow::anyhow!("Invalid credentials_json: {}", e))?;
-    let proofs: Vec<marty_oid4vci::ZkProofEntry> =
-        zk_proofs.into_iter().map(Into::into).collect();
+    let proofs: Vec<marty_oid4vci::ZkProofEntry> = zk_proofs.into_iter().map(Into::into).collect();
     let engine = marty_oid4vci::WalletEngine::new();
     let (vp_token, submission) = engine
         .build_zk_presentation(&definition, credentials, proofs)
@@ -938,9 +982,13 @@ pub fn zk_prove_from_presentation_definition(
     session_nonce: Vec<u8>,
 ) -> anyhow::Result<Vec<u8>> {
     #[derive(serde::Deserialize)]
-    struct PD { input_descriptors: Vec<ID> }
+    struct PD {
+        input_descriptors: Vec<ID>,
+    }
     #[derive(serde::Deserialize)]
-    struct ID { id: String }
+    struct ID {
+        id: String,
+    }
 
     let pd: PD = serde_json::from_str(&presentation_definition_json)
         .map_err(|e| anyhow::anyhow!("Invalid Presentation Definition JSON: {}", e))?;
@@ -950,9 +998,18 @@ pub fn zk_prove_from_presentation_definition(
     for descriptor in pd.input_descriptors {
         let predicate = marty_zkp::ZkPredicate::from_id(&descriptor.id);
         let claim_name = predicate.required_claim();
-        let claim_value = secrets.get(claim_name)
-            .ok_or_else(|| anyhow::anyhow!("Missing '{}' in secrets for predicate '{}'", claim_name, descriptor.id))?;
-        let attr = marty_zkp::AttributeRequest::new("org.iso.18013.5.1", claim_name, claim_value.as_bytes().to_vec());
+        let claim_value = secrets.get(claim_name).ok_or_else(|| {
+            anyhow::anyhow!(
+                "Missing '{}' in secrets for predicate '{}'",
+                claim_name,
+                descriptor.id
+            )
+        })?;
+        let attr = marty_zkp::AttributeRequest::new(
+            "org.iso.18013.5.1",
+            claim_name,
+            claim_value.as_bytes().to_vec(),
+        );
         let input = marty_zkp::MdocProveInput {
             mdoc: mdoc_bytes.clone(),
             issuer_pkx: issuer_pkx.clone(),
@@ -967,7 +1024,9 @@ pub fn zk_prove_from_presentation_definition(
         return marty_zkp::Prover::prove(&circuit, &input)
             .map_err(|e| anyhow::anyhow!("ZK proof generation failed: {}", e));
     }
-    Err(anyhow::anyhow!("No input descriptors found in Presentation Definition"))
+    Err(anyhow::anyhow!(
+        "No input descriptors found in Presentation Definition"
+    ))
 }
 
 /// Generate a ZK proof for a single named predicate.
@@ -983,7 +1042,11 @@ pub fn zk_prove(
 ) -> anyhow::Result<Vec<u8>> {
     let predicate = marty_zkp::ZkPredicate::from_id(&predicate_id);
     let claim_name = predicate.required_claim();
-    let attr = marty_zkp::AttributeRequest::new("org.iso.18013.5.1", claim_name, claim_value.as_bytes().to_vec());
+    let attr = marty_zkp::AttributeRequest::new(
+        "org.iso.18013.5.1",
+        claim_name,
+        claim_value.as_bytes().to_vec(),
+    );
     let input = marty_zkp::MdocProveInput {
         mdoc: mdoc_bytes,
         issuer_pkx,
@@ -1023,7 +1086,9 @@ mod tests {
             encode_query_json(dcql_query),
         );
 
-        let parsed = wallet_parse_presentation_request(request_uri).await.unwrap();
+        let parsed = wallet_parse_presentation_request(request_uri)
+            .await
+            .unwrap();
 
         assert_eq!(parsed.query_type, "dcql_query");
         assert!(parsed.presentation_definition_json.is_none());
@@ -1041,7 +1106,9 @@ mod tests {
             encode_query_json(presentation_definition),
         );
 
-        let parsed = wallet_parse_presentation_request(request_uri).await.unwrap();
+        let parsed = wallet_parse_presentation_request(request_uri)
+            .await
+            .unwrap();
 
         assert_eq!(parsed.query_type, "presentation_definition");
         assert!(parsed.presentation_definition_json.is_some());

@@ -39,18 +39,17 @@ class LicenseView extends StatelessView {
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
-      future: PackageInfo.fromPlatform(),
-      builder: (context, platformInfo) => LicensePage(
-        applicationName: appName,
-        applicationIcon: Padding(
-          padding: const EdgeInsets.all(32),
-          child: appImage,
-        ),
-        applicationLegalese: '© $websiteLink',
-        applicationVersion: platformInfo.data == null
-            ? ''
-            : '${platformInfo.data?.version}+${platformInfo.data?.buildNumber}',
+    future: PackageInfo.fromPlatform(),
+    builder: (context, platformInfo) => LicensePage(
+      applicationName: appName,
+      applicationIcon: Padding(
+        padding: const EdgeInsets.all(32),
+        child: appImage,
       ),
+      applicationLegalese: '© $websiteLink',
+      applicationVersion: platformInfo.data == null
+          ? ''
+          : '${platformInfo.data?.version}+${platformInfo.data?.buildNumber}',
     ),
   );
 }

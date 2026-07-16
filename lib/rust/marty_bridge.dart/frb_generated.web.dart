@@ -626,8 +626,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.format),
       cst_encode_opt_String(raw.credential),
       cst_encode_opt_String(raw.transactionId),
-      cst_encode_opt_String(raw.cNonce),
-      cst_encode_opt_box_autoadd_u_64(raw.cNonceExpiresIn),
     ].jsify()!;
   }
 
@@ -704,8 +702,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_String(raw.accessToken),
       cst_encode_String(raw.tokenType),
       cst_encode_opt_box_autoadd_u_64(raw.expiresIn),
-      cst_encode_opt_String(raw.cNonce),
-      cst_encode_opt_box_autoadd_u_64(raw.cNonceExpiresIn),
       cst_encode_opt_String(raw.scope),
     ].jsify()!;
   }

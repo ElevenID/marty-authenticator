@@ -33,7 +33,9 @@
 /// final meta  = await svc.fetchIssuerMetadata(offer.credentialIssuer);
 /// final token = await svc.exchangePreAuthToken(
 ///   meta.tokenEndpoint, offer.preAuthorizedCode!, txCode: userPin);
-/// final proofJwt = svc.createProofJwt(holderKid, token.cNonce!, meta.credentialIssuer, jwkJson);
+/// final nonce = await svc.fetchNonceForIssuer(meta.credentialIssuer);
+/// final proofJwt = await svc.createProofJwtAsync(
+///   holderKid: holderKid, cNonce: nonce, issuerUrl: meta.credentialIssuer, jwkJson: jwkJson);
 /// final cred = await svc.requestCredential(meta.credentialEndpoint,
 ///   token.accessToken, 'mso_mdoc', proofJwt);
 ///
@@ -50,6 +52,8 @@ library;
 
 import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
 
 import '../rust/marty_bridge.dart/api.dart';
 import '../utils/logger.dart';
@@ -115,16 +119,12 @@ class Oid4vciTokenResponse {
   final String accessToken;
   final String tokenType;
   final int? expiresIn;
-  final String? cNonce;
-  final int? cNonceExpiresIn;
   final String? scope;
 
   const Oid4vciTokenResponse({
     required this.accessToken,
     required this.tokenType,
     this.expiresIn,
-    this.cNonce,
-    this.cNonceExpiresIn,
     this.scope,
   });
 }
@@ -154,15 +154,11 @@ class Oid4vciCredentialResponse {
   final String? format;
   final String? credential;
   final String? transactionId;
-  final String? cNonce;
-  final int? cNonceExpiresIn;
 
   const Oid4vciCredentialResponse({
     this.format,
     this.credential,
     this.transactionId,
-    this.cNonce,
-    this.cNonceExpiresIn,
   });
 }
 
@@ -343,6 +339,46 @@ class OID4VCService {
     return _tokenFromFrb(r);
   }
 
+  /// Discover and call the OID4VCI Final Nonce Endpoint.
+  Future<String> fetchNonceForIssuer(String issuerUrl) async {
+    final issuer = Uri.parse(issuerUrl);
+    final metadataUri = issuer.replace(
+      path: '/.well-known/openid-credential-issuer${issuer.path}',
+      query: null,
+      fragment: null,
+    );
+    final metadataResponse = await http.get(
+      metadataUri,
+      headers: const {'Accept': 'application/json'},
+    );
+    if (metadataResponse.statusCode != 200) {
+      throw StateError(
+        'Issuer metadata returned HTTP ${metadataResponse.statusCode}',
+      );
+    }
+    final metadata = jsonDecode(metadataResponse.body) as Map<String, dynamic>;
+    final nonceEndpoint = metadata['nonce_endpoint'] as String?;
+    if (nonceEndpoint == null || nonceEndpoint.isEmpty) {
+      throw StateError('Issuer metadata does not advertise nonce_endpoint');
+    }
+    final nonceResponse = await http.post(
+      Uri.parse(nonceEndpoint),
+      headers: const {'Content-Type': 'application/json'},
+      body: '{}',
+    );
+    if (nonceResponse.statusCode != 200) {
+      throw StateError(
+        'Nonce endpoint returned HTTP ${nonceResponse.statusCode}',
+      );
+    }
+    final body = jsonDecode(nonceResponse.body) as Map<String, dynamic>;
+    final nonce = body['c_nonce'] as String?;
+    if (nonce == null || nonce.isEmpty) {
+      throw StateError('Nonce endpoint returned no c_nonce');
+    }
+    return nonce;
+  }
+
   // --------------------------------------------------------------------------
   // Credential request
   // --------------------------------------------------------------------------
@@ -391,8 +427,6 @@ class OID4VCService {
       format: r.format,
       credential: r.credential,
       transactionId: r.transactionId,
-      cNonce: r.cNonce,
-      cNonceExpiresIn: r.cNonceExpiresIn?.toInt(),
     );
   }
 
@@ -477,8 +511,6 @@ class OID4VCService {
         accessToken: t.accessToken,
         tokenType: t.tokenType,
         expiresIn: t.expiresIn?.toInt(),
-        cNonce: t.cNonce,
-        cNonceExpiresIn: t.cNonceExpiresIn?.toInt(),
         scope: t.scope,
       );
 

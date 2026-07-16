@@ -107,8 +107,6 @@ class SpruceCredentialTransport implements ICredentialTransport {
         tokenType: result['tokenType'] as String? ?? 'Bearer',
         expiresIn: result['expiresIn'] as int?,
         refreshToken: result['refreshToken'] as String?,
-        cNonce: result['c_nonce'] as String?,
-        cNonceExpiresIn: result['c_nonce_expires_in'] as int?,
       );
     } on PlatformException catch (e) {
       Logger.error('Failed to complete authorization', error: e);
@@ -131,7 +129,6 @@ class SpruceCredentialTransport implements ICredentialTransport {
             'credentialEndpoint': session.credentialEndpoint,
             'credentialType': credentialType,
             if (proofJwt != null) 'proofJwt': base64Encode(proofJwt),
-            if (tokens.cNonce != null) 'c_nonce': tokens.cNonce,
           });
 
       if (result == null) {
@@ -141,7 +138,6 @@ class SpruceCredentialTransport implements ICredentialTransport {
       return CredentialResponse(
         format: result['format'] as String? ?? 'unknown',
         credential: result['credential'],
-        cNonce: result['c_nonce'] as String?,
         transactionId: result['transaction_id'] as String?,
       );
     } on PlatformException catch (e) {
@@ -159,28 +155,14 @@ class SpruceCredentialTransport implements ICredentialTransport {
   }) async {
     // Request credentials one by one
     final responses = <CredentialResponse>[];
-    TokenResponse currentTokens = tokens;
-
     for (final type in credentialTypes) {
       final response = await requestCredential(
         session: session,
-        tokens: currentTokens,
+        tokens: tokens,
         credentialType: type,
         proofJwt: proofJwt,
       );
       responses.add(response);
-
-      // Update nonce if provided
-      if (response.cNonce != null) {
-        currentTokens = TokenResponse(
-          accessToken: currentTokens.accessToken,
-          tokenType: currentTokens.tokenType,
-          expiresIn: currentTokens.expiresIn,
-          refreshToken: currentTokens.refreshToken,
-          cNonce: response.cNonce,
-          cNonceExpiresIn: currentTokens.cNonceExpiresIn,
-        );
-      }
     }
 
     return responses;
@@ -238,12 +220,12 @@ class SpruceCredentialTransport implements ICredentialTransport {
             result['presentationDefinition'] as Map<String, dynamic>?,
         dcqlQuery: result['dcqlQuery'] as Map<String, dynamic>?,
         queryType:
-          result['queryType'] as String? ??
-          (result['dcqlQuery'] != null
-            ? 'dcql_query'
-            : (result['presentationDefinition'] != null
-              ? 'presentation_definition'
-              : null)),
+            result['queryType'] as String? ??
+            (result['dcqlQuery'] != null
+                ? 'dcql_query'
+                : (result['presentationDefinition'] != null
+                      ? 'presentation_definition'
+                      : null)),
       );
     } on PlatformException catch (e) {
       Logger.error('Failed to parse presentation request', error: e);

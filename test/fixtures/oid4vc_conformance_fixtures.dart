@@ -136,22 +136,19 @@ const String kCredentialOfferByRefJson = r'''
 
 // ── Token & Nonce Responses ───────────────────────────────────────────────────
 
-/// OID4VCI §7 — token endpoint response with c_nonce.
+/// OID4VCI Final token endpoint response. Proof nonces are separate.
 const String kTokenResponseJson = r'''
 {
   "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdA.dGVzdA",
   "token_type": "Bearer",
-  "expires_in": 86400,
-  "c_nonce": "tZignsnFbp",
-  "c_nonce_expires_in": 86400
+  "expires_in": 86400
 }
 ''';
 
 /// OID4VCI 1.0 Final §7.2 — nonce endpoint response.
 const String kNonceResponseJson = r'''
 {
-  "c_nonce": "fGFF7UkhLa",
-  "c_nonce_expires_in": 86400
+  "c_nonce": "fGFF7UkhLa"
 }
 ''';
 
@@ -162,10 +159,8 @@ const String kCredentialResponseJwtVcJson = r'''
 {
   "format": "jwt_vc_json",
   "credentials": [
-    "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6a2V5Ono2TWtpc3N1ZXIiLCJzdWIiOiJkaWQ6a2V5Ono2TWtob2xkZXIiLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiZ2l2ZW5fbmFtZSI6IkNvbmZvcm1hbmNlIiwiZmFtaWx5X25hbWUiOiJUZXN0IiwiZGVncmVlIjoiQlNjIENvbXB1dGVyIFNjaWVuY2UifX19.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" // pragma: allowlist secret
-  ],
-  "c_nonce": "PAPPf3h9lexTv3VOOU9szD",
-  "c_nonce_expires_in": 86400
+    "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6a2V5Ono2TWtpc3N1ZXIiLCJzdWIiOiJkaWQ6a2V5Ono2TWtob2xkZXIiLCJ2YyI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVW5pdmVyc2l0eURlZ3JlZUNyZWRlbnRpYWwiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiZ2l2ZW5fbmFtZSI6IkNvbmZvcm1hbmNlIiwiZmFtaWx5X25hbWUiOiJUZXN0IiwiZGVncmVlIjoiQlNjIENvbXB1dGVyIFNjaWVuY2UifX19.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  ]
 }
 ''';
 
@@ -174,10 +169,8 @@ const String kCredentialResponseSdJwtJson = r'''
 {
   "format": "dc+sd-jwt",
   "credentials": [
-    "eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlLmNvbSIsInZjdCI6Imh0dHBzOi8vY3JlZGVudGlhbHMuZXhhbXBsZS5jb20vdW5pdmVyc2l0eV9kZWdyZWUiLCJfc2RfYWxnIjoic2hhLTI1NiIsIl9zZCI6WyJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJdfQ.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" // pragma: allowlist secret
-  ],
-  "c_nonce": "8YE9hloQ620A3T4UODKBwA",
-  "c_nonce_expires_in": 86400
+    "eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCJ9.eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlLmNvbSIsInZjdCI6Imh0dHBzOi8vY3JlZGVudGlhbHMuZXhhbXBsZS5jb20vdW5pdmVyc2l0eV9kZWdyZWUiLCJfc2RfYWxnIjoic2hhLTI1NiIsIl9zZCI6WyJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJdfQ.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  ]
 }
 ''';
 
@@ -185,9 +178,7 @@ const String kCredentialResponseSdJwtJson = r'''
 const String kCredentialResponseMdocJson = r'''
 {
   "format": "mso_mdoc",
-  "credentials": ["oQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"],
-  "c_nonce": "GPoI55Da-9GM6RmdNi9Btg",
-  "c_nonce_expires_in": 86400
+  "credentials": ["oQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
 }
 ''';
 

@@ -1217,14 +1217,10 @@ impl SseDecode for crate::api::FrbCredentialResponse {
         let mut var_format = <Option<String>>::sse_decode(deserializer);
         let mut var_credential = <Option<String>>::sse_decode(deserializer);
         let mut var_transactionId = <Option<String>>::sse_decode(deserializer);
-        let mut var_cNonce = <Option<String>>::sse_decode(deserializer);
-        let mut var_cNonceExpiresIn = <Option<u64>>::sse_decode(deserializer);
         return crate::api::FrbCredentialResponse {
             format: var_format,
             credential: var_credential,
             transaction_id: var_transactionId,
-            c_nonce: var_cNonce,
-            c_nonce_expires_in: var_cNonceExpiresIn,
         };
     }
 }
@@ -1337,15 +1333,11 @@ impl SseDecode for crate::api::FrbTokenResponse {
         let mut var_accessToken = <String>::sse_decode(deserializer);
         let mut var_tokenType = <String>::sse_decode(deserializer);
         let mut var_expiresIn = <Option<u64>>::sse_decode(deserializer);
-        let mut var_cNonce = <Option<String>>::sse_decode(deserializer);
-        let mut var_cNonceExpiresIn = <Option<u64>>::sse_decode(deserializer);
         let mut var_scope = <Option<String>>::sse_decode(deserializer);
         return crate::api::FrbTokenResponse {
             access_token: var_accessToken,
             token_type: var_tokenType,
             expires_in: var_expiresIn,
-            c_nonce: var_cNonce,
-            c_nonce_expires_in: var_cNonceExpiresIn,
             scope: var_scope,
         };
     }
@@ -1985,8 +1977,6 @@ impl flutter_rust_bridge::IntoDart for crate::api::FrbCredentialResponse {
             self.format.into_into_dart().into_dart(),
             self.credential.into_into_dart().into_dart(),
             self.transaction_id.into_into_dart().into_dart(),
-            self.c_nonce.into_into_dart().into_dart(),
-            self.c_nonce_expires_in.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2136,8 +2126,6 @@ impl flutter_rust_bridge::IntoDart for crate::api::FrbTokenResponse {
             self.access_token.into_into_dart().into_dart(),
             self.token_type.into_into_dart().into_dart(),
             self.expires_in.into_into_dart().into_dart(),
-            self.c_nonce.into_into_dart().into_dart(),
-            self.c_nonce_expires_in.into_into_dart().into_dart(),
             self.scope.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -2547,8 +2535,6 @@ impl SseEncode for crate::api::FrbCredentialResponse {
         <Option<String>>::sse_encode(self.format, serializer);
         <Option<String>>::sse_encode(self.credential, serializer);
         <Option<String>>::sse_encode(self.transaction_id, serializer);
-        <Option<String>>::sse_encode(self.c_nonce, serializer);
-        <Option<u64>>::sse_encode(self.c_nonce_expires_in, serializer);
     }
 }
 
@@ -2619,8 +2605,6 @@ impl SseEncode for crate::api::FrbTokenResponse {
         <String>::sse_encode(self.access_token, serializer);
         <String>::sse_encode(self.token_type, serializer);
         <Option<u64>>::sse_encode(self.expires_in, serializer);
-        <Option<String>>::sse_encode(self.c_nonce, serializer);
-        <Option<u64>>::sse_encode(self.c_nonce_expires_in, serializer);
         <Option<String>>::sse_encode(self.scope, serializer);
     }
 }
@@ -3164,8 +3148,6 @@ mod io {
                 format: self.format.cst_decode(),
                 credential: self.credential.cst_decode(),
                 transaction_id: self.transaction_id.cst_decode(),
-                c_nonce: self.c_nonce.cst_decode(),
-                c_nonce_expires_in: self.c_nonce_expires_in.cst_decode(),
             }
         }
     }
@@ -3242,8 +3224,6 @@ mod io {
                 access_token: self.access_token.cst_decode(),
                 token_type: self.token_type.cst_decode(),
                 expires_in: self.expires_in.cst_decode(),
-                c_nonce: self.c_nonce.cst_decode(),
-                c_nonce_expires_in: self.c_nonce_expires_in.cst_decode(),
                 scope: self.scope.cst_decode(),
             }
         }
@@ -3569,8 +3549,6 @@ mod io {
                 format: core::ptr::null_mut(),
                 credential: core::ptr::null_mut(),
                 transaction_id: core::ptr::null_mut(),
-                c_nonce: core::ptr::null_mut(),
-                c_nonce_expires_in: core::ptr::null_mut(),
             }
         }
     }
@@ -3671,8 +3649,6 @@ mod io {
                 access_token: core::ptr::null_mut(),
                 token_type: core::ptr::null_mut(),
                 expires_in: core::ptr::null_mut(),
-                c_nonce: core::ptr::null_mut(),
-                c_nonce_expires_in: core::ptr::null_mut(),
                 scope: core::ptr::null_mut(),
             }
         }
@@ -3848,7 +3824,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__assess_face_quality(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality(
         port_: i64,
         image: *mut wire_cst_list_prim_u_8_strict,
         models_dir: *mut wire_cst_list_prim_u_8_strict,
@@ -3857,7 +3833,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__check_issuer_constraints(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints(
         port_: i64,
         policy_json: *mut wire_cst_list_prim_u_8_strict,
         issuer_id: *mut wire_cst_list_prim_u_8_strict,
@@ -3872,7 +3848,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__create_selectable_credential(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(
         port_: i64,
         credential: *mut wire_cst_credential,
         privacy_level: i32,
@@ -3881,7 +3857,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__credential_from_json(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__credential_from_json(
         port_: i64,
         json: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -3889,7 +3865,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__credential_to_json(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__credential_to_json(
         port_: i64,
         credential: *mut wire_cst_credential,
     ) {
@@ -3897,7 +3873,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__estimate_face_age(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age(
         port_: i64,
         image: *mut wire_cst_list_prim_u_8_strict,
         models_dir: *mut wire_cst_list_prim_u_8_strict,
@@ -3906,7 +3882,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__evaluate_presentation_request(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request(
         port_: i64,
         request_json: *mut wire_cst_list_prim_u_8_strict,
         policies_json: *mut wire_cst_list_String,
@@ -3921,7 +3897,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__get_credential_claims(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__get_credential_claims(
         port_: i64,
         credential: *mut wire_cst_credential,
     ) {
@@ -3929,7 +3905,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__get_minimum_disclosure_set(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__get_minimum_disclosure_set(
         port_: i64,
         policy_json: *mut wire_cst_list_prim_u_8_strict,
         credential: *mut wire_cst_credential,
@@ -3938,7 +3914,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__group_credentials_by_issuer(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__group_credentials_by_issuer(
         port_: i64,
         credentials: *mut wire_cst_list_credential,
     ) {
@@ -3946,7 +3922,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__is_credential_expired(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__is_credential_expired(
         port_: i64,
         credential: *mut wire_cst_credential,
     ) {
@@ -3954,7 +3930,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__parse_mdoc_credential(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__parse_mdoc_credential(
         port_: i64,
         cbor_bytes: *mut wire_cst_list_prim_u_8_loose,
     ) {
@@ -3962,7 +3938,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__parse_sd_jwt_credential(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__parse_sd_jwt_credential(
         port_: i64,
         sd_jwt: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -3970,7 +3946,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__parse_verifiable_credential(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential(
         port_: i64,
         json: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -3978,7 +3954,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__rank_matching_credentials(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__rank_matching_credentials(
         port_: i64,
         policy_json: *mut wire_cst_list_prim_u_8_strict,
         credentials: *mut wire_cst_list_rankable_credential_input,
@@ -3987,7 +3963,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__sync_policies(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__sync_policies(
         port_: i64,
         license_jwt: *mut wire_cst_list_prim_u_8_strict,
         endpoint: *mut wire_cst_list_prim_u_8_strict,
@@ -3996,7 +3972,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__verify_and_attach_trust(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__verify_and_attach_trust(
         port_: i64,
         mdoc: *mut wire_cst_m_doc_credential,
         x5chain: *mut wire_cst_list_list_prim_u_8_strict,
@@ -4005,7 +3981,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__biometrics__verify_face_match(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match(
         port_: i64,
         reference_image: *mut wire_cst_list_prim_u_8_strict,
         probe_image: *mut wire_cst_list_prim_u_8_strict,
@@ -4022,7 +3998,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__verify_mdoc_trust_chain(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain(
         port_: i64,
         x5chain: *mut wire_cst_list_list_prim_u_8_strict,
     ) {
@@ -4030,7 +4006,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_presentation(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_presentation(
         port_: i64,
         response_uri: *mut wire_cst_list_prim_u_8_strict,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
@@ -4047,7 +4023,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation(
         port_: i64,
         response_uri: *mut wire_cst_list_prim_u_8_strict,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
@@ -4064,7 +4040,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_build_auth_request(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request(
         port_: i64,
         issuer_metadata_json: *mut wire_cst_list_prim_u_8_strict,
         credential_configuration_id: *mut wire_cst_list_prim_u_8_strict,
@@ -4083,7 +4059,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_create_proof_jwt(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt(
         port_: i64,
         holder_kid: *mut wire_cst_list_prim_u_8_strict,
         c_nonce: *mut wire_cst_list_prim_u_8_strict,
@@ -4096,7 +4072,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_auth_code_token(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token(
         port_: i64,
         token_endpoint: *mut wire_cst_list_prim_u_8_strict,
         code: *mut wire_cst_list_prim_u_8_strict,
@@ -4115,7 +4091,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_exchange_pre_auth_token(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token(
         port_: i64,
         token_endpoint: *mut wire_cst_list_prim_u_8_strict,
         pre_auth_code: *mut wire_cst_list_prim_u_8_strict,
@@ -4130,7 +4106,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(
         port_: i64,
         issuer_url: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -4138,7 +4114,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_credential_offer(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer(
         port_: i64,
         offer_uri: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -4146,7 +4122,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_parse_presentation_request(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_parse_presentation_request(
         port_: i64,
         request_uri: *mut wire_cst_list_prim_u_8_strict,
     ) {
@@ -4154,7 +4130,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__wallet_request_credential(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_request_credential(
         port_: i64,
         credential_endpoint: *mut wire_cst_list_prim_u_8_strict,
         access_token: *mut wire_cst_list_prim_u_8_strict,
@@ -4173,14 +4149,14 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_is_supported_on_device(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__zk_is_supported_on_device(
         port_: i64,
     ) {
         wire__crate__api__zk_is_supported_on_device_impl(port_)
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_prove(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__zk_prove(
         port_: i64,
         predicate_id: *mut wire_cst_list_prim_u_8_strict,
         claim_value: *mut wire_cst_list_prim_u_8_strict,
@@ -4203,7 +4179,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_wire__crate__api__zk_prove_from_presentation_definition(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition(
         port_: i64,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
         mdoc_bytes: *mut wire_cst_list_prim_u_8_loose,
@@ -4226,7 +4202,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    pub extern "C" fn frbgen_marty_authenticator_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
         ptr: *const std::ffi::c_void,
     ) {
         unsafe {
@@ -4235,7 +4211,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
+    pub extern "C" fn frbgen_marty_authenticator_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(
         ptr: *const std::ffi::c_void,
     ) {
         unsafe {
@@ -4244,7 +4220,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_credential(
     ) -> *mut wire_cst_credential {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_credential::new_with_null_ptr(),
@@ -4252,7 +4228,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_credential_status(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_credential_status(
     ) -> *mut wire_cst_credential_status {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_credential_status::new_with_null_ptr(),
@@ -4260,14 +4236,12 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_f_32(
-        value: f32,
-    ) -> *mut f32 {
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_f_32(value: f32) -> *mut f32 {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_m_doc_credential(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential(
     ) -> *mut wire_cst_m_doc_credential {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_m_doc_credential::new_with_null_ptr(),
@@ -4275,13 +4249,13 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_proof(
-    ) -> *mut wire_cst_proof {
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_proof() -> *mut wire_cst_proof
+    {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(wire_cst_proof::new_with_null_ptr())
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_sd_jwt_credential(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_sd_jwt_credential(
     ) -> *mut wire_cst_sd_jwt_credential {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_sd_jwt_credential::new_with_null_ptr(),
@@ -4289,7 +4263,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_trust_info(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_trust_info(
     ) -> *mut wire_cst_trust_info {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_trust_info::new_with_null_ptr(),
@@ -4297,14 +4271,12 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_u_64(
-        value: u64,
-    ) -> *mut u64 {
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_u_64(value: u64) -> *mut u64 {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_box_autoadd_verifiable_credential(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_verifiable_credential(
     ) -> *mut wire_cst_verifiable_credential {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
             wire_cst_verifiable_credential::new_with_null_ptr(),
@@ -4312,13 +4284,13 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(len: i32) -> *mut wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy{
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy(len: i32) -> *mut wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy{
         let wrap = wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy { ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(Default::default(), len), len };
         flutter_rust_bridge::for_generated::new_leak_box_ptr(wrap)
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_String(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_String(
         len: i32,
     ) -> *mut wire_cst_list_String {
         let wrap = wire_cst_list_String {
@@ -4332,7 +4304,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_credential(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_credential(
         len: i32,
     ) -> *mut wire_cst_list_credential {
         let wrap = wire_cst_list_credential {
@@ -4346,7 +4318,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_credential_group(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_credential_group(
         len: i32,
     ) -> *mut wire_cst_list_credential_group {
         let wrap = wire_cst_list_credential_group {
@@ -4360,7 +4332,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_frb_zk_proof_entry(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry(
         len: i32,
     ) -> *mut wire_cst_list_frb_zk_proof_entry {
         let wrap = wire_cst_list_frb_zk_proof_entry {
@@ -4374,7 +4346,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_list_prim_u_8_strict(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict(
         len: i32,
     ) -> *mut wire_cst_list_list_prim_u_8_strict {
         let wrap = wire_cst_list_list_prim_u_8_strict {
@@ -4388,7 +4360,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_loose(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_prim_u_8_loose(
         len: i32,
     ) -> *mut wire_cst_list_prim_u_8_loose {
         let ans = wire_cst_list_prim_u_8_loose {
@@ -4399,7 +4371,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_prim_u_8_strict(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_prim_u_8_strict(
         len: i32,
     ) -> *mut wire_cst_list_prim_u_8_strict {
         let ans = wire_cst_list_prim_u_8_strict {
@@ -4410,7 +4382,7 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_privacyidea_authenticator_cst_new_list_rankable_credential_input(
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_rankable_credential_input(
         len: i32,
     ) -> *mut wire_cst_list_rankable_credential_input {
         let wrap = wire_cst_list_rankable_credential_input {
@@ -4504,8 +4476,6 @@ mod io {
         format: *mut wire_cst_list_prim_u_8_strict,
         credential: *mut wire_cst_list_prim_u_8_strict,
         transaction_id: *mut wire_cst_list_prim_u_8_strict,
-        c_nonce: *mut wire_cst_list_prim_u_8_strict,
-        c_nonce_expires_in: *mut u64,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -4564,8 +4534,6 @@ mod io {
         access_token: *mut wire_cst_list_prim_u_8_strict,
         token_type: *mut wire_cst_list_prim_u_8_strict,
         expires_in: *mut u64,
-        c_nonce: *mut wire_cst_list_prim_u_8_strict,
-        c_nonce_expires_in: *mut u64,
         scope: *mut wire_cst_list_prim_u_8_strict,
     }
     #[repr(C)]
@@ -4913,16 +4881,14 @@ mod web {
                 .unwrap();
             assert_eq!(
                 self_.length(),
-                5,
-                "Expected 5 elements, got {}",
+                3,
+                "Expected 3 elements, got {}",
                 self_.length()
             );
             crate::api::FrbCredentialResponse {
                 format: self_.get(0).cst_decode(),
                 credential: self_.get(1).cst_decode(),
                 transaction_id: self_.get(2).cst_decode(),
-                c_nonce: self_.get(3).cst_decode(),
-                c_nonce_expires_in: self_.get(4).cst_decode(),
             }
         }
     }
@@ -5057,17 +5023,15 @@ mod web {
                 .unwrap();
             assert_eq!(
                 self_.length(),
-                6,
-                "Expected 6 elements, got {}",
+                4,
+                "Expected 4 elements, got {}",
                 self_.length()
             );
             crate::api::FrbTokenResponse {
                 access_token: self_.get(0).cst_decode(),
                 token_type: self_.get(1).cst_decode(),
                 expires_in: self_.get(2).cst_decode(),
-                c_nonce: self_.get(3).cst_decode(),
-                c_nonce_expires_in: self_.get(4).cst_decode(),
-                scope: self_.get(5).cst_decode(),
+                scope: self_.get(3).cst_decode(),
             }
         }
     }

@@ -1625,14 +1625,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FrbCredentialResponse dco_decode_frb_credential_response(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 5)
-      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return FrbCredentialResponse(
       format: dco_decode_opt_String(arr[0]),
       credential: dco_decode_opt_String(arr[1]),
       transactionId: dco_decode_opt_String(arr[2]),
-      cNonce: dco_decode_opt_String(arr[3]),
-      cNonceExpiresIn: dco_decode_opt_box_autoadd_u_64(arr[4]),
     );
   }
 
@@ -1721,15 +1719,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 6)
-      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return FrbTokenResponse(
       accessToken: dco_decode_String(arr[0]),
       tokenType: dco_decode_String(arr[1]),
       expiresIn: dco_decode_opt_box_autoadd_u_64(arr[2]),
-      cNonce: dco_decode_opt_String(arr[3]),
-      cNonceExpiresIn: dco_decode_opt_box_autoadd_u_64(arr[4]),
-      scope: dco_decode_opt_String(arr[5]),
+      scope: dco_decode_opt_String(arr[3]),
     );
   }
 
@@ -2273,14 +2269,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_format = sse_decode_opt_String(deserializer);
     var var_credential = sse_decode_opt_String(deserializer);
     var var_transactionId = sse_decode_opt_String(deserializer);
-    var var_cNonce = sse_decode_opt_String(deserializer);
-    var var_cNonceExpiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
     return FrbCredentialResponse(
       format: var_format,
       credential: var_credential,
       transactionId: var_transactionId,
-      cNonce: var_cNonce,
-      cNonceExpiresIn: var_cNonceExpiresIn,
     );
   }
 
@@ -2395,15 +2387,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_accessToken = sse_decode_String(deserializer);
     var var_tokenType = sse_decode_String(deserializer);
     var var_expiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
-    var var_cNonce = sse_decode_opt_String(deserializer);
-    var var_cNonceExpiresIn = sse_decode_opt_box_autoadd_u_64(deserializer);
     var var_scope = sse_decode_opt_String(deserializer);
     return FrbTokenResponse(
       accessToken: var_accessToken,
       tokenType: var_tokenType,
       expiresIn: var_expiresIn,
-      cNonce: var_cNonce,
-      cNonceExpiresIn: var_cNonceExpiresIn,
       scope: var_scope,
     );
   }
@@ -3121,8 +3109,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.format, serializer);
     sse_encode_opt_String(self.credential, serializer);
     sse_encode_opt_String(self.transactionId, serializer);
-    sse_encode_opt_String(self.cNonce, serializer);
-    sse_encode_opt_box_autoadd_u_64(self.cNonceExpiresIn, serializer);
   }
 
   @protected
@@ -3205,8 +3191,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.accessToken, serializer);
     sse_encode_String(self.tokenType, serializer);
     sse_encode_opt_box_autoadd_u_64(self.expiresIn, serializer);
-    sse_encode_opt_String(self.cNonce, serializer);
-    sse_encode_opt_box_autoadd_u_64(self.cNonceExpiresIn, serializer);
     sse_encode_opt_String(self.scope, serializer);
   }
 
