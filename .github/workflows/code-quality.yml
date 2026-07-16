@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  FLUTTER_VERSION: "3.32.8"
+  FLUTTER_VERSION: "3.44.6"
   PYTHON_VERSION: "3.11"
 
 jobs:
@@ -177,7 +177,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.32.8"
+          flutter-version: "3.44.6"
           channel: "stable"
 
       - name: Install dependencies
@@ -212,14 +212,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check for Python files
         id: check-python
+        shell: bash
         run: |
-          if find . -name "*.py" -type f | grep -q .; then
-            echo "python-files=true" >> $GITHUB_OUTPUT
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if git diff --quiet "$BASE_SHA" HEAD -- '*.py' pyproject.toml requirements.txt; then
+            echo "python-files=false" >> "$GITHUB_OUTPUT"
           else
-            echo "python-files=false" >> $GITHUB_OUTPUT
+            echo "python-files=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Python
@@ -322,7 +326,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.32.8"
+          flutter-version: "3.44.6"
           channel: "stable"
 
       - name: Install dependencies
