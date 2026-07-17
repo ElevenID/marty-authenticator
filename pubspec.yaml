@@ -52,7 +52,6 @@ dependencies:
   flutter_zxing: ^2.1.0
   font_awesome_flutter: ^11.0.0
   getwidget: ^7.0.0
-  freezed_annotation: ^3.1.0
   google_mlkit_face_detection: ^0.14.0
   hex: ^0.2.0
   home_widget: ^0.9.3
@@ -100,12 +99,10 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  freezed: ^3.2.5
   integration_test:
     sdk: flutter
   json_serializable: ^6.8.0
   mockito: ^5.4.4
-  riverpod_generator: ^4.0.4
 
 # Dependency overrides to address WASM compatibility issues
 dependency_overrides:
