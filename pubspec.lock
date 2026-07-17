@@ -361,14 +361,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
-  crypto_keys:
-    dependency: transitive
-    description:
-      name: crypto_keys
-      sha256: acc19abf34623d990a0e8aec69463d74a824c31f137128f42e2810befc509ad0
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0+1"
   cryptography:
     dependency: "direct main"
     description:
@@ -1840,14 +1832,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  x509:
-    dependency: transitive
-    description:
-      name: x509
-      sha256: cbd1a63846884afd273cda247b0365284c8d85a365ca98e110413f93d105b935
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.4+3"
   xdg_directories:
     dependency: transitive
     description:
