@@ -1,0 +1,32 @@
+name: Bootstrap Flutter dependency upgrade
+
+on:
+  push:
+    branches: [agent/security-quality-cleanup]
+
+permissions:
+  contents: read
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.44.6"
+          channel: stable
+          cache: true
+      - run: flutter pub upgrade --major-versions
+      - run: dart fix --apply
+      - run: dart format .
+      - name: Build reviewable patch
+        run: git diff --binary > flutter-upgrade.patch
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
+        with:
+          name: flutter-upgrade-patch
+          path: flutter-upgrade.patch
+          if-no-files-found: error
+          retention-days: 1
