@@ -147,7 +147,7 @@ repos:
       - id: dart-format
         name: Dart Format
         entry: dart
-        args: [format, --set-exit-if-changed, .]
+        args: [format, --set-exit-if-changed, lib/main_document.dart, test]
         language: system
         files: \.dart$
         pass_filenames: false

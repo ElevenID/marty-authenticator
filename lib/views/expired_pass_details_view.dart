@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/card_data.dart';
-import '../../providers/card_state_provider.dart';
+import '../models/card_data.dart';
+import '../providers/card_state_provider.dart';
 import 'pass_configuration_view.dart';
-import '../../widgets/common/back_button.dart' as common;
+import '../widgets/common/back_button.dart' as common;
 
 class ExpiredPassDetailsView extends ConsumerWidget {
   final CardData cardData;

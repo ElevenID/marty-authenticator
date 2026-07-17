@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/common/back_button.dart' as common;
+import '../widgets/common/back_button.dart' as common;
 
 class PassConfigurationView extends StatefulWidget {
   const PassConfigurationView({super.key});

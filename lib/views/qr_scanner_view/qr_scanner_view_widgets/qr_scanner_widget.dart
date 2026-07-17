@@ -20,7 +20,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../widgets/qr_scanner_enhanced.dart';
+import '../../../widgets/qr_scanner_enhanced.dart';
 
 class QRScannerWidget extends StatefulWidget {
   const QRScannerWidget({super.key});

@@ -11,10 +11,7 @@ import '../../widgets/cascading_card_list.dart';
 import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
 import '../../utils/view_utils.dart';
-import '../../utils/utils.dart';
-import '../../utils/riverpod/riverpod_providers/generated_providers/token_notifier.dart';
 import '../../utils/riverpod/providers/credentials_provider.dart';
-import '../../model/processor_result.dart';
 import '../qr_scanner_view/qr_scanner_view.dart';
 import '../card_details_screen.dart';
 import '../grouped_card_details_screen.dart';
@@ -157,16 +154,10 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     if (!mounted) return;
 
     final qrCode = await Navigator.pushNamed(context, QRScannerView.routeName);
-    final resultHandlers = <ResultHandler>[
-      ref.read(tokenProvider.notifier),
-      ref.read(credentialsProvider.notifier),
-    ];
     if (qrCode == null || !mounted) return;
-    final handled = await scanQrCode(
-      context: context,
-      resultHandlerList: resultHandlers,
-      qrCode: qrCode,
-    );
+    final handled = await ref
+        .read(credentialsProvider.notifier)
+        .handleCredentialOffer(qrCode.toString());
     if (!handled) {
       showErrorStatusMessage(message: (l) => l.invalidQrScan);
     }

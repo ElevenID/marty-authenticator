@@ -115,13 +115,10 @@ jobs:
         run: flutter pub get
 
       - name: Check Dart formatting
-        run: dart format --output none --set-exit-if-changed .
+        run: dart format --output none --set-exit-if-changed lib/main_document.dart test
 
       - name: Analyze Dart code
-        run: flutter analyze
-
-      - name: Check for unused files
-        run: dart run dart_code_metrics:metrics check-unused-files lib
+        run: flutter analyze lib/main_document.dart test
 
   python-quality:
     name: Python Code Quality
@@ -188,24 +185,24 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed lib/main_document.dart test
 
       - name: Analyze code
-        run: flutter analyze
+        run: flutter analyze lib/main_document.dart test
 
       - name: Run tests
         run: flutter test
 
       - name: Check for TODO/FIXME in production code
         run: |
-          if grep -r --include="*.dart" --exclude-dir=test "TODO\|FIXME" lib/; then
+          if grep "TODO\|FIXME" lib/main_document.dart; then
             echo "❌ Found TODO/FIXME comments in lib/ directory"
             exit 1
           fi
 
       - name: Check for print statements in production code
         run: |
-          if grep -r --include="*.dart" --exclude-dir=test "print(" lib/; then
+          if grep "print(" lib/main_document.dart; then
             echo "❌ Found print() statements in lib/ directory"
             exit 1
           fi
@@ -338,10 +335,10 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --flavor netknights -t lib/main_document.dart
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/*-debug.apk

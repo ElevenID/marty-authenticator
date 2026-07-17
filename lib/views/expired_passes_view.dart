@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/card_data.dart';
-import '../../providers/card_state_provider.dart';
+import '../models/card_data.dart';
+import '../providers/card_state_provider.dart';
 import 'expired_pass_details_view.dart';
 
 class ExpiredPassesView extends ConsumerStatefulWidget {

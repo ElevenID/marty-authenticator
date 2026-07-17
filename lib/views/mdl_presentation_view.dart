@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/proximity_service.dart';
-import '../../services/proximity/proximity_transport.dart';
+import '../services/proximity_service.dart';
+import '../services/proximity/proximity_transport.dart';
 
 class MdlPresentationView extends ConsumerStatefulWidget {
   const MdlPresentationView({super.key});

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_ios:
-    name: (iOS)
+    name: (iOS configuration, unsigned)
     runs-on: macos-latest
     timeout-minutes: 15
     steps:
@@ -36,7 +36,9 @@ jobs:
       - run: flutter doctor -v
       - run: flutter pub get
       - run: flutter gen-l10n
-      - run: flutter build ios -t "lib/main_document.dart" --debug --flavor netknights --no-codesign
+      # Apple signing credentials are intentionally not used. Validate the
+      # generated Xcode project without producing an iOS installer.
+      - run: flutter build ios -t "lib/main_document.dart" --debug --flavor netknights --no-codesign --config-only
 
   build_appbundle:
     name: (Android)

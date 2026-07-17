@@ -23,7 +23,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../interfaces/spruce_interfaces.dart';
 import '../../logger.dart';
 import '../../../services/spruce_client_extended.dart';
-import '../../../model/processor_result.dart';
 import '../../../model/promotional_credential.dart';
 import '../../../models/credentials.dart';
 import '../../oid4vci_offer_uri.dart';
@@ -170,8 +169,7 @@ class CredentialsState {
 }
 
 /// Notifier for managing credentials state
-class CredentialsNotifier extends StateNotifier<CredentialsState>
-    with ResultHandler {
+class CredentialsNotifier extends StateNotifier<CredentialsState> {
   late final ISpruceIdWalletManager _walletManager;
   final Ref _ref;
 
@@ -180,34 +178,10 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
     _loadCredentials();
   }
 
-  @override
-  Future<bool> handleProcessorResult(
-    ProcessorResult result, {
-    Map<String, dynamic> args = const {},
-  }) async {
-    return handleProcessorResults([result], args: args);
-  }
-
-  @override
-  Future<bool> handleProcessorResults(
-    List<ProcessorResult> results, {
-    Map<String, dynamic> args = const {},
-  }) async {
-    bool handled = false;
-    for (final result in results) {
-      if (result.isSuccess) {
-        final data = result.asSuccess!.resultData;
-        if (data is Uri) {
-          // Handle URI
-          await _handleSpruceUri(data);
-          handled = true;
-        }
-      }
-    }
-    return handled;
-  }
-
-  Future<void> _handleSpruceUri(Uri uri) async {
+  /// Process an OID4VCI credential offer returned by the QR scanner.
+  Future<bool> handleCredentialOffer(String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null) return false;
     Logger.info('CredentialsNotifier: Handling SpruceID URI: $uri');
 
     try {
@@ -251,13 +225,16 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
           'CredentialsNotifier: Credential offer processed successfully. Reloading credentials...',
         );
         await _loadCredentials();
+        return true;
       }
+      return false;
     } catch (e) {
       Logger.error('Error handling SpruceID URI: $e');
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to process credential offer: $e',
       );
+      return false;
     }
   }
 

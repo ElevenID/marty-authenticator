@@ -31,11 +31,8 @@ import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:marty_authenticator/l10n/app_localizations.dart';
-import '../mains/main_marty.dart';
 import '../utils/app_info_utils.dart';
-import '../views/settings_view/settings_view_widgets/send_error_dialog.dart';
 import 'globals.dart';
-import 'riverpod/riverpod_providers/generated_providers/settings_notifier.dart';
 import 'view_utils.dart';
 
 class Logger {
@@ -46,12 +43,6 @@ class Logger {
   static String get _mailBody => _context != null
       ? AppLocalizations.of(_context!)!.errorMailBody
       : 'Error Log File Attached';
-  static Set<String> get _mailRecipients => {
-    ...globalRef?.read(settingsProvider).value?.crashReportRecipients ?? {},
-    ...MartyAuthenticator.currentCustomization != null
-        ? {MartyAuthenticator.currentCustomization!.crashRecipient}
-        : {},
-  };
   static printer.Logger print = printer.Logger(
     printer: printer.PrettyPrinter(
       methodCount: 0,
@@ -519,7 +510,16 @@ Device Parameters $deviceInfo""";
     if (_context == null) return;
     showDialog(
       context: _context!,
-      builder: (context) => const SendErrorDialog(),
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.unexpectedError),
+        content: SelectableText(_lastError),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppLocalizations.of(context)!.ok),
+          ),
+        ],
+      ),
       useRootNavigator: false,
     );
   }

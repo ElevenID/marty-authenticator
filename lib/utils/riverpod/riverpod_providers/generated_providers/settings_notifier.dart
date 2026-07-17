@@ -24,7 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mutex/mutex.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../../../../repo/preference_settings_repository.dart';
+import '../../../../repo/preference_settings_repository.dart';
 import '../../../../interfaces/repo/settings_repository.dart';
 import '../../../../model/riverpod_states/settings_state.dart';
 import '../../../../model/version.dart';

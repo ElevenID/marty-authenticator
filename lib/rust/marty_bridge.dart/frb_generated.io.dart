@@ -1535,7 +1535,7 @@ class RustLibWire implements BaseWire {
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> policy_json,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_id,
-    ffi.Pointer<bool> trust_profile_verified,
+    ffi.Pointer<ffi.Bool> trust_profile_verified,
   ) {
     return _wire__crate__api__check_issuer_constraints(
       port_,
@@ -1552,7 +1552,7 @@ class RustLibWire implements BaseWire {
             ffi.Int,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-            ffi.Pointer<bool>,
+            ffi.Pointer<ffi.Bool>,
           )
         >
       >(
@@ -1565,7 +1565,7 @@ class RustLibWire implements BaseWire {
               int,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-              ffi.Pointer<bool>,
+              ffi.Pointer<ffi.Bool>,
             )
           >();
 
@@ -2864,6 +2864,7 @@ final class wire_cst_Credential_VerifiableCredential extends ffi.Struct {
 }
 
 final class wire_cst_trust_info extends ffi.Struct {
+  @ffi.Bool()
   external bool is_valid;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> trust_anchor;
@@ -2872,8 +2873,6 @@ final class wire_cst_trust_info extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_String> certificate_chain;
 }
-
-typedef bool = ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Int>)>;
 
 final class wire_cst_m_doc_credential extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> id;
@@ -3050,6 +3049,7 @@ final class wire_cst_frb_credential_offer extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> pre_authorized_code;
 
+  @ffi.Bool()
   external bool tx_code_required;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_state;
@@ -3064,6 +3064,7 @@ final class wire_cst_frb_credential_response extends ffi.Struct {
 }
 
 final class wire_cst_frb_face_match_result extends ffi.Struct {
+  @ffi.Bool()
   external bool verified;
 
   @ffi.Float()
@@ -3086,6 +3087,7 @@ final class wire_cst_frb_face_quality extends ffi.Struct {
   @ffi.Float()
   external double overall_score;
 
+  @ffi.Bool()
   external bool face_detected;
 
   @ffi.Int()
@@ -3138,6 +3140,7 @@ final class wire_cst_frb_presentation_request extends ffi.Struct {
 }
 
 final class wire_cst_frb_presentation_response extends ffi.Struct {
+  @ffi.Bool()
   external bool ok;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> redirect_uri;
@@ -3158,12 +3161,14 @@ final class wire_cst_frb_token_response extends ffi.Struct {
 }
 
 final class wire_cst_issuer_check_result_output extends ffi.Struct {
+  @ffi.Bool()
   external bool is_trusted;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> violation_message;
 }
 
 final class wire_cst_policy_evaluation_result extends ffi.Struct {
+  @ffi.Bool()
   external bool is_satisfied;
 
   external ffi.Pointer<wire_cst_list_String> minimum_disclosure_claims;
@@ -3176,6 +3181,7 @@ final class wire_cst_policy_evaluation_result extends ffi.Struct {
 final class wire_cst_selectable_credential extends ffi.Struct {
   external wire_cst_credential credential;
 
+  @ffi.Bool()
   external bool is_selected;
 
   external ffi.Pointer<wire_cst_list_String> selected_claims;

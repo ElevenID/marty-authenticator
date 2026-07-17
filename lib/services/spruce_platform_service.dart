@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../interfaces/spruce_interfaces.dart';
 import '../utils/spruce_channels.dart';
-import '../mocks/mock_spruce_services.dart';
 import '../utils/logger.dart';
 import 'spruce_platform_service_extended.dart';
 import 'spruce_platform_service_web.dart';
@@ -451,13 +450,13 @@ final spruceIdPlatformServiceProvider = Provider<ISpruceIdPlatformService>((
     return SpruceIdPlatformServiceWeb();
   }
 
-  // Use Mock service for Desktop development
-  // Force Mock for debugging
+  // Desktop uses the platform-neutral implementation. Native mobile builds
+  // use the extended platform-channel service below.
   if (defaultTargetPlatform == TargetPlatform.macOS ||
       defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.linux) {
-    Logger.debug('DEBUG: Using MockSpruceIdPlatformService');
-    return MockSpruceIdPlatformService();
+    Logger.debug('DEBUG: Using SpruceIdPlatformServiceWeb on desktop');
+    return SpruceIdPlatformServiceWeb();
   }
 
   Logger.debug('DEBUG: Using Real SpruceIdPlatformServiceExtended');
