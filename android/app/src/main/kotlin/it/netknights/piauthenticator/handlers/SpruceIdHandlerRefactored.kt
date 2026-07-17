@@ -17,6 +17,14 @@ import com.spruceid.mobile.sdk.rs.Oid4vciExchangeOptions
 import com.spruceid.mobile.sdk.rs.Holder
 import com.spruceid.mobile.sdk.rs.Oid4vp180137
 import com.spruceid.mobile.sdk.rs.JsonVc
+import com.spruceid.mobile.sdk.rs.ApprovedResponse180137
+import com.spruceid.mobile.sdk.rs.InProgressRequest180137
+import com.spruceid.mobile.sdk.rs.PermissionRequest
+import com.spruceid.mobile.sdk.rs.ParsedCredential
+import com.spruceid.mobile.sdk.rs.PresentableCredential
+import com.spruceid.mobile.sdk.rs.generatePopComplete
+import com.spruceid.mobile.sdk.rs.generatePopPrepare
+import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -53,6 +61,11 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     // Session storage for pending requests
     // Storing Any to avoid complex type imports here, but casting safely in methods
     private val pendingRequests = ConcurrentHashMap<String, Any>()
+
+    private data class VpSession(
+        val holder: Holder,
+        val request: PermissionRequest
+    )
 
     // Coroutine scope for async operations
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -213,30 +226,38 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             return
         }
 
-        try {
-            val signer = this.signer ?: run {
-                result.error("NOT_INITIALIZED", "Signer not initialized", null)
-                return
+        scope.launch {
+            try {
+                val activeSigner = if (keyId == DEFAULT_SIGNING_KEY_ID) {
+                    this@SpruceIdHandlerRefactored.signer
+                        ?: throw IllegalStateException("Signer not initialized")
+                } else {
+                    val manager = keyManager ?: throw IllegalStateException("KeyManager not initialized")
+                    if (!manager.keyExists(keyId)) manager.generateSigningKey(keyId, byteArrayOf())
+                    Signer(keyId, manager)
+                }
+
+                val signature = activeSigner.sign(JSONObject(credential).toString().toByteArray())
+                val signatureBase64 = android.util.Base64.encodeToString(
+                    signature,
+                    android.util.Base64.NO_WRAP
+                )
+
+                withContext(Dispatchers.Main) {
+                    result.success(mapOf(
+                        "credential" to credential,
+                        "signature" to signatureBase64,
+                        "keyId" to keyId,
+                        "status" to "signed"
+                    ))
+                }
+                Log.d(TAG, "Credential signed with adapter")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to sign credential", e)
+                withContext(Dispatchers.Main) {
+                    result.error("SIGNING_ERROR", "Failed to sign credential: ${e.message}", null)
+                }
             }
-
-            // Use Signer adapter for signing
-            val credentialJson = credential.toString()
-            val payloadBytes = credentialJson.toByteArray()
-            val signature = signer.sign(payloadBytes)
-            val signatureBase64 = android.util.Base64.encodeToString(signature, android.util.Base64.NO_WRAP)
-
-            result.success(mapOf(
-                "credential" to credential,
-                "signature" to signatureBase64,
-                "keyId" to keyId,
-                "status" to "signed"
-            ))
-
-            Log.d(TAG, "Credential signed with adapter")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to sign credential", e)
-            result.error("SIGNING_ERROR", "Failed to sign credential: ${e.message}", null)
         }
     }
 
@@ -282,15 +303,24 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
                 // Use Signer adapter for proof-of-possession
                 val signer = this@SpruceIdHandlerRefactored.signer ?: throw IllegalStateException("Signer not initialized")
-                val signingInput = createSigningInput(metadata.issuer(), nonce, signer.getPublicKeyJwk())
+                val signingInput = generatePopPrepare(
+                    metadata.issuer(),
+                    nonce,
+                    DidMethod.JWK,
+                    signer.getPublicKeyJwk(),
+                    null
+                )
                 val signature = signer.sign(signingInput)
-                val pop = createPop(signingInput, signature)
+                val pop = generatePopComplete(signingInput, signature)
 
                 val credentials = oid4vciSession.exchangeCredential(listOf(pop), Oid4vciExchangeOptions(false))
 
                 // Store using CredentialPack - replaces custom storage logic
                 credentials.forEach { credential ->
-                    credentialPack.tryAddRawCredential(credential.toString())
+                    credentialPack.tryAddAnyFormat(
+                        credential.payload.toString(Charsets.UTF_8),
+                        DEFAULT_SIGNING_KEY_ID
+                    )
                 }
                 credentialPack.save(storageManager ?: throw IllegalStateException("StorageManager not initialized"))
 
@@ -360,17 +390,19 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
         // Generate session ID and store request
         val newSessionId = UUID.randomUUID().toString()
-        pendingRequests[newSessionId] = permissionRequest
+        pendingRequests[newSessionId] = VpSession(holder, permissionRequest)
 
         // Prepare matches for UI
-        // Note: In a real implementation, we'd extract actual matches from permissionRequest
-        // For now, we'll return all credentials as potential matches to demonstrate the flow
-        val matches = credentials.map { credential ->
+        val matches = permissionRequest.credentials().map { credential ->
+            val parsed = credential.asParsedCredential()
+            val requestedFields = permissionRequest.requestedFields(credential)
             mapOf(
-                "id" to credential.id(),
-                "type" to credential.credentialType(),
-                "issuer" to credential.issuer(),
-                "requestedFields" to mapOf("all" to listOf("credentialSubject")) // Simplified
+                "id" to parsed.id().toString(),
+                "type" to parsed.intoGenericForm().type,
+                "issuer" to credentialIssuer(parsed),
+                "requestedFields" to mapOf(
+                    "credential" to requestedFields.map { field -> field.path().joinToString("/") }
+                )
             )
         }
 
@@ -386,33 +418,33 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     }
 
     private suspend fun completeVpRequest(sessionId: String, call: MethodCall, result: MethodChannel.Result) {
-        val permissionRequest = pendingRequests.remove(sessionId) as? com.spruceid.mobile.sdk.rs.PermissionRequest
+        val session = pendingRequests.remove(sessionId) as? VpSession
             ?: throw IllegalStateException("Session expired or invalid")
+        val permissionRequest = session.request
 
         val selectedCredentialId = call.argument<String>("selectedCredentialId")
-        // val selectedFields = call.argument<List<String>>("selectedFields") // Not used in this simplified version yet
-
-        val credentials = credentialPack.list()
-        val selectedCredentials = if (selectedCredentialId != null) {
-            credentials.filter { it.id() == selectedCredentialId }
-        } else {
-            credentials // Fallback
-        }
-
-        val selectedFieldsList = emptyList<List<String>>() // Simplified
+        val selectedCredential = permissionRequest.credentials().firstOrNull { credential ->
+            selectedCredentialId == null ||
+                credential.asParsedCredential().id().toString() == selectedCredentialId
+        } ?: throw IllegalArgumentException("Selected credential is not valid for this request")
+        val selectedFieldsList = call.argument<List<String>>("selectedFields")
+            ?.map { path -> path.split('/').filter(String::isNotBlank) }
+            ?: permissionRequest.requestedFields(selectedCredential)
+                .filter { it.required() }
+                .map { it.path() }
 
         val permissionResponse = permissionRequest.createPermissionResponse(
-            selectedCredentials,
+            listOf(selectedCredential),
             selectedFieldsList,
             com.spruceid.mobile.sdk.rs.ResponseOptions(false, false, false)
         )
 
-        val presentationResult = permissionRequest.submit(permissionResponse)
+        session.holder.submitPermissionResponse(permissionResponse)
 
         withContext(Dispatchers.Main) {
             result.success(mapOf(
                 "status" to "success",
-                "presentation" to presentationResult.toString(),
+                "presentation" to "submitted",
                 "message" to "VP created via SDK Holder"
             ))
         }
@@ -469,13 +501,11 @@ class SpruceIdHandlerRefactored(private val context: Context) {
 
         // Serialize matches for UI
         val serializedMatches = matches.map { match ->
-            // We need to extract ID and requested items from the match object
-            // This is a simplification as the SDK API might differ slightly
             mapOf(
-                "id" to "mdoc_cred", // SDK might not expose ID directly on match
+                "id" to match.credentialId().toString(),
                 "type" to "mDL",
                 "requestedFields" to mapOf(
-                    "org.iso.18013.5.1" to listOf("family_name", "given_name", "birth_date", "age_over_18")
+                    "mdoc" to match.requestedFields().map { it.displayableName }
                 )
             )
         }
@@ -492,22 +522,36 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     }
 
     private suspend fun completeMdocResponse(sessionId: String, call: MethodCall, result: MethodChannel.Result) {
-        val request = pendingRequests.remove(sessionId) as? com.spruceid.mobile.sdk.rs.MdocRequest
+        val request = pendingRequests.remove(sessionId) as? InProgressRequest180137
             ?: throw IllegalStateException("Session expired or invalid")
 
-        // In a real implementation, we would use the user's selection to filter the response
-        // For now, we take the first match as approved (simulating user selected it)
         val matches = request.matches()
-        val approvedResponse = matches.firstOrNull() ?: throw IllegalStateException("No matching credentials")
-
-        // TODO: Apply field filtering based on call.argument("selectedFields")
+        val selectedCredentialId = call.argument<String>("selectedCredentialId")
+        val selectedMatch = matches.firstOrNull { match ->
+            selectedCredentialId == null || match.credentialId().toString() == selectedCredentialId
+        } ?: throw IllegalStateException("No matching credential selected")
+        val selectedFieldNames = call.argument<List<String>>("selectedFields")
+            ?.map { it.substringAfterLast('/') }
+            ?.toSet()
+            .orEmpty()
+        val approvedFields = selectedMatch.requestedFields()
+            .filter { field ->
+                selectedFieldNames.isEmpty() ||
+                    field.required ||
+                    field.displayableName in selectedFieldNames
+            }
+            .map { it.id }
+        val approvedResponse = ApprovedResponse180137(
+            selectedMatch.credentialId(),
+            approvedFields
+        )
 
         val response = request.respond(approvedResponse)
 
         withContext(Dispatchers.Main) {
             result.success(mapOf(
                 "status" to "success",
-                "mdocResponse" to response.toString(),
+                "mdocResponse" to response?.toString(),
                 "matches" to matches.size,
                 "message" to "mDoc response created via SDK"
             ))
@@ -532,27 +576,28 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             return
         }
 
-        try {
-            val credentialJson = credential.toString()
+        scope.launch {
+            try {
+                val jsonVc = JsonVc.newFromJson(JSONObject(credential).toString())
+                val stored = credentialPack.addJsonVc(jsonVc).last()
+                credentialPack.save(
+                    storageManager ?: throw IllegalStateException("StorageManager not initialized")
+                )
 
-            // Use CredentialPack for storage - replaces custom storage logic
-            val jsonVc = JsonVc.newFromJson(credentialJson)
-            credentialPack.addJsonVc(jsonVc)
-            credentialPack.save(storageManager ?: throw IllegalStateException("StorageManager not initialized"))
-
-            val credentialId = "cred_" + System.currentTimeMillis()
-
-            result.success(mapOf(
-                "credentialId" to credentialId,
-                "status" to "stored",
-                "message" to "Stored via CredentialPack"
-            ))
-
-            Log.d(TAG, "Credential stored via CredentialPack")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to store credential", e)
-            result.error("STORAGE_ERROR", "Failed to store credential: ${e.message}", null)
+                withContext(Dispatchers.Main) {
+                    result.success(mapOf(
+                        "credentialId" to stored.id().toString(),
+                        "status" to "stored",
+                        "message" to "Stored via CredentialPack"
+                    ))
+                }
+                Log.d(TAG, "Credential stored via CredentialPack")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to store credential", e)
+                withContext(Dispatchers.Main) {
+                    result.error("STORAGE_ERROR", "Failed to store credential: ${e.message}", null)
+                }
+            }
         }
     }
 
@@ -565,14 +610,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         try {
             // Use CredentialPack for retrieval - replaces custom retrieval logic
             val credentials = credentialPack.list()
-            val credentialMaps = credentials.map { credential ->
-                mapOf(
-                    "id" to credential.id(),
-                    "type" to credential.credentialType(),
-                    "issuer" to credential.issuer(),
-                    "data" to credential.jsonRepresentation()
-                )
-            }
+            val credentialMaps = credentials.map(::credentialToMap)
 
             result.success(credentialMaps)
             Log.d(TAG, "Retrieved ${credentials.size} credentials via CredentialPack")
@@ -599,17 +637,10 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             // Use CredentialPack filtering - replaces custom filtering logic
             val allCredentials = credentialPack.list()
             val filteredCredentials = allCredentials.filter { credential ->
-                credential.credentialType().contains(type, ignoreCase = true)
+                credential.intoGenericForm().type.contains(type, ignoreCase = true)
             }
 
-            val credentialMaps = filteredCredentials.map { credential ->
-                mapOf(
-                    "id" to credential.id(),
-                    "type" to credential.credentialType(),
-                    "issuer" to credential.issuer(),
-                    "data" to credential.jsonRepresentation()
-                )
-            }
+            val credentialMaps = filteredCredentials.map(::credentialToMap)
 
             result.success(credentialMaps)
             Log.d(TAG, "Retrieved ${filteredCredentials.size} credentials of type '$type' via CredentialPack")
@@ -630,7 +661,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         try {
             // Use CredentialPack for deletion
             val credentials = credentialPack.list()
-            val credentialToRemove = credentials.find { it.id() == credentialId }
+            val credentialToRemove = credentials.find { it.id().toString() == credentialId }
 
             if (credentialToRemove != null) {
                 // Note: CredentialPack might not have direct removal, this is conceptual
@@ -757,16 +788,27 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         )
     }
 
-    private fun createSigningInput(issuer: String, nonce: String, jwk: String): ByteArray {
-        // Create signing input for proof-of-possession
-        // This would be implemented by SDK helper functions
-        return "signing_input_$issuer$nonce".toByteArray()
+    private fun credentialIssuer(credential: ParsedCredential): String {
+        val claims = runCatching {
+            credentialPack.getCredentialClaims(credential, listOf("issuer", "iss"))
+        }.getOrNull() ?: return ""
+        return claims.optString("issuer").ifBlank { claims.optString("iss") }
     }
 
-    private fun createPop(signingInput: ByteArray, signature: ByteArray): String {
-        // Create proof-of-possession token
-        // This would be implemented by SDK helper functions
-        return "pop_token_" + android.util.Base64.encodeToString(signature, android.util.Base64.NO_WRAP)
+    private fun credentialToMap(credential: ParsedCredential): Map<String, Any?> {
+        val generic = credential.intoGenericForm()
+        val claims = runCatching {
+            credentialPack.getCredentialClaims(credential, emptyList()).toString()
+        }.getOrDefault("")
+        return mapOf(
+            "id" to credential.id().toString(),
+            "type" to generic.type,
+            "issuer" to credentialIssuer(credential),
+            "format" to credential.format().toString(),
+            "data" to claims.ifBlank {
+                android.util.Base64.encodeToString(generic.payload, android.util.Base64.NO_WRAP)
+            }
+        )
     }
 
     /**
