@@ -401,7 +401,7 @@ class SpruceIdHandlerRefactored(private val context: Context) {
                 "type" to parsed.intoGenericForm().type,
                 "issuer" to credentialIssuer(parsed),
                 "requestedFields" to mapOf(
-                    "credential" to requestedFields.map { field -> field.path().joinToString("/") }
+                    "credential" to requestedFields.map { field -> field.path() }
                 )
             )
         }
@@ -427,15 +427,17 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             selectedCredentialId == null ||
                 credential.asParsedCredential().id().toString() == selectedCredentialId
         } ?: throw IllegalArgumentException("Selected credential is not valid for this request")
-        val selectedFieldsList = call.argument<List<String>>("selectedFields")
-            ?.map { path -> path.split('/').filter(String::isNotBlank) }
-            ?: permissionRequest.requestedFields(selectedCredential)
-                .filter { it.required() }
-                .map { it.path() }
+        val requestedFields = permissionRequest.requestedFields(selectedCredential)
+        val selectedFieldPaths = call.argument<List<String>>("selectedFields")
+        val selectedFields = if (selectedFieldPaths == null) {
+            requestedFields.filter { it.required() }
+        } else {
+            requestedFields.filter { it.path() in selectedFieldPaths }
+        }
 
         val permissionResponse = permissionRequest.createPermissionResponse(
             listOf(selectedCredential),
-            selectedFieldsList,
+            listOf(selectedFields),
             com.spruceid.mobile.sdk.rs.ResponseOptions(false, false, false)
         )
 
