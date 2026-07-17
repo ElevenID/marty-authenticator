@@ -10,11 +10,13 @@ subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(':app')
 
-    // Set JVM toolchain for all subprojects to ensure consistency
-    if (plugins.hasPlugin('org.jetbrains.kotlin.android')) {
+    // Flutter plugins may choose Java 17 through current Android Gradle Plugin
+    // defaults. Configure Kotlin after its plugin is applied so every plugin
+    // subproject targets the same bytecode level.
+    plugins.withId('org.jetbrains.kotlin.android') {
         tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = "17"
             }
         }
     }
