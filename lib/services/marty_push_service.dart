@@ -323,23 +323,28 @@ class MartyPushService {
     bool generateKeyPair = true,
   }) async {
     Logger.info('MartyPushService: Registering device for user $userId');
+    print('registerDevice: Starting for user $userId');
 
     _currentUserId = userId;
     _currentOrganizationId = organizationId;
 
-    Logger.debug('MartyPushService: Generating device ID');
+    print('registerDevice: Generating device ID...');
     _currentDeviceId = await generateDeviceId(organizationId: organizationId);
-    Logger.debug('MartyPushService: Device ID generated');
+    print('registerDevice: Device ID generated: $_currentDeviceId');
 
-    Logger.debug('MartyPushService: Getting Firebase token');
+    print('registerDevice: Getting Firebase token...');
     final fcmToken = await _getFirebaseToken();
-    Logger.debug('MartyPushService: Firebase token obtained');
+    print('registerDevice: Firebase token obtained: $fcmToken');
 
     // Generate RSA keypair for challenge signature verification
     String? publicKeyBase64;
     if (generateKeyPair) {
       Logger.info('MartyPushService: Generating RSA keypair for device');
+      print(
+        'registerDevice: Generating RSA keypair (this may take a moment on web)...',
+      );
       final keyPair = await _rsaUtils.generateRSAKeyPair();
+      print('registerDevice: RSA keypair generated');
       _privateKey = keyPair.privateKey;
       // Serialize public key as base64 PKCS#1 DER
       publicKeyBase64 = _rsaUtils.serializeRSAPublicKeyPKCS1(keyPair.publicKey);
@@ -358,8 +363,8 @@ class MartyPushService {
       publicKey: publicKeyBase64,
     );
 
-    Logger.debug(
-      'MartyPushService: Sending device registration request',
+    print(
+      'registerDevice: Making HTTP request to ${config.apiBaseUrl}/api/devices/register',
     );
 
     final response = await _httpClient
@@ -370,9 +375,8 @@ class MartyPushService {
         )
         .timeout(config.requestTimeout);
 
-    Logger.debug(
-      'MartyPushService: Device registration response ${response.statusCode}',
-    );
+    print('registerDevice: HTTP response status: ${response.statusCode}');
+    print('registerDevice: HTTP response body: ${response.body}');
 
     if (response.statusCode == 201) {
       final result = DeviceRegistrationResult.fromJson(
@@ -461,7 +465,8 @@ class MartyPushService {
   Future<Map<String, dynamic>> registerFromQRCode(
     Map<String, dynamic> qrData,
   ) async {
-    Logger.debug('MartyPushService: QR registration request received');
+    // Use print instead of html.window.console.log for better visibility
+    print('registerFromQRCode: Starting with qrData=$qrData');
 
     final organizationId = qrData['organization_id'] as String?;
     final apiUrl = qrData['api_url'] as String?;
@@ -471,6 +476,7 @@ class MartyPushService {
     Logger.info(
       'MartyPushService: Registering from QR code for org=$organizationId',
     );
+    print('registerFromQRCode: org=$organizationId, api=$apiUrl, user=$userId');
 
     if (registrationToken == null || userId == null) {
       throw Exception('Invalid QR code: missing token or user_id');
@@ -479,13 +485,17 @@ class MartyPushService {
     // Use the API URL from the QR code if provided
     final effectiveApiUrl = apiUrl ?? config.apiBaseUrl;
 
+    print('registerFromQRCode: Calling registerDevice...');
+
     // First register the device normally
     final result = await registerDevice(
       userId: userId,
       organizationId: organizationId,
     );
 
-    Logger.debug('MartyPushService: Device registration completed');
+    print(
+      'registerFromQRCode: registerDevice completed, deviceId=${result.deviceId}',
+    );
 
     // Then call the QR callback endpoint to confirm registration and link to session
     final callbackResponse = await _httpClient
@@ -503,8 +513,11 @@ class MartyPushService {
         )
         .timeout(config.requestTimeout);
 
-    Logger.debug(
-      'MartyPushService: QR callback response ${callbackResponse.statusCode}',
+    print(
+      'registerFromQRCode: QR callback response status: ${callbackResponse.statusCode}',
+    );
+    print(
+      'registerFromQRCode: QR callback response body: ${callbackResponse.body}',
     );
 
     if (callbackResponse.statusCode == 200) {
