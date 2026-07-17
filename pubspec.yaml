@@ -106,7 +106,6 @@ dev_dependencies:
   json_serializable: ^6.8.0
   mockito: ^5.4.4
   riverpod_generator: ^4.0.4
-  riverpod_lint: ^3.1.4
 
 # Dependency overrides to address WASM compatibility issues
 dependency_overrides:
