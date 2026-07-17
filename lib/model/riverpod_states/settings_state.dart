@@ -68,7 +68,6 @@ class SettingsState {
     bool? isFirstRun,
     bool? showGuideOnStart,
     bool? hideOpts,
-    bool? enablePolling,
     Set<String>? crashReportRecipients,
     Locale? localePreference,
     bool? useSystemLocale,

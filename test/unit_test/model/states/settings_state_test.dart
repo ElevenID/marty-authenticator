@@ -12,7 +12,6 @@ void _testSettingsState() {
       isFirstRun: true,
       showGuideOnStart: true,
       hideOpts: true,
-      enablePolling: true,
       crashReportRecipients: {'test'},
       localePreference: const Locale('en'),
       useSystemLocale: true,
@@ -22,7 +21,6 @@ void _testSettingsState() {
       expect(state.isFirstRun, true);
       expect(state.showGuideOnStart, true);
       expect(state.hideOpts, true);
-      expect(state.enablePolling, true);
       expect(state.crashReportRecipients, {'test'});
       expect(
         state.localePreference.toLanguageTag(),
@@ -36,7 +34,6 @@ void _testSettingsState() {
         isFirstRun: false,
         showGuideOnStart: false,
         hideOpts: false,
-        enablePolling: false,
         crashReportRecipients: {'test2'},
         localePreference: const Locale('de'),
         useSystemLocale: false,
@@ -45,7 +42,6 @@ void _testSettingsState() {
       expect(state.isFirstRun, true);
       expect(state.showGuideOnStart, true);
       expect(state.hideOpts, true);
-      expect(state.enablePolling, true);
       expect(state.crashReportRecipients, {'test'});
       expect(
         state.localePreference.toLanguageTag(),
@@ -56,7 +52,6 @@ void _testSettingsState() {
       expect(newState.isFirstRun, false);
       expect(newState.showGuideOnStart, false);
       expect(newState.hideOpts, false);
-      expect(newState.enablePolling, false);
       expect(newState.crashReportRecipients, {'test2'});
       expect(
         newState.localePreference.toLanguageTag(),

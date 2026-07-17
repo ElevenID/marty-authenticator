@@ -107,15 +107,10 @@ Future<GlobalKey<NavigatorState>> _getContextedGlobalNavigatorKey() async {
 }
 
 final policyStatementUri = Uri.parse(
-  "https://netknights.it/en/privacy-statement/",
+  "https://github.com/ElevenID/marty-authenticator/blob/main/PRIVACY.md",
 );
 final piAuthenticatorGitHubUri = Uri.parse(
-  "https://github.com/privacyidea/pi-authenticator",
+  "https://github.com/ElevenID/marty-authenticator",
 );
 
-// The highest version of the pipush Tokentype that this client supports.
-
 WidgetRef? globalRef;
-
-// Must be set before runApp() is called.
-FirebaseOptions? appFirebaseOptions;
