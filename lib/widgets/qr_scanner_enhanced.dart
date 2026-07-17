@@ -26,6 +26,7 @@
 /// - Live preview of scan results with privacy assessment
 /// - Optimized performance for credential workflows
 /// - Hardware-accelerated processing capabilities
+library;
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -36,7 +37,6 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import '../services/qr_scanner_service_enhanced.dart';
 import '../services/spruce_client_extended.dart';
 import '../services/spruce_platform_service_extended.dart';
-import '../views/credential_selection_view.dart' hide SecurityLevel;
 import '../widgets/presentation_request_view.dart';
 import '../utils/logger.dart';
 
@@ -505,7 +505,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Widget _buildProcessingOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -518,7 +518,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                   child: Icon(
                     Icons.sync,
                     size: 64,
-                    color: Colors.blue.withOpacity(0.8),
+                    color: Colors.blue.withValues(alpha: 0.8),
                   ),
                 );
               },
@@ -563,9 +563,9 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: _buildResultPreview(_currentResult!.enrichedResult!),
         ),
@@ -688,7 +688,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -933,7 +933,7 @@ class ScannerOverlayPainter extends CustomPainter {
     final lineY = rect.top + (rect.height * animation.value);
 
     final linePaint = Paint()
-      ..color = Colors.blue.withOpacity(0.8)
+      ..color = Colors.blue.withValues(alpha: 0.8)
       ..strokeWidth = 2;
 
     canvas.drawLine(

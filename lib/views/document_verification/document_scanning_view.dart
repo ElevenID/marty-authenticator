@@ -136,7 +136,7 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
         // Semi-transparent background with cutout
         ColorFiltered(
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.5),
+            Colors.black.withValues(alpha: 0.5),
             BlendMode.srcOut,
           ),
           child: Stack(

@@ -26,13 +26,12 @@
 /// - Advanced disclosure patterns
 /// - Hardware security status
 /// - Data minimization guidance
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/selectable_credential.dart';
-import '../services/spruce_sdk_services.dart';
-import '../widgets/spruce_credential_selection_widget.dart';
 import '../utils/logger.dart';
 
 /// Selective disclosure configuration for a single attribute
@@ -327,7 +326,7 @@ class _SelectiveDisclosureSheetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -374,9 +373,9 @@ class _SelectiveDisclosureSheetState
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -448,10 +447,10 @@ class _SelectiveDisclosureSheetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _getPrivacyScoreColor(privacyScore).withOpacity(0.1),
+        color: _getPrivacyScoreColor(privacyScore).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getPrivacyScoreColor(privacyScore).withOpacity(0.3),
+          color: _getPrivacyScoreColor(privacyScore).withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -562,8 +561,8 @@ class _SelectiveDisclosureSheetState
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: config.isDisclosed
-              ? config.riskLevel.color.withOpacity(0.5)
-              : Colors.grey.withOpacity(0.3),
+              ? config.riskLevel.color.withValues(alpha: 0.5)
+              : Colors.grey.withValues(alpha: 0.3),
           width: config.isDisclosed ? 2 : 1,
         ),
       ),
@@ -600,10 +599,10 @@ class _SelectiveDisclosureSheetState
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: Colors.red.withOpacity(0.3),
+                                  color: Colors.red.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: const Text(
@@ -640,7 +639,7 @@ class _SelectiveDisclosureSheetState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

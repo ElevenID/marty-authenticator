@@ -63,7 +63,7 @@ class MdlPlaceholderCard extends ConsumerWidget {
               color: Colors.deepPurple,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -91,7 +91,7 @@ class MdlPlaceholderCard extends ConsumerWidget {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -119,7 +119,7 @@ class MdlPlaceholderCard extends ConsumerWidget {
                                 ? 'Waiting for approval...'
                                 : 'Add your driver\'s license to Wallet',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,
                             ),
                           ),

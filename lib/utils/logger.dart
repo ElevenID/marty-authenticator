@@ -158,8 +158,9 @@ class Logger {
     String? name,
     bool verbose = false,
   }) {
-    if (_verboseLogging == false && kDebugMode == false && verbose == false)
+    if (_verboseLogging == false && kDebugMode == false && verbose == false) {
       return;
+    }
     String infoString = _convertLogToSingleString(
       message,
       error: error,
@@ -195,8 +196,9 @@ class Logger {
     String? name,
     bool verbose = false,
   }) {
-    if (_verboseLogging == false && kDebugMode == false && verbose == false)
+    if (_verboseLogging == false && kDebugMode == false && verbose == false) {
       return;
+    }
     String warningString = _convertLogToSingleString(
       message,
       error: error,
@@ -236,8 +238,9 @@ class Logger {
     String? name,
     bool verbose = false,
   }) {
-    if (_verboseLogging == false && kDebugMode == false && verbose == false)
+    if (_verboseLogging == false && kDebugMode == false && verbose == false) {
       return;
+    }
     if (stackTrace != null) {
       log('Stacktrace is not supported in debug mode');
     }
@@ -307,8 +310,9 @@ class Logger {
   }
 
   Future<void> _logToFile(String fileMessage) async {
-    if (_enableLoggingToFile == false || kIsWeb)
+    if (_enableLoggingToFile == false || kIsWeb) {
       return; // Skip file logging on web
+    }
     await _mutexWriteFile.acquire();
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/$_filename');
@@ -393,8 +397,9 @@ Device Parameters $deviceInfo""";
   }
 
   Future<void> _setupLogPath() async {
-    if (_flutterIsRunning == false || kIsWeb)
+    if (_flutterIsRunning == false || kIsWeb) {
       return; // Skip file path setup on web
+    }
     final directory = await getApplicationDocumentsDirectory();
     _logPath = directory.path;
   }
@@ -432,8 +437,9 @@ Device Parameters $deviceInfo""";
   /*----------- PRINTS -----------*/
 
   static void _print(String message) {
-    if (!kDebugMode)
+    if (!kDebugMode) {
       return; // add \n every 1000 characters only if the line is longer than 1000 characters
+    }
     message = message.replaceAllMapped(
       RegExp(r'.{1000}'),
       (match) => '${match.group(0)}\n',
@@ -452,8 +458,9 @@ Device Parameters $deviceInfo""";
   }
 
   static void _printWarning(String message) {
-    if (!kDebugMode)
+    if (!kDebugMode) {
       return; // add \n every 1000 characters only if the line is longer than 1000 characters
+    }
     message = message.replaceAllMapped(
       RegExp(r'.{1000}'),
       (match) => '${match.group(0)}\n',
@@ -558,10 +565,12 @@ Device Parameters $deviceInfo""";
       final nextLine = lineSeparatedStrings.length > i + 1
           ? lineSeparatedStrings[i + 1]
           : null;
-      if (line != 'null' && line != '')
+      if (line != 'null' && line != '') {
         fileMessage += '[${logLevel.name}] $line';
-      if (nextLine != null && nextLine != 'null' && nextLine != '')
+      }
+      if (nextLine != null && nextLine != 'null' && nextLine != '') {
         fileMessage += '\n';
+      }
     }
     return fileMessage;
   }
@@ -574,8 +583,9 @@ Device Parameters $deviceInfo""";
     if (frame == null) return null;
     final entry = frame.split(' ');
     final methodName = entry.elementAtOrNull(entry.length - 2);
-    if (methodName == 'closure>')
+    if (methodName == 'closure>') {
       return RegExp(r'(?<=\s\s)\w+.*(?=\s\()').firstMatch(frame)?.group(0);
+    }
     return methodName;
   }
 }

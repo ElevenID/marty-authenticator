@@ -20,6 +20,8 @@
 
 /// Extended manager implementations with SDK capabilities
 /// Provides advanced functionality for mDoc, SD-JWT, and Wallet operations
+library;
+
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

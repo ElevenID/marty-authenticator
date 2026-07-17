@@ -23,6 +23,7 @@
 ///
 /// This file exports the complete SDK integration layer that leverages
 /// the refactored Android and iOS handlers for enhanced functionality
+library;
 
 // Extended interfaces
 export '../interfaces/spruce_interfaces_extended.dart';

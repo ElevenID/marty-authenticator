@@ -20,13 +20,14 @@
 
 /// Extended SpruceID platform service implementation
 /// Leverages SDK integration from refactored Android and iOS handlers
+library;
+
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
 import '../utils/oid4vci_offer_uri.dart';
-import '../utils/spruce_channels.dart';
 import 'spruce_platform_service.dart';
 
 /// Exception thrown when user selection is required for a presentation request

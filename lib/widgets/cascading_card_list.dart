@@ -39,11 +39,11 @@ class CascadingCardList extends StatelessWidget {
         top: verticalOffset,
         right: 0,
         child: DragTarget<CardData>(
-          onWillAccept: (data) {
+          onWillAcceptWithDetails: (data) {
             // Don't accept if it's the same card
-            return data != null && data != cardGroup.cards.first;
+            return data != cardGroup.cards.first;
           },
-          onAccept: (data) {
+          onAcceptWithDetails: (data) {
             // Find source index
             int sourceIndex = -1;
             for (int i = 0; i < cardGroups.length; i++) {

@@ -180,8 +180,9 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
         (defaultTargetPlatform == TargetPlatform.android &&
             format != InputImageFormat.nv21) ||
         (defaultTargetPlatform == TargetPlatform.iOS &&
-            format != InputImageFormat.bgra8888))
+            format != InputImageFormat.bgra8888)) {
       return null;
+    }
 
     // Since we're streaming images, we need to concatenate the planes
     if (image.planes.length != 1) return null;

@@ -104,7 +104,7 @@ class _GroupedCardDetailsScreenState extends State<GroupedCardDetailsScreen> {
                 decoration: BoxDecoration(
                   color: _currentIndex == index
                       ? Colors.white
-                      : Colors.white.withOpacity(0.3),
+                      : Colors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

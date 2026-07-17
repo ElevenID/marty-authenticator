@@ -31,7 +31,7 @@ class PassportPlaceholderCard extends ConsumerWidget {
             color: Colors.indigo,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -59,7 +59,7 @@ class PassportPlaceholderCard extends ConsumerWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -87,7 +87,7 @@ class PassportPlaceholderCard extends ConsumerWidget {
                               ? 'Waiting for approval...'
                               : 'Add your passport to Wallet',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 14,
                           ),
                         ),

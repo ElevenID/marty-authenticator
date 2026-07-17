@@ -26,10 +26,11 @@
 /// - Real-time privacy impact assessment
 /// - Hardware-backed security indicators
 /// - Compliance with data minimization principles
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/spruce_sdk_services.dart';
 import '../utils/logger.dart';
 import '../models/selectable_credential.dart';
 
@@ -306,7 +307,7 @@ class _SpruceCredentialSelectionWidgetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -342,9 +343,9 @@ class _SpruceCredentialSelectionWidgetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _getPrivacyColor().withOpacity(0.1),
+        color: _getPrivacyColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getPrivacyColor().withOpacity(0.3)),
+        border: Border.all(color: _getPrivacyColor().withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -479,9 +480,9 @@ class _SpruceCredentialSelectionWidgetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -533,7 +534,7 @@ class _SpruceCredentialSelectionWidgetState
         side: BorderSide(
           color: credential.isSelected
               ? Theme.of(context).primaryColor
-              : Colors.grey.withOpacity(0.3),
+              : Colors.grey.withValues(alpha: 0.3),
           width: credential.isSelected ? 2 : 1,
         ),
       ),
@@ -634,10 +635,10 @@ class _SpruceCredentialSelectionWidgetState
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
+                                  color: Colors.red.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.red.withOpacity(0.3),
+                                    color: Colors.red.withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: const Text(
@@ -663,7 +664,7 @@ class _SpruceCredentialSelectionWidgetState
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
