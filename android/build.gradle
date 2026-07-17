@@ -20,29 +20,6 @@ subprojects {
         )
     }
 
-    // Flutter plugins may choose Java 17 through current Android Gradle Plugin
-    // defaults. Configure Kotlin after its plugin is applied so every plugin
-    // subproject targets the same bytecode level.
-    plugins.withId('org.jetbrains.kotlin.android') {
-        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
-    }
-
-}
-
-// Some Flutter plugins set Java 8 in their own build scripts after the root
-// subproject configuration runs. Apply the final Java task target only after
-// every plugin project has been evaluated so Gradle sees matching targets.
-gradle.projectsEvaluated {
-    subprojects {
-        tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
-            sourceCompatibility = "17"
-            targetCompatibility = "17"
-        }
-    }
 }
 
 tasks.register("clean", Delete) {
