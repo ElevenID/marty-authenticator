@@ -80,7 +80,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> initializeMdocSDK({
     required Map<String, dynamic> mdocData,
     bool enableProximityDetection = true,
@@ -93,7 +92,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> createMdocPresentationSDK({
     required String docType,
     required List<String> requestedAttributes,
@@ -110,7 +108,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> establishMdocSessionSDK({
     required Map<String, dynamic> sessionRequest,
     String? keyId,
@@ -123,7 +120,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> performProximityVerificationSDK({
     required String sessionId,
     required Map<String, dynamic> proximityRequest,
@@ -136,7 +132,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> enableBiometricBindingSDK({
     required String docId,
     required String biometricTemplate,
@@ -213,7 +208,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> createAdvancedSdJwtSDK({
     required String issuer,
     required Map<String, dynamic> claims,
@@ -229,7 +223,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> presentSdJwtSDK({
     required String sdJwt,
     required Map<String, dynamic> disclosureRequest,
@@ -244,7 +237,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> verifySdJwtPresentationSDK({
     required String presentation,
     required List<String> requiredClaims,
@@ -257,7 +249,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> createSelectiveDisclosureSchemaSDK({
     required Map<String, dynamic> schema,
     required Map<String, dynamic> disclosureRules,
@@ -271,7 +262,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> validateDisclosureComplianceSDK({
     required String presentation,
     required String schemaId,
@@ -354,14 +344,12 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(
     String credentialId,
   ) async {
     return await _platformService.monitorCredentialStatusSDK(credentialId);
   }
 
-  @override
   Future<Map<String, dynamic>> refreshCredentialSDK({
     required String credentialId,
     String? keyId,
@@ -374,7 +362,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> backupCredentialsSDK({
     List<String>? credentialIds,
     required String backupPassphrase,
@@ -386,7 +373,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> restoreCredentialsSDK({
     required String backupData,
     required String backupPassphrase,
@@ -398,7 +384,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> syncCredentialsSDK({
     required String syncEndpoint,
     String? syncToken,
@@ -407,7 +392,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     return syncCredentials(syncEndpoint: syncEndpoint, syncToken: syncToken);
   }
 
-  @override
   Future<Map<String, dynamic>> exportCredentialsSDK({
     required List<String> credentialIds,
     required String exportFormat,
@@ -420,7 +404,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> importCredentialsSDK({
     required String credentialData,
     String? expectedFormat,
@@ -433,7 +416,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> setupAutomaticRenewalSDK({
     required List<String> credentialIds,
     required Map<String, dynamic> renewalPolicy,
@@ -447,7 +429,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  @override
   Future<Map<String, dynamic>> analyzeWalletHealthSDK({
     Map<String, dynamic>? healthCheckOptions,
   }) async {
@@ -460,7 +441,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     return results.isNotEmpty ? results.first : {};
   }
 
-  @override
   Future<Map<String, dynamic>> optimizeWalletStorageSDK({
     Map<String, dynamic>? optimizationOptions,
   }) async {

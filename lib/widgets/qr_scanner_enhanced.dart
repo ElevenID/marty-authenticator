@@ -62,7 +62,6 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
 class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     with TickerProviderStateMixin {
   // Scanner state
-  bool _isScanning = false;
   bool _isProcessing = false;
   String? _lastScannedCode;
   ProcessedQRResult? _currentResult;
@@ -232,8 +231,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   Future<void> _handlePresentationRequest(
     EnrichedQRResult enrichedResult,
   ) async {
-    final requestContent =
-        enrichedResult.validatedResult.parsedData.parsedContent!;
     final requestUri = enrichedResult.validatedResult.parsedData.rawData;
 
     try {
@@ -333,22 +330,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     }
   }
 
-  void _showPresentationSuccess(Map<String, dynamic> presentation) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            const Text('Presentation created successfully'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   void _showSuccess(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -432,9 +413,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     return Stack(
       children: [
         ReaderWidget(
-          onControllerCreated: (controller, _) {
-            setState(() => _isScanning = controller != null);
-          },
+          onControllerCreated: (_, _) {},
           actionButtonsAlignment: Alignment.bottomRight,
           showFlashlight: Platform.isIOS || Platform.isAndroid,
           flashOnIcon: const Icon(Icons.flash_on, color: Colors.white),

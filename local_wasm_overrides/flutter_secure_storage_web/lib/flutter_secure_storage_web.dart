@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// WASM-compatible implementation of FlutterSecureStorage for web
 class FlutterSecureStorageWebPlugin extends FlutterSecureStoragePlatform {
-  static void registerWith(registrar) {
+  static void registerWith(Object? _) {
     FlutterSecureStoragePlatform.instance = FlutterSecureStorageWebPlugin();
   }
 

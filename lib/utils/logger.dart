@@ -40,9 +40,6 @@ class Logger {
   static final Mutex _mutexWriteFile = Mutex();
   static Logger? _instance;
   static BuildContext? get _context => navigatorKey.currentContext;
-  static String get _mailBody => _context != null
-      ? AppLocalizations.of(_context!)!.errorMailBody
-      : 'Error Log File Attached';
   static printer.Logger print = printer.Logger(
     printer: printer.PrettyPrinter(
       methodCount: 0,
@@ -336,12 +333,6 @@ class Logger {
     if (!file.existsSync() || file.lengthSync() == 0) {
       return Future.value(false);
     }
-    String deviceInfo = InfoUtils.deviceInfoString;
-
-    final completeMailBody = """${message ?? _mailBody}
----------------------------------------------------------
-
-Device Parameters $deviceInfo""";
     return Future.value(false); // Mail sending disabled — PiMailer removed
   }
 

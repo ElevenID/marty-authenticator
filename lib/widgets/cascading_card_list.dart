@@ -39,15 +39,15 @@ class CascadingCardList extends StatelessWidget {
         top: verticalOffset,
         right: 0,
         child: DragTarget<CardData>(
-          onWillAcceptWithDetails: (data) {
+          onWillAcceptWithDetails: (details) {
             // Don't accept if it's the same card
-            return data != cardGroup.cards.first;
+            return details.data != cardGroup.cards.first;
           },
-          onAcceptWithDetails: (data) {
+          onAcceptWithDetails: (details) {
             // Find source index
             int sourceIndex = -1;
             for (int i = 0; i < cardGroups.length; i++) {
-              if (cardGroups[i].cards.first.title == data.title) {
+              if (cardGroups[i].cards.first.title == details.data.title) {
                 // Compare by title or equality
                 sourceIndex = i;
                 break;
