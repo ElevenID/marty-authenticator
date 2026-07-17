@@ -32,14 +32,6 @@ repos:
         files: requirements.*\.txt$
       - id: check-docstring-first
 
-  # Security - Comprehensive Secret Detection
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ["--baseline", ".precommit/.secrets.baseline"]
-        exclude: ^(package-lock\.json|\.precommit/\.secrets\.baseline)$
-
   # Security - Gitleaks (comprehensive secret scanning)
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.29.0

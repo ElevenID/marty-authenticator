@@ -33,7 +33,7 @@ jobs:
 
       - name: Install pre-commit and tools
         run: |
-          pip install pre-commit ruff isort bandit detect-secrets safety mypy vulture pydocstyle
+          pip install pre-commit ruff isort bandit mypy vulture pydocstyle
 
       - name: Cache pre-commit
         uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c
@@ -224,7 +224,7 @@ jobs:
           if git diff --quiet "$BASE_SHA" HEAD -- '*.py' pyproject.toml requirements.txt; then
             echo "python-files=false" >> "$GITHUB_OUTPUT"
           else
-            echo "python-files=true" >> $GITHUB_OUTPUT
+            echo "python-files=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Python
