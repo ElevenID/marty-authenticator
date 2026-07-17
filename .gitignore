@@ -3,6 +3,7 @@
 # Miscellaneous
 *.class
 *.lock
+!pubspec.lock
 *.log
 *.pyc
 *.swp
@@ -157,8 +158,7 @@ fastlane/readme.md
 .dart_tool/
 .packages
 build/
-# If you're building an application, you may want to check-in your pubspec.lock
-pubspec.lock
+# Application dependencies are locked for reproducible builds.
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
@@ -420,8 +420,7 @@ fastlane/readme.md
 .dart_tool/
 .packages
 build/
-# If you're building an application, you may want to check-in your pubspec.lock
-pubspec.lock
+# Application dependencies are locked for reproducible builds.
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
