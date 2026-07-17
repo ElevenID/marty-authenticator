@@ -429,11 +429,8 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         } ?: throw IllegalArgumentException("Selected credential is not valid for this request")
         val requestedFields = permissionRequest.requestedFields(selectedCredential)
         val selectedFieldPaths = call.argument<List<String>>("selectedFields")
-        val selectedFields = if (selectedFieldPaths == null) {
-            requestedFields.filter { it.required() }
-        } else {
-            requestedFields.filter { it.path() in selectedFieldPaths }
-        }
+        val selectedFields = selectedFieldPaths
+            ?: requestedFields.filter { it.required() }.map { it.path() }
 
         val permissionResponse = permissionRequest.createPermissionResponse(
             listOf(selectedCredential),
