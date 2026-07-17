@@ -1,4 +1,4 @@
-name: Bootstrap Flutter dependency upgrade
+name: Bootstrap Flutter lockfile refresh
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  upgrade:
+  refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -19,14 +19,14 @@ jobs:
           flutter-version: "3.44.6"
           channel: stable
           cache: true
-      - run: flutter pub upgrade --major-versions
+      - run: flutter pub get
       - run: dart fix --apply
       - run: dart format .
       - name: Build reviewable patch
-        run: git diff --binary > flutter-upgrade.patch
+        run: git diff --binary > flutter-lockfile.patch
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
         with:
-          name: flutter-upgrade-patch
-          path: flutter-upgrade.patch
+          name: flutter-lockfile-patch
+          path: flutter-lockfile.patch
           if-no-files-found: error
           retention-days: 1
