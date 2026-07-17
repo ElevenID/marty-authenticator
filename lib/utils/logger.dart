@@ -31,7 +31,6 @@ import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:marty_authenticator/l10n/app_localizations.dart';
-import '../utils/app_info_utils.dart';
 import 'globals.dart';
 import 'view_utils.dart';
 
