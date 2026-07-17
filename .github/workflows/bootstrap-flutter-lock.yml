@@ -1,6 +1,8 @@
 name: Bootstrap Flutter lockfile
 
 on:
+  push:
+    branches: [agent/security-quality-cleanup]
   workflow_dispatch:
 
 permissions:
