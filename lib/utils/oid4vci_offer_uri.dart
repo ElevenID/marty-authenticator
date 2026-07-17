@@ -2,15 +2,9 @@ import 'dart:convert';
 
 const oid4vciCredentialOfferScheme = 'openid-credential-offer';
 
-const _oid4vciSchemes = {
-  oid4vciCredentialOfferScheme,
-  'haip-vci',
-};
+const _oid4vciSchemes = {oid4vciCredentialOfferScheme, 'haip-vci'};
 
-const _walletWrapperSchemes = {
-  'marty-authenticator',
-  'martywallet',
-};
+const _walletWrapperSchemes = {'marty-authenticator', 'martywallet'};
 
 const _nestedUriKeys = [
   'inner',

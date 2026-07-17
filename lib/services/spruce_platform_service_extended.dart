@@ -74,11 +74,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       // Use refactored Android/iOS handlers with SDK integration
       final result = await w3cChannel.invokeMethod(
         'handleOID4VCOfferRefactored',
-        {
-          'offer': normalizedOffer,
-          'pin': pin,
-          'keyId': keyId ?? 'default-key',
-        },
+        {'offer': normalizedOffer, 'pin': pin, 'keyId': keyId ?? 'default-key'},
       );
 
       return Map<String, dynamic>.from(result);

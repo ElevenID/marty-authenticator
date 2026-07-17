@@ -21,7 +21,7 @@ class MartyStorageKeys {
   static const String deviceId = 'marty_device_id';
   static const String registrationId = 'marty_registration_id';
   static const String organizationId = 'marty_organization_id';
-  static const String privateKey = 'marty_private_key';
+  static const String privateKeyStorageKey = 'marty_private_key';
   static const String publicKeyKid = 'marty_public_key_kid';
 }
 
@@ -235,7 +235,7 @@ class MartySecureStorage {
   Future<void> savePrivateKey(String privateKeyBase64) async {
     try {
       await _storage.write(
-        key: MartyStorageKeys.privateKey,
+        key: MartyStorageKeys.privateKeyStorageKey,
         value: privateKeyBase64,
       );
       _cachedPrivateKey = privateKeyBase64;
@@ -257,7 +257,9 @@ class MartySecureStorage {
     }
 
     try {
-      final key = await _storage.read(key: MartyStorageKeys.privateKey);
+      final key = await _storage.read(
+        key: MartyStorageKeys.privateKeyStorageKey,
+      );
       _cachedPrivateKey = key;
       return key;
     } catch (e, s) {
@@ -273,7 +275,7 @@ class MartySecureStorage {
   /// Delete the device's private key.
   Future<void> deletePrivateKey() async {
     try {
-      await _storage.delete(key: MartyStorageKeys.privateKey);
+      await _storage.delete(key: MartyStorageKeys.privateKeyStorageKey);
       _cachedPrivateKey = null;
       Logger.info('MartySecureStorage: Private key deleted');
     } catch (e, s) {
@@ -303,7 +305,7 @@ class MartySecureStorage {
         _storage.delete(key: MartyStorageKeys.deviceId),
         _storage.delete(key: MartyStorageKeys.registrationId),
         _storage.delete(key: MartyStorageKeys.organizationId),
-        _storage.delete(key: MartyStorageKeys.privateKey),
+        _storage.delete(key: MartyStorageKeys.privateKeyStorageKey),
         _storage.delete(key: MartyStorageKeys.publicKeyKid),
       ]);
 

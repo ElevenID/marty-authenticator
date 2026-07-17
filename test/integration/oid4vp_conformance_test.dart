@@ -121,7 +121,8 @@ void main() {
       expect(
         req.presentationDefinition,
         isNull,
-        reason: 'Default OID4VP requests should not expose presentation_definition',
+        reason:
+            'Default OID4VP requests should not expose presentation_definition',
       );
     });
 
@@ -196,9 +197,9 @@ void main() {
         ),
       );
 
-      final req = await OID4VCHttpClient(
-        mockClient,
-      ).fetchPresentationRequest('https://verifier.example.com/request/legacy-pe');
+      final req = await OID4VCHttpClient(mockClient).fetchPresentationRequest(
+        'https://verifier.example.com/request/legacy-pe',
+      );
 
       expect(req.presentationDefinition, isNotNull);
       expect(req.dcqlQuery, isNull);
@@ -275,7 +276,7 @@ void main() {
     /// The PD embedded in the presentation request matches the standalone PD fixture.
     test('presentationRequest_embeddedPD_matchesFixture', () {
       final req =
-        jsonDecode(kLegacyPresentationRequestJson) as Map<String, dynamic>;
+          jsonDecode(kLegacyPresentationRequestJson) as Map<String, dynamic>;
       final pd =
           jsonDecode(kPresentationDefinitionJson) as Map<String, dynamic>;
 
@@ -310,10 +311,9 @@ void main() {
         return http.Response('', 200);
       });
 
-      await OID4VCHttpClient(mockClient).submitVpToken(
-        responseUri: kResponseUri,
-        vpToken: kFakeVpToken,
-      );
+      await OID4VCHttpClient(
+        mockClient,
+      ).submitVpToken(responseUri: kResponseUri, vpToken: kFakeVpToken);
 
       expect(
         capturedMethod,
@@ -336,10 +336,9 @@ void main() {
         return http.Response('', 200);
       });
 
-      await OID4VCHttpClient(mockClient).submitVpToken(
-        responseUri: kResponseUri,
-        vpToken: kFakeVpToken,
-      );
+      await OID4VCHttpClient(
+        mockClient,
+      ).submitVpToken(responseUri: kResponseUri, vpToken: kFakeVpToken);
 
       expect(
         capturedBody,
@@ -409,10 +408,9 @@ void main() {
         ),
       );
 
-      final resp = await OID4VCHttpClient(mockClient).submitVpToken(
-        responseUri: kResponseUri,
-        vpToken: kFakeVpToken,
-      );
+      final resp = await OID4VCHttpClient(
+        mockClient,
+      ).submitVpToken(responseUri: kResponseUri, vpToken: kFakeVpToken);
 
       expect(resp.statusCode, equals(200));
     });
@@ -423,10 +421,9 @@ void main() {
         (_) async => http.Response('{"error":"vp_token_invalid"}', 400),
       );
 
-      final resp = await OID4VCHttpClient(mockClient).submitVpToken(
-        responseUri: kResponseUri,
-        vpToken: 'tampered.jwt.token',
-      );
+      final resp = await OID4VCHttpClient(
+        mockClient,
+      ).submitVpToken(responseUri: kResponseUri, vpToken: 'tampered.jwt.token');
 
       expect(
         resp.statusCode,

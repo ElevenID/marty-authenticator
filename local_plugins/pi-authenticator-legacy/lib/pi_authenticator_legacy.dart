@@ -38,27 +38,34 @@ class LegacyUtils {
   const LegacyUtils();
   static const MethodChannel _channel = MethodChannel(METHOD_CHANNEL_ID);
 
-  Future<String> sign(String serial, String message) async =>
-      await (_channel.invokeMethod(METHOD_SIGN, {
+  Future<String> sign(String serial, String message) async => await (_channel
+      .invokeMethod(METHOD_SIGN, {
         PARAMETER_SERIAL: serial,
         PARAMETER_MESSAGE: message,
-      }).catchError((dynamic, stackTrace) {
+      })
+      .catchError((dynamic, stackTrace) {
         log(
           "Error occurred in [sign]",
           name: "pi_authenticator_legacy.dart",
           error: dynamic,
         );
         throw PlatformException(
-            message: "Signing failed.", code: LEGACY_SIGNING_ERROR);
+          message: "Signing failed.",
+          code: LEGACY_SIGNING_ERROR,
+        );
       }));
 
   Future<bool> verify(
-          String serial, String signedData, String signature) async =>
-      await (_channel.invokeMethod(METHOD_VERIFY, {
+    String serial,
+    String signedData,
+    String signature,
+  ) async => await (_channel
+      .invokeMethod(METHOD_VERIFY, {
         PARAMETER_SERIAL: serial,
         PARAMETER_SIGNED_DATA: signedData,
         PARAMETER_SIGNATURE: signature,
-      }).catchError((dynamic, stackTrace) {
+      })
+      .catchError((dynamic, stackTrace) {
         log(
           "Error occurred in [verify]",
           name: "pi_authenticator_legacy.dart",

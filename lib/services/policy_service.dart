@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:marty_authenticator/rust/marty_bridge.dart';
+import 'package:marty_authenticator/utils/logger.dart';
 
 /// Service for managing presentation policies with background sync.
 ///
@@ -67,7 +68,7 @@ class PolicyService {
       );
     } catch (e) {
       // Log error but don't throw - allow offline operation
-      print('Policy sync failed: $e');
+      Logger.warning('Policy sync failed: $e');
     }
   }
 
@@ -188,7 +189,7 @@ class PolicyService {
             .toList();
       }
     } catch (e) {
-      print('Failed to load cached policies: $e');
+      Logger.warning('Failed to load cached policies: $e');
       _cachedPolicies = [];
     }
   }
@@ -201,7 +202,7 @@ class PolicyService {
         value: jsonEncode(policiesJson),
       );
     } catch (e) {
-      print('Failed to cache policies: $e');
+      Logger.warning('Failed to cache policies: $e');
     }
   }
 }

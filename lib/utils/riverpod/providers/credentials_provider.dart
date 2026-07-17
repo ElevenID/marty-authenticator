@@ -229,9 +229,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState>
         );
 
         if (client is SpruceIdClientExtended) {
-          await client.handleOID4VCOfferSDK(
-            credentialOffer: credentialOffer,
-          );
+          await client.handleOID4VCOfferSDK(credentialOffer: credentialOffer);
         } else {
           // Fallback if we can't access the specific method, though this shouldn't happen
           // with the current provider setup

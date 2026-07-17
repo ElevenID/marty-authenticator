@@ -5,9 +5,7 @@ void main() {
   group('normalizeOid4vciCredentialOfferUri', () {
     test('wraps bare HTTPS by-reference offer endpoint', () {
       expect(
-        normalizeOid4vciCredentialOfferUri(
-          'https://issuer.example/offers/123',
-        ),
+        normalizeOid4vciCredentialOfferUri('https://issuer.example/offers/123'),
         'openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffers%2F123',
       );
     });
