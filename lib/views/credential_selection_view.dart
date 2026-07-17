@@ -30,6 +30,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/selectable_credential.dart';
 import '../services/spruce_sdk_services.dart';
 import '../widgets/spruce_credential_selection_widget.dart';
 import '../widgets/selective_disclosure_sheet.dart';

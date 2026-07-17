@@ -11,7 +11,6 @@ import 'package:marty_authenticator/repo/secure_storage.dart';
 import 'package:marty_authenticator/utils/allow_screenshot_utils.dart';
 import 'package:marty_authenticator/utils/ecc_utils.dart';
 import 'package:marty_authenticator/utils/rsa_utils.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 @GenerateNiceMocks([
   MockSpec<TokenRepository>(),

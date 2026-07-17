@@ -326,6 +326,7 @@ void main() {
         contains('application/x-www-form-urlencoded'),
         reason: 'OID4VP §7: direct_post MUST use form encoding',
       );
+      expect(capturedBody, contains('vp_token='));
     });
 
     /// DCQL-originated submissions should not require PE metadata.

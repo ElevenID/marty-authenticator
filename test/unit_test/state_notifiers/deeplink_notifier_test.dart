@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/model/deeplink.dart';
 import 'package:marty_authenticator/utils/riverpod/state_notifiers/deeplink_notifier.dart';

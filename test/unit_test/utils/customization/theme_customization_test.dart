@@ -720,7 +720,6 @@ void _testThemeCustomization() {
       test('toJson (new)', () {
         // Act
         final json = customization.toJson();
-        print(json);
         // Assert
 
         expect(json['brightness'], equals('dark'));
