@@ -31,12 +31,16 @@ subprojects {
         }
     }
 
-    plugins.withId('com.android.library') {
-        android {
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
+}
+
+// Some Flutter plugins set Java 8 in their own build scripts after the root
+// subproject configuration runs. Apply the final Java task target only after
+// every plugin project has been evaluated so Gradle sees matching targets.
+gradle.projectsEvaluated {
+    subprojects {
+        tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
         }
     }
 }
