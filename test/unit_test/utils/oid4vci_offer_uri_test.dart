@@ -56,5 +56,93 @@ void main() {
       expect(parsed.scheme, oid4vciCredentialOfferScheme);
       expect(parsed.queryParameters['credential_offer'], offerJson);
     });
+
+    test('handles invalid, empty, wrapper, and unrelated inputs safely', () {
+      expect(normalizeOid4vciCredentialOfferUri('  '), isEmpty);
+      expect(normalizeOid4vciCredentialOfferUri('not a uri'), 'not a uri');
+      expect(
+        normalizeOid4vciCredentialOfferUri('mailto:test@example.com'),
+        'mailto:test@example.com',
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri('martywallet://open'),
+        'martywallet://open',
+      );
+      expect(normalizeOid4vciCredentialOfferUri('{invalid'), '{invalid');
+      expect(
+        normalizeOid4vciCredentialOfferUri('{"other":true}'),
+        '{"other":true}',
+      );
+      expect(isOid4vciCredentialOfferUri('not a uri'), isFalse);
+      expect(
+        isOid4vciCredentialOfferUri('HAIP-VCI://?credential_offer=x'),
+        isTrue,
+      );
+      expect(
+        normalizedOid4vciCredentialOfferUriOrNull('mailto:test@example.com'),
+        isNull,
+      );
+    });
+
+    test('normalizes by-value and nested variants across transports', () {
+      const json = '{"credential_issuer":"https://issuer.example"}';
+      final encodedJson = Uri.encodeQueryComponent(json);
+      final expected = normalizeOid4vciCredentialOfferUri(json);
+
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'https://wallet.example/open?credential_offer=$encodedJson',
+        ),
+        expected,
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'intent://open?credential_offer=$encodedJson#Intent;scheme=other;end',
+        ),
+        expected,
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'openid-credential-offer://?credential_offer=$encodedJson',
+        ),
+        expected,
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'openid-credential-offer://?inner=${Uri.encodeQueryComponent(expected)}',
+        ),
+        expected,
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'intent://open?x=1#Intent;scheme=openid-credential-offer;end',
+        ),
+        'openid-credential-offer://?x=1',
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'intent://open?x=1#Intent;scheme=other;end',
+        ),
+        'intent://open?x=1#Intent;scheme=other;end',
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'openid-credential-offer://?credential_offer=opaque-offer',
+        ),
+        'openid-credential-offer://?credential_offer=opaque-offer',
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'https://wallet.example/open?credential_offer_uri=${Uri.encodeQueryComponent('https://issuer.example/ref')}',
+        ),
+        normalizeOid4vciCredentialOfferUri('https://issuer.example/ref'),
+      );
+      expect(
+        normalizeOid4vciCredentialOfferUri(
+          'https://wallet.example/open?credential_offer=opaque-offer',
+        ),
+        'openid-credential-offer://?credential_offer=opaque-offer',
+      );
+    });
   });
 }

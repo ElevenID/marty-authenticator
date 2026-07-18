@@ -114,6 +114,9 @@ void main() {
     expect(find.text('Back'), findsOneWidget);
     // And verify the original dialog title is not visible (it might be behind, but let's check top widget)
     // Actually, since it's a fullscreen dialog, it covers the previous one.
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Add Documents'), findsOneWidget);
   });
 
   testWidgets('AddToWalletDialog navigates to TransitCardDialog', (
@@ -319,5 +322,29 @@ void main() {
     final chevronIcon = transitCardRow.children.last as Icon;
     expect(chevronIcon.icon, Icons.chevron_right);
     expect(chevronIcon.color, Colors.grey);
+  });
+
+  testWidgets('transit selections provide feedback', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => AddToWalletDialog.show(context),
+            child: const Text('Open Dialog'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open Dialog'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Transit Card'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clipper'));
+    await tester.pump();
+    expect(find.text('Clipper selected'), findsWidgets);
   });
 }

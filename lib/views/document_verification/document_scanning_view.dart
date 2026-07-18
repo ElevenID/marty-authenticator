@@ -5,14 +5,33 @@ import '../../models/document_verification_config.dart';
 import '../../widgets/common/back_button.dart';
 import 'liveness_check_view.dart';
 
+Future<List<CameraDescription>> _availableDocumentCameras() =>
+    availableCameras();
+Future<void> _documentDelay(Duration duration) => Future.delayed(duration);
+
 class DocumentScanningView extends StatefulWidget {
   final DocumentVerificationConfig config;
   final int currentStepIndex;
+  final Widget? cameraPreviewOverride;
+  final Duration processingDelay;
+  final Duration cameraReleaseDelay;
+  final Widget Function(DocumentVerificationConfig config)? livenessBuilder;
+  final Widget Function(DocumentVerificationConfig config, int stepIndex)?
+  scanningBuilder;
+  final Future<List<CameraDescription>> Function() cameraProvider;
+  final Future<void> Function(Duration duration) delay;
 
   const DocumentScanningView({
     super.key,
     required this.config,
     this.currentStepIndex = 0,
+    this.cameraPreviewOverride,
+    this.processingDelay = const Duration(seconds: 1),
+    this.cameraReleaseDelay = const Duration(milliseconds: 500),
+    this.livenessBuilder,
+    this.scanningBuilder,
+    this.cameraProvider = _availableDocumentCameras,
+    this.delay = _documentDelay,
   });
 
   @override
@@ -23,6 +42,7 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
   bool _isScanning = false;
+  bool _cameraReady = false;
 
   @override
   void initState() {
@@ -31,7 +51,11 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
   }
 
   Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
+    if (widget.cameraPreviewOverride != null) {
+      if (mounted) setState(() => _cameraReady = true);
+      return;
+    }
+    final cameras = await widget.cameraProvider();
     if (cameras.isEmpty) return;
 
     final firstCamera = cameras.first;
@@ -44,7 +68,7 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
 
     _initializeControllerFuture = _controller!.initialize();
     if (mounted) {
-      setState(() {});
+      setState(() => _cameraReady = true);
     }
   }
 
@@ -78,15 +102,19 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              _controller != null &&
-              _controller!.value.isInitialized) {
+          if (_cameraReady &&
+              (widget.cameraPreviewOverride != null ||
+                  (snapshot.connectionState == ConnectionState.done &&
+                      _controller != null &&
+                      _controller!.value.isInitialized))) {
             return Stack(
               children: [
                 SizedBox(
                   width: double.infinity,
                   height: double.infinity,
-                  child: CameraPreview(_controller!),
+                  child:
+                      widget.cameraPreviewOverride ??
+                      CameraPreview(_controller!),
                 ),
                 _buildOverlay(instruction),
                 Positioned(
@@ -194,7 +222,7 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
       // 4. OCR text
 
       // Simulate processing delay
-      await Future.delayed(const Duration(seconds: 1));
+      await widget.delay(widget.processingDelay);
 
       // We need to dispose the controller before navigating to the next step
       // because on many devices we can't have multiple active camera sessions.
@@ -202,7 +230,7 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
       _controller = null;
 
       // Give the OS time to release the camera resource
-      await Future.delayed(const Duration(milliseconds: 500));
+      await widget.delay(widget.cameraReleaseDelay);
 
       if (!mounted) return;
 
@@ -214,17 +242,21 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => LivenessCheckView(config: widget.config),
+              builder: (context) =>
+                  widget.livenessBuilder?.call(widget.config) ??
+                  LivenessCheckView(config: widget.config),
             ),
           );
         } else {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DocumentScanningView(
-                config: widget.config,
-                currentStepIndex: nextIndex,
-              ),
+              builder: (context) =>
+                  widget.scanningBuilder?.call(widget.config, nextIndex) ??
+                  DocumentScanningView(
+                    config: widget.config,
+                    currentStepIndex: nextIndex,
+                  ),
             ),
           );
         }
@@ -235,7 +267,8 @@ class _DocumentScanningViewState extends State<DocumentScanningView> {
           setState(() => _isScanning = false);
         }
       } else {
-        // Should not happen if config is correct (liveness is usually last)
+        // A custom flow may end after a scan without a liveness step.
+        if (mounted) setState(() => _isScanning = false);
       }
     } catch (e) {
       Logger.error(e.toString());
