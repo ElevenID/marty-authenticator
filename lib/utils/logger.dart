@@ -23,7 +23,7 @@ class Logger {
     if (!kDebugMode && !_verboseLogging && !verbose) return;
     _printer.i(
       _format(message, name),
-      error: error,
+      error: _safeError(error),
       stackTrace: stackTrace,
     );
   }
@@ -38,7 +38,7 @@ class Logger {
     if (!kDebugMode && !_verboseLogging && !verbose) return;
     _printer.w(
       _format(message, name),
-      error: error,
+      error: _safeError(error),
       stackTrace: stackTrace,
     );
   }
@@ -53,7 +53,7 @@ class Logger {
     if (!kDebugMode && !_verboseLogging && !verbose) return;
     _printer.d(
       _format(message, name),
-      error: error,
+      error: _safeError(error),
       stackTrace: stackTrace,
     );
   }
@@ -71,7 +71,7 @@ class Logger {
     };
     _printer.e(
       _format(message ?? error?.toString() ?? 'Unknown error', name),
-      error: error,
+      error: _safeError(error),
       stackTrace: trace,
     );
   }
@@ -80,6 +80,9 @@ class Logger {
     final prefix = name == null ? '' : '[$name] ';
     return _redact('$prefix$message');
   }
+
+  static String? _safeError(Object? error) =>
+      error == null ? null : _redact(error.toString());
 
   static String _redact(String text) {
     for (final key in filterParameterKeys) {
