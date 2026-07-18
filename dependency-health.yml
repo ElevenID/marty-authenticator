@@ -1,0 +1,14 @@
+version: 1
+dependencies:
+  - package: flutter_secure_storage_web
+    ecosystem: pub
+    owner: ElevenID
+    upstream: https://github.com/juliansteenbakker/flutter_secure_storage
+    current: local-wasm-override
+    target: upstream-release
+    status: watch
+    decision: replace
+    advisories: []
+    tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/11
+    review-after: 2026-10-18
+    rationale: Remove the local WASM compatibility override when the upstream package meets the application contract.

@@ -2,6 +2,9 @@
   "name": "credential-test",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "jimp": "^1.6.1",
     "jsqr": "^1.4.0",
