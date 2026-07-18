@@ -26,6 +26,7 @@
 /// - Real-time security assessment
 /// - Hardware-backed operations
 /// - Comprehensive selective disclosure controls
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -476,9 +477,9 @@ class _CredentialSelectionViewState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: Colors.blue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,7 +510,7 @@ class _CredentialSelectionViewState
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Colors.blue.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -545,11 +546,13 @@ class _CredentialSelectionViewState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _securityAssessment!.overallSecurityLevel.color.withOpacity(0.1),
+        color: _securityAssessment!.overallSecurityLevel.color.withValues(
+          alpha: 0.1,
+        ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _securityAssessment!.overallSecurityLevel.color.withOpacity(
-            0.3,
+          color: _securityAssessment!.overallSecurityLevel.color.withValues(
+            alpha: 0.3,
           ),
         ),
       ),

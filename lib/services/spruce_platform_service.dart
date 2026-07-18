@@ -112,7 +112,7 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
     try {
       final result = await _w3cChannel.invokeMethod(
         SpruceIdW3CMethods.signVerifiableCredential,
-        {'credential': credential, if (keyId != null) 'keyId': keyId},
+        {'credential': credential, 'keyId': ?keyId},
       );
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
@@ -175,7 +175,7 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
     try {
       final result = await _pkiChannel.invokeMethod(
         SpruceIdPkiMethods.createCSR,
-        {'subject': subject, if (keyId != null) 'keyId': keyId},
+        {'subject': subject, 'keyId': ?keyId},
       );
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {

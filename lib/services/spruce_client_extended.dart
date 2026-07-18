@@ -20,6 +20,8 @@
 
 /// Extended SpruceID client with SDK capabilities
 /// Utilizes the extended platform service to provide advanced functionality
+library;
+
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

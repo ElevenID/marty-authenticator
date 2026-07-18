@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:marty_authenticator/l10n/app_localizations.dart';
 import 'package:marty_authenticator/l10n/app_localizations_en.dart';
 

@@ -105,7 +105,7 @@ class CardDetailsScreen extends StatelessWidget {
                     ],
                   ),
                 );
-              }).toList()
+              })
             else ...[
               // Employee/Card holder information
               const Text(

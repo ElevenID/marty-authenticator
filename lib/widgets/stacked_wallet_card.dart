@@ -45,7 +45,7 @@ class StackedWalletCard extends ConsumerWidget {
         ref.read(draggingCardProvider.notifier).state = primaryCard;
         onLongPress?.call();
       },
-      onDraggableCanceled: (_, __) {
+      onDraggableCanceled: (_, _) {
         ref.read(draggingCardProvider.notifier).state = null;
       },
       onDragCompleted: () {
@@ -69,7 +69,7 @@ class StackedWalletCard extends ConsumerWidget {
         color: Colors.transparent,
         child: Transform.scale(
           scale: 1.05,
-          child: Container(
+          child: SizedBox(
             height: LayoutConstants.cardHeight,
             width: LayoutConstants.cardWidth,
             child: Stack(
@@ -87,7 +87,7 @@ class StackedWalletCard extends ConsumerWidget {
       ),
       childWhenDragging: Opacity(
         opacity: 0.3,
-        child: Container(
+        child: SizedBox(
           height: LayoutConstants.cardHeight,
           width: LayoutConstants.cardWidth,
           child: Stack(
@@ -107,7 +107,7 @@ class StackedWalletCard extends ConsumerWidget {
         ref.read(draggingCardProvider.notifier).state = primaryCard;
         onLongPress?.call();
       },
-      onDraggableCanceled: (_, __) {
+      onDraggableCanceled: (_, _) {
         ref.read(draggingCardProvider.notifier).state = null;
       },
       onDragCompleted: () {
@@ -115,7 +115,7 @@ class StackedWalletCard extends ConsumerWidget {
       },
       child: GestureDetector(
         onTap: onTap ?? () => _navigateToGroupedCardDetails(context),
-        child: Container(
+        child: SizedBox(
           height: LayoutConstants.cardHeight,
           width: LayoutConstants.cardWidth,
           child: Stack(
@@ -158,12 +158,12 @@ class StackedWalletCard extends ConsumerWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: card.gradient
-                  .map((color) => color.withOpacity(0.8))
+                  .map((color) => color.withValues(alpha: 0.8))
                   .toList(),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -191,7 +191,7 @@ class StackedWalletCard extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -234,7 +234,7 @@ class StackedWalletCard extends ConsumerWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Icon(card.icon, color: Colors.white, size: 24),
@@ -257,7 +257,7 @@ class StackedWalletCard extends ConsumerWidget {
               Text(
                 card.title, // Credential Name
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 12,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -308,7 +308,7 @@ class StackedWalletCard extends ConsumerWidget {
               Text(
                 '${entry.key.toUpperCase()}: ',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -329,7 +329,7 @@ class StackedWalletCard extends ConsumerWidget {
       height: 2,
       width: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
+        color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(1),
       ),
     );
@@ -339,9 +339,9 @@ class StackedWalletCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
       child: Text(
         '${cardGroup.cards.length}',

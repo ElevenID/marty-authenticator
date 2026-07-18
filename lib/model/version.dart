@@ -51,55 +51,19 @@ class Version implements Comparable<Version> {
   }
 
   bool operator <(Object other) {
-    if (other is! Version) {
-      return false;
-    }
-    if (major != other.major) {
-      if (major < other.major) return true;
-      return false;
-    }
-    if (minor != other.minor) {
-      if (minor < other.minor) return true;
-      return false;
-    }
-    if (patch != other.patch) {
-      if (patch < other.patch) return true;
-      return false;
-    }
-    return false;
+    return other is Version && compareTo(other) < 0;
   }
 
   bool operator >(Object other) {
-    if (other is! Version) return false;
-    if (major != other.major) {
-      if (major > other.major) return true;
-      return false;
-    }
-    if (minor != other.minor) {
-      if (minor > other.minor) return true;
-      return false;
-    }
-    if (patch != other.patch) {
-      if (patch > other.patch) return true;
-      return false;
-    }
-    return false;
+    return other is Version && compareTo(other) > 0;
   }
 
   bool operator <=(Object other) {
-    if (other is! Version) return false;
-    if (major > other.major) return false;
-    if (minor > other.minor) return false;
-    if (patch > other.patch) return false;
-    return true;
+    return other is Version && compareTo(other) <= 0;
   }
 
   bool operator >=(Object other) {
-    if (other is! Version) return false;
-    if (major < other.major) return false;
-    if (minor < other.minor) return false;
-    if (patch < other.patch) return false;
-    return true;
+    return other is Version && compareTo(other) >= 0;
   }
 
   @override

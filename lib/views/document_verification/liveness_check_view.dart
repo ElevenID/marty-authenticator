@@ -2,17 +2,33 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../utils/logger.dart';
-import 'package:flutter/services.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../../models/document_verification_config.dart';
 import '../../models/liveness_challenge.dart';
+import '../../models/liveness_gesture_detector.dart';
+import '../../services/liveness_camera_image_converter.dart';
 import '../../widgets/common/back_button.dart';
 import 'review_and_submit_view.dart';
 
 class LivenessCheckView extends StatefulWidget {
   final DocumentVerificationConfig config;
+  final List<LivenessGesture>? gesturesOverride;
+  final Widget? cameraPreviewOverride;
+  final Duration mockGestureDelay;
+  final Widget Function(LivenessChallenge? challenge)? reviewBuilder;
+  final bool enableExpiryTicker;
+  final Duration challengeTtl;
 
-  const LivenessCheckView({super.key, required this.config});
+  const LivenessCheckView({
+    super.key,
+    required this.config,
+    this.gesturesOverride,
+    this.cameraPreviewOverride,
+    this.mockGestureDelay = const Duration(seconds: 2),
+    this.reviewBuilder,
+    this.enableExpiryTicker = true,
+    this.challengeTtl = const Duration(seconds: 60),
+  });
 
   @override
   State<LivenessCheckView> createState() => _LivenessCheckViewState();
@@ -31,14 +47,16 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   @override
   void initState() {
     super.initState();
-    _gestures = DocumentVerificationConfig.generateRandomGestures();
+    _gestures =
+        widget.gesturesOverride ??
+        DocumentVerificationConfig.generateRandomGestures();
     _challenge = LivenessChallenge.create(
       gestures: _gestures,
-      ttl: const Duration(seconds: 60),
+      ttl: widget.challengeTtl,
       signingSecret: 'local-dev-secret',
     );
-    _expirySeconds = 60;
-    _startExpiryTicker();
+    _expirySeconds = widget.challengeTtl.inSeconds;
+    if (widget.enableExpiryTicker) _startExpiryTicker();
     _initializeCamera();
     _initializeFaceDetector();
   }
@@ -60,7 +78,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   }
 
   void _initializeFaceDetector() {
-    if (kIsWeb) return;
+    if (kIsWeb || widget.cameraPreviewOverride != null) return;
     final options = FaceDetectorOptions(
       enableClassification: true, // for smile and eyes
       enableLandmarks: true,
@@ -72,6 +90,13 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   Future<void> _initializeCamera() async {
     try {
+      if (widget.cameraPreviewOverride != null) {
+        if (mounted) {
+          setState(() {});
+          _startWebMock();
+        }
+        return;
+      }
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
         throw Exception('No cameras available');
@@ -113,7 +138,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   void _startWebMock() async {
     while (mounted && _currentGestureIndex < _gestures.length) {
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(widget.mockGestureDelay);
       if (!mounted) return;
       setState(() {
         _currentGestureIndex++;
@@ -153,83 +178,27 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
     if (kIsWeb) return null;
     if (_controller == null) return null;
 
-    final camera = _controller!.description;
-    final sensorOrientation = camera.sensorOrientation;
-
-    InputImageRotation? rotation;
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
-    } else if (defaultTargetPlatform == TargetPlatform.android) {
-      var rotationCompensation =
-          _orientations[_controller!.value.deviceOrientation];
-      if (rotationCompensation == null) return null;
-      if (camera.lensDirection == CameraLensDirection.front) {
-        // front-facing
-        rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
-      } else {
-        // back-facing
-        rotationCompensation =
-            (sensorOrientation - rotationCompensation + 360) % 360;
-      }
-      rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
-    }
-    if (rotation == null) return null;
-
-    final format = InputImageFormatValue.fromRawValue(image.format.raw);
-    if (format == null ||
-        (defaultTargetPlatform == TargetPlatform.android &&
-            format != InputImageFormat.nv21) ||
-        (defaultTargetPlatform == TargetPlatform.iOS &&
-            format != InputImageFormat.bgra8888))
-      return null;
-
-    // Since we're streaming images, we need to concatenate the planes
-    if (image.planes.length != 1) return null;
-    final plane = image.planes.first;
-
-    return InputImage.fromBytes(
-      bytes: plane.bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
-      ),
+    return LivenessCameraImageConverter.convert(
+      image: image,
+      camera: _controller!.description,
+      deviceOrientation: _controller!.value.deviceOrientation,
+      platform: defaultTargetPlatform,
     );
   }
-
-  static final _orientations = {
-    DeviceOrientation.portraitUp: 0,
-    DeviceOrientation.landscapeLeft: 90,
-    DeviceOrientation.portraitDown: 180,
-    DeviceOrientation.landscapeRight: 270,
-  };
 
   void _checkGesture(Face face) {
     if (_currentGestureIndex >= _gestures.length) return;
 
     final targetGesture = _gestures[_currentGestureIndex];
-    bool gestureDetected = false;
 
     // TODO: Add platform specific depth camera API integration here for better anti-spoofing
 
-    switch (targetGesture) {
-      case LivenessGesture.smile:
-        if ((face.smilingProbability ?? 0) > 0.8) gestureDetected = true;
-        break;
-      case LivenessGesture.turnHeadLeft:
-        if ((face.headEulerAngleY ?? 0) > 45) gestureDetected = true;
-        break;
-      case LivenessGesture.turnHeadRight:
-        if ((face.headEulerAngleY ?? 0) < -45) gestureDetected = true;
-        break;
-      case LivenessGesture.lookUp:
-        if ((face.headEulerAngleX ?? 0) > 20) gestureDetected = true;
-        break;
-      case LivenessGesture.lookDown:
-        if ((face.headEulerAngleX ?? 0) < -20) gestureDetected = true;
-        break;
-    }
+    final gestureDetected = LivenessGestureDetector.detects(
+      targetGesture,
+      smilingProbability: face.smilingProbability,
+      headEulerAngleX: face.headEulerAngleX,
+      headEulerAngleY: face.headEulerAngleY,
+    );
 
     if (gestureDetected) {
       setState(() {
@@ -250,6 +219,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
       context,
       MaterialPageRoute(
         builder: (context) =>
+            widget.reviewBuilder?.call(_challenge) ??
             ReviewAndSubmitView(livenessChallenge: _challenge),
       ),
     );
@@ -264,7 +234,8 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null || !_controller!.value.isInitialized) {
+    if (widget.cameraPreviewOverride == null &&
+        (_controller == null || !_controller!.value.isInitialized)) {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(child: CircularProgressIndicator()),
@@ -287,7 +258,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
           SizedBox(
             width: double.infinity,
             height: double.infinity,
-            child: CameraPreview(_controller!),
+            child: widget.cameraPreviewOverride ?? CameraPreview(_controller!),
           ),
           Positioned(
             top: 100,

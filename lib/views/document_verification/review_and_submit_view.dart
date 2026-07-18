@@ -9,8 +9,13 @@ import '../../widgets/common/back_button.dart';
 
 class ReviewAndSubmitView extends ConsumerStatefulWidget {
   final LivenessChallenge? livenessChallenge;
+  final Future<void> Function()? submitRequest;
 
-  const ReviewAndSubmitView({super.key, this.livenessChallenge});
+  const ReviewAndSubmitView({
+    super.key,
+    this.livenessChallenge,
+    this.submitRequest,
+  });
 
   @override
   ConsumerState<ReviewAndSubmitView> createState() =>
@@ -35,7 +40,8 @@ class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
 
       if (didAuthenticate) {
         // Simulate network request
-        await Future.delayed(const Duration(seconds: 2));
+        await (widget.submitRequest?.call() ??
+            Future.delayed(const Duration(seconds: 2)));
 
         // Update state
         await ref

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/proximity_service.dart';
-import '../services/proximity/proximity_transport.dart';
 
 class MdlPresentationView extends ConsumerStatefulWidget {
   const MdlPresentationView({super.key});
@@ -13,7 +12,7 @@ class MdlPresentationView extends ConsumerStatefulWidget {
 
 class _MdlPresentationViewState extends ConsumerState<MdlPresentationView> {
   String _status = 'Initializing...';
-  List<String> _logs = [];
+  final List<String> _logs = [];
 
   @override
   void initState() {

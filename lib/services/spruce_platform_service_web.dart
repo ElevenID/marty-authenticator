@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import '../interfaces/spruce_interfaces.dart';
 import 'wasm/marty_wasm.dart';
 import '../utils/logger.dart';

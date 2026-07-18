@@ -7,12 +7,12 @@ class PresentationRequestView extends StatefulWidget {
   final VoidCallback onReject;
 
   const PresentationRequestView({
-    Key? key,
+    super.key,
     required this.requestDetails,
     required this.matchingCredentials,
     required this.onApprove,
     required this.onReject,
-  }) : super(key: key);
+  });
 
   @override
   State<PresentationRequestView> createState() =>
@@ -21,7 +21,7 @@ class PresentationRequestView extends StatefulWidget {
 
 class _PresentationRequestViewState extends State<PresentationRequestView> {
   String? _selectedCredentialId;
-  Map<String, bool> _selectedFields = {};
+  final Map<String, bool> _selectedFields = {};
 
   @override
   void initState() {
@@ -88,7 +88,7 @@ class _PresentationRequestViewState extends State<PresentationRequestView> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: DropdownButtonFormField<String>(
-                value: _selectedCredentialId,
+                initialValue: _selectedCredentialId,
                 decoration: const InputDecoration(
                   labelText: 'Select Credential',
                 ),

@@ -85,8 +85,9 @@ class _QRScannerViewState extends State<QRScannerView> {
       () async => _cameraPermission ?? await _requestCameraPermission(),
     ),
     builder: (context, isGranted) {
-      if (isGranted.connectionState != ConnectionState.done)
+      if (isGranted.connectionState != ConnectionState.done) {
         return const Center(child: CircularProgressIndicator());
+      }
       return switch (isGranted.data) {
         PermissionStatus.permanentlyDenied => DefaultDialog(
           title: Text(

@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../interfaces/spruce_interfaces.dart';
 import '../../logger.dart';

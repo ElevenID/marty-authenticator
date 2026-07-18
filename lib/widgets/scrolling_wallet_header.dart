@@ -22,7 +22,7 @@ class ScrollingWalletHeader extends StatelessWidget {
       snap: true,
       backgroundColor: Theme.of(
         context,
-      ).colorScheme.surface.withOpacity(opacity),
+      ).colorScheme.surface.withValues(alpha: opacity),
       foregroundColor: Theme.of(context).colorScheme.onSurface,
       elevation: 0,
       centerTitle: false,
@@ -58,7 +58,7 @@ class ScrollingWalletHeader extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(right: 8.0),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(opacity),
+          color: Colors.white.withValues(alpha: opacity),
           shape: BoxShape.circle,
         ),
         child: IconButton(

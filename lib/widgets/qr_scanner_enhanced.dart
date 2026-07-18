@@ -26,6 +26,7 @@
 /// - Live preview of scan results with privacy assessment
 /// - Optimized performance for credential workflows
 /// - Hardware-accelerated processing capabilities
+library;
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -36,7 +37,6 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import '../services/qr_scanner_service_enhanced.dart';
 import '../services/spruce_client_extended.dart';
 import '../services/spruce_platform_service_extended.dart';
-import '../views/credential_selection_view.dart' hide SecurityLevel;
 import '../widgets/presentation_request_view.dart';
 import '../utils/logger.dart';
 
@@ -62,7 +62,6 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
 class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     with TickerProviderStateMixin {
   // Scanner state
-  bool _isScanning = false;
   bool _isProcessing = false;
   String? _lastScannedCode;
   ProcessedQRResult? _currentResult;
@@ -232,8 +231,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   Future<void> _handlePresentationRequest(
     EnrichedQRResult enrichedResult,
   ) async {
-    final requestContent =
-        enrichedResult.validatedResult.parsedData.parsedContent!;
     final requestUri = enrichedResult.validatedResult.parsedData.rawData;
 
     try {
@@ -333,22 +330,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     }
   }
 
-  void _showPresentationSuccess(Map<String, dynamic> presentation) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            const Text('Presentation created successfully'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   void _showSuccess(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -432,9 +413,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     return Stack(
       children: [
         ReaderWidget(
-          onControllerCreated: (controller, _) {
-            setState(() => _isScanning = controller != null);
-          },
+          onControllerCreated: (_, _) {},
           actionButtonsAlignment: Alignment.bottomRight,
           showFlashlight: Platform.isIOS || Platform.isAndroid,
           flashOnIcon: const Icon(Icons.flash_on, color: Colors.white),
@@ -505,7 +484,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Widget _buildProcessingOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -518,7 +497,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                   child: Icon(
                     Icons.sync,
                     size: 64,
-                    color: Colors.blue.withOpacity(0.8),
+                    color: Colors.blue.withValues(alpha: 0.8),
                   ),
                 );
               },
@@ -563,9 +542,9 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: _buildResultPreview(_currentResult!.enrichedResult!),
         ),
@@ -688,7 +667,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -933,7 +912,7 @@ class ScannerOverlayPainter extends CustomPainter {
     final lineY = rect.top + (rect.height * animation.value);
 
     final linePaint = Paint()
-      ..color = Colors.blue.withOpacity(0.8)
+      ..color = Colors.blue.withValues(alpha: 0.8)
       ..strokeWidth = 2;
 
     canvas.drawLine(

@@ -181,7 +181,7 @@ class MDocCredential implements Credential {
     final claimName = 'age_over_$threshold';
     final value = _getClaimFromNamespace('org.iso.18013.5.1', claimName);
     if (value == null) return null;
-    return value == 'true' || value == true;
+    return value == 'true';
   }
 
   @override
