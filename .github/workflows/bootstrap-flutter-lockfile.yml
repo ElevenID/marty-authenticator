@@ -1,0 +1,30 @@
+name: Bootstrap Flutter lockfile
+
+on:
+  push:
+    branches: [agent/security-quality-cleanup]
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.44.6"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build reviewable patch
+        run: git diff --binary > flutter-lockfile.patch
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: flutter-lockfile-patch
+          path: flutter-lockfile.patch
+          if-no-files-found: error
+          retention-days: 1
