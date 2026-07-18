@@ -87,9 +87,7 @@ class WalletCredentialStore {
   static const _indexKey = 'marty:cred:index';
   static const _prefix = 'marty:cred:';
 
-  static const FlutterSecureStorage _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // -------------------------------------------------------------------------
   // Write
