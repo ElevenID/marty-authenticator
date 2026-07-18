@@ -14,14 +14,14 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Set Xcode version
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90
         with:
           xcode-version: "26.6"
 
-      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95
         with:
           distribution: "zulu"
           java-version: "17" # Use JDK 17 for better compatibility
@@ -46,10 +46,10 @@ jobs:
     timeout-minutes: 15
     # Removed the 'strategy' block with 'api-level' and 'target' matrix
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Set up Java Development Kit
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95
         with:
           distribution: "zulu"
           java-version: "21" # Keeping Java 21 as per your current setup
@@ -77,7 +77,7 @@ jobs:
 
       # Cache Gradle dependencies for faster subsequent builds
       - name: Cache Gradle dependencies
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ~/.gradle/caches
