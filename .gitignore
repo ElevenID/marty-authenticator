@@ -4,6 +4,7 @@
 *.class
 *.lock
 !pubspec.lock
+!rust/Cargo.lock
 *.log
 *.pyc
 *.swp

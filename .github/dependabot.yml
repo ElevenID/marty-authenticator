@@ -1,5 +1,12 @@
 version: 2
 updates:
+  - package-ecosystem: cargo
+    directory: /rust
+    schedule:
+      interval: weekly
+    groups:
+      rust-dependencies:
+        patterns: ["*"]
   - package-ecosystem: pub
     directory: /
     schedule:

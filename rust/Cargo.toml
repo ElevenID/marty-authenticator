@@ -13,21 +13,21 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = "0.1.0"
-marty-verification = { version = "0.1.0", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = "0.1.0"
+marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "13101ffe4923d7dfa0ae1d329a5236ef7731c724" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "13101ffe4923d7dfa0ae1d329a5236ef7731c724", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "13101ffe4923d7dfa0ae1d329a5236ef7731c724" }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { version = "0.1.0", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "13101ffe4923d7dfa0ae1d329a5236ef7731c724", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 
 # Sync for policy caching
-marty-sync = "0.1.0"
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "191daca784f0fc3b93bb17b4ab158497311dd35f" }
 
 # Biometric face verification (ONNX-backed for on-device matching)
-marty-biometrics = { version = "0.1.0", features = ["native", "onnx"] }
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "13101ffe4923d7dfa0ae1d329a5236ef7731c724", features = ["native", "onnx"] }
 
 # Flutter Rust Bridge
-flutter_rust_bridge = "=2.11.1"
+flutter_rust_bridge = "=2.12.0"
 
 # Serialization for FFI
 serde = { version = "1.0", features = ["derive"] }
@@ -43,11 +43,15 @@ chrono = { version = "0.4", features = ["serde"] }
 url = "2.5"
 
 # SD-JWT parsing
-ssi-sd-jwt = "0.3"
-ssi-claims = { version = "0.4", default-features = false }
+ssi-sd-jwt = "0.6"
+ssi-claims = { version = "0.7", default-features = false }
 
 # Async runtime for blocking calls
 tokio = { version = "1.0", features = ["rt", "sync"] }
 
 [build-dependencies]
-flutter_rust_bridge_codegen = "2.0"
+flutter_rust_bridge_codegen = "=2.12.0"
+
+[patch.crates-io]
+ssi-jwt = { git = "https://github.com/ElevenID/ssi-jwt-elevenid", rev = "957c8b0fbf3e4b967fe73c858a22b38e907b3023" }
+isomdl = { git = "https://github.com/ElevenID/isomdl-elevenid", rev = "069576a64580fc9923b65dcbdad0c2253c44296d" }

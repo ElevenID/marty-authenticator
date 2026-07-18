@@ -4,6 +4,9 @@
   "description": "Python and WASM bindings for Marty digital identity verification",
   "version": "0.1.0",
   "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
   "files": [
     "_marty_rs_bg.wasm",
     "_marty_rs.js",
