@@ -19,7 +19,7 @@ jobs:
       policy-ref: 9b6141e294da5c0f9254cfaa60c8934df95ec68b
   dependency-review:
     if: github.event_name == 'pull_request'
-    uses: ElevenID/.github/.github/workflows/dependency-review.yml@9b6141e294da5c0f9254cfaa60c8934df95ec68b
+    uses: ElevenID/.github/.github/workflows/dependency-review.yml@8b6cbdb767e03edad4590595592b3f3b4b47eb94
 
   scorecard:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
