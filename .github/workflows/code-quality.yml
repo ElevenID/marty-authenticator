@@ -21,4 +21,4 @@ jobs:
       flutter-version: "3.44.6"
       test-command: flutter test --coverage
       build-command: flutter build apk --debug --flavor netknights -t lib/main_document.dart
-      android-api-level: "37"
+      android-api-level: "36"

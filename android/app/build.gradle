@@ -55,7 +55,9 @@ if (keystorePropertiesFileNetknightsDebug.exists()) {
 android {
     namespace 'it.netknights.piauthenticator'
 
-    compileSdkVersion 37
+    // API 37 is not yet published in the stable Android SDK repository used by
+    // GitHub-hosted runners. Keep the newest stable platform until it is.
+    compileSdkVersion 36
     ndkVersion = "28.2.13676358"  // Updated to highest version for compatibility
 
     sourceSets {
