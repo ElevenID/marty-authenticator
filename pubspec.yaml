@@ -32,10 +32,10 @@ dependencies:
   basic_utils: ^5.7.0
   camera: ^0.12.0+2
   collection: ^1.18.0
-  connectivity_plus: ^7.0.0
+  connectivity_plus: ^7.3.1
   crypto: ^3.0.6
   cryptography: ^2.7.0
-  device_info_plus: ^12.2.0
+  device_info_plus: ^13.2.0
   easy_dynamic_theme: ^2.3.1
   encrypt: ^5.0.3
   file_selector: ^1.0.3
@@ -46,7 +46,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_riverpod: ^3.3.2
+  flutter_riverpod: ^3.4.2
   flutter_secure_storage: ^10.3.1
   flutter_svg: ^2.0.16
   flutter_zxing: ^2.1.0
@@ -68,8 +68,8 @@ dependencies:
   material_design_icons_flutter: ^7.0.7296
   # no_screenshot: ^0.3.1  # Temporarily removed for macOS build compatibility
   otp: ^3.1.4
-  package_info_plus: ^9.0.0
-  permission_handler: ^12.0.1
+  package_info_plus: ^10.2.1
+  permission_handler: ^13.0.0
   pointycastle: ^3.9.1
   shared_preferences: ^2.3.2
   simple_icons: ^16.23.0
@@ -92,14 +92,14 @@ dev_dependencies:
   camera_platform_interface: ^2.13.1
   build_runner: ^2.4.13
   dependency_validator: ^5.0.5
-  ffigen: ^20.1.1
+  ffigen: ^21.0.0
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  json_serializable: ^6.8.0
+  json_serializable: ^6.14.1
   mockito: ^5.4.4
 
 # Dependency overrides to address WASM compatibility issues
