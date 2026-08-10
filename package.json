@@ -8,6 +8,6 @@
   "dependencies": {
     "jimp": "^1.6.1",
     "jsqr": "^1.4.0",
-    "playwright": "^1.61.1"
+    "playwright": "^1.62.0"
   }
 }
