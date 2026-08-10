@@ -1,5 +1,17 @@
 version: 1
 dependencies:
+  - package: permission_handler
+    ecosystem: pub
+    owner: ElevenID
+    upstream: https://github.com/Baseflow/flutter-permission-handler
+    current: 12.0.3
+    target: 13.x
+    status: watch
+    decision: upgrade
+    advisories: []
+    tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/25
+    review-after: 2026-09-01
+    rationale: Version 13 requires compileSdk 37, which the stable Android SDK channel used by hosted CI does not publish yet.
   - package: flutter_secure_storage_web
     ecosystem: pub
     owner: ElevenID
