@@ -16,8 +16,9 @@ concurrency:
 
 jobs:
   flutter-quality:
-    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@9b6141e294da5c0f9254cfaa60c8934df95ec68b
+    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@e72a8018521dae62af30515d9a45a8d7653acc28
     with:
       flutter-version: "3.44.6"
       test-command: flutter test --coverage
       build-command: flutter build apk --debug --flavor netknights -t lib/main_document.dart
+      android-api-level: "37"

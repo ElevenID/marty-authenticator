@@ -55,7 +55,7 @@ if (keystorePropertiesFileNetknightsDebug.exists()) {
 android {
     namespace 'it.netknights.piauthenticator'
 
-    compileSdkVersion 36
+    compileSdkVersion 37
     ndkVersion = "28.2.13676358"  // Updated to highest version for compatibility
 
     sourceSets {

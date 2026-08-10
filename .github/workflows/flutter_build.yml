@@ -60,6 +60,9 @@ jobs:
           channel: "stable"
           flutter-version: "3.44.6"
 
+      - name: Install Android SDK platform
+        run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
+
       - name: Clean Flutter project
         run: flutter clean
 
