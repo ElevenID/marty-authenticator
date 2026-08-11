@@ -462,7 +462,7 @@ dependencies = [
  "bitflags 2.13.1",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools",
  "lazy_static",
  "lazycell",
  "log",
@@ -1536,7 +1536,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1763,7 +1763,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1934,7 +1934,7 @@ dependencies = [
  "include_dir",
  "indicatif",
  "indicatif-log-bridge",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "log",
  "notify",
@@ -2729,7 +2729,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2741,7 +2741,7 @@ checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 [[package]]
 name = "isomdl"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=069576a64580fc9923b65dcbdad0c2253c44296d#069576a64580fc9923b65dcbdad0c2253c44296d"
+source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=7a443cf6c37c8d7f11e9a767c1002684842ab5d0#7a443cf6c37c8d7f11e9a767c1002684842ab5d0"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -2786,7 +2786,7 @@ dependencies = [
 [[package]]
 name = "isomdl-macros"
 version = "0.1.0"
-source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=069576a64580fc9923b65dcbdad0c2253c44296d#069576a64580fc9923b65dcbdad0c2253c44296d"
+source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=7a443cf6c37c8d7f11e9a767c1002684842ab5d0#7a443cf6c37c8d7f11e9a767c1002684842ab5d0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2798,15 +2798,6 @@ name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -3440,10 +3431,10 @@ dependencies = [
  "flutter_rust_bridge",
  "flutter_rust_bridge_codegen",
  "marty-biometrics",
- "marty-crypto",
+ "marty-crypto 0.1.44",
  "marty-oid4vci",
  "marty-sync",
- "marty-verification",
+ "marty-verification 0.1.44",
  "marty-zkp",
  "serde",
  "serde_json",
@@ -3457,8 +3448,8 @@ dependencies = [
 
 [[package]]
 name = "marty-biometrics"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -3518,9 +3509,55 @@ dependencies = [
 ]
 
 [[package]]
+name = "marty-crypto"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "base64 0.22.1",
+ "cbc",
+ "chrono",
+ "cipher",
+ "cmac",
+ "cms",
+ "const-oid",
+ "der 0.7.10",
+ "des",
+ "ecdsa",
+ "ed25519-dalek",
+ "ed448-goldilocks-plus",
+ "elliptic-curve",
+ "hex",
+ "hkdf",
+ "hmac",
+ "p12",
+ "p256",
+ "p384",
+ "p521",
+ "pbkdf2",
+ "pem-rfc7468 0.7.0",
+ "pkcs5",
+ "pkcs8",
+ "rand 0.8.7",
+ "rand_core 0.10.1",
+ "rsa",
+ "serde",
+ "sha1",
+ "sha2 0.10.9",
+ "signature",
+ "spki",
+ "thiserror 2.0.19",
+ "x25519-dalek",
+ "x509-cert",
+ "x509-ocsp",
+ "zkryptium",
+]
+
+[[package]]
 name = "marty-oid4vci"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -3560,7 +3597,7 @@ dependencies = [
  "directories",
  "hex",
  "keyring",
- "marty-types",
+ "marty-types 0.1.2",
  "rand 0.8.7",
  "rusqlite",
  "serde",
@@ -3582,7 +3619,7 @@ dependencies = [
  "der 0.7.10",
  "ed25519-dalek",
  "marty-secure-storage",
- "marty-verification",
+ "marty-verification 0.1.2",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
@@ -3596,6 +3633,17 @@ dependencies = [
 name = "marty-types"
 version = "0.1.2"
 source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+]
+
+[[package]]
+name = "marty-types"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
 dependencies = [
  "chrono",
  "serde",
@@ -3626,7 +3674,7 @@ dependencies = [
  "iref",
  "isomdl",
  "ldap3",
- "marty-crypto",
+ "marty-crypto 0.1.2",
  "moka",
  "p256",
  "p384",
@@ -3656,15 +3704,67 @@ dependencies = [
 ]
 
 [[package]]
+name = "marty-verification"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "bs58",
+ "chrono",
+ "ciborium",
+ "cms",
+ "const-oid",
+ "der 0.7.10",
+ "ecdsa",
+ "ed25519-dalek",
+ "elliptic-curve",
+ "flate2",
+ "futures",
+ "hex",
+ "hmac",
+ "iref",
+ "isomdl",
+ "marty-crypto 0.1.44",
+ "p256",
+ "p384",
+ "p521",
+ "pem-rfc7468 0.7.0",
+ "pkcs8",
+ "rand 0.8.7",
+ "regex",
+ "rsa",
+ "serde",
+ "serde_json",
+ "sha1",
+ "sha2 0.10.9",
+ "signature",
+ "spki",
+ "ssi-claims",
+ "ssi-crypto",
+ "ssi-dids",
+ "ssi-json-ld",
+ "ssi-jwk",
+ "ssi-jws",
+ "ssi-verification-methods",
+ "thiserror 2.0.19",
+ "tracing",
+ "tracing-error",
+ "uuid",
+ "x509-cert",
+ "zeroize",
+]
+
+[[package]]
 name = "marty-zkp"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.44"
+source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
 dependencies = [
  "bindgen",
  "cc",
  "cmake",
  "libc",
- "marty-types",
+ "marty-types 0.1.44",
  "serde",
  "thiserror 2.0.19",
  "zeroize",
@@ -4569,7 +4669,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4974,7 +5074,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5033,7 +5133,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -6356,7 +6456,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.4",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7055,7 +7155,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
