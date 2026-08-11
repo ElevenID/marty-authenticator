@@ -368,7 +368,18 @@ pub async fn sync_policies(
         .await
         .map_err(|e| anyhow::anyhow!("Policy sync failed: {}", e))?;
 
-    Ok(policies)
+    // marty-sync is released independently from marty-core. Keep this boundary
+    // as serialization-only DTO mapping so the mobile bridge exposes the
+    // canonical core type without reproducing policy behavior.
+    policies
+        .into_iter()
+        .map(|policy| {
+            let value = serde_json::to_value(policy)
+                .map_err(|e| anyhow::anyhow!("Failed to map synced policy: {e}"))?;
+            serde_json::from_value(value)
+                .map_err(|e| anyhow::anyhow!("Synced policy is incompatible with core: {e}"))
+        })
+        .collect()
 }
 
 /// Evaluate a presentation request against policies and available credentials.
@@ -377,10 +388,9 @@ pub async fn sync_policies(
 pub fn evaluate_presentation_request(
     request_json: String,
     policies_json: Vec<String>,
-    credentials: Vec<Credential>,
+    _credentials: Vec<Credential>,
 ) -> anyhow::Result<PolicyEvaluationResult> {
-    use marty_verification::policy::{MinimumDisclosureResolver, PresentationPolicy};
-    use std::collections::HashMap;
+    use marty_verification::policy::{PolicyEvaluationInput, PolicyEvaluator, PresentationPolicy};
 
     // Parse policies
     let policies: Vec<PresentationPolicy> = policies_json
@@ -394,22 +404,42 @@ pub fn evaluate_presentation_request(
         .first()
         .ok_or_else(|| anyhow::anyhow!("No policies provided"))?;
 
-    // Get all available claims from credentials
-    let mut all_claims = Vec::new();
-    for cred in &credentials {
-        all_claims.extend(get_credential_claims(cred));
-    }
-
-    // Resolve minimum disclosure
-    let resolver = MinimumDisclosureResolver::new(policy);
-    let disclosure = resolver.resolve(&all_claims);
+    // Security-sensitive facts must come from the protocol verifier. This
+    // adapter does not infer trust, holder binding, freshness, or revocation
+    // from display-oriented wallet credential models.
+    let input: PolicyEvaluationInput = serde_json::from_str(&request_json)
+        .map_err(|e| anyhow::anyhow!("Failed to parse verified policy facts: {}", e))?;
+    let evaluation = PolicyEvaluator::new(policy.clone()).evaluate(&input);
 
     Ok(PolicyEvaluationResult {
-        is_satisfied: disclosure.is_complete(),
-        minimum_disclosure_claims: disclosure.claims,
-        missing_required_claims: disclosure.missing_required,
+        is_satisfied: evaluation.is_satisfied,
+        minimum_disclosure_claims: evaluation.minimum_disclosure_set,
+        missing_required_claims: evaluation.missing_claims,
         policy_id: policy.id.clone(),
     })
+}
+
+/// Evaluate the complete presentation-policy contract with the canonical Rust
+/// service kernel.
+///
+/// The JSON request contains protocol-verified facts. This adapter performs no
+/// trust, signature, freshness, revocation, or policy decision of its own.
+pub fn evaluate_service_presentation_policy(request_json: String) -> anyhow::Result<String> {
+    use marty_verification::policy::{evaluate_service_policy, ServicePolicyEvaluationRequest};
+
+    const MAX_REQUEST_BYTES: usize = 1_000_000;
+    if request_json.len() > MAX_REQUEST_BYTES {
+        return Err(anyhow::anyhow!(
+            "Service presentation policy request exceeds {MAX_REQUEST_BYTES} bytes"
+        ));
+    }
+
+    let request: ServicePolicyEvaluationRequest = serde_json::from_str(&request_json)
+        .map_err(|e| anyhow::anyhow!("Invalid service presentation policy request: {e}"))?;
+    let result = evaluate_service_policy(request)
+        .map_err(|e| anyhow::anyhow!("Service presentation policy evaluation failed: {e}"))?;
+    serde_json::to_string(&result)
+        .map_err(|e| anyhow::anyhow!("Failed to serialize policy result: {e}"))
 }
 
 /// Get the minimum set of claims to disclose from a credential based on policy.
@@ -446,19 +476,23 @@ pub fn rank_matching_credentials(
     let mut rankable: Vec<RankableCredential> = credentials
         .into_iter()
         .map(|c| {
-            let issued_at =
-                SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(c.issued_at_unix as u64);
-            RankableCredential {
+            let issued_at_epoch_seconds = u64::try_from(c.issued_at_unix)
+                .map_err(|_| anyhow::anyhow!("Credential issuance time cannot be negative"))?;
+            Ok(RankableCredential {
                 credential_id: c.credential_id,
                 issuer_id: c.issuer_id,
-                issued_at,
+                issued_at_epoch_seconds,
                 trust_level: c.trust_level,
                 claim_count: c.claim_count,
-            }
+            })
         })
-        .collect();
+        .collect::<anyhow::Result<_>>()?;
 
-    ranker.rank(&mut rankable);
+    let evaluation_time_epoch_seconds = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| anyhow::anyhow!("System clock is before the Unix epoch"))?
+        .as_secs();
+    ranker.rank(&mut rankable, evaluation_time_epoch_seconds);
 
     Ok(rankable.into_iter().map(|r| r.credential_id).collect())
 }
@@ -469,7 +503,6 @@ pub fn check_issuer_constraints(
     issuer_id: String,
     trust_profile_verified: bool,
 ) -> anyhow::Result<IssuerCheckResultOutput> {
-    use marty_verification::policy::issuer::IssuerCheckResult;
     use marty_verification::policy::{IssuerConstraintChecker, PresentationPolicy};
 
     let policy: PresentationPolicy = serde_json::from_str(&policy_json)
@@ -1071,9 +1104,153 @@ pub fn zk_is_supported_on_device() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     fn encode_query_json(value: &str) -> String {
         url::form_urlencoded::byte_serialize(value.as_bytes()).collect()
+    }
+
+    fn policy_json() -> String {
+        json!({
+            "id": "mobile-policy",
+            "name": "Mobile policy",
+            "description": null,
+            "purpose": "Test the canonical mobile adapter",
+            "accepted_credential_types": ["EmployeeCredential"],
+            "required_claims": [{
+                "claim_name": "employee_id",
+                "credential_type": "EmployeeCredential",
+                "accept_predicate": false,
+                "required_value": null
+            }],
+            "holder_binding": "none",
+            "trust_profile_id": null,
+            "allowed_issuers": [],
+            "freshness_requirements": {
+                "max_credential_age_seconds": null,
+                "max_proof_age_seconds": 300,
+                "require_live_revocation_check": false
+            },
+            "prefer_predicates": false,
+            "single_presentation": false,
+            "derived_attribute_preferences": {},
+            "credential_ranking_strategy": "freshest_first",
+            "credential_ranking_weights": {},
+            "metadata": {},
+            "version": 1
+        })
+        .to_string()
+    }
+
+    fn verified_facts_json(claims: serde_json::Value) -> String {
+        json!({
+            "credential_types": ["EmployeeCredential"],
+            "claims": claims,
+            "issuer_id": "did:example:issuer",
+            "trust_profile_verified": true,
+            "issued_at_epoch_seconds": null,
+            "proof_epoch_seconds": null,
+            "evaluation_time_epoch_seconds": 1_800_000_000u64,
+            "holder_binding_verified": false,
+            "revocation_checked": false,
+            "not_revoked": null,
+            "presentation_count": 1
+        })
+        .to_string()
+    }
+
+    fn service_policy_request_json(signature_verified: bool) -> String {
+        let mut vector: serde_json::Value = serde_json::from_str(include_str!(
+            "../../test/fixtures/presentation_policy_service.json"
+        ))
+        .unwrap();
+        let credential = &mut vector["request"]["credentials"][0];
+        credential["signature_verified"] = json!(signature_verified);
+        credential["signature_failure_reason"] = if signature_verified {
+            serde_json::Value::Null
+        } else {
+            json!("invalid signature")
+        };
+        vector["request"].to_string()
+    }
+    #[test]
+    fn mobile_policy_adapter_uses_rust_evaluator_for_allow_and_deny() {
+        let allowed = evaluate_presentation_request(
+            verified_facts_json(json!({"employee_id": "123"})),
+            vec![policy_json()],
+            Vec::new(),
+        )
+        .unwrap();
+        assert!(allowed.is_satisfied);
+        assert_eq!(allowed.minimum_disclosure_claims, ["employee_id"]);
+
+        let denied = evaluate_presentation_request(
+            verified_facts_json(json!({})),
+            vec![policy_json()],
+            Vec::new(),
+        )
+        .unwrap();
+        assert!(!denied.is_satisfied);
+        assert_eq!(denied.missing_required_claims, ["employee_id"]);
+    }
+
+    #[test]
+    fn mobile_policy_adapter_rejects_missing_verified_facts() {
+        let error =
+            evaluate_presentation_request("{}".to_string(), vec![policy_json()], Vec::new())
+                .unwrap_err();
+        assert!(error.to_string().contains("verified policy facts"));
+    }
+
+    #[test]
+    fn mobile_service_policy_adapter_matches_canonical_allow_and_deny() {
+        let vector: serde_json::Value = serde_json::from_str(include_str!(
+            "../../test/fixtures/presentation_policy_service.json"
+        ))
+        .unwrap();
+        let allowed: serde_json::Value = serde_json::from_str(
+            &evaluate_service_presentation_policy(service_policy_request_json(true)).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(allowed["result"], vector["expected"]["result"]);
+        assert_eq!(allowed["decision"], vector["expected"]["decision"]);
+        assert_eq!(
+            allowed["verified_claims"],
+            vector["expected"]["verified_claims"]
+        );
+
+        let denied: serde_json::Value = serde_json::from_str(
+            &evaluate_service_presentation_policy(service_policy_request_json(false)).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(denied["decision"], "deny");
+        assert!(denied["errors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|error| error["code"] == "signature_invalid"));
+    }
+
+    #[test]
+    fn mobile_policy_format_aliases_match_shared_vectors() {
+        let vector: serde_json::Value = serde_json::from_str(include_str!(
+            "../../test/fixtures/presentation_policy_service.json"
+        ))
+        .unwrap();
+        for format in vector["format_vectors"].as_array().unwrap() {
+            assert_eq!(
+                marty_verification::policy::canonical_credential_format(
+                    format["input"].as_str().unwrap()
+                ),
+                format["expected"].as_str().unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn mobile_service_policy_adapter_rejects_malformed_and_oversized_requests() {
+        assert!(evaluate_service_presentation_policy("{}".to_string()).is_err());
+        assert!(evaluate_service_presentation_policy("x".repeat(1_000_001)).is_err());
     }
 
     #[tokio::test]

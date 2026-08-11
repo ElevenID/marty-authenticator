@@ -462,7 +462,7 @@ dependencies = [
  "bitflags 2.13.1",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools",
  "lazy_static",
  "lazycell",
  "log",
@@ -1934,7 +1934,7 @@ dependencies = [
  "include_dir",
  "indicatif",
  "indicatif-log-bridge",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "log",
  "notify",
@@ -2741,7 +2741,7 @@ checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
 [[package]]
 name = "isomdl"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=069576a64580fc9923b65dcbdad0c2253c44296d#069576a64580fc9923b65dcbdad0c2253c44296d"
+source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=7a443cf6c37c8d7f11e9a767c1002684842ab5d0#7a443cf6c37c8d7f11e9a767c1002684842ab5d0"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -2786,7 +2786,7 @@ dependencies = [
 [[package]]
 name = "isomdl-macros"
 version = "0.1.0"
-source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=069576a64580fc9923b65dcbdad0c2253c44296d#069576a64580fc9923b65dcbdad0c2253c44296d"
+source = "git+https://github.com/ElevenID/isomdl-elevenid?rev=7a443cf6c37c8d7f11e9a767c1002684842ab5d0#7a443cf6c37c8d7f11e9a767c1002684842ab5d0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2798,15 +2798,6 @@ name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
 dependencies = [
  "either",
 ]
@@ -3457,8 +3448,8 @@ dependencies = [
 
 [[package]]
 name = "marty-biometrics"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -3473,8 +3464,8 @@ dependencies = [
 
 [[package]]
 name = "marty-crypto"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -3519,8 +3510,8 @@ dependencies = [
 
 [[package]]
 name = "marty-oid4vci"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -3550,8 +3541,8 @@ dependencies = [
 
 [[package]]
 name = "marty-secure-storage"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
@@ -3573,8 +3564,8 @@ dependencies = [
 
 [[package]]
 name = "marty-sync"
-version = "0.1.1"
-source = "git+https://github.com/ElevenID/marty-verifier?rev=191daca784f0fc3b93bb17b4ab158497311dd35f#191daca784f0fc3b93bb17b4ab158497311dd35f"
+version = "0.1.2"
+source = "git+https://github.com/ElevenID/marty-verifier?rev=6c07332551081d531260c0ffe3469f231bbdb0ec#6c07332551081d531260c0ffe3469f231bbdb0ec"
 dependencies = [
  "base64 0.22.1",
  "blake3",
@@ -3584,6 +3575,7 @@ dependencies = [
  "marty-secure-storage",
  "marty-verification",
  "reqwest 0.12.28",
+ "ryu-js",
  "serde",
  "serde_json",
  "thiserror 2.0.19",
@@ -3594,8 +3586,8 @@ dependencies = [
 
 [[package]]
 name = "marty-types"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "chrono",
  "serde",
@@ -3605,8 +3597,8 @@ dependencies = [
 
 [[package]]
 name = "marty-verification"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -3634,6 +3626,7 @@ dependencies = [
  "pem-rfc7468 0.7.0",
  "pkcs8",
  "rand 0.8.7",
+ "regex",
  "reqwest 0.13.4",
  "rsa",
  "serde",
@@ -3643,22 +3636,25 @@ dependencies = [
  "signature",
  "spki",
  "ssi-claims",
+ "ssi-crypto",
  "ssi-dids",
  "ssi-json-ld",
  "ssi-jwk",
+ "ssi-jws",
  "ssi-verification-methods",
  "thiserror 2.0.19",
  "tokio",
  "tracing",
  "tracing-error",
+ "uuid",
  "x509-cert",
  "zeroize",
 ]
 
 [[package]]
 name = "marty-zkp"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "bindgen",
  "cc",
