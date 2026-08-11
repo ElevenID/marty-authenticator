@@ -26,4 +26,33 @@ void main() {
     expect(pressed, isTrue);
     await tester.tap(find.byIcon(Icons.chevron_left).last);
   });
+
+  testWidgets('uses the current navigator when no callback is supplied', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const Scaffold(
+                  body: SizedBox(width: 100, child: CustomBackButton()),
+                ),
+              ),
+            ),
+            child: const Text('Open route'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open route'));
+    await tester.pumpAndSettle();
+    expect(find.text('Back'), findsOneWidget);
+
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Open route'), findsOneWidget);
+  });
 }
