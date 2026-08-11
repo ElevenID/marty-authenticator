@@ -763,6 +763,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return Icons.request_page;
       case QRType.credentialOffer:
         return Icons.card_membership;
+      case QRType.mdocDeviceEngagement:
+        return Icons.contactless;
       case QRType.credentialData:
         return Icons.verified;
       case QRType.didcommMessage:
@@ -778,6 +780,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return 'Presentation Request';
       case QRType.credentialOffer:
         return 'Credential Offer';
+      case QRType.mdocDeviceEngagement:
+        return 'mDoc Device Engagement';
       case QRType.credentialData:
         return 'Credential Data';
       case QRType.didcommMessage:

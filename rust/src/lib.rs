@@ -17,7 +17,8 @@ pub mod trust;
 // Re-export types for flutter_rust_bridge
 pub use api::{
     FrbAuthorizationRequest, FrbCredentialOffer, FrbCredentialResponse, FrbIssuerMetadata,
-    FrbPresentationRequest, FrbPresentationResponse, FrbTokenResponse, FrbZkProofEntry,
+    FrbPresentationRequest, FrbPresentationResponse, FrbTokenResponse, FrbWalletQrInput,
+    FrbZkProofEntry,
 };
 pub use credential::{
     Credential, MDocCredential, SdJwtCredential, TrustInfo, VerifiableCredential,

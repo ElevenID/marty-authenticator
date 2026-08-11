@@ -8,7 +8,7 @@ import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `extract_claim`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -133,6 +133,16 @@ Future<IssuerCheckResultOutput> checkIssuerConstraints({
   issuerId: issuerId,
   trustProfileVerified: trustProfileVerified,
 );
+
+/// Normalize a credential-offer handoff through the canonical Rust engine.
+Future<String> walletNormalizeCredentialOffer({required String input}) =>
+    RustLib.instance.api.crateApiWalletNormalizeCredentialOffer(input: input);
+
+/// Classify and fully parse a protocol QR/deep-link without a permissive
+/// fallback. Unknown non-protocol input returns `None`; malformed supported
+/// protocol input returns an error.
+Future<FrbWalletQrInput?> walletValidateQrInput({required String rawData}) =>
+    RustLib.instance.api.crateApiWalletValidateQrInput(rawData: rawData);
 
 /// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
 Future<FrbCredentialOffer> walletParseCredentialOffer({
@@ -530,6 +540,38 @@ class FrbTokenResponse {
           tokenType == other.tokenType &&
           expiresIn == other.expiresIn &&
           scope == other.scope;
+}
+
+/// A protocol QR/deep-link accepted by the canonical Rust wallet parsers.
+class FrbWalletQrInput {
+  final String kind;
+  final String normalized;
+  final String parsedContentJson;
+  final bool requiresExternalProvider;
+
+  const FrbWalletQrInput({
+    required this.kind,
+    required this.normalized,
+    required this.parsedContentJson,
+    required this.requiresExternalProvider,
+  });
+
+  @override
+  int get hashCode =>
+      kind.hashCode ^
+      normalized.hashCode ^
+      parsedContentJson.hashCode ^
+      requiresExternalProvider.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbWalletQrInput &&
+          runtimeType == other.runtimeType &&
+          kind == other.kind &&
+          normalized == other.normalized &&
+          parsedContentJson == other.parsedContentJson &&
+          requiresExternalProvider == other.requiresExternalProvider;
 }
 
 /// One ZK proof to include in a presentation.

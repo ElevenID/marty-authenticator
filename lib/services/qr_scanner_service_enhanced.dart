@@ -31,8 +31,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../utils/logger.dart';
-import '../utils/oid4vci_offer_uri.dart';
 import 'spruce_sdk_services.dart';
 
 /// Enhanced QR scanner service provider
@@ -75,6 +75,13 @@ class QRScannerServiceEnhanced {
 
       // Step 2: Validate using SDK capabilities
       final validationResult = await _validateWithSDK(parseResult);
+      if (!validationResult.isValid) {
+        return ProcessedQRResult.error(
+          validationResult.validationErrors.isEmpty
+              ? 'QR content validation failed'
+              : validationResult.validationErrors.join('; '),
+        );
+      }
 
       // Step 3: Enrich with credential matching if applicable
       final enrichedResult = await _enrichWithCredentialData(validationResult);
@@ -96,6 +103,37 @@ class QRScannerServiceEnhanced {
   /// Parse raw QR data into structured format
   Future<ParsedQRData> _parseQRData(String rawData) async {
     try {
+      final nativeProtocol = await rust_api.walletValidateQrInput(
+        rawData: rawData,
+      );
+      if (nativeProtocol != null) {
+        final parsedContent =
+            jsonDecode(nativeProtocol.parsedContentJson)
+                as Map<String, dynamic>;
+        final type = switch (nativeProtocol.kind) {
+          'credential_offer' => QRType.credentialOffer,
+          'presentation_request' => QRType.presentationRequest,
+          'mdoc_device_engagement' => QRType.mdocDeviceEngagement,
+          _ => throw StateError(
+            'Native wallet parser returned an unsupported kind',
+          ),
+        };
+        return ParsedQRData(
+          type: type,
+          format: type == QRType.mdocDeviceEngagement
+              ? QRFormat.raw
+              : QRFormat.openid,
+          rawData: nativeProtocol.normalized,
+          parsedContent: parsedContent,
+          metadata: {
+            'native_validated': true,
+            'native_backend': 'marty-core',
+            'requires_external_provider':
+                nativeProtocol.requiresExternalProvider,
+          },
+        );
+      }
+
       // Handle different QR code formats
       if (rawData.startsWith('http') || rawData.startsWith('https')) {
         return await _parseURLQR(rawData);
@@ -107,13 +145,6 @@ class QRScannerServiceEnhanced {
         return await _parseJSONQR(jsonData, rawData);
       } catch (e) {
         // Not JSON, try other formats
-      }
-
-      // Handle special protocol schemes
-      if (rawData.startsWith('openid-credential-offer://') ||
-          rawData.startsWith('openid-vc://') ||
-          rawData.startsWith('openid4vp://')) {
-        return await _parseOpenIDQR(rawData);
       }
 
       // Handle Marty push registration scheme
@@ -141,52 +172,6 @@ class QRScannerServiceEnhanced {
   /// Parse URL-based QR codes
   Future<ParsedQRData> _parseURLQR(String url) async {
     final uri = Uri.parse(url);
-    final normalizedOfferUri = normalizeOid4vciCredentialOfferUri(url);
-    final path = uri.path.toLowerCase();
-
-    // Check for credential offer URLs
-    if (path.contains('credential-offer') ||
-        path.contains('/offers/') ||
-        uri.queryParameters.containsKey('credential_offer_uri') ||
-        uri.queryParameters.containsKey('credential_offer')) {
-      return ParsedQRData(
-        type: QRType.credentialOffer,
-        format: QRFormat.url,
-        rawData: url,
-        parsedContent: {
-          'offer_uri': normalizedOfferUri,
-          'credential_offer_uri': uri.queryParameters['credential_offer_uri'],
-          'credential_offer': uri.queryParameters['credential_offer'],
-          'issuer_state': uri.queryParameters['issuer_state'],
-        },
-        metadata: {
-          'host': uri.host,
-          'scheme': uri.scheme,
-          'query_params': uri.queryParameters,
-        },
-      );
-    }
-
-    // Check for presentation request URLs
-    if (uri.path.contains('presentation-request') ||
-        uri.queryParameters.containsKey('request_uri')) {
-      return ParsedQRData(
-        type: QRType.presentationRequest,
-        format: QRFormat.url,
-        rawData: url,
-        parsedContent: {
-          'request_uri': uri.queryParameters['request_uri'] ?? url,
-          'client_id': uri.queryParameters['client_id'],
-          'response_uri': uri.queryParameters['response_uri'],
-        },
-        metadata: {
-          'host': uri.host,
-          'scheme': uri.scheme,
-          'query_params': uri.queryParameters,
-        },
-      );
-    }
-
     return ParsedQRData(
       type: QRType.genericURL,
       format: QRFormat.url,
@@ -258,62 +243,6 @@ class QRScannerServiceEnhanced {
     }
   }
 
-  /// Parse OpenID-based QR codes
-  Future<ParsedQRData> _parseOpenIDQR(String data) async {
-    final uri = Uri.parse(
-      data.startsWith('openid4vp://')
-          ? data.replaceFirst('openid4vp://', 'https://vp.invalid/')
-          : data.startsWith('openid-credential-offer://')
-          ? data.replaceFirst(
-              'openid-credential-offer://',
-              'https://offer.invalid/',
-            )
-          : data,
-    );
-
-    final isPresentation =
-        data.startsWith('openid4vp://') ||
-        uri.queryParameters.containsKey('presentation_definition') ||
-        uri.queryParameters.containsKey('presentation_definition_uri') ||
-        uri.queryParameters.containsKey('request_uri');
-
-    final isOffer =
-        data.startsWith('openid-credential-offer://') ||
-        data.contains('credential_offer') ||
-        data.contains('issuanceRequests');
-
-    return ParsedQRData(
-      type: isPresentation
-          ? QRType.presentationRequest
-          : isOffer
-          ? QRType.credentialOffer
-          : QRType.presentationRequest,
-      format: QRFormat.openid,
-      rawData: data,
-      parsedContent: isPresentation
-          ? {
-              'request_uri': uri.queryParameters['request_uri'],
-              'client_id': uri.queryParameters['client_id'],
-              'response_uri':
-                  uri.queryParameters['response_uri'] ??
-                  uri.queryParameters['redirect_uri'],
-              'nonce': uri.queryParameters['nonce'],
-              'presentation_definition':
-                  uri.queryParameters['presentation_definition'],
-              'presentation_definition_uri':
-                  uri.queryParameters['presentation_definition_uri'],
-            }
-          : {
-              'offer_uri': normalizeOid4vciCredentialOfferUri(data),
-              'credential_offer_uri':
-                  uri.queryParameters['credential_offer_uri'],
-              'credential_offer': uri.queryParameters['credential_offer'],
-              'issuer_state': uri.queryParameters['issuer_state'],
-            },
-      metadata: {'protocol': 'openid', 'query_params': uri.queryParameters},
-    );
-  }
-
   /// Parse DIDComm-based QR codes
   Future<ParsedQRData> _parseDIDCommQR(String data) async {
     final jsonData = jsonDecode(data) as Map<String, dynamic>;
@@ -351,50 +280,61 @@ class QRScannerServiceEnhanced {
     );
   }
 
-  /// Validate parsed data using SDK capabilities
+  /// Accept only protocol data already validated by Rust or the app-specific
+  /// push-registration contract. There is no permissive fallback.
   Future<ValidatedQRResult> _validateWithSDK(ParsedQRData parsedData) async {
-    try {
-      // Use SDK validation capabilities
-      // final validationResult = await _spruceClient.validateQRDataSDK(
-      //   qrType: parsedData.type.name,
-      //   content: parsedData.parsedContent ?? {},
-      //   format: parsedData.format.name,
-      // );
-
-      // Mock validation for now as SDK method is missing
-      final validationResult = {
-        'valid': true,
-        'errors': [],
-        'securityLevel': 'high',
-      };
-
+    if (parsedData.metadata['native_validated'] == true) {
+      final requiresExternalProvider =
+          parsedData.metadata['requires_external_provider'] == true;
       return ValidatedQRResult(
         parsedData: parsedData,
-        isValid: validationResult['valid'] as bool? ?? false,
-        validationErrors:
-            (validationResult['errors'] as List?)?.cast<String>() ?? [],
-        securityLevel: SecurityLevel.fromString(
-          validationResult['securityLevel'] as String? ?? 'unknown',
-        ),
-        recommendedActions: [],
-        sdkCapabilities: {},
-      );
-    } catch (e) {
-      Logger.warning(
-        'SDK validation failed, using fallback validation',
-        error: e,
-      );
-      return ValidatedQRResult(
-        parsedData: parsedData,
-        isValid: true, // Fallback to basic validation
-        validationErrors: [],
-        securityLevel: SecurityLevel.medium,
-        recommendedActions: [
-          'SDK validation unavailable - using basic validation',
-        ],
-        sdkCapabilities: {},
+        isValid: true,
+        validationErrors: const [],
+        securityLevel: requiresExternalProvider
+            ? SecurityLevel.medium
+            : SecurityLevel.high,
+        recommendedActions: requiresExternalProvider
+            ? const ['Continue with the required external provider adapter']
+            : const [],
+        sdkCapabilities: const {'protocol_validation': 'marty-core'},
       );
     }
+
+    if (parsedData.type == QRType.pushRegistration) {
+      final content = parsedData.parsedContent ?? const <String, dynamic>{};
+      final apiUri = Uri.tryParse(content['api_url'] as String? ?? '');
+      final errors = <String>[
+        if ((content['organization_id'] as String? ?? '').trim().isEmpty)
+          'Push registration is missing organization_id',
+        if (apiUri == null || apiUri.scheme != 'https')
+          'Push registration api_url must use HTTPS',
+        if ((content['registration_token'] as String? ?? '').trim().isEmpty)
+          'Push registration is missing registration_token',
+        if ((content['user_id'] as String? ?? '').trim().isEmpty)
+          'Push registration is missing user_id',
+      ];
+      return ValidatedQRResult(
+        parsedData: parsedData,
+        isValid: errors.isEmpty,
+        validationErrors: errors,
+        securityLevel: errors.isEmpty
+            ? SecurityLevel.high
+            : SecurityLevel.unknown,
+        recommendedActions: const [],
+        sdkCapabilities: const {'contract': 'marty-push-registration'},
+      );
+    }
+
+    return ValidatedQRResult(
+      parsedData: parsedData,
+      isValid: false,
+      validationErrors: const [
+        'Unsupported QR content was not validated by the native backend',
+      ],
+      securityLevel: SecurityLevel.unknown,
+      recommendedActions: const [],
+      sdkCapabilities: const {},
+    );
   }
 
   /// Enrich validation result with credential data matching
@@ -403,6 +343,15 @@ class QRScannerServiceEnhanced {
   ) async {
     try {
       final parsedData = validatedResult.parsedData;
+
+      if (!validatedResult.isValid) {
+        return EnrichedQRResult(
+          validatedResult: validatedResult,
+          matchingCredentials: const [],
+          availableActions: const [],
+          privacyAnalysis: null,
+        );
+      }
 
       if (parsedData.type == QRType.presentationRequest) {
         return await _enrichPresentationRequest(validatedResult);
@@ -1042,6 +991,7 @@ class QRScannerServiceEnhanced {
 enum QRType {
   presentationRequest,
   credentialOffer,
+  mdocDeviceEngagement,
   credentialData,
   didcommMessage,
   jsonDocument,

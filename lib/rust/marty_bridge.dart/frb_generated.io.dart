@@ -55,6 +55,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double dco_decode_box_autoadd_f_32(dynamic raw);
 
   @protected
+  FrbWalletQrInput dco_decode_box_autoadd_frb_wallet_qr_input(dynamic raw);
+
+  @protected
   MDocCredential dco_decode_box_autoadd_m_doc_credential(dynamic raw);
 
   @protected
@@ -123,6 +126,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
 
   @protected
+  FrbWalletQrInput dco_decode_frb_wallet_qr_input(dynamic raw);
+
+  @protected
   FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw);
 
   @protected
@@ -177,6 +183,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
+
+  @protected
+  FrbWalletQrInput? dco_decode_opt_box_autoadd_frb_wallet_qr_input(dynamic raw);
 
   @protected
   Proof? dco_decode_opt_box_autoadd_proof(dynamic raw);
@@ -257,6 +266,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
+  FrbWalletQrInput sse_decode_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MDocCredential sse_decode_box_autoadd_m_doc_credential(
@@ -345,6 +359,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
 
   @protected
+  FrbWalletQrInput sse_decode_frb_wallet_qr_input(SseDeserializer deserializer);
+
+  @protected
   FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer);
 
   @protected
@@ -409,6 +426,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
+  FrbWalletQrInput? sse_decode_opt_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   Proof? sse_decode_opt_box_autoadd_proof(SseDeserializer deserializer);
@@ -505,6 +527,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ffi.Pointer<ffi.Float> cst_encode_box_autoadd_f_32(double raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return wire.cst_new_box_autoadd_f_32(cst_encode_f_32(raw));
+  }
+
+  @protected
+  ffi.Pointer<wire_cst_frb_wallet_qr_input>
+  cst_encode_box_autoadd_frb_wallet_qr_input(FrbWalletQrInput raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    final ptr = wire.cst_new_box_autoadd_frb_wallet_qr_input();
+    cst_api_fill_to_wire_frb_wallet_qr_input(raw, ptr.ref);
+    return ptr;
   }
 
   @protected
@@ -696,6 +727,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  ffi.Pointer<wire_cst_frb_wallet_qr_input>
+  cst_encode_opt_box_autoadd_frb_wallet_qr_input(FrbWalletQrInput? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null
+        ? ffi.nullptr
+        : cst_encode_box_autoadd_frb_wallet_qr_input(raw);
+  }
+
+  @protected
   ffi.Pointer<wire_cst_proof> cst_encode_opt_box_autoadd_proof(Proof? raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? ffi.nullptr : cst_encode_box_autoadd_proof(raw);
@@ -741,6 +781,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     ffi.Pointer<wire_cst_credential_status> wireObj,
   ) {
     cst_api_fill_to_wire_credential_status(apiObj, wireObj.ref);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput apiObj,
+    ffi.Pointer<wire_cst_frb_wallet_qr_input> wireObj,
+  ) {
+    cst_api_fill_to_wire_frb_wallet_qr_input(apiObj, wireObj.ref);
   }
 
   @protected
@@ -980,6 +1028,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_frb_wallet_qr_input(
+    FrbWalletQrInput apiObj,
+    wire_cst_frb_wallet_qr_input wireObj,
+  ) {
+    wireObj.kind = cst_encode_String(apiObj.kind);
+    wireObj.normalized = cst_encode_String(apiObj.normalized);
+    wireObj.parsed_content_json = cst_encode_String(apiObj.parsedContentJson);
+    wireObj.requires_external_provider = cst_encode_bool(
+      apiObj.requiresExternalProvider,
+    );
+  }
+
+  @protected
   void cst_api_fill_to_wire_frb_zk_proof_entry(
     FrbZkProofEntry apiObj,
     wire_cst_frb_zk_proof_entry wireObj,
@@ -1192,6 +1253,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_m_doc_credential(
     MDocCredential self,
     SseSerializer serializer,
@@ -1309,6 +1376,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_frb_zk_proof_entry(
     FrbZkProofEntry self,
     SseSerializer serializer,
@@ -1392,6 +1465,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_opt_box_autoadd_proof(Proof? self, SseSerializer serializer);
@@ -2326,6 +2405,30 @@ class RustLibWire implements BaseWire {
             void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
           >();
 
+  void wire__crate__api__wallet_normalize_credential_offer(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> input,
+  ) {
+    return _wire__crate__api__wallet_normalize_credential_offer(port_, input);
+  }
+
+  late final _wire__crate__api__wallet_normalize_credential_offerPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_normalize_credential_offer',
+      );
+  late final _wire__crate__api__wallet_normalize_credential_offer =
+      _wire__crate__api__wallet_normalize_credential_offerPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
   void wire__crate__api__wallet_parse_credential_offer(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> offer_uri,
@@ -2421,6 +2524,30 @@ class RustLibWire implements BaseWire {
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             )
+          >();
+
+  void wire__crate__api__wallet_validate_qr_input(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> raw_data,
+  ) {
+    return _wire__crate__api__wallet_validate_qr_input(port_, raw_data);
+  }
+
+  late final _wire__crate__api__wallet_validate_qr_inputPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_validate_qr_input',
+      );
+  late final _wire__crate__api__wallet_validate_qr_input =
+      _wire__crate__api__wallet_validate_qr_inputPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
           >();
 
   void wire__crate__api__zk_is_supported_on_device(int port_) {
@@ -2609,6 +2736,19 @@ class RustLibWire implements BaseWire {
       );
   late final _cst_new_box_autoadd_f_32 = _cst_new_box_autoadd_f_32Ptr
       .asFunction<ffi.Pointer<ffi.Float> Function(double)>();
+
+  ffi.Pointer<wire_cst_frb_wallet_qr_input>
+  cst_new_box_autoadd_frb_wallet_qr_input() {
+    return _cst_new_box_autoadd_frb_wallet_qr_input();
+  }
+
+  late final _cst_new_box_autoadd_frb_wallet_qr_inputPtr =
+      _lookup<
+        ffi.NativeFunction<ffi.Pointer<wire_cst_frb_wallet_qr_input> Function()>
+      >('frbgen_marty_authenticator_cst_new_box_autoadd_frb_wallet_qr_input');
+  late final _cst_new_box_autoadd_frb_wallet_qr_input =
+      _cst_new_box_autoadd_frb_wallet_qr_inputPtr
+          .asFunction<ffi.Pointer<wire_cst_frb_wallet_qr_input> Function()>();
 
   ffi.Pointer<wire_cst_m_doc_credential>
   cst_new_box_autoadd_m_doc_credential() {
@@ -3056,6 +3196,17 @@ final class wire_cst_list_frb_zk_proof_entry extends ffi.Struct {
 
   @ffi.Int32()
   external int len;
+}
+
+final class wire_cst_frb_wallet_qr_input extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> kind;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> normalized;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> parsed_content_json;
+
+  @ffi.Bool()
+  external bool requires_external_provider;
 }
 
 final class wire_cst_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPresentationPolicy
