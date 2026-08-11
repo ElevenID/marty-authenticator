@@ -1,0 +1,75 @@
+name: Rust Bridge Codegen
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "rust/**"
+    paths:
+      - "rust/src/**"
+      - "rust/Cargo.toml"
+      - "rust/Cargo.lock"
+      - "flutter_rust_bridge.yaml"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/rust-bridge-codegen.yml"
+  pull_request:
+    paths:
+      - "rust/src/**"
+      - "rust/Cargo.toml"
+      - "rust/Cargo.lock"
+      - "flutter_rust_bridge.yaml"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/rust-bridge-codegen.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  generated-bindings:
+    name: Generated bindings are current
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: "3.44.6"
+          cache: true
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: "1.97.1"
+          components: rustfmt
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Install pinned bridge generator
+        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+
+      - name: Generate bridge surfaces
+        run: flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml
+
+      - name: Upload generated bridge surfaces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: flutter-rust-bridge-generated
+          if-no-files-found: error
+          retention-days: 3
+          path: |
+            rust/src/frb_generated.rs
+            lib/rust/
+            ios/Runner/bridge_generated.h
+            macos/Runner/bridge_generated.h
+
+      - name: Reject stale generated bindings
+        run: git diff --exit-code -- rust/src/frb_generated.rs lib/rust ios/Runner/bridge_generated.h macos/Runner/bridge_generated.h
