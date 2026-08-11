@@ -26,7 +26,7 @@ import '../../logger.dart';
 import '../../../services/spruce_client_extended.dart';
 import '../../../model/promotional_credential.dart';
 import '../../../models/credentials.dart';
-import '../../oid4vci_offer_uri.dart';
+import '../../../rust/marty_bridge.dart/api.dart' as rust_api;
 import 'spruce_providers.dart';
 
 /// Provider for managing the list of credentials
@@ -186,12 +186,13 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
     Logger.info('CredentialsNotifier: Handling SpruceID URI: $uri');
 
     try {
-      final credentialOffer = normalizeOid4vciCredentialOfferUri(
-        uri.toString(),
+      final credentialOffer = await rust_api.walletNormalizeCredentialOffer(
+        input: uri.toString(),
       );
 
       // Check if it is a credential offer
-      if (isOid4vciCredentialOfferUri(credentialOffer)) {
+      if (credentialOffer.startsWith('openid-credential-offer://') ||
+          credentialOffer.startsWith('openid-vc://')) {
         state = state.copyWith(isLoading: true);
 
         // Get the extended client

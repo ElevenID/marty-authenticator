@@ -27,7 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
-import '../utils/oid4vci_offer_uri.dart';
+import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import 'spruce_platform_service.dart';
 
 /// Exception thrown when user selection is required for a presentation request
@@ -68,8 +68,8 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
   }) async {
     try {
-      final normalizedOffer = normalizeOid4vciCredentialOfferUri(
-        credentialOffer,
+      final normalizedOffer = await rust_api.walletNormalizeCredentialOffer(
+        input: credentialOffer,
       );
 
       // Use refactored Android/iOS handlers with SDK integration

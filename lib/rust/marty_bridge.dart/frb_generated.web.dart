@@ -57,6 +57,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double dco_decode_box_autoadd_f_32(dynamic raw);
 
   @protected
+  FrbWalletQrInput dco_decode_box_autoadd_frb_wallet_qr_input(dynamic raw);
+
+  @protected
   MDocCredential dco_decode_box_autoadd_m_doc_credential(dynamic raw);
 
   @protected
@@ -125,6 +128,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
 
   @protected
+  FrbWalletQrInput dco_decode_frb_wallet_qr_input(dynamic raw);
+
+  @protected
   FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw);
 
   @protected
@@ -179,6 +185,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
+
+  @protected
+  FrbWalletQrInput? dco_decode_opt_box_autoadd_frb_wallet_qr_input(dynamic raw);
 
   @protected
   Proof? dco_decode_opt_box_autoadd_proof(dynamic raw);
@@ -259,6 +268,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
+  FrbWalletQrInput sse_decode_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MDocCredential sse_decode_box_autoadd_m_doc_credential(
@@ -347,6 +361,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
 
   @protected
+  FrbWalletQrInput sse_decode_frb_wallet_qr_input(SseDeserializer deserializer);
+
+  @protected
   FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer);
 
   @protected
@@ -411,6 +428,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
+  FrbWalletQrInput? sse_decode_opt_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  );
 
   @protected
   Proof? sse_decode_opt_box_autoadd_proof(SseDeserializer deserializer);
@@ -498,6 +520,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double cst_encode_box_autoadd_f_32(double raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_f_32(raw);
+  }
+
+  @protected
+  JSAny cst_encode_box_autoadd_frb_wallet_qr_input(FrbWalletQrInput raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return cst_encode_frb_wallet_qr_input(raw);
   }
 
   @protected
@@ -707,6 +735,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_frb_wallet_qr_input(FrbWalletQrInput raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.kind),
+      cst_encode_String(raw.normalized),
+      cst_encode_String(raw.parsedContentJson),
+      cst_encode_bool(raw.requiresExternalProvider),
+    ].jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_frb_zk_proof_entry(FrbZkProofEntry raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return [
@@ -827,6 +866,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double? cst_encode_opt_box_autoadd_f_32(double? raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? null : cst_encode_box_autoadd_f_32(raw);
+  }
+
+  @protected
+  JSAny? cst_encode_opt_box_autoadd_frb_wallet_qr_input(FrbWalletQrInput? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? null : cst_encode_box_autoadd_frb_wallet_qr_input(raw);
   }
 
   @protected
@@ -1026,6 +1071,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_m_doc_credential(
     MDocCredential self,
     SseSerializer serializer,
@@ -1143,6 +1194,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_frb_zk_proof_entry(
     FrbZkProofEntry self,
     SseSerializer serializer,
@@ -1226,6 +1283,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_opt_box_autoadd_proof(Proof? self, SseSerializer serializer);
@@ -1553,6 +1616,14 @@ class RustLibWire implements BaseWire {
     issuer_url,
   );
 
+  void wire__crate__api__wallet_normalize_credential_offer(
+    NativePortType port_,
+    String input,
+  ) => wasmModule.wire__crate__api__wallet_normalize_credential_offer(
+    port_,
+    input,
+  );
+
   void wire__crate__api__wallet_parse_credential_offer(
     NativePortType port_,
     String offer_uri,
@@ -1584,6 +1655,11 @@ class RustLibWire implements BaseWire {
     credential_configuration_id,
     proof_jwt,
   );
+
+  void wire__crate__api__wallet_validate_qr_input(
+    NativePortType port_,
+    String raw_data,
+  ) => wasmModule.wire__crate__api__wallet_validate_qr_input(port_, raw_data);
 
   void wire__crate__api__zk_is_supported_on_device(NativePortType port_) =>
       wasmModule.wire__crate__api__zk_is_supported_on_device(port_);
@@ -1819,6 +1895,11 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String issuer_url,
   );
 
+  external void wire__crate__api__wallet_normalize_credential_offer(
+    NativePortType port_,
+    String input,
+  );
+
   external void wire__crate__api__wallet_parse_credential_offer(
     NativePortType port_,
     String offer_uri,
@@ -1836,6 +1917,11 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String credential_format,
     String? credential_configuration_id,
     String proof_jwt,
+  );
+
+  external void wire__crate__api__wallet_validate_qr_input(
+    NativePortType port_,
+    String raw_data,
   );
 
   external void wire__crate__api__zk_is_supported_on_device(

@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1666550188;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1082978152;
 
 // Section: executor
 
@@ -800,6 +800,29 @@ fn wire__crate__api__wallet_fetch_issuer_metadata_impl(
         },
     )
 }
+fn wire__crate__api__wallet_normalize_credential_offer_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    input: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_normalize_credential_offer",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_input = input.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::wallet_normalize_credential_offer(api_input)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__wallet_parse_credential_offer_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     offer_uri: impl CstDecode<String>,
@@ -881,6 +904,30 @@ fn wire__crate__api__wallet_request_credential_impl(
                             api_proof_jwt,
                         )
                         .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_validate_qr_input_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    raw_data: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_validate_qr_input",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_raw_data = raw_data.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_validate_qr_input(api_raw_data).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -1368,6 +1415,22 @@ impl SseDecode for crate::api::FrbTokenResponse {
     }
 }
 
+impl SseDecode for crate::api::FrbWalletQrInput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_kind = <String>::sse_decode(deserializer);
+        let mut var_normalized = <String>::sse_decode(deserializer);
+        let mut var_parsedContentJson = <String>::sse_decode(deserializer);
+        let mut var_requiresExternalProvider = <bool>::sse_decode(deserializer);
+        return crate::api::FrbWalletQrInput {
+            kind: var_kind,
+            normalized: var_normalized,
+            parsed_content_json: var_parsedContentJson,
+            requires_external_provider: var_requiresExternalProvider,
+        };
+    }
+}
+
 impl SseDecode for crate::api::FrbZkProofEntry {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1563,6 +1626,17 @@ impl SseDecode for Option<f32> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<f32>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::FrbWalletQrInput> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::FrbWalletQrInput>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -2165,6 +2239,26 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbTokenResponse>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbWalletQrInput {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.kind.into_into_dart().into_dart(),
+            self.normalized.into_into_dart().into_dart(),
+            self.parsed_content_json.into_into_dart().into_dart(),
+            self.requires_external_provider.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::FrbWalletQrInput {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbWalletQrInput>
+    for crate::api::FrbWalletQrInput
+{
+    fn into_into_dart(self) -> crate::api::FrbWalletQrInput {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::FrbZkProofEntry {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2634,6 +2728,16 @@ impl SseEncode for crate::api::FrbTokenResponse {
     }
 }
 
+impl SseEncode for crate::api::FrbWalletQrInput {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.kind, serializer);
+        <String>::sse_encode(self.normalized, serializer);
+        <String>::sse_encode(self.parsed_content_json, serializer);
+        <bool>::sse_encode(self.requires_external_provider, serializer);
+    }
+}
+
 impl SseEncode for crate::api::FrbZkProofEntry {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2786,6 +2890,16 @@ impl SseEncode for Option<f32> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <f32>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::FrbWalletQrInput> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::FrbWalletQrInput>::sse_encode(value, serializer);
         }
     }
 }
@@ -3041,6 +3155,13 @@ mod io {
             unsafe { *flutter_rust_bridge::for_generated::box_from_leak_ptr(self) }
         }
     }
+    impl CstDecode<crate::api::FrbWalletQrInput> for *mut wire_cst_frb_wallet_qr_input {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbWalletQrInput {
+            let wrap = unsafe { flutter_rust_bridge::for_generated::box_from_leak_ptr(self) };
+            CstDecode::<crate::api::FrbWalletQrInput>::cst_decode(*wrap).into()
+        }
+    }
     impl CstDecode<crate::credential::MDocCredential> for *mut wire_cst_m_doc_credential {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::credential::MDocCredential {
@@ -3250,6 +3371,17 @@ mod io {
                 token_type: self.token_type.cst_decode(),
                 expires_in: self.expires_in.cst_decode(),
                 scope: self.scope.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbWalletQrInput> for wire_cst_frb_wallet_qr_input {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbWalletQrInput {
+            crate::api::FrbWalletQrInput {
+                kind: self.kind.cst_decode(),
+                normalized: self.normalized.cst_decode(),
+                parsed_content_json: self.parsed_content_json.cst_decode(),
+                requires_external_provider: self.requires_external_provider.cst_decode(),
             }
         }
     }
@@ -3679,6 +3811,21 @@ mod io {
         }
     }
     impl Default for wire_cst_frb_token_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_wallet_qr_input {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                kind: core::ptr::null_mut(),
+                normalized: core::ptr::null_mut(),
+                parsed_content_json: core::ptr::null_mut(),
+                requires_external_provider: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_wallet_qr_input {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -4147,6 +4294,14 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_normalize_credential_offer(
+        port_: i64,
+        input: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_normalize_credential_offer_impl(port_, input)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer(
         port_: i64,
         offer_uri: *mut wire_cst_list_prim_u_8_strict,
@@ -4179,6 +4334,14 @@ mod io {
             credential_configuration_id,
             proof_jwt,
         )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_validate_qr_input(
+        port_: i64,
+        raw_data: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_validate_qr_input_impl(port_, raw_data)
     }
 
     #[unsafe(no_mangle)]
@@ -4271,6 +4434,14 @@ mod io {
     #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_f_32(value: f32) -> *mut f32 {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_frb_wallet_qr_input(
+    ) -> *mut wire_cst_frb_wallet_qr_input {
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(
+            wire_cst_frb_wallet_qr_input::new_with_null_ptr(),
+        )
     }
 
     #[unsafe(no_mangle)]
@@ -4568,6 +4739,14 @@ mod io {
         token_type: *mut wire_cst_list_prim_u_8_strict,
         expires_in: *mut u64,
         scope: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_wallet_qr_input {
+        kind: *mut wire_cst_list_prim_u_8_strict,
+        normalized: *mut wire_cst_list_prim_u_8_strict,
+        parsed_content_json: *mut wire_cst_list_prim_u_8_strict,
+        requires_external_provider: bool,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -5065,6 +5244,28 @@ mod web {
                 token_type: self_.get(1).cst_decode(),
                 expires_in: self_.get(2).cst_decode(),
                 scope: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbWalletQrInput>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbWalletQrInput {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbWalletQrInput {
+                kind: self_.get(0).cst_decode(),
+                normalized: self_.get(1).cst_decode(),
+                parsed_content_json: self_.get(2).cst_decode(),
+                requires_external_provider: self_.get(3).cst_decode(),
             }
         }
     }
@@ -5810,6 +6011,14 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_normalize_credential_offer(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        input: String,
+    ) {
+        wire__crate__api__wallet_normalize_credential_offer_impl(port_, input)
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__wallet_parse_credential_offer(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         offer_uri: String,
@@ -5842,6 +6051,14 @@ mod web {
             credential_configuration_id,
             proof_jwt,
         )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_validate_qr_input(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        raw_data: String,
+    ) {
+        wire__crate__api__wallet_validate_qr_input_impl(port_, raw_data)
     }
 
     #[wasm_bindgen]

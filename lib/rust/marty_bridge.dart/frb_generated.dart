@@ -66,7 +66,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => -1666550188;
+  int get rustContentHash => -1082978152;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -211,6 +211,10 @@ abstract class RustLibApi extends BaseApi {
     required String issuerUrl,
   });
 
+  Future<String> crateApiWalletNormalizeCredentialOffer({
+    required String input,
+  });
+
   Future<FrbCredentialOffer> crateApiWalletParseCredentialOffer({
     required String offerUri,
   });
@@ -225,6 +229,10 @@ abstract class RustLibApi extends BaseApi {
     required String credentialFormat,
     String? credentialConfigurationId,
     required String proofJwt,
+  });
+
+  Future<FrbWalletQrInput?> crateApiWalletValidateQrInput({
+    required String rawData,
   });
 
   Future<bool> crateApiZkIsSupportedOnDevice();
@@ -1182,6 +1190,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiWalletNormalizeCredentialOffer({
+    required String input,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(input);
+          return wire.wire__crate__api__wallet_normalize_credential_offer(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletNormalizeCredentialOfferConstMeta,
+        argValues: [input],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletNormalizeCredentialOfferConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_normalize_credential_offer",
+        argNames: ["input"],
+      );
+
+  @override
   Future<FrbCredentialOffer> crateApiWalletParseCredentialOffer({
     required String offerUri,
   }) {
@@ -1293,6 +1331,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "credentialConfigurationId",
           "proofJwt",
         ],
+      );
+
+  @override
+  Future<FrbWalletQrInput?> crateApiWalletValidateQrInput({
+    required String rawData,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(rawData);
+          return wire.wire__crate__api__wallet_validate_qr_input(port_, arg0);
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_opt_box_autoadd_frb_wallet_qr_input,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletValidateQrInputConstMeta,
+        argValues: [rawData],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletValidateQrInputConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_validate_qr_input",
+        argNames: ["rawData"],
       );
 
   @override
@@ -1503,6 +1568,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double dco_decode_box_autoadd_f_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as double;
+  }
+
+  @protected
+  FrbWalletQrInput dco_decode_box_autoadd_frb_wallet_qr_input(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_frb_wallet_qr_input(raw);
   }
 
   @protected
@@ -1765,6 +1836,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FrbWalletQrInput dco_decode_frb_wallet_qr_input(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbWalletQrInput(
+      kind: dco_decode_String(arr[0]),
+      normalized: dco_decode_String(arr[1]),
+      parsedContentJson: dco_decode_String(arr[2]),
+      requiresExternalProvider: dco_decode_bool(arr[3]),
+    );
+  }
+
+  @protected
   FrbZkProofEntry dco_decode_frb_zk_proof_entry(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1901,6 +1986,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_f_32(raw);
+  }
+
+  @protected
+  FrbWalletQrInput? dco_decode_opt_box_autoadd_frb_wallet_qr_input(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_frb_wallet_qr_input(raw);
   }
 
   @protected
@@ -2129,6 +2222,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_f_32(deserializer));
+  }
+
+  @protected
+  FrbWalletQrInput sse_decode_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_frb_wallet_qr_input(deserializer));
   }
 
   @protected
@@ -2432,6 +2533,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FrbWalletQrInput sse_decode_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_kind = sse_decode_String(deserializer);
+    var var_normalized = sse_decode_String(deserializer);
+    var var_parsedContentJson = sse_decode_String(deserializer);
+    var var_requiresExternalProvider = sse_decode_bool(deserializer);
+    return FrbWalletQrInput(
+      kind: var_kind,
+      normalized: var_normalized,
+      parsedContentJson: var_parsedContentJson,
+      requiresExternalProvider: var_requiresExternalProvider,
+    );
+  }
+
+  @protected
   FrbZkProofEntry sse_decode_frb_zk_proof_entry(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_descriptorId = sse_decode_String(deserializer);
@@ -2637,6 +2755,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_f_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  FrbWalletQrInput? sse_decode_opt_box_autoadd_frb_wallet_qr_input(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_frb_wallet_qr_input(deserializer));
     } else {
       return null;
     }
@@ -2990,6 +3121,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_frb_wallet_qr_input(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_m_doc_credential(
     MDocCredential self,
     SseSerializer serializer,
@@ -3230,6 +3370,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_frb_wallet_qr_input(
+    FrbWalletQrInput self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.kind, serializer);
+    sse_encode_String(self.normalized, serializer);
+    sse_encode_String(self.parsedContentJson, serializer);
+    sse_encode_bool(self.requiresExternalProvider, serializer);
+  }
+
+  @protected
   void sse_encode_frb_zk_proof_entry(
     FrbZkProofEntry self,
     SseSerializer serializer,
@@ -3416,6 +3568,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_f_32(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_frb_wallet_qr_input(
+    FrbWalletQrInput? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_frb_wallet_qr_input(self, serializer);
     }
   }
 

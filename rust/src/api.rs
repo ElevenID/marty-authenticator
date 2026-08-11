@@ -705,6 +705,112 @@ impl From<marty_oid4vci::PresentationResponse> for FrbPresentationResponse {
 // OID4VCI / OID4VP wallet entry points
 // ============================================================================
 
+/// A protocol QR/deep-link accepted by the canonical Rust wallet parsers.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbWalletQrInput {
+    pub kind: String,
+    pub normalized: String,
+    pub parsed_content_json: String,
+    pub requires_external_provider: bool,
+}
+
+/// Normalize a credential-offer handoff through the canonical Rust engine.
+#[frb]
+pub fn wallet_normalize_credential_offer(input: String) -> anyhow::Result<String> {
+    marty_oid4vci::normalize_credential_offer_uri(&input)
+        .map_err(|error| anyhow::anyhow!("Credential offer normalization error: {}", error))
+}
+
+/// Classify and fully parse a protocol QR/deep-link without a permissive
+/// fallback. Unknown non-protocol input returns `None`; malformed supported
+/// protocol input returns an error.
+#[frb]
+pub async fn wallet_validate_qr_input(
+    raw_data: String,
+) -> anyhow::Result<Option<FrbWalletQrInput>> {
+    use marty_oid4vci::WalletInputKind;
+
+    let Some(classified) = marty_oid4vci::classify_wallet_input(&raw_data)
+        .map_err(|error| anyhow::anyhow!("Wallet QR classification error: {}", error))?
+    else {
+        return Ok(None);
+    };
+
+    match classified.kind {
+        WalletInputKind::CredentialOffer if classified.normalized.starts_with("openid-vc:") => {
+            let parsed_content_json = serde_json::json!({
+                "offer_uri": classified.normalized,
+                "provider_protocol": "openid-vc",
+            })
+            .to_string();
+            Ok(Some(FrbWalletQrInput {
+                kind: "credential_offer".to_string(),
+                normalized: classified.normalized,
+                parsed_content_json,
+                requires_external_provider: true,
+            }))
+        }
+        WalletInputKind::CredentialOffer => {
+            let engine = marty_oid4vci::WalletEngine::new();
+            let offer = engine
+                .parse_credential_offer(&classified.normalized)
+                .await
+                .map_err(|error| anyhow::anyhow!("Credential offer validation error: {}", error))?;
+            let parsed_content_json = serde_json::json!({
+                "offer_uri": classified.normalized,
+                "credential_issuer": offer.credential_issuer,
+                "credential_configuration_ids": offer.credential_configuration_ids,
+            })
+            .to_string();
+            Ok(Some(FrbWalletQrInput {
+                kind: "credential_offer".to_string(),
+                normalized: classified.normalized,
+                parsed_content_json,
+                requires_external_provider: false,
+            }))
+        }
+        WalletInputKind::PresentationRequest => {
+            let engine = marty_oid4vci::WalletEngine::new();
+            let request = engine
+                .parse_presentation_request(&classified.normalized)
+                .await
+                .map_err(|error| {
+                    anyhow::anyhow!("Presentation request validation error: {}", error)
+                })?;
+            let parsed_content_json = serde_json::json!({
+                "request_uri": classified.normalized,
+                "client_id": request.client_id,
+                "nonce": request.nonce,
+                "response_uri": request.response_uri,
+                "query_type": match request.query_type {
+                    marty_oid4vci::PresentationRequestQueryType::PresentationDefinition => "presentation_definition",
+                    marty_oid4vci::PresentationRequestQueryType::DcqlQuery => "dcql_query",
+                },
+                "presentation_definition": request.presentation_definition,
+                "dcql_query": request.dcql_query,
+            })
+            .to_string();
+            Ok(Some(FrbWalletQrInput {
+                kind: "presentation_request".to_string(),
+                normalized: classified.normalized,
+                parsed_content_json,
+                requires_external_provider: false,
+            }))
+        }
+        WalletInputKind::MdocDeviceEngagement => {
+            marty_iso18013::DeviceEngagement::from_qr_uri(&classified.normalized)
+                .map_err(|error| anyhow::anyhow!("mDoc engagement validation error: {}", error))?;
+            Ok(Some(FrbWalletQrInput {
+                kind: "mdoc_device_engagement".to_string(),
+                normalized: classified.normalized,
+                parsed_content_json: "{}".to_string(),
+                requires_external_provider: false,
+            }))
+        }
+    }
+}
+
 /// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
 #[frb]
 pub async fn wallet_parse_credential_offer(
@@ -1290,5 +1396,61 @@ mod tests {
         assert_eq!(parsed.query_type, "presentation_definition");
         assert!(parsed.presentation_definition_json.is_some());
         assert!(parsed.dcql_query_json.is_none());
+    }
+
+    #[tokio::test]
+    async fn wallet_qr_validation_uses_canonical_rust_parsers() {
+        let offer = json!({
+            "credential_issuer": "https://issuer.example",
+            "credential_configuration_ids": ["pid"],
+            "grants": {}
+        })
+        .to_string();
+        let validated = wallet_validate_qr_input(offer).await.unwrap().unwrap();
+        assert_eq!(validated.kind, "credential_offer");
+        assert!(validated
+            .normalized
+            .starts_with("openid-credential-offer://"));
+        assert!(!validated.requires_external_provider);
+
+        let presentation_definition =
+            r#"{"id":"pd-1","input_descriptors":[{"id":"member","constraints":{"fields":[]}}]}"#;
+        let request_uri = format!(
+            "openid4vp://authorize?client_id={}&nonce=nonce-123&response_uri={}&presentation_definition={}",
+            encode_query_json("https://verifier.example"),
+            encode_query_json("https://verifier.example/submit"),
+            encode_query_json(presentation_definition),
+        );
+        let validated = wallet_validate_qr_input(request_uri)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(validated.kind, "presentation_request");
+
+        const ISO_QR: &str = "mdoc:owBjMS4wAYIB2BhYS6QBAiABIVgglyWXuAyJ6iRNc8OlYXenvkJt23rJPdtIhlawXqr-yf0iWCC1GQSH8tIwTYVwha_ZoPL20_saYXrGIbrCm133H0ki-QKBgwIBowD1AfQKUH2RiuAEbUVzrsrOiUnSPDw";
+        let validated = wallet_validate_qr_input(ISO_QR.to_string())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(validated.kind, "mdoc_device_engagement");
+    }
+
+    #[tokio::test]
+    async fn wallet_qr_validation_rejects_malformed_protocol_input() {
+        assert!(wallet_validate_qr_input("openid4vp://".to_string())
+            .await
+            .is_err());
+        assert!(wallet_validate_qr_input(
+            "openid-credential-offer://?credential_offer=not-json".to_string()
+        )
+        .await
+        .is_err());
+        assert!(wallet_validate_qr_input("mdoc:not-cbor".to_string())
+            .await
+            .is_err());
+        assert!(wallet_validate_qr_input("https://example.com".to_string())
+            .await
+            .unwrap()
+            .is_none());
     }
 }

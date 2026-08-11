@@ -31,4 +31,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Driver\'s License and\nID Cards'), findsNothing);
   });
+
+  testWidgets('passport option opens document scanning', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => DriverLicenseDialog.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Digital ID (Passport)'));
+    await tester.pump();
+
+    expect(find.text('Scan Document'), findsOneWidget);
+  });
 }

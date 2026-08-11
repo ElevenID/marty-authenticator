@@ -13,18 +13,19 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "c8ea296bb301befff4a5b6d09d7369ea802c12ad" }
-marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "c8ea296bb301befff4a5b6d09d7369ea802c12ad", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "c8ea296bb301befff4a5b6d09d7369ea802c12ad" }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "c8ea296bb301befff4a5b6d09d7369ea802c12ad", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
 
 # Sync for policy caching
 marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "6c07332551081d531260c0ffe3469f231bbdb0ec" }
 
 # Biometric face verification (ONNX-backed for on-device matching)
-marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "c8ea296bb301befff4a5b6d09d7369ea802c12ad", features = ["native", "onnx"] }
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", features = ["native", "onnx"] }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.12.0"
