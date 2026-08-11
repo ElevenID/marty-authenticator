@@ -66,6 +66,7 @@ jobs:
           if-no-files-found: error
           retention-days: 3
           path: |
+            pubspec.lock
             rust/src/frb_generated.rs
             lib/rust/
             ios/Runner/bridge_generated.h
