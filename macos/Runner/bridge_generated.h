@@ -291,7 +291,10 @@ void frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age(int64
 void frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request(int64_t port_,
                                                                                 struct wire_cst_list_prim_u_8_strict *request_json,
                                                                                 struct wire_cst_list_String *policies_json,
-                                                                                struct wire_cst_list_credential *credentials);
+                                                                                struct wire_cst_list_credential *_credentials);
+
+void frbgen_marty_authenticator_wire__crate__api__evaluate_service_presentation_policy(int64_t port_,
+                                                                                       struct wire_cst_list_prim_u_8_strict *request_json);
 
 void frbgen_marty_authenticator_wire__crate__api__get_credential_claims(int64_t port_,
                                                                         struct wire_cst_credential *credential);
@@ -475,6 +478,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__credential_from_json);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__credential_to_json);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__evaluate_service_presentation_policy);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__get_credential_claims);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__get_minimum_disclosure_set);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__group_credentials_by_issuer);
