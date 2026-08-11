@@ -1536,7 +1536,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1763,7 +1763,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2729,7 +2729,7 @@ checksum = "3640c1c38b8e4e43584d8df18be5fc6b0aa314ce6ebf51b53313d4306cca8e46"
 dependencies = [
  "hermit-abi",
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3431,10 +3431,10 @@ dependencies = [
  "flutter_rust_bridge",
  "flutter_rust_bridge_codegen",
  "marty-biometrics",
- "marty-crypto 0.1.44",
+ "marty-crypto",
  "marty-oid4vci",
  "marty-sync",
- "marty-verification 0.1.44",
+ "marty-verification",
  "marty-zkp",
  "serde",
  "serde_json",
@@ -3448,8 +3448,8 @@ dependencies = [
 
 [[package]]
 name = "marty-biometrics"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -3464,54 +3464,8 @@ dependencies = [
 
 [[package]]
 name = "marty-crypto"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
-dependencies = [
- "aes",
- "aes-gcm",
- "base64 0.22.1",
- "cbc",
- "chrono",
- "cipher",
- "cmac",
- "cms",
- "const-oid",
- "der 0.7.10",
- "des",
- "ecdsa",
- "ed25519-dalek",
- "ed448-goldilocks-plus",
- "elliptic-curve",
- "hex",
- "hkdf",
- "hmac",
- "p12",
- "p256",
- "p384",
- "p521",
- "pbkdf2",
- "pem-rfc7468 0.7.0",
- "pkcs5",
- "pkcs8",
- "rand 0.8.7",
- "rand_core 0.10.1",
- "rsa",
- "serde",
- "sha1",
- "sha2 0.10.9",
- "signature",
- "spki",
- "thiserror 2.0.19",
- "x25519-dalek",
- "x509-cert",
- "x509-ocsp",
- "zkryptium",
-]
-
-[[package]]
-name = "marty-crypto"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -3556,8 +3510,8 @@ dependencies = [
 
 [[package]]
 name = "marty-oid4vci"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -3587,8 +3541,8 @@ dependencies = [
 
 [[package]]
 name = "marty-secure-storage"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
@@ -3597,7 +3551,7 @@ dependencies = [
  "directories",
  "hex",
  "keyring",
- "marty-types 0.1.2",
+ "marty-types",
  "rand 0.8.7",
  "rusqlite",
  "serde",
@@ -3610,8 +3564,8 @@ dependencies = [
 
 [[package]]
 name = "marty-sync"
-version = "0.1.1"
-source = "git+https://github.com/ElevenID/marty-verifier?rev=191daca784f0fc3b93bb17b4ab158497311dd35f#191daca784f0fc3b93bb17b4ab158497311dd35f"
+version = "0.1.2"
+source = "git+https://github.com/ElevenID/marty-verifier?rev=6c07332551081d531260c0ffe3469f231bbdb0ec#6c07332551081d531260c0ffe3469f231bbdb0ec"
 dependencies = [
  "base64 0.22.1",
  "blake3",
@@ -3619,8 +3573,9 @@ dependencies = [
  "der 0.7.10",
  "ed25519-dalek",
  "marty-secure-storage",
- "marty-verification 0.1.2",
+ "marty-verification",
  "reqwest 0.12.28",
+ "ryu-js",
  "serde",
  "serde_json",
  "thiserror 2.0.19",
@@ -3631,19 +3586,8 @@ dependencies = [
 
 [[package]]
 name = "marty-types"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
-dependencies = [
- "chrono",
- "serde",
- "serde_json",
- "serde_yaml",
-]
-
-[[package]]
-name = "marty-types"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "chrono",
  "serde",
@@ -3653,8 +3597,8 @@ dependencies = [
 
 [[package]]
 name = "marty-verification"
-version = "0.1.2"
-source = "git+https://github.com/ElevenID/marty-core?rev=13101ffe4923d7dfa0ae1d329a5236ef7731c724#13101ffe4923d7dfa0ae1d329a5236ef7731c724"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -3674,7 +3618,7 @@ dependencies = [
  "iref",
  "isomdl",
  "ldap3",
- "marty-crypto 0.1.2",
+ "marty-crypto",
  "moka",
  "p256",
  "p384",
@@ -3682,57 +3626,8 @@ dependencies = [
  "pem-rfc7468 0.7.0",
  "pkcs8",
  "rand 0.8.7",
- "reqwest 0.13.4",
- "rsa",
- "serde",
- "serde_json",
- "sha1",
- "sha2 0.10.9",
- "signature",
- "spki",
- "ssi-claims",
- "ssi-dids",
- "ssi-json-ld",
- "ssi-jwk",
- "ssi-verification-methods",
- "thiserror 2.0.19",
- "tokio",
- "tracing",
- "tracing-error",
- "x509-cert",
- "zeroize",
-]
-
-[[package]]
-name = "marty-verification"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "bs58",
- "chrono",
- "ciborium",
- "cms",
- "const-oid",
- "der 0.7.10",
- "ecdsa",
- "ed25519-dalek",
- "elliptic-curve",
- "flate2",
- "futures",
- "hex",
- "hmac",
- "iref",
- "isomdl",
- "marty-crypto 0.1.44",
- "p256",
- "p384",
- "p521",
- "pem-rfc7468 0.7.0",
- "pkcs8",
- "rand 0.8.7",
  "regex",
+ "reqwest 0.13.4",
  "rsa",
  "serde",
  "serde_json",
@@ -3748,6 +3643,7 @@ dependencies = [
  "ssi-jws",
  "ssi-verification-methods",
  "thiserror 2.0.19",
+ "tokio",
  "tracing",
  "tracing-error",
  "uuid",
@@ -3757,14 +3653,14 @@ dependencies = [
 
 [[package]]
 name = "marty-zkp"
-version = "0.1.44"
-source = "git+https://github.com/ElevenID/marty-core?rev=810438b4d9fc299b1c2217ac01b649bc72e71ab0#810438b4d9fc299b1c2217ac01b649bc72e71ab0"
+version = "0.1.45"
+source = "git+https://github.com/ElevenID/marty-core?rev=c8ea296bb301befff4a5b6d09d7369ea802c12ad#c8ea296bb301befff4a5b6d09d7369ea802c12ad"
 dependencies = [
  "bindgen",
  "cc",
  "cmake",
  "libc",
- "marty-types 0.1.44",
+ "marty-types",
  "serde",
  "thiserror 2.0.19",
  "zeroize",
@@ -4669,7 +4565,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5074,7 +4970,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5133,7 +5029,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6456,7 +6352,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.4",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -7155,7 +7051,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
