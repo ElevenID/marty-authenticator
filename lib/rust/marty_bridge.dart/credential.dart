@@ -100,7 +100,7 @@ class CredentialSubject {
   /// Subject DID (holder)
   final String? id;
 
-  /// All claims as JSON string (serialized HashMap<String, Value>)
+  /// All claims as JSON string (serialized `HashMap<String, Value>`)
   /// This avoids opaque type issues with flutter_rust_bridge
   final String claimsJson;
 
@@ -135,7 +135,7 @@ class MDocCredential {
   /// Expiry date (ISO 8601)
   final String? expiryDate;
 
-  /// Namespaced claims as JSON string (serialized HashMap<String, HashMap<String, Value>>)
+  /// Namespaced claims as JSON string (serialized `HashMap<String, HashMap<String, Value>>`)
   /// This avoids opaque type issues with flutter_rust_bridge
   final String namespacesJson;
 
@@ -262,7 +262,7 @@ class SdJwtCredential {
   /// Expiration date
   final String? expirationDate;
 
-  /// Disclosed claims as JSON string (serialized HashMap<String, Value>)
+  /// Disclosed claims as JSON string (serialized `HashMap<String, Value>`)
   /// This avoids opaque type issues with flutter_rust_bridge
   final String disclosedClaimsJson;
 

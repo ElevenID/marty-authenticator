@@ -123,7 +123,7 @@ pub struct CredentialSubject {
     #[serde(default)]
     pub id: Option<String>,
 
-    /// All claims as JSON string (serialized HashMap<String, Value>)
+    /// All claims as JSON string (serialized `HashMap<String, Value>`)
     /// This avoids opaque type issues with flutter_rust_bridge
     #[serde(skip)]
     pub claims_json: String,
@@ -188,7 +188,7 @@ pub struct MDocCredential {
     #[serde(default)]
     pub expiry_date: Option<String>,
 
-    /// Namespaced claims as JSON string (serialized HashMap<String, HashMap<String, Value>>)
+    /// Namespaced claims as JSON string (serialized `HashMap<String, HashMap<String, Value>>`)
     /// This avoids opaque type issues with flutter_rust_bridge
     #[serde(skip)]
     pub namespaces_json: String,
@@ -226,7 +226,7 @@ pub struct SdJwtCredential {
     #[serde(default)]
     pub expiration_date: Option<String>,
 
-    /// Disclosed claims as JSON string (serialized HashMap<String, Value>)
+    /// Disclosed claims as JSON string (serialized `HashMap<String, Value>`)
     /// This avoids opaque type issues with flutter_rust_bridge
     #[serde(skip)]
     pub disclosed_claims_json: String,
