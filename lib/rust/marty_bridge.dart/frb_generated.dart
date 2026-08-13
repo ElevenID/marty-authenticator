@@ -66,7 +66,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => -1082978152;
+  int get rustContentHash => 658812507;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -230,6 +230,13 @@ abstract class RustLibApi extends BaseApi {
     String? credentialConfigurationId,
     required String proofJwt,
   });
+
+  Future<String> crateApiWalletRoutePresentationRequest({
+    required String input,
+  });
+
+  Future<FrbPresentationBindingContext>
+  crateApiWalletValidatePresentationContext({required String requestJson});
 
   Future<FrbWalletQrInput?> crateApiWalletValidateQrInput({
     required String rawData,
@@ -1334,6 +1341,65 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiWalletRoutePresentationRequest({
+    required String input,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(input);
+          return wire.wire__crate__api__wallet_route_presentation_request(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletRoutePresentationRequestConstMeta,
+        argValues: [input],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletRoutePresentationRequestConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_route_presentation_request",
+        argNames: ["input"],
+      );
+
+  @override
+  Future<FrbPresentationBindingContext>
+  crateApiWalletValidatePresentationContext({required String requestJson}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(requestJson);
+          return wire.wire__crate__api__wallet_validate_presentation_context(
+            port_,
+            arg0,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_presentation_binding_context,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletValidatePresentationContextConstMeta,
+        argValues: [requestJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletValidatePresentationContextConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_validate_presentation_context",
+        argNames: ["requestJson"],
+      );
+
+  @override
   Future<FrbWalletQrInput?> crateApiWalletValidateQrInput({
     required String rawData,
   }) {
@@ -1788,6 +1854,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       authorizationEndpoint: dco_decode_opt_String(arr[3]),
       grantTypesSupported: dco_decode_list_String(arr[4]),
       credentialConfigurationsJson: dco_decode_String(arr[5]),
+    );
+  }
+
+  @protected
+  FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return FrbPresentationBindingContext(
+      challenge: dco_decode_String(arr[0]),
+      domain: dco_decode_String(arr[1]),
     );
   }
 
@@ -2476,6 +2556,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       authorizationEndpoint: var_authorizationEndpoint,
       grantTypesSupported: var_grantTypesSupported,
       credentialConfigurationsJson: var_credentialConfigurationsJson,
+    );
+  }
+
+  @protected
+  FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_challenge = sse_decode_String(deserializer);
+    var var_domain = sse_decode_String(deserializer);
+    return FrbPresentationBindingContext(
+      challenge: var_challenge,
+      domain: var_domain,
     );
   }
 
@@ -3329,6 +3422,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.authorizationEndpoint, serializer);
     sse_encode_list_String(self.grantTypesSupported, serializer);
     sse_encode_String(self.credentialConfigurationsJson, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_presentation_binding_context(
+    FrbPresentationBindingContext self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.challenge, serializer);
+    sse_encode_String(self.domain, serializer);
   }
 
   @protected

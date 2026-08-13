@@ -96,9 +96,16 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       MethodChannel channel = w3cChannel;
       String method = 'handleVpRequest';
 
-      if (presentationRequest.startsWith('mdoc')) {
+      final route = await rust_api.walletRoutePresentationRequest(
+        input: presentationRequest,
+      );
+      if (route == 'mdoc') {
         channel = mdocChannel;
         method = 'createMdocResponse';
+      } else if (route != 'oid4vp') {
+        throw StateError(
+          'Native wallet returned an unsupported presentation route',
+        );
       }
 
       final result = await channel.invokeMethod(method, {

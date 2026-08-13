@@ -14,6 +14,9 @@ on:
       - "pubspec.yaml"
       - "pubspec.lock"
       - "lib/services/qr_scanner_service_enhanced.dart"
+      - "lib/services/spruce_client_extended.dart"
+      - "lib/services/spruce_platform_service_extended.dart"
+      - "lib/views/credential_selection_view.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
   pull_request:
     paths:
@@ -24,6 +27,9 @@ on:
       - "pubspec.yaml"
       - "pubspec.lock"
       - "lib/services/qr_scanner_service_enhanced.dart"
+      - "lib/services/spruce_client_extended.dart"
+      - "lib/services/spruce_platform_service_extended.dart"
+      - "lib/views/credential_selection_view.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
 
 permissions:
@@ -60,6 +66,9 @@ jobs:
       - name: Generate bridge surfaces
         run: flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml
 
+      - name: Test native wallet routing and validation
+        run: cargo test --locked --manifest-path rust/Cargo.toml --lib wallet_
+
       - name: Upload generated bridge surfaces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -81,5 +90,16 @@ jobs:
         run: |
           if grep -Eq '_parse(URLQR|JSONQR|DIDCommQR|PushRegistrationQR)|Uri\.(parse|tryParse)\(|rawData\.(startsWith|contains)\(' lib/services/qr_scanner_service_enhanced.dart; then
             echo 'QR protocol parsing must remain in the Rust bridge and marty-core.' >&2
+            exit 1
+          fi
+
+      - name: Enforce native presentation routing and binding ownership
+        shell: bash
+        run: |
+          if grep -Eq "startsWith\(['\"]mdoc|default-(challenge|domain)" \
+            lib/services/spruce_client_extended.dart \
+            lib/services/spruce_platform_service_extended.dart \
+            lib/views/credential_selection_view.dart; then
+            echo 'Presentation routing and holder binding must remain in the Rust bridge and marty-core.' >&2
             exit 1
           fi

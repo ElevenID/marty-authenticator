@@ -8,7 +8,7 @@ import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `extract_claim`, `parse_push_registration_qr`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -132,6 +132,21 @@ Future<IssuerCheckResultOutput> checkIssuerConstraints({
   policyJson: policyJson,
   issuerId: issuerId,
   trustProfileVerified: trustProfileVerified,
+);
+
+/// Select the native presentation transport without Dart URI-prefix logic.
+Future<String> walletRoutePresentationRequest({required String input}) =>
+    RustLib.instance.api.crateApiWalletRoutePresentationRequest(input: input);
+
+/// Validate holder-binding values from a presentation request.
+///
+/// W3C-style `challenge`/`domain` fields and OID4VP `nonce`/`client_id`
+/// aliases are accepted. Missing, malformed, conflicting, or synthetic values
+/// fail closed; callers must never invent a fallback binding context.
+Future<FrbPresentationBindingContext> walletValidatePresentationContext({
+  required String requestJson,
+}) => RustLib.instance.api.crateApiWalletValidatePresentationContext(
+  requestJson: requestJson,
 );
 
 /// Normalize a credential-offer handoff through the canonical Rust engine.
@@ -436,6 +451,28 @@ class FrbIssuerMetadata {
           authorizationEndpoint == other.authorizationEndpoint &&
           grantTypesSupported == other.grantTypesSupported &&
           credentialConfigurationsJson == other.credentialConfigurationsJson;
+}
+
+/// Presentation holder-binding values validated by the canonical Rust wallet.
+class FrbPresentationBindingContext {
+  final String challenge;
+  final String domain;
+
+  const FrbPresentationBindingContext({
+    required this.challenge,
+    required this.domain,
+  });
+
+  @override
+  int get hashCode => challenge.hashCode ^ domain.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPresentationBindingContext &&
+          runtimeType == other.runtimeType &&
+          challenge == other.challenge &&
+          domain == other.domain;
 }
 
 /// Parsed OID4VP presentation request.

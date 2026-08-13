@@ -119,6 +119,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
+  FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
+    dynamic raw,
+  );
+
+  @protected
   FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw);
 
   @protected
@@ -344,6 +349,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
     SseDeserializer deserializer,
   );
 
@@ -696,6 +706,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.authorizationEndpoint),
       cst_encode_list_String(raw.grantTypesSupported),
       cst_encode_String(raw.credentialConfigurationsJson),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_presentation_binding_context(
+    FrbPresentationBindingContext raw,
+  ) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.challenge),
+      cst_encode_String(raw.domain),
     ].jsify()!;
   }
 
@@ -1172,6 +1193,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_issuer_metadata(
     FrbIssuerMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_binding_context(
+    FrbPresentationBindingContext self,
     SseSerializer serializer,
   );
 
@@ -1656,6 +1683,22 @@ class RustLibWire implements BaseWire {
     proof_jwt,
   );
 
+  void wire__crate__api__wallet_route_presentation_request(
+    NativePortType port_,
+    String input,
+  ) => wasmModule.wire__crate__api__wallet_route_presentation_request(
+    port_,
+    input,
+  );
+
+  void wire__crate__api__wallet_validate_presentation_context(
+    NativePortType port_,
+    String request_json,
+  ) => wasmModule.wire__crate__api__wallet_validate_presentation_context(
+    port_,
+    request_json,
+  );
+
   void wire__crate__api__wallet_validate_qr_input(
     NativePortType port_,
     String raw_data,
@@ -1917,6 +1960,16 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String credential_format,
     String? credential_configuration_id,
     String proof_jwt,
+  );
+
+  external void wire__crate__api__wallet_route_presentation_request(
+    NativePortType port_,
+    String input,
+  );
+
+  external void wire__crate__api__wallet_validate_presentation_context(
+    NativePortType port_,
+    String request_json,
   );
 
   external void wire__crate__api__wallet_validate_qr_input(

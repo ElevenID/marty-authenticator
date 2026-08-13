@@ -117,6 +117,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
+  FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
+    dynamic raw,
+  );
+
+  @protected
   FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw);
 
   @protected
@@ -342,6 +347,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
     SseDeserializer deserializer,
   );
 
@@ -991,6 +1001,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_frb_presentation_binding_context(
+    FrbPresentationBindingContext apiObj,
+    wire_cst_frb_presentation_binding_context wireObj,
+  ) {
+    wireObj.challenge = cst_encode_String(apiObj.challenge);
+    wireObj.domain = cst_encode_String(apiObj.domain);
+  }
+
+  @protected
   void cst_api_fill_to_wire_frb_presentation_request(
     FrbPresentationRequest apiObj,
     wire_cst_frb_presentation_request wireObj,
@@ -1354,6 +1373,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_issuer_metadata(
     FrbIssuerMetadata self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_presentation_binding_context(
+    FrbPresentationBindingContext self,
     SseSerializer serializer,
   );
 
@@ -2526,6 +2551,57 @@ class RustLibWire implements BaseWire {
             )
           >();
 
+  void wire__crate__api__wallet_route_presentation_request(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> input,
+  ) {
+    return _wire__crate__api__wallet_route_presentation_request(port_, input);
+  }
+
+  late final _wire__crate__api__wallet_route_presentation_requestPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_route_presentation_request',
+      );
+  late final _wire__crate__api__wallet_route_presentation_request =
+      _wire__crate__api__wallet_route_presentation_requestPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
+  void wire__crate__api__wallet_validate_presentation_context(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> request_json,
+  ) {
+    return _wire__crate__api__wallet_validate_presentation_context(
+      port_,
+      request_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_validate_presentation_contextPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_validate_presentation_context',
+      );
+  late final _wire__crate__api__wallet_validate_presentation_context =
+      _wire__crate__api__wallet_validate_presentation_contextPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
   void wire__crate__api__wallet_validate_qr_input(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> raw_data,
@@ -3338,6 +3414,12 @@ final class wire_cst_frb_issuer_metadata extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict>
   credential_configurations_json;
+}
+
+final class wire_cst_frb_presentation_binding_context extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> challenge;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> domain;
 }
 
 final class wire_cst_frb_presentation_request extends ffi.Struct {
