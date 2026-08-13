@@ -5,6 +5,7 @@
 - A few minor bugs have been resolved to improve app stability.
 - Internal components have been updated to maintain security and ensure compatibility with the latest devices.
 - QR protocol and push-registration validation now use the native Rust backend exclusively.
+- Presentation request routing and holder-binding validation now fail closed through the native Rust backend.
 
 ## [4.5.3] - 2025.06.05
 

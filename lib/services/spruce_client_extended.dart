@@ -23,9 +23,11 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
+import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../utils/logger.dart';
 import 'spruce_platform_service_extended.dart';
 import '../spruce_client.dart';
@@ -286,15 +288,14 @@ class SpruceIdClientExtended extends SpruceIdClient
     required Map<String, dynamic> presentationRequest,
     required Map<String, List<String>> selectiveDisclosure,
   }) async {
-    // Extract challenge and domain from presentation request if available
-    final challenge =
-        presentationRequest['challenge'] as String? ?? 'default-challenge';
-    final domain = presentationRequest['domain'] as String? ?? 'default-domain';
+    final binding = await rust_api.walletValidatePresentationContext(
+      requestJson: jsonEncode(presentationRequest),
+    );
 
     return await createPresentationSDK(
       credentials: credentials,
-      challenge: challenge,
-      domain: domain,
+      challenge: binding.challenge,
+      domain: binding.domain,
       selectiveDisclosure: selectiveDisclosure,
     );
   }

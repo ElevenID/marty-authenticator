@@ -715,6 +715,104 @@ pub struct FrbWalletQrInput {
     pub requires_external_provider: bool,
 }
 
+/// Presentation holder-binding values validated by the canonical Rust wallet.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FrbPresentationBindingContext {
+    pub challenge: String,
+    pub domain: String,
+}
+
+/// Select the native presentation transport without Dart URI-prefix logic.
+#[frb]
+pub fn wallet_route_presentation_request(input: String) -> anyhow::Result<String> {
+    use marty_oid4vci::WalletInputKind;
+
+    let classified = marty_oid4vci::classify_wallet_input(&input)
+        .map_err(|error| anyhow::anyhow!("Presentation request classification error: {error}"))?
+        .ok_or_else(|| anyhow::anyhow!("Unsupported presentation request"))?;
+    match classified.kind {
+        WalletInputKind::PresentationRequest => Ok("oid4vp".to_string()),
+        WalletInputKind::MdocDeviceEngagement => {
+            marty_iso18013::DeviceEngagement::from_qr_uri(&classified.normalized)
+                .map_err(|error| anyhow::anyhow!("mDoc engagement validation error: {error}"))?;
+            Ok("mdoc".to_string())
+        }
+        WalletInputKind::CredentialOffer => Err(anyhow::anyhow!(
+            "Credential offers cannot be routed as presentation requests"
+        )),
+    }
+}
+
+/// Validate holder-binding values from a presentation request.
+///
+/// W3C-style `challenge`/`domain` fields and OID4VP `nonce`/`client_id`
+/// aliases are accepted. Missing, malformed, conflicting, or synthetic values
+/// fail closed; callers must never invent a fallback binding context.
+#[frb]
+pub fn wallet_validate_presentation_context(
+    request_json: String,
+) -> anyhow::Result<FrbPresentationBindingContext> {
+    const MAX_PRESENTATION_CONTEXT_BYTES: usize = 64 * 1024;
+    const MAX_BINDING_VALUE_BYTES: usize = 4096;
+
+    if request_json.len() > MAX_PRESENTATION_CONTEXT_BYTES {
+        return Err(anyhow::anyhow!("Presentation context exceeds 64 KiB"));
+    }
+    let request: serde_json::Value = serde_json::from_str(&request_json)
+        .map_err(|error| anyhow::anyhow!("Invalid presentation context JSON: {error}"))?;
+    let request = request
+        .as_object()
+        .ok_or_else(|| anyhow::anyhow!("Presentation context must be a JSON object"))?;
+
+    fn binding_value(
+        request: &serde_json::Map<String, serde_json::Value>,
+        primary: &str,
+        alias: &str,
+        max_bytes: usize,
+    ) -> anyhow::Result<String> {
+        fn optional_string<'a>(
+            request: &'a serde_json::Map<String, serde_json::Value>,
+            name: &str,
+        ) -> anyhow::Result<Option<&'a str>> {
+            request
+                .get(name)
+                .map(|value| {
+                    value.as_str().ok_or_else(|| {
+                        anyhow::anyhow!("Presentation context `{name}` must be a string")
+                    })
+                })
+                .transpose()
+        }
+        let primary_value = optional_string(request, primary)?;
+        let alias_value = optional_string(request, alias)?;
+        if primary_value.is_some() && alias_value.is_some() && primary_value != alias_value {
+            return Err(anyhow::anyhow!(
+                "Presentation context `{primary}` conflicts with `{alias}`"
+            ));
+        }
+        let value = primary_value.or(alias_value).ok_or_else(|| {
+            anyhow::anyhow!("Presentation context requires `{primary}` or `{alias}`")
+        })?;
+        if value.is_empty()
+            || value.trim() != value
+            || value.len() > max_bytes
+            || value.chars().any(char::is_control)
+            || matches!(value, "default-challenge" | "default-domain")
+        {
+            return Err(anyhow::anyhow!(
+                "Presentation context `{primary}` is invalid"
+            ));
+        }
+        Ok(value.to_string())
+    }
+
+    Ok(FrbPresentationBindingContext {
+        challenge: binding_value(request, "challenge", "nonce", MAX_BINDING_VALUE_BYTES)?,
+        domain: binding_value(request, "domain", "client_id", MAX_BINDING_VALUE_BYTES)?,
+    })
+}
+
 /// Normalize a credential-offer handoff through the canonical Rust engine.
 #[frb]
 pub fn wallet_normalize_credential_offer(input: String) -> anyhow::Result<String> {
@@ -1571,6 +1669,53 @@ mod tests {
             assert!(wallet_validate_qr_input(malformed.to_string())
                 .await
                 .is_err());
+        }
+    }
+
+    #[test]
+    fn wallet_routes_presentation_requests_in_rust() {
+        let oid4vp = "openid4vp://authorize?client_id=verifier&nonce=nonce&response_uri=https%3A%2F%2Fverifier.example%2Fsubmit&presentation_definition=%7B%22id%22%3A%22pd%22%2C%22input_descriptors%22%3A%5B%5D%7D";
+        assert_eq!(
+            wallet_route_presentation_request(oid4vp.to_string()).unwrap(),
+            "oid4vp"
+        );
+
+        const ISO_QR: &str = "mdoc:owBjMS4wAYIB2BhYS6QBAiABIVgglyWXuAyJ6iRNc8OlYXenvkJt23rJPdtIhlawXqr-yf0iWCC1GQSH8tIwTYVwha_ZoPL20_saYXrGIbrCm133H0ki-QKBgwIBowD1AfQKUH2RiuAEbUVzrsrOiUnSPDw";
+        assert_eq!(
+            wallet_route_presentation_request(ISO_QR.to_string()).unwrap(),
+            "mdoc"
+        );
+        assert!(wallet_route_presentation_request("mdoc:not-cbor".to_string()).is_err());
+        assert!(wallet_route_presentation_request(
+            "openid-credential-offer://?credential_offer=%7B%7D".to_string()
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn wallet_validates_presentation_binding_context_in_rust() {
+        let direct = wallet_validate_presentation_context(
+            json!({"challenge": "challenge-123", "domain": "verifier.example"}).to_string(),
+        )
+        .unwrap();
+        assert_eq!(direct.challenge, "challenge-123");
+        assert_eq!(direct.domain, "verifier.example");
+
+        let oid4vp = wallet_validate_presentation_context(
+            json!({"nonce": "nonce-123", "client_id": "https://verifier.example"}).to_string(),
+        )
+        .unwrap();
+        assert_eq!(oid4vp.challenge, "nonce-123");
+        assert_eq!(oid4vp.domain, "https://verifier.example");
+
+        for invalid in [
+            json!({}),
+            json!({"challenge": "", "domain": "verifier.example"}),
+            json!({"challenge": "default-challenge", "domain": "default-domain"}),
+            json!({"challenge": "one", "nonce": "two", "domain": "verifier.example"}),
+            json!({"challenge": 123, "domain": "verifier.example"}),
+        ] {
+            assert!(wallet_validate_presentation_context(invalid.to_string()).is_err());
         }
     }
 }

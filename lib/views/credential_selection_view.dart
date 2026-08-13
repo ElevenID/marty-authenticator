@@ -28,10 +28,13 @@
 /// - Comprehensive selective disclosure controls
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/selectable_credential.dart';
+import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../services/spruce_sdk_services.dart';
 import '../widgets/spruce_credential_selection_widget.dart';
 import '../widgets/selective_disclosure_sheet.dart';
@@ -249,11 +252,18 @@ class _CredentialSelectionViewState
         };
       }).toList();
 
-      // Create presentation using SDK
+      final binding = await rust_api.walletValidatePresentationContext(
+        requestJson: jsonEncode({
+          'challenge': widget.challenge,
+          'domain': widget.domain,
+        }),
+      );
+
+      // Create presentation using the native-validated holder binding.
       final presentation = await client.createPresentationSDK(
         credentials: credentialData,
-        challenge: widget.challenge ?? 'default-challenge',
-        domain: widget.domain ?? 'default-domain',
+        challenge: binding.challenge,
+        domain: binding.domain,
         selectiveDisclosure: selectiveDisclosure,
         keyId: keyId,
       );
