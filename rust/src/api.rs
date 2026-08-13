@@ -731,6 +731,10 @@ pub async fn wallet_validate_qr_input(
 ) -> anyhow::Result<Option<FrbWalletQrInput>> {
     use marty_oid4vci::WalletInputKind;
 
+    if let Some(push_registration) = parse_push_registration_qr(&raw_data)? {
+        return Ok(Some(push_registration));
+    }
+
     let Some(classified) = marty_oid4vci::classify_wallet_input(&raw_data)
         .map_err(|error| anyhow::anyhow!("Wallet QR classification error: {}", error))?
     else {
@@ -809,6 +813,87 @@ pub async fn wallet_validate_qr_input(
             }))
         }
     }
+}
+
+fn parse_push_registration_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrInput>> {
+    let parsed = match url::Url::parse(raw_data) {
+        Ok(parsed) => parsed,
+        Err(error) if raw_data.starts_with("marty:") => {
+            return Err(anyhow::anyhow!(
+                "Push registration validation error: invalid URI: {error}"
+            ));
+        }
+        Err(_) => return Ok(None),
+    };
+
+    if parsed.scheme() != "marty" {
+        return Ok(None);
+    }
+    if parsed.host_str() != Some("push-register") || parsed.path() != "" {
+        return Err(anyhow::anyhow!(
+            "Push registration validation error: unsupported Marty QR action"
+        ));
+    }
+    if !parsed.username().is_empty() || parsed.password().is_some() || parsed.fragment().is_some() {
+        return Err(anyhow::anyhow!(
+            "Push registration validation error: credentials and fragments are not allowed"
+        ));
+    }
+
+    let mut values = std::collections::HashMap::<String, String>::new();
+    for (key, value) in parsed.query_pairs() {
+        if !matches!(key.as_ref(), "org" | "api" | "token" | "user") {
+            return Err(anyhow::anyhow!(
+                "Push registration validation error: unsupported query parameter '{key}'"
+            ));
+        }
+        if value.trim().is_empty() {
+            return Err(anyhow::anyhow!(
+                "Push registration validation error: '{key}' must not be empty"
+            ));
+        }
+        if values.insert(key.to_string(), value.to_string()).is_some() {
+            return Err(anyhow::anyhow!(
+                "Push registration validation error: duplicate query parameter '{key}'"
+            ));
+        }
+    }
+
+    for required in ["org", "api", "token", "user"] {
+        if !values.contains_key(required) {
+            return Err(anyhow::anyhow!(
+                "Push registration validation error: missing '{required}'"
+            ));
+        }
+    }
+
+    let api_url = url::Url::parse(&values["api"]).map_err(|error| {
+        anyhow::anyhow!("Push registration validation error: invalid api URL: {error}")
+    })?;
+    if api_url.scheme() != "https"
+        || api_url.host_str().is_none()
+        || !api_url.username().is_empty()
+        || api_url.password().is_some()
+    {
+        return Err(anyhow::anyhow!(
+            "Push registration validation error: api must be an HTTPS URL without credentials"
+        ));
+    }
+
+    let parsed_content_json = serde_json::json!({
+        "organization_id": values["org"],
+        "api_url": api_url.as_str(),
+        "registration_token": values["token"],
+        "user_id": values["user"],
+    })
+    .to_string();
+
+    Ok(Some(FrbWalletQrInput {
+        kind: "push_registration".to_string(),
+        normalized: parsed.to_string(),
+        parsed_content_json,
+        requires_external_provider: false,
+    }))
 }
 
 /// Parse a `openid-credential-offer://` URI or `https://…?credential_offer=…` URL.
@@ -1452,5 +1537,40 @@ mod tests {
             .await
             .unwrap()
             .is_none());
+    }
+
+    #[tokio::test]
+    async fn wallet_qr_validation_parses_push_registration_in_rust() {
+        let validated = wallet_validate_qr_input(
+            "marty://push-register?org=acme&api=https%3A%2F%2Fapi.example%2Fpush&token=secret&user=alice"
+                .to_string(),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+
+        assert_eq!(validated.kind, "push_registration");
+        assert!(!validated.requires_external_provider);
+        let content: serde_json::Value =
+            serde_json::from_str(&validated.parsed_content_json).unwrap();
+        assert_eq!(content["organization_id"], "acme");
+        assert_eq!(content["api_url"], "https://api.example/push");
+        assert_eq!(content["registration_token"], "secret");
+        assert_eq!(content["user_id"], "alice");
+    }
+
+    #[tokio::test]
+    async fn wallet_qr_validation_rejects_malformed_push_registration() {
+        for malformed in [
+            "marty://push-register?org=acme&api=http%3A%2F%2Fapi.example&token=secret&user=alice",
+            "marty://push-register?org=acme&api=https%3A%2F%2Fapi.example&token=secret",
+            "marty://push-register?org=acme&org=other&api=https%3A%2F%2Fapi.example&token=secret&user=alice",
+            "marty://push-register?org=acme&api=https%3A%2F%2Fapi.example&token=secret&user=alice&extra=value",
+            "marty://other-action?org=acme",
+        ] {
+            assert!(wallet_validate_qr_input(malformed.to_string())
+                .await
+                .is_err());
+        }
     }
 }
