@@ -103,7 +103,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         channel = mdocChannel;
         method = 'createMdocResponse';
       } else if (route != 'oid4vp') {
-        throw StateError('Native wallet returned an unsupported presentation route');
+        throw StateError(
+          'Native wallet returned an unsupported presentation route',
+        );
       }
 
       final result = await channel.invokeMethod(method, {

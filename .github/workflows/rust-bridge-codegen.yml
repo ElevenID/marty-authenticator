@@ -66,6 +66,9 @@ jobs:
       - name: Generate bridge surfaces
         run: flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml
 
+      - name: Test native wallet routing and validation
+        run: cargo test --locked --manifest-path rust/Cargo.toml --lib wallet_
+
       - name: Upload generated bridge surfaces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
