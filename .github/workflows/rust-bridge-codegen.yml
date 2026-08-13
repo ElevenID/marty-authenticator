@@ -13,6 +13,7 @@ on:
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "lib/**/*.dart"
       - "lib/services/qr_scanner_service_enhanced.dart"
       - "lib/services/spruce_client_extended.dart"
       - "lib/services/spruce_platform_service_extended.dart"
@@ -26,6 +27,7 @@ on:
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "lib/**/*.dart"
       - "lib/services/qr_scanner_service_enhanced.dart"
       - "lib/services/spruce_client_extended.dart"
       - "lib/services/spruce_platform_service_extended.dart"
@@ -101,5 +103,14 @@ jobs:
             lib/services/spruce_platform_service_extended.dart \
             lib/views/credential_selection_view.dart; then
             echo 'Presentation routing and holder binding must remain in the Rust bridge and marty-core.' >&2
+            exit 1
+          fi
+
+      - name: Enforce native holder-key and offer-normalization ownership
+        shell: bash
+        run: |
+          if grep -REn --include='*.dart' \
+            'Ecdsa\.p256|newKeyPair\(|_computeKid|normalizeOid4vciCredentialOfferUri' lib; then
+            echo 'P-256 holder keys and OID4VCI offer normalization must remain in Rust.' >&2
             exit 1
           fi
