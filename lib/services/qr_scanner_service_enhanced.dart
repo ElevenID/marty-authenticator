@@ -114,15 +114,18 @@ class QRScannerServiceEnhanced {
           'credential_offer' => QRType.credentialOffer,
           'presentation_request' => QRType.presentationRequest,
           'mdoc_device_engagement' => QRType.mdocDeviceEngagement,
+          'push_registration' => QRType.pushRegistration,
           _ => throw StateError(
             'Native wallet parser returned an unsupported kind',
           ),
         };
         return ParsedQRData(
           type: type,
-          format: type == QRType.mdocDeviceEngagement
-              ? QRFormat.raw
-              : QRFormat.openid,
+          format: switch (type) {
+            QRType.pushRegistration => QRFormat.url,
+            QRType.mdocDeviceEngagement => QRFormat.raw,
+            _ => QRFormat.openid,
+          },
           rawData: nativeProtocol.normalized,
           parsedContent: parsedContent,
           metadata: {
@@ -134,30 +137,8 @@ class QRScannerServiceEnhanced {
         );
       }
 
-      // Handle different QR code formats
-      if (rawData.startsWith('http') || rawData.startsWith('https')) {
-        return await _parseURLQR(rawData);
-      }
-
-      // Try JSON parsing
-      try {
-        final jsonData = jsonDecode(rawData) as Map<String, dynamic>;
-        return await _parseJSONQR(jsonData, rawData);
-      } catch (e) {
-        // Not JSON, try other formats
-      }
-
-      // Handle Marty push registration scheme
-      if (rawData.startsWith('marty://push-register')) {
-        return await _parsePushRegistrationQR(rawData);
-      }
-
-      // Handle DIDComm messages
-      if (rawData.contains('"@type"') && rawData.contains('didcomm')) {
-        return await _parseDIDCommQR(rawData);
-      }
-
-      // Fallback to raw text
+      // Unknown input is retained only for the existing error result shape.
+      // All supported protocol recognition and parsing happens in Rust.
       return ParsedQRData(
         type: QRType.unknown,
         format: QRFormat.raw,
@@ -169,119 +150,7 @@ class QRScannerServiceEnhanced {
     }
   }
 
-  /// Parse URL-based QR codes
-  Future<ParsedQRData> _parseURLQR(String url) async {
-    final uri = Uri.parse(url);
-    return ParsedQRData(
-      type: QRType.genericURL,
-      format: QRFormat.url,
-      rawData: url,
-      parsedContent: {'url': url},
-      metadata: {'host': uri.host, 'scheme': uri.scheme},
-    );
-  }
-
-  /// Parse JSON-based QR codes
-  Future<ParsedQRData> _parseJSONQR(
-    Map<String, dynamic> jsonData,
-    String rawData,
-  ) async {
-    final type = jsonData['type'] as String? ?? '';
-
-    switch (type.toLowerCase()) {
-      case 'presentationrequest':
-      case 'presentation_request':
-        return ParsedQRData(
-          type: QRType.presentationRequest,
-          format: QRFormat.json,
-          rawData: rawData,
-          parsedContent: jsonData,
-          metadata: {
-            'version': jsonData['version'],
-            'verifier': jsonData['verifier'],
-            'requested_attributes_count':
-                (jsonData['requested_attributes'] as List?)?.length ?? 0,
-          },
-        );
-
-      case 'credentialoffer':
-      case 'credential_offer':
-        return ParsedQRData(
-          type: QRType.credentialOffer,
-          format: QRFormat.json,
-          rawData: rawData,
-          parsedContent: jsonData,
-          metadata: {
-            'version': jsonData['version'],
-            'issuer': jsonData['issuer'],
-            'credentials_count':
-                (jsonData['credentials'] as List?)?.length ?? 0,
-          },
-        );
-
-      case 'verifiablecredential':
-      case 'verifiable_credential':
-        return ParsedQRData(
-          type: QRType.credentialData,
-          format: QRFormat.json,
-          rawData: rawData,
-          parsedContent: jsonData,
-          metadata: {
-            'issuer': jsonData['issuer'],
-            'credential_subject': jsonData['credentialSubject'],
-          },
-        );
-
-      default:
-        return ParsedQRData(
-          type: QRType.jsonDocument,
-          format: QRFormat.json,
-          rawData: rawData,
-          parsedContent: jsonData,
-          metadata: {'detected_type': type},
-        );
-    }
-  }
-
-  /// Parse DIDComm-based QR codes
-  Future<ParsedQRData> _parseDIDCommQR(String data) async {
-    final jsonData = jsonDecode(data) as Map<String, dynamic>;
-
-    return ParsedQRData(
-      type: QRType.didcommMessage,
-      format: QRFormat.didcomm,
-      rawData: data,
-      parsedContent: jsonData,
-      metadata: {
-        'message_type': jsonData['@type'],
-        'from': jsonData['from'],
-        'to': jsonData['to'],
-      },
-    );
-  }
-
-  /// Parse Marty push registration QR codes
-  /// Format: marty://push-register?org={org_id}&api={api_url}&token={temp_token}&user={user_id}
-  Future<ParsedQRData> _parsePushRegistrationQR(String data) async {
-    final uri = Uri.parse(data);
-    final params = uri.queryParameters;
-
-    return ParsedQRData(
-      type: QRType.pushRegistration,
-      format: QRFormat.url,
-      rawData: data,
-      parsedContent: {
-        'organization_id': params['org'],
-        'api_url': params['api'],
-        'registration_token': params['token'],
-        'user_id': params['user'],
-      },
-      metadata: {'scheme': 'marty', 'action': 'push-register'},
-    );
-  }
-
-  /// Accept only protocol data already validated by Rust or the app-specific
-  /// push-registration contract. There is no permissive fallback.
+  /// Accept only protocol data already validated by Rust.
   Future<ValidatedQRResult> _validateWithSDK(ParsedQRData parsedData) async {
     if (parsedData.metadata['native_validated'] == true) {
       final requiresExternalProvider =
@@ -297,31 +166,6 @@ class QRScannerServiceEnhanced {
             ? const ['Continue with the required external provider adapter']
             : const [],
         sdkCapabilities: const {'protocol_validation': 'marty-core'},
-      );
-    }
-
-    if (parsedData.type == QRType.pushRegistration) {
-      final content = parsedData.parsedContent ?? const <String, dynamic>{};
-      final apiUri = Uri.tryParse(content['api_url'] as String? ?? '');
-      final errors = <String>[
-        if ((content['organization_id'] as String? ?? '').trim().isEmpty)
-          'Push registration is missing organization_id',
-        if (apiUri == null || apiUri.scheme != 'https')
-          'Push registration api_url must use HTTPS',
-        if ((content['registration_token'] as String? ?? '').trim().isEmpty)
-          'Push registration is missing registration_token',
-        if ((content['user_id'] as String? ?? '').trim().isEmpty)
-          'Push registration is missing user_id',
-      ];
-      return ValidatedQRResult(
-        parsedData: parsedData,
-        isValid: errors.isEmpty,
-        validationErrors: errors,
-        securityLevel: errors.isEmpty
-            ? SecurityLevel.high
-            : SecurityLevel.unknown,
-        recommendedActions: const [],
-        sdkCapabilities: const {'contract': 'marty-push-registration'},
       );
     }
 
@@ -992,16 +836,12 @@ enum QRType {
   presentationRequest,
   credentialOffer,
   mdocDeviceEngagement,
-  credentialData,
-  didcommMessage,
-  jsonDocument,
-  genericURL,
   pushRegistration, // marty://push-register QR for enabling push notifications
   unknown,
 }
 
 /// QR code data formats
-enum QRFormat { json, url, openid, didcomm, raw }
+enum QRFormat { url, openid, raw }
 
 /// Security levels for QR content
 enum SecurityLevel {

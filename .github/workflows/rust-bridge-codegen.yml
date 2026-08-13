@@ -13,6 +13,7 @@ on:
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "lib/services/qr_scanner_service_enhanced.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
   pull_request:
     paths:
@@ -22,6 +23,7 @@ on:
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
+      - "lib/services/qr_scanner_service_enhanced.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
 
 permissions:
@@ -73,3 +75,11 @@ jobs:
 
       - name: Reject stale generated bindings
         run: git diff --exit-code -- rust/src/frb_generated.rs lib/rust ios/Runner/bridge_generated.h macos/Runner/bridge_generated.h
+
+      - name: Enforce native QR protocol ownership
+        shell: bash
+        run: |
+          if grep -Eq '_parse(URLQR|JSONQR|DIDCommQR|PushRegistrationQR)|Uri\.(parse|tryParse)\(|rawData\.(startsWith|contains)\(' lib/services/qr_scanner_service_enhanced.dart; then
+            echo 'QR protocol parsing must remain in the Rust bridge and marty-core.' >&2
+            exit 1
+          fi
