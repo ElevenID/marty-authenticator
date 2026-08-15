@@ -1,4 +1,5 @@
 import 'document_verification_config.dart';
+import '../rust/marty_bridge.dart/biometrics.dart' as rust_biometrics;
 
 /// Pure liveness gesture policy, kept independent from camera SDK objects.
 class LivenessGestureDetector {
@@ -10,12 +11,11 @@ class LivenessGestureDetector {
     double? headEulerAngleX,
     double? headEulerAngleY,
   }) {
-    return switch (gesture) {
-      LivenessGesture.smile => (smilingProbability ?? 0) > 0.8,
-      LivenessGesture.turnHeadLeft => (headEulerAngleY ?? 0) > 45,
-      LivenessGesture.turnHeadRight => (headEulerAngleY ?? 0) < -45,
-      LivenessGesture.lookUp => (headEulerAngleX ?? 0) > 20,
-      LivenessGesture.lookDown => (headEulerAngleX ?? 0) < -20,
-    };
+    return rust_biometrics.evaluateLivenessGesture(
+      gesture: gesture.name,
+      smilingProbability: smilingProbability,
+      headEulerAngleX: headEulerAngleX,
+      headEulerAngleY: headEulerAngleY,
+    );
   }
 }

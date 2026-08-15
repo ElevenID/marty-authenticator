@@ -209,6 +209,34 @@ pub fn verify_liveness_challenge(
     Ok(true)
 }
 
+/// Apply the canonical active-liveness gesture threshold policy.
+#[frb(sync)]
+pub fn evaluate_liveness_gesture(
+    gesture: String,
+    smiling_probability: Option<f64>,
+    head_euler_angle_x: Option<f64>,
+    head_euler_angle_y: Option<f64>,
+) -> anyhow::Result<bool> {
+    for value in [smiling_probability, head_euler_angle_x, head_euler_angle_y]
+        .into_iter()
+        .flatten()
+    {
+        if !value.is_finite() {
+            anyhow::bail!("liveness measurements must be finite");
+        }
+    }
+
+    let detected = match gesture.as_str() {
+        "smile" => smiling_probability.unwrap_or(0.0) > 0.8,
+        "turnHeadLeft" => head_euler_angle_y.unwrap_or(0.0) > 45.0,
+        "turnHeadRight" => head_euler_angle_y.unwrap_or(0.0) < -45.0,
+        "lookUp" => head_euler_angle_x.unwrap_or(0.0) > 20.0,
+        "lookDown" => head_euler_angle_x.unwrap_or(0.0) < -20.0,
+        _ => anyhow::bail!("unsupported liveness gesture"),
+    };
+    Ok(detected)
+}
+
 // ============================================================================
 // Internals
 // ============================================================================
@@ -271,6 +299,25 @@ mod liveness_tests {
             } else {
                 assert!(result.is_err(), "{} must fail closed", vector["id"]);
             }
+        }
+    }
+
+    #[test]
+    fn language_neutral_gesture_vectors_preserve_strict_thresholds() {
+        for vector in fixture()["gesture_vectors"].as_array().unwrap() {
+            let result = evaluate_liveness_gesture(
+                vector["gesture"].as_str().unwrap().to_string(),
+                vector.get("smiling_probability").and_then(Value::as_f64),
+                vector.get("head_euler_angle_x").and_then(Value::as_f64),
+                vector.get("head_euler_angle_y").and_then(Value::as_f64),
+            )
+            .unwrap();
+            assert_eq!(
+                result,
+                vector["detected"].as_bool().unwrap(),
+                "{}",
+                vector["id"]
+            );
         }
     }
 }

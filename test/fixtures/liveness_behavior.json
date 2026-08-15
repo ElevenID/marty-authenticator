@@ -36,5 +36,18 @@
       "signing_secret": "language-neutral-test-secret",
       "valid": false
     }
+  ],
+  "gesture_vectors": [
+    {"id": "smile-above-threshold", "gesture": "smile", "smiling_probability": 0.81, "detected": true},
+    {"id": "smile-at-threshold", "gesture": "smile", "smiling_probability": 0.8, "detected": false},
+    {"id": "left-above-threshold", "gesture": "turnHeadLeft", "head_euler_angle_y": 46, "detected": true},
+    {"id": "left-at-threshold", "gesture": "turnHeadLeft", "head_euler_angle_y": 45, "detected": false},
+    {"id": "right-below-threshold", "gesture": "turnHeadRight", "head_euler_angle_y": -46, "detected": true},
+    {"id": "right-at-threshold", "gesture": "turnHeadRight", "head_euler_angle_y": -45, "detected": false},
+    {"id": "up-above-threshold", "gesture": "lookUp", "head_euler_angle_x": 21, "detected": true},
+    {"id": "up-at-threshold", "gesture": "lookUp", "head_euler_angle_x": 20, "detected": false},
+    {"id": "down-below-threshold", "gesture": "lookDown", "head_euler_angle_x": -21, "detected": true},
+    {"id": "down-at-threshold", "gesture": "lookDown", "head_euler_angle_x": -20, "detected": false},
+    {"id": "missing-measurements", "gesture": "smile", "detected": false}
   ]
 }
