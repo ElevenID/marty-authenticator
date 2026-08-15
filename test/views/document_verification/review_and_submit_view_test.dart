@@ -10,10 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   testWidgets('renders challenge and submits verification', (tester) async {
     SharedPreferences.setMockInitialValues({});
-    final challenge = LivenessChallenge.create(
+    final challenge = LivenessChallenge(
+      challengeId: 'lv-review-fixture',
+      nonce: 'nonce-review-fixture',
+      issuedAt: DateTime.utc(2026),
+      expiresAt: DateTime.utc(2026, 1, 1, 0, 1),
       gestures: const [LivenessGesture.smile],
-      ttl: const Duration(minutes: 1),
-      signingSecret: 'test',
+      signature: 'a' * 64,
     );
     final container = ProviderContainer();
     addTearDown(container.dispose);

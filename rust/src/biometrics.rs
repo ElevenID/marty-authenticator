@@ -6,7 +6,10 @@
 use flutter_rust_bridge::frb;
 use serde::{Deserialize, Serialize};
 
-use marty_biometrics::{BiometricProvider, FaceVerifier};
+use marty_biometrics::{
+    sign_challenge, validate_challenge, BiometricProvider, FaceVerifier, LivenessChallenge,
+    LivenessChallengeBuilder, LivenessChallengeConfig, LivenessMode,
+};
 
 // ============================================================================
 // FFI types
@@ -47,6 +50,20 @@ pub struct FrbAgeEstimate {
     pub confidence: f32,
     pub age_range_low: u8,
     pub age_range_high: u8,
+}
+
+/// Signed active-liveness challenge created by the canonical biometric kernel.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[frb(dart_metadata=("freezed"))]
+pub struct FrbLivenessChallenge {
+    pub challenge_id: String,
+    pub nonce: String,
+    pub issued_at: String,
+    pub expires_at: String,
+    pub gestures: Vec<String>,
+    pub signature: String,
+    /// Complete canonical challenge required for native verification.
+    pub native_payload: String,
 }
 
 // ============================================================================
@@ -130,6 +147,68 @@ pub fn estimate_face_age(
     })
 }
 
+/// Create and sign an active-liveness challenge in Rust.
+#[frb(sync)]
+pub fn create_liveness_challenge(
+    gestures: Vec<String>,
+    ttl_seconds: u64,
+    signing_secret: String,
+) -> anyhow::Result<FrbLivenessChallenge> {
+    if gestures.is_empty() || gestures.len() > 5 {
+        anyhow::bail!("liveness challenge must contain between 1 and 5 gestures");
+    }
+    if !(1..=600).contains(&ttl_seconds) {
+        anyhow::bail!("liveness challenge TTL must be between 1 and 600 seconds");
+    }
+    if signing_secret.is_empty() {
+        anyhow::bail!("liveness signing secret must not be empty");
+    }
+
+    let challenge_id = format!("lv-{}", uuid::Uuid::new_v4().simple());
+    let nonce = format!("nonce-{}", uuid::Uuid::new_v4().simple());
+    let session_id = format!("mobile-{}", uuid::Uuid::new_v4().simple());
+    let config = LivenessChallengeConfig {
+        step_count: gestures.len(),
+        validity_seconds: ttl_seconds,
+        allow_accessibility: true,
+        preferred_mode: LivenessMode::OnDevice,
+        allow_network_fallback: false,
+    };
+    let mut builder = LivenessChallengeBuilder::new(&challenge_id, session_id).with_config(config);
+    for (index, gesture) in gestures.iter().enumerate() {
+        let prompt = gesture_prompt(gesture)?;
+        builder = builder.add_head_pose(format!("gesture-{}", index + 1), gesture, prompt, 10_000);
+    }
+    let mut challenge = builder.build(&nonce);
+    sign_challenge(&mut challenge, signing_secret.as_bytes());
+    let native_payload = serde_json::to_string(&challenge)?;
+
+    Ok(FrbLivenessChallenge {
+        challenge_id,
+        nonce,
+        issued_at: challenge.issued_at,
+        expires_at: challenge.expires_at,
+        gestures,
+        signature: challenge.signature,
+        native_payload,
+    })
+}
+
+/// Verify a canonical active-liveness challenge and fail closed on expiry,
+/// tampering, malformed input, or a wrong key.
+#[frb(sync)]
+pub fn verify_liveness_challenge(
+    native_payload: String,
+    signing_secret: String,
+) -> anyhow::Result<bool> {
+    if signing_secret.is_empty() {
+        anyhow::bail!("liveness signing secret must not be empty");
+    }
+    let challenge: LivenessChallenge = serde_json::from_str(&native_payload)?;
+    validate_challenge(&challenge, signing_secret.as_bytes())?;
+    Ok(true)
+}
+
 // ============================================================================
 // Internals
 // ============================================================================
@@ -145,4 +224,53 @@ fn build_provider(models_dir: Option<&str>) -> BiometricProvider {
         }
     }
     BiometricProvider::mock()
+}
+
+fn gesture_prompt(gesture: &str) -> anyhow::Result<&'static str> {
+    match gesture {
+        "smile" => Ok("Smile"),
+        "turnHeadLeft" => Ok("Turn your head left"),
+        "turnHeadRight" => Ok("Turn your head right"),
+        "lookUp" => Ok("Look up"),
+        "lookDown" => Ok("Look down"),
+        _ => anyhow::bail!("unsupported liveness gesture"),
+    }
+}
+
+#[cfg(test)]
+mod liveness_tests {
+    use super::*;
+    use serde_json::Value;
+
+    fn fixture() -> Value {
+        serde_json::from_str(include_str!("../../test/fixtures/liveness_behavior.json")).unwrap()
+    }
+
+    #[test]
+    fn language_neutral_liveness_vectors_preserve_behavior() {
+        for vector in fixture()["vectors"].as_array().unwrap() {
+            let gestures = serde_json::from_value(vector["gestures"].clone()).unwrap();
+            let result = create_liveness_challenge(
+                gestures,
+                vector["ttl_seconds"].as_u64().unwrap(),
+                vector["signing_secret"].as_str().unwrap().to_string(),
+            );
+            if vector["valid"].as_bool().unwrap() {
+                let challenge = result.unwrap();
+                assert_eq!(challenge.signature.len(), 64);
+                assert!(verify_liveness_challenge(
+                    challenge.native_payload.clone(),
+                    vector["signing_secret"].as_str().unwrap().to_string(),
+                )
+                .unwrap());
+                assert!(verify_liveness_challenge(
+                    challenge.native_payload,
+                    "wrong-key".to_string(),
+                )
+                .is_err());
+            } else {
+                assert!(result.is_err(), "{} must fail closed", vector["id"]);
+            }
+        }
+    }
 }

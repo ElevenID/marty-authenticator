@@ -1,0 +1,111 @@
+{
+  "schema": "elevenid.authenticator-status-behavior/v1",
+  "vectors": [
+    {
+      "id": "valid-good-revocation-status",
+      "entry": {
+        "id": "https://issuer.example/status/1#5",
+        "type": "BitstringStatusListEntry",
+        "statusPurpose": "revocation",
+        "statusListIndex": "5",
+        "statusListCredential": "https://issuer.example/status/1"
+      },
+      "status_list_credential": {
+        "id": "https://issuer.example/status/1",
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "credentialSubject": {
+          "id": "https://issuer.example/status/1#list",
+          "type": "BitstringStatusList",
+          "statusPurpose": "revocation",
+          "encodedList": "uH4sIAAAAAAACCu3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+        },
+        "proof": {"type": "DataIntegrityProof", "proofValue": "fixture-proof"}
+      },
+      "asserted": false
+    },
+    {
+      "id": "valid-asserted-revocation-status",
+      "entry": {
+        "id": "https://issuer.example/status/2#5",
+        "type": "BitstringStatusListEntry",
+        "statusPurpose": "revocation",
+        "statusListIndex": "5",
+        "statusListCredential": "https://issuer.example/status/2"
+      },
+      "status_list_credential": {
+        "id": "https://issuer.example/status/2",
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "credentialSubject": {
+          "id": "https://issuer.example/status/2#list",
+          "type": "BitstringStatusList",
+          "statusPurpose": "revocation",
+          "encodedList": "uH4sIAAAAAAACCu3BIQEAAAACIIP_NzvDAjQAAAAAAAAAAAAAAAAAAADA2wC5foOwAEAAAA"
+        },
+        "proof": {"type": "DataIntegrityProof", "proofValue": "fixture-proof"}
+      },
+      "asserted": true
+    },
+    {
+      "id": "unsigned-list-fails-closed",
+      "entry": {
+        "id": "https://issuer.example/status/3#5",
+        "type": "BitstringStatusListEntry",
+        "statusPurpose": "revocation",
+        "statusListIndex": "5",
+        "statusListCredential": "https://issuer.example/status/3"
+      },
+      "status_list_credential": {
+        "id": "https://issuer.example/status/3",
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "credentialSubject": {
+          "id": "https://issuer.example/status/3#list",
+          "type": "BitstringStatusList",
+          "statusPurpose": "revocation",
+          "encodedList": "uH4sIAAAAAAACCu3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+        }
+      }
+    },
+    {
+      "id": "purpose-mismatch-fails-closed",
+      "entry": {
+        "id": "https://issuer.example/status/4#5",
+        "type": "BitstringStatusListEntry",
+        "statusPurpose": "suspension",
+        "statusListIndex": "5",
+        "statusListCredential": "https://issuer.example/status/4"
+      },
+      "status_list_credential": {
+        "id": "https://issuer.example/status/4",
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "credentialSubject": {
+          "id": "https://issuer.example/status/4#list",
+          "type": "BitstringStatusList",
+          "statusPurpose": "revocation",
+          "encodedList": "uH4sIAAAAAAACCu3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+        },
+        "proof": {"type": "DataIntegrityProof", "proofValue": "fixture-proof"}
+      }
+    },
+    {
+      "id": "plain-base64-fails-closed",
+      "entry": {
+        "id": "https://issuer.example/status/5#5",
+        "type": "BitstringStatusListEntry",
+        "statusPurpose": "revocation",
+        "statusListIndex": "5",
+        "statusListCredential": "https://issuer.example/status/5"
+      },
+      "status_list_credential": {
+        "id": "https://issuer.example/status/5",
+        "type": ["VerifiableCredential", "BitstringStatusListCredential"],
+        "credentialSubject": {
+          "id": "https://issuer.example/status/5#list",
+          "type": "BitstringStatusList",
+          "statusPurpose": "revocation",
+          "encodedList": "H4sIAAAAAAACCu3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAIC3AYbSVKsAQAAA"
+        },
+        "proof": {"type": "DataIntegrityProof", "proofValue": "fixture-proof"}
+      }
+    }
+  ]
+}

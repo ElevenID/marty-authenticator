@@ -1,9 +1,4 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:crypto/crypto.dart';
-
-import '../utils/crypto_utils.dart';
+import '../rust/marty_bridge.dart/biometrics.dart' as rust_biometrics;
 import 'document_verification_config.dart';
 
 class LivenessChallenge {
@@ -13,6 +8,7 @@ class LivenessChallenge {
   final DateTime expiresAt;
   final List<LivenessGesture> gestures;
   final String signature;
+  final String? nativePayload;
 
   const LivenessChallenge({
     required this.challengeId,
@@ -21,6 +17,7 @@ class LivenessChallenge {
     required this.expiresAt,
     required this.gestures,
     required this.signature,
+    this.nativePayload,
   });
 
   bool get isExpired => DateTime.now().toUtc().isAfter(expiresAt);
@@ -33,6 +30,7 @@ class LivenessChallenge {
       'expires_at': expiresAt.toIso8601String(),
       'gestures': gestures.map((gesture) => gesture.name).toList(),
       'signature': signature,
+      if (nativePayload != null) 'native_payload': nativePayload,
     };
   }
 
@@ -56,66 +54,29 @@ class LivenessChallenge {
       expiresAt: _parseDate(json['expires_at']),
       gestures: parsedGestures,
       signature: json['signature']?.toString() ?? '',
+      nativePayload: json['native_payload']?.toString(),
     );
   }
 
-  static LivenessChallenge create({
+  static Future<LivenessChallenge> create({
     required List<LivenessGesture> gestures,
     required Duration ttl,
     required String signingSecret,
-  }) {
-    final now = DateTime.now().toUtc();
-    final expiresAt = now.add(ttl);
-    final challengeId = _randomId('lv');
-    final nonce = _randomId('nonce');
-    final signature = _sign(
-      challengeId: challengeId,
-      nonce: nonce,
-      issuedAt: now,
-      expiresAt: expiresAt,
-      gestures: gestures,
+  }) async {
+    final native = rust_biometrics.createLivenessChallenge(
+      gestures: gestures.map((gesture) => gesture.name).toList(growable: false),
+      ttlSeconds: ttl.inSeconds,
       signingSecret: signingSecret,
     );
-
     return LivenessChallenge(
-      challengeId: challengeId,
-      nonce: nonce,
-      issuedAt: now,
-      expiresAt: expiresAt,
+      challengeId: native.challengeId,
+      nonce: native.nonce,
+      issuedAt: DateTime.parse(native.issuedAt).toUtc(),
+      expiresAt: DateTime.parse(native.expiresAt).toUtc(),
       gestures: gestures,
-      signature: signature,
+      signature: native.signature,
+      nativePayload: native.nativePayload,
     );
-  }
-
-  static String _sign({
-    required String challengeId,
-    required String nonce,
-    required DateTime issuedAt,
-    required DateTime expiresAt,
-    required List<LivenessGesture> gestures,
-    required String signingSecret,
-  }) {
-    final payload = jsonEncode({
-      'challenge_id': challengeId,
-      'nonce': nonce,
-      'issued_at': issuedAt.toIso8601String(),
-      'expires_at': expiresAt.toIso8601String(),
-      'gestures': gestures.map((gesture) => gesture.name).toList(),
-    });
-    final hmac = Hmac(sha256, utf8.encode(signingSecret));
-    return hmac.convert(utf8.encode(payload)).toString();
-  }
-
-  static String _randomId(String prefix) {
-    final random = secureRandom();
-    final bytes = Uint8List(12);
-    for (var i = 0; i < bytes.length; i++) {
-      bytes[i] = random.nextUint8();
-    }
-    final hex = bytes
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join();
-    return '$prefix-$hex';
   }
 
   static DateTime _parseDate(dynamic value) {

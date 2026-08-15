@@ -3,23 +3,19 @@ import 'package:marty_authenticator/models/document_verification_config.dart';
 import 'package:marty_authenticator/models/liveness_challenge.dart';
 
 void main() {
-  test('created challenge has signed, unique, serializable data', () {
-    final challenge = LivenessChallenge.create(
+  test('native challenge data remains serializable', () {
+    final challenge = LivenessChallenge(
+      challengeId: 'lv-native',
+      nonce: 'nonce-native',
+      issuedAt: DateTime.utc(2026),
+      expiresAt: DateTime.utc(2026, 1, 1, 0, 1),
       gestures: const [LivenessGesture.smile, LivenessGesture.lookUp],
-      ttl: const Duration(minutes: 1),
-      signingSecret: 'test-secret',
+      signature: 'a' * 64,
+      nativePayload: '{"challenge_id":"lv-native"}',
     );
-    final second = LivenessChallenge.create(
-      gestures: const [LivenessGesture.smile],
-      ttl: const Duration(minutes: 1),
-      signingSecret: 'test-secret',
-    );
-
     expect(challenge.challengeId, startsWith('lv-'));
     expect(challenge.nonce, startsWith('nonce-'));
     expect(challenge.signature, hasLength(64));
-    expect(challenge.challengeId, isNot(second.challengeId));
-    expect(challenge.isExpired, isFalse);
 
     final restored = LivenessChallenge.fromJson(challenge.toJson());
     expect(restored.challengeId, challenge.challengeId);
@@ -27,6 +23,7 @@ void main() {
     expect(restored.issuedAt, challenge.issuedAt);
     expect(restored.expiresAt, challenge.expiresAt);
     expect(restored.signature, challenge.signature);
+    expect(restored.nativePayload, challenge.nativePayload);
   });
 
   test('parsing uses safe defaults for invalid external data', () {

@@ -1,0 +1,40 @@
+{
+  "schema": "elevenid.authenticator-liveness-behavior/v1",
+  "vectors": [
+    {
+      "id": "valid-mobile-gesture-challenge",
+      "gestures": ["smile", "lookUp", "turnHeadLeft"],
+      "ttl_seconds": 60,
+      "signing_secret": "language-neutral-test-secret",
+      "valid": true
+    },
+    {
+      "id": "empty-gesture-set-fails-closed",
+      "gestures": [],
+      "ttl_seconds": 60,
+      "signing_secret": "language-neutral-test-secret",
+      "valid": false
+    },
+    {
+      "id": "unknown-gesture-fails-closed",
+      "gestures": ["wave"],
+      "ttl_seconds": 60,
+      "signing_secret": "language-neutral-test-secret",
+      "valid": false
+    },
+    {
+      "id": "empty-signing-key-fails-closed",
+      "gestures": ["smile"],
+      "ttl_seconds": 60,
+      "signing_secret": "",
+      "valid": false
+    },
+    {
+      "id": "oversized-ttl-fails-closed",
+      "gestures": ["smile"],
+      "ttl_seconds": 601,
+      "signing_secret": "language-neutral-test-secret",
+      "valid": false
+    }
+  ]
+}
