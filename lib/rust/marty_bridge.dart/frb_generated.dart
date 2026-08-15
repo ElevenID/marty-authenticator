@@ -12,6 +12,7 @@ import 'frb_generated.dart';
 import 'frb_generated.io.dart'
     if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'status.dart';
 
 /// Main entrypoint of the Rust API
 class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
@@ -66,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 658812507;
+  int get rustContentHash => 60312203;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -89,6 +90,12 @@ abstract class RustLibApi extends BaseApi {
     required bool trustProfileVerified,
   });
 
+  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
+    required List<String> gestures,
+    required BigInt ttlSeconds,
+    required String signingSecret,
+  });
+
   Future<SelectableCredential> crateApiCreateSelectableCredential({
     required Credential credential,
     required PrivacyLevel privacyLevel,
@@ -101,6 +108,18 @@ abstract class RustLibApi extends BaseApi {
   Future<FrbAgeEstimate> crateBiometricsEstimateFaceAge({
     required String image,
     String? modelsDir,
+  });
+
+  Future<FrbStatusDecision> crateStatusEvaluateBitstringStatus({
+    required String entryJson,
+    required String statusListCredentialJson,
+  });
+
+  bool crateBiometricsEvaluateLivenessGesture({
+    required String gesture,
+    double? smilingProbability,
+    double? headEulerAngleX,
+    double? headEulerAngleY,
   });
 
   Future<PolicyEvaluationResult> crateApiEvaluatePresentationRequest({
@@ -134,6 +153,10 @@ abstract class RustLibApi extends BaseApi {
 
   Future<SdJwtCredential> crateApiParseSdJwtCredential({required String sdJwt});
 
+  Future<List<FrbStatusEntry>> crateStatusParseStatusEntries({
+    required String credentialStatusJson,
+  });
+
   Future<VerifiableCredential> crateApiParseVerifiableCredential({
     required String json,
   });
@@ -158,6 +181,11 @@ abstract class RustLibApi extends BaseApi {
     required String probeImage,
     double? threshold,
     String? modelsDir,
+  });
+
+  bool crateBiometricsVerifyLivenessChallenge({
+    required String nativePayload,
+    required String signingSecret,
   });
 
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
@@ -352,6 +380,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
+    required List<String> gestures,
+    required BigInt ttlSeconds,
+    required String signingSecret,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          var arg0 = cst_encode_list_String(gestures);
+          var arg1 = cst_encode_u_64(ttlSeconds);
+          var arg2 = cst_encode_String(signingSecret);
+          return wire.wire__crate__biometrics__create_liveness_challenge(
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_liveness_challenge,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsCreateLivenessChallengeConstMeta,
+        argValues: [gestures, ttlSeconds, signingSecret],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsCreateLivenessChallengeConstMeta =>
+      const TaskConstMeta(
+        debugName: "create_liveness_challenge",
+        argNames: ["gestures", "ttlSeconds", "signingSecret"],
+      );
+
+  @override
   Future<SelectableCredential> crateApiCreateSelectableCredential({
     required Credential credential,
     required PrivacyLevel privacyLevel,
@@ -463,6 +526,87 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "estimate_face_age",
         argNames: ["image", "modelsDir"],
+      );
+
+  @override
+  Future<FrbStatusDecision> crateStatusEvaluateBitstringStatus({
+    required String entryJson,
+    required String statusListCredentialJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(entryJson);
+          var arg1 = cst_encode_String(statusListCredentialJson);
+          return wire.wire__crate__status__evaluate_bitstring_status(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_status_decision,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateStatusEvaluateBitstringStatusConstMeta,
+        argValues: [entryJson, statusListCredentialJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateStatusEvaluateBitstringStatusConstMeta =>
+      const TaskConstMeta(
+        debugName: "evaluate_bitstring_status",
+        argNames: ["entryJson", "statusListCredentialJson"],
+      );
+
+  @override
+  bool crateBiometricsEvaluateLivenessGesture({
+    required String gesture,
+    double? smilingProbability,
+    double? headEulerAngleX,
+    double? headEulerAngleY,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          var arg0 = cst_encode_String(gesture);
+          var arg1 = cst_encode_opt_box_autoadd_f_64(smilingProbability);
+          var arg2 = cst_encode_opt_box_autoadd_f_64(headEulerAngleX);
+          var arg3 = cst_encode_opt_box_autoadd_f_64(headEulerAngleY);
+          return wire.wire__crate__biometrics__evaluate_liveness_gesture(
+            arg0,
+            arg1,
+            arg2,
+            arg3,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_bool,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsEvaluateLivenessGestureConstMeta,
+        argValues: [
+          gesture,
+          smilingProbability,
+          headEulerAngleX,
+          headEulerAngleY,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsEvaluateLivenessGestureConstMeta =>
+      const TaskConstMeta(
+        debugName: "evaluate_liveness_gesture",
+        argNames: [
+          "gesture",
+          "smilingProbability",
+          "headEulerAngleX",
+          "headEulerAngleY",
+        ],
       );
 
   @override
@@ -701,6 +845,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<List<FrbStatusEntry>> crateStatusParseStatusEntries({
+    required String credentialStatusJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(credentialStatusJson);
+          return wire.wire__crate__status__parse_status_entries(port_, arg0);
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_list_frb_status_entry,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateStatusParseStatusEntriesConstMeta,
+        argValues: [credentialStatusJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateStatusParseStatusEntriesConstMeta =>
+      const TaskConstMeta(
+        debugName: "parse_status_entries",
+        argNames: ["credentialStatusJson"],
+      );
+
+  @override
   Future<VerifiableCredential> crateApiParseVerifiableCredential({
     required String json,
   }) {
@@ -862,6 +1033,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "verify_face_match",
         argNames: ["referenceImage", "probeImage", "threshold", "modelsDir"],
+      );
+
+  @override
+  bool crateBiometricsVerifyLivenessChallenge({
+    required String nativePayload,
+    required String signingSecret,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          var arg0 = cst_encode_String(nativePayload);
+          var arg1 = cst_encode_String(signingSecret);
+          return wire.wire__crate__biometrics__verify_liveness_challenge(
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_bool,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateBiometricsVerifyLivenessChallengeConstMeta,
+        argValues: [nativePayload, signingSecret],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateBiometricsVerifyLivenessChallengeConstMeta =>
+      const TaskConstMeta(
+        debugName: "verify_liveness_challenge",
+        argNames: ["nativePayload", "signingSecret"],
       );
 
   @override
@@ -1637,6 +1840,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  double dco_decode_box_autoadd_f_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as double;
+  }
+
+  @protected
   FrbWalletQrInput dco_decode_box_autoadd_frb_wallet_qr_input(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_frb_wallet_qr_input(raw);
@@ -1858,6 +2067,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    return FrbLivenessChallenge(
+      challengeId: dco_decode_String(arr[0]),
+      nonce: dco_decode_String(arr[1]),
+      issuedAt: dco_decode_String(arr[2]),
+      expiresAt: dco_decode_String(arr[3]),
+      gestures: dco_decode_list_String(arr[4]),
+      signature: dco_decode_String(arr[5]),
+      nativePayload: dco_decode_String(arr[6]),
+    );
+  }
+
+  @protected
   FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
     dynamic raw,
   ) {
@@ -1898,6 +2124,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       redirectUri: dco_decode_opt_String(arr[1]),
       error: dco_decode_opt_String(arr[2]),
       errorDescription: dco_decode_opt_String(arr[3]),
+    );
+  }
+
+  @protected
+  FrbStatusDecision dco_decode_frb_status_decision(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbStatusDecision(
+      purpose: dco_decode_String(arr[0]),
+      index: dco_decode_u_64(arr[1]),
+      asserted: dco_decode_bool(arr[2]),
+      listSize: dco_decode_u_64(arr[3]),
+    );
+  }
+
+  @protected
+  FrbStatusEntry dco_decode_frb_status_entry(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return FrbStatusEntry(
+      id: dco_decode_String(arr[0]),
+      purpose: dco_decode_String(arr[1]),
+      index: dco_decode_u_64(arr[2]),
+      listUrl: dco_decode_String(arr[3]),
+      entryJson: dco_decode_String(arr[4]),
     );
   }
 
@@ -1998,6 +2253,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<FrbStatusEntry> dco_decode_list_frb_status_entry(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_frb_status_entry).toList();
+  }
+
+  @protected
   List<FrbZkProofEntry> dco_decode_list_frb_zk_proof_entry(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_frb_zk_proof_entry).toList();
@@ -2066,6 +2327,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_f_32(raw);
+  }
+
+  @protected
+  double? dco_decode_opt_box_autoadd_f_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_f_64(raw);
   }
 
   @protected
@@ -2302,6 +2569,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_f_32(deserializer));
+  }
+
+  @protected
+  double sse_decode_box_autoadd_f_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_f_64(deserializer));
   }
 
   @protected
@@ -2560,6 +2833,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_challengeId = sse_decode_String(deserializer);
+    var var_nonce = sse_decode_String(deserializer);
+    var var_issuedAt = sse_decode_String(deserializer);
+    var var_expiresAt = sse_decode_String(deserializer);
+    var var_gestures = sse_decode_list_String(deserializer);
+    var var_signature = sse_decode_String(deserializer);
+    var var_nativePayload = sse_decode_String(deserializer);
+    return FrbLivenessChallenge(
+      challengeId: var_challengeId,
+      nonce: var_nonce,
+      issuedAt: var_issuedAt,
+      expiresAt: var_expiresAt,
+      gestures: var_gestures,
+      signature: var_signature,
+      nativePayload: var_nativePayload,
+    );
+  }
+
+  @protected
   FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
     SseDeserializer deserializer,
   ) {
@@ -2607,6 +2903,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       redirectUri: var_redirectUri,
       error: var_error,
       errorDescription: var_errorDescription,
+    );
+  }
+
+  @protected
+  FrbStatusDecision sse_decode_frb_status_decision(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_purpose = sse_decode_String(deserializer);
+    var var_index = sse_decode_u_64(deserializer);
+    var var_asserted = sse_decode_bool(deserializer);
+    var var_listSize = sse_decode_u_64(deserializer);
+    return FrbStatusDecision(
+      purpose: var_purpose,
+      index: var_index,
+      asserted: var_asserted,
+      listSize: var_listSize,
+    );
+  }
+
+  @protected
+  FrbStatusEntry sse_decode_frb_status_entry(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_String(deserializer);
+    var var_purpose = sse_decode_String(deserializer);
+    var var_index = sse_decode_u_64(deserializer);
+    var var_listUrl = sse_decode_String(deserializer);
+    var var_entryJson = sse_decode_String(deserializer);
+    return FrbStatusEntry(
+      id: var_id,
+      purpose: var_purpose,
+      index: var_index,
+      listUrl: var_listUrl,
+      entryJson: var_entryJson,
     );
   }
 
@@ -2738,6 +3068,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<FrbStatusEntry> sse_decode_list_frb_status_entry(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <FrbStatusEntry>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_frb_status_entry(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<FrbZkProofEntry> sse_decode_list_frb_zk_proof_entry(
     SseDeserializer deserializer,
   ) {
@@ -2848,6 +3192,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_f_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  double? sse_decode_opt_box_autoadd_f_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_f_64(deserializer));
     } else {
       return null;
     }
@@ -3214,6 +3569,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_f_64(double self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_f_64(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_frb_wallet_qr_input(
     FrbWalletQrInput self,
     SseSerializer serializer,
@@ -3425,6 +3786,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_frb_liveness_challenge(
+    FrbLivenessChallenge self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.challengeId, serializer);
+    sse_encode_String(self.nonce, serializer);
+    sse_encode_String(self.issuedAt, serializer);
+    sse_encode_String(self.expiresAt, serializer);
+    sse_encode_list_String(self.gestures, serializer);
+    sse_encode_String(self.signature, serializer);
+    sse_encode_String(self.nativePayload, serializer);
+  }
+
+  @protected
   void sse_encode_frb_presentation_binding_context(
     FrbPresentationBindingContext self,
     SseSerializer serializer,
@@ -3458,6 +3834,31 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.redirectUri, serializer);
     sse_encode_opt_String(self.error, serializer);
     sse_encode_opt_String(self.errorDescription, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_status_decision(
+    FrbStatusDecision self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.purpose, serializer);
+    sse_encode_u_64(self.index, serializer);
+    sse_encode_bool(self.asserted, serializer);
+    sse_encode_u_64(self.listSize, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_status_entry(
+    FrbStatusEntry self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.id, serializer);
+    sse_encode_String(self.purpose, serializer);
+    sse_encode_u_64(self.index, serializer);
+    sse_encode_String(self.listUrl, serializer);
+    sse_encode_String(self.entryJson, serializer);
   }
 
   @protected
@@ -3567,6 +3968,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_frb_status_entry(
+    List<FrbStatusEntry> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_frb_status_entry(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_frb_zk_proof_entry(
     List<FrbZkProofEntry> self,
     SseSerializer serializer,
@@ -3671,6 +4084,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_f_32(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_f_64(double? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_f_64(self, serializer);
     }
   }
 

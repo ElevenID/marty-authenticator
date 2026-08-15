@@ -3693,6 +3693,7 @@ dependencies = [
  "marty-crypto 0.1.45 (git+https://github.com/ElevenID/marty-core?rev=f099f8779ca51a9dfa9a62970538c66f9c812c54)",
  "marty-iso18013",
  "marty-oid4vci",
+ "marty-status",
  "marty-sync",
  "marty-verification 0.1.45 (git+https://github.com/ElevenID/marty-core?rev=f099f8779ca51a9dfa9a62970538c66f9c812c54)",
  "marty-zkp",
@@ -3712,11 +3713,14 @@ version = "0.1.45"
 source = "git+https://github.com/ElevenID/marty-core?rev=f099f8779ca51a9dfa9a62970538c66f9c812c54#f099f8779ca51a9dfa9a62970538c66f9c812c54"
 dependencies = [
  "base64 0.22.1",
+ "chrono",
+ "hmac",
  "image",
  "ndarray",
  "ort",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "thiserror 2.0.19",
  "tokio",
  "tracing",
@@ -3891,6 +3895,18 @@ dependencies = [
  "tokio",
  "tracing",
  "uuid",
+]
+
+[[package]]
+name = "marty-status"
+version = "0.1.56"
+source = "git+https://github.com/ElevenID/marty-core?rev=19f5d8c747da3e8422f53a47f311b59c147c3f22#19f5d8c747da3e8422f53a47f311b59c147c3f22"
+dependencies = [
+ "base64 0.22.1",
+ "flate2",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.19",
 ]
 
 [[package]]

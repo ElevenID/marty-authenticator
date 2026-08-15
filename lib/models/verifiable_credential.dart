@@ -57,7 +57,7 @@ class VerifiableCredential implements Credential {
 
   final Map<String, dynamic>? proof;
   final List<String>? context;
-  final Map<String, dynamic>? credentialStatus;
+  final Object? credentialStatus;
 
   /// Trust chain verification info (populated after verification)
   final TrustInfo? trustInfo;
@@ -102,9 +102,7 @@ class VerifiableCredential implements Credential {
                 ? List<String>.from(json['@context'])
                 : [json['@context'].toString()])
           : null,
-      credentialStatus: json['credentialStatus'] != null
-          ? Map<String, dynamic>.from(json['credentialStatus'])
-          : null,
+      credentialStatus: _copyCredentialStatus(json['credentialStatus']),
       trustInfo: json['trustInfo'] != null
           ? TrustInfo.fromJson(json['trustInfo'])
           : null,
@@ -215,26 +213,27 @@ class VerifiableCredential implements Credential {
 
   /// Check if this credential supports revocation
   bool get supportsRevocation {
-    if (credentialStatus == null) return false;
-    final purpose = credentialStatus!['statusPurpose'] as String?;
-    return purpose == 'revocation' || _hasStatusPurposeInArray('revocation');
+    return _statusEntries.any(
+      (entry) => entry['statusPurpose'] == 'revocation',
+    );
   }
 
   /// Check if this credential supports suspension
   bool get supportsSuspension {
-    if (credentialStatus == null) return false;
-    final purpose = credentialStatus!['statusPurpose'] as String?;
-    return purpose == 'suspension' || _hasStatusPurposeInArray('suspension');
+    return _statusEntries.any(
+      (entry) => entry['statusPurpose'] == 'suspension',
+    );
   }
 
-  bool _hasStatusPurposeInArray(String purpose) {
-    // If credentialStatus is an array-like structure with multiple entries
-    // This handles the case where both revocation and suspension are present
-    if (credentialStatus == null) return false;
-
-    // Check for array format (would need to be parsed from raw JSON)
-    // For now, check if there are multiple entries with different purposes
-    return credentialStatus!['statusPurpose'] == purpose;
+  Iterable<Map<String, dynamic>> get _statusEntries sync* {
+    final status = credentialStatus;
+    if (status is Map<String, dynamic>) {
+      yield status;
+    } else if (status is List) {
+      for (final entry in status) {
+        if (entry is Map) yield Map<String, dynamic>.from(entry);
+      }
+    }
   }
 
   /// Check the revocation/suspension status of this credential
@@ -296,4 +295,14 @@ class VerifiableCredential implements Credential {
   void clearStatusCache() {
     _cachedStatusCheck = null;
   }
+}
+
+Object? _copyCredentialStatus(Object? status) {
+  if (status is Map) return Map<String, dynamic>.from(status);
+  if (status is List) {
+    return status
+        .map((entry) => entry is Map ? Map<String, dynamic>.from(entry) : entry)
+        .toList(growable: false);
+  }
+  return status;
 }

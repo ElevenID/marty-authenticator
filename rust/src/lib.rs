@@ -12,6 +12,7 @@ pub mod api;
 pub mod biometrics;
 pub mod credential;
 pub mod error;
+pub mod status;
 pub mod trust;
 
 // Re-export types for flutter_rust_bridge

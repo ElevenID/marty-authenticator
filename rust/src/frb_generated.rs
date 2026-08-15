@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 658812507;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 60312203;
 
 // Section: executor
 
@@ -103,6 +103,34 @@ fn wire__crate__api__check_issuer_constraints_impl(
                     })(),
                 )
             }
+        },
+    )
+}
+fn wire__crate__biometrics__create_liveness_challenge_impl(
+    gestures: impl CstDecode<Vec<String>>,
+    ttl_seconds: impl CstDecode<u64>,
+    signing_secret: impl CstDecode<String>,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "create_liveness_challenge",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let api_gestures = gestures.cst_decode();
+            let api_ttl_seconds = ttl_seconds.cst_decode();
+            let api_signing_secret = signing_secret.cst_decode();
+            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::biometrics::create_liveness_challenge(
+                        api_gestures,
+                        api_ttl_seconds,
+                        api_signing_secret,
+                    )?;
+                    Ok(output_ok)
+                })(),
+            )
         },
     )
 }
@@ -201,6 +229,65 @@ fn wire__crate__biometrics__estimate_face_age_impl(
                     })(),
                 )
             }
+        },
+    )
+}
+fn wire__crate__status__evaluate_bitstring_status_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    entry_json: impl CstDecode<String>,
+    status_list_credential_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "evaluate_bitstring_status",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_entry_json = entry_json.cst_decode();
+            let api_status_list_credential_json = status_list_credential_json.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::status::evaluate_bitstring_status(
+                            api_entry_json,
+                            api_status_list_credential_json,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__biometrics__evaluate_liveness_gesture_impl(
+    gesture: impl CstDecode<String>,
+    smiling_probability: impl CstDecode<Option<f64>>,
+    head_euler_angle_x: impl CstDecode<Option<f64>>,
+    head_euler_angle_y: impl CstDecode<Option<f64>>,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "evaluate_liveness_gesture",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let api_gesture = gesture.cst_decode();
+            let api_smiling_probability = smiling_probability.cst_decode();
+            let api_head_euler_angle_x = head_euler_angle_x.cst_decode();
+            let api_head_euler_angle_y = head_euler_angle_y.cst_decode();
+            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::biometrics::evaluate_liveness_gesture(
+                        api_gesture,
+                        api_smiling_probability,
+                        api_head_euler_angle_x,
+                        api_head_euler_angle_y,
+                    )?;
+                    Ok(output_ok)
+                })(),
+            )
         },
     )
 }
@@ -400,6 +487,30 @@ fn wire__crate__api__parse_sd_jwt_credential_impl(
         },
     )
 }
+fn wire__crate__status__parse_status_entries_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    credential_status_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "parse_status_entries",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_credential_status_json = credential_status_json.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::status::parse_status_entries(api_credential_status_json)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__parse_verifiable_credential_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     json: impl CstDecode<String>,
@@ -534,6 +645,31 @@ fn wire__crate__biometrics__verify_face_match_impl(
                     })(),
                 )
             }
+        },
+    )
+}
+fn wire__crate__biometrics__verify_liveness_challenge_impl(
+    native_payload: impl CstDecode<String>,
+    signing_secret: impl CstDecode<String>,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "verify_liveness_challenge",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let api_native_payload = native_payload.cst_decode();
+            let api_signing_secret = signing_secret.cst_decode();
+            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::biometrics::verify_liveness_challenge(
+                        api_native_payload,
+                        api_signing_secret,
+                    )?;
+                    Ok(output_ok)
+                })(),
+            )
         },
     )
 }
@@ -1410,6 +1546,28 @@ impl SseDecode for crate::api::FrbIssuerMetadata {
     }
 }
 
+impl SseDecode for crate::biometrics::FrbLivenessChallenge {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_challengeId = <String>::sse_decode(deserializer);
+        let mut var_nonce = <String>::sse_decode(deserializer);
+        let mut var_issuedAt = <String>::sse_decode(deserializer);
+        let mut var_expiresAt = <String>::sse_decode(deserializer);
+        let mut var_gestures = <Vec<String>>::sse_decode(deserializer);
+        let mut var_signature = <String>::sse_decode(deserializer);
+        let mut var_nativePayload = <String>::sse_decode(deserializer);
+        return crate::biometrics::FrbLivenessChallenge {
+            challenge_id: var_challengeId,
+            nonce: var_nonce,
+            issued_at: var_issuedAt,
+            expires_at: var_expiresAt,
+            gestures: var_gestures,
+            signature: var_signature,
+            native_payload: var_nativePayload,
+        };
+    }
+}
+
 impl SseDecode for crate::api::FrbPresentationBindingContext {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1454,6 +1612,40 @@ impl SseDecode for crate::api::FrbPresentationResponse {
             redirect_uri: var_redirectUri,
             error: var_error,
             error_description: var_errorDescription,
+        };
+    }
+}
+
+impl SseDecode for crate::status::FrbStatusDecision {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_purpose = <String>::sse_decode(deserializer);
+        let mut var_index = <u64>::sse_decode(deserializer);
+        let mut var_asserted = <bool>::sse_decode(deserializer);
+        let mut var_listSize = <u64>::sse_decode(deserializer);
+        return crate::status::FrbStatusDecision {
+            purpose: var_purpose,
+            index: var_index,
+            asserted: var_asserted,
+            list_size: var_listSize,
+        };
+    }
+}
+
+impl SseDecode for crate::status::FrbStatusEntry {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_id = <String>::sse_decode(deserializer);
+        let mut var_purpose = <String>::sse_decode(deserializer);
+        let mut var_index = <u64>::sse_decode(deserializer);
+        let mut var_listUrl = <String>::sse_decode(deserializer);
+        let mut var_entryJson = <String>::sse_decode(deserializer);
+        return crate::status::FrbStatusEntry {
+            id: var_id,
+            purpose: var_purpose,
+            index: var_index,
+            list_url: var_listUrl,
+            entry_json: var_entryJson,
         };
     }
 }
@@ -1580,6 +1772,18 @@ impl SseDecode for Vec<crate::credential::CredentialGroup> {
     }
 }
 
+impl SseDecode for Vec<crate::status::FrbStatusEntry> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::status::FrbStatusEntry>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<crate::api::FrbZkProofEntry> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1685,6 +1889,17 @@ impl SseDecode for Option<f32> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<f32>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<f64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<f64>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -2228,6 +2443,32 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbIssuerMetadata>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbLivenessChallenge {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.challenge_id.into_into_dart().into_dart(),
+            self.nonce.into_into_dart().into_dart(),
+            self.issued_at.into_into_dart().into_dart(),
+            self.expires_at.into_into_dart().into_dart(),
+            self.gestures.into_into_dart().into_dart(),
+            self.signature.into_into_dart().into_dart(),
+            self.native_payload.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::biometrics::FrbLivenessChallenge
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbLivenessChallenge>
+    for crate::biometrics::FrbLivenessChallenge
+{
+    fn into_into_dart(self) -> crate::biometrics::FrbLivenessChallenge {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::FrbPresentationBindingContext {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2295,6 +2536,50 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbPresentationResponse>
     for crate::api::FrbPresentationResponse
 {
     fn into_into_dart(self) -> crate::api::FrbPresentationResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::status::FrbStatusDecision {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.purpose.into_into_dart().into_dart(),
+            self.index.into_into_dart().into_dart(),
+            self.asserted.into_into_dart().into_dart(),
+            self.list_size.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::status::FrbStatusDecision
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::status::FrbStatusDecision>
+    for crate::status::FrbStatusDecision
+{
+    fn into_into_dart(self) -> crate::status::FrbStatusDecision {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::status::FrbStatusEntry {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.id.into_into_dart().into_dart(),
+            self.purpose.into_into_dart().into_dart(),
+            self.index.into_into_dart().into_dart(),
+            self.list_url.into_into_dart().into_dart(),
+            self.entry_json.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::status::FrbStatusEntry {}
+impl flutter_rust_bridge::IntoIntoDart<crate::status::FrbStatusEntry>
+    for crate::status::FrbStatusEntry
+{
+    fn into_into_dart(self) -> crate::status::FrbStatusEntry {
         self
     }
 }
@@ -2776,6 +3061,19 @@ impl SseEncode for crate::api::FrbIssuerMetadata {
     }
 }
 
+impl SseEncode for crate::biometrics::FrbLivenessChallenge {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.challenge_id, serializer);
+        <String>::sse_encode(self.nonce, serializer);
+        <String>::sse_encode(self.issued_at, serializer);
+        <String>::sse_encode(self.expires_at, serializer);
+        <Vec<String>>::sse_encode(self.gestures, serializer);
+        <String>::sse_encode(self.signature, serializer);
+        <String>::sse_encode(self.native_payload, serializer);
+    }
+}
+
 impl SseEncode for crate::api::FrbPresentationBindingContext {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2803,6 +3101,27 @@ impl SseEncode for crate::api::FrbPresentationResponse {
         <Option<String>>::sse_encode(self.redirect_uri, serializer);
         <Option<String>>::sse_encode(self.error, serializer);
         <Option<String>>::sse_encode(self.error_description, serializer);
+    }
+}
+
+impl SseEncode for crate::status::FrbStatusDecision {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.purpose, serializer);
+        <u64>::sse_encode(self.index, serializer);
+        <bool>::sse_encode(self.asserted, serializer);
+        <u64>::sse_encode(self.list_size, serializer);
+    }
+}
+
+impl SseEncode for crate::status::FrbStatusEntry {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.id, serializer);
+        <String>::sse_encode(self.purpose, serializer);
+        <u64>::sse_encode(self.index, serializer);
+        <String>::sse_encode(self.list_url, serializer);
+        <String>::sse_encode(self.entry_json, serializer);
     }
 }
 
@@ -2897,6 +3216,16 @@ impl SseEncode for Vec<crate::credential::CredentialGroup> {
     }
 }
 
+impl SseEncode for Vec<crate::status::FrbStatusEntry> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::status::FrbStatusEntry>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<crate::api::FrbZkProofEntry> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2978,6 +3307,16 @@ impl SseEncode for Option<f32> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <f32>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<f64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <f64>::sse_encode(value, serializer);
         }
     }
 }
@@ -3243,6 +3582,12 @@ mod io {
             unsafe { *flutter_rust_bridge::for_generated::box_from_leak_ptr(self) }
         }
     }
+    impl CstDecode<f64> for *mut f64 {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> f64 {
+            unsafe { *flutter_rust_bridge::for_generated::box_from_leak_ptr(self) }
+        }
+    }
     impl CstDecode<crate::api::FrbWalletQrInput> for *mut wire_cst_frb_wallet_qr_input {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> crate::api::FrbWalletQrInput {
@@ -3427,6 +3772,20 @@ mod io {
             }
         }
     }
+    impl CstDecode<crate::biometrics::FrbLivenessChallenge> for wire_cst_frb_liveness_challenge {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
+            crate::biometrics::FrbLivenessChallenge {
+                challenge_id: self.challenge_id.cst_decode(),
+                nonce: self.nonce.cst_decode(),
+                issued_at: self.issued_at.cst_decode(),
+                expires_at: self.expires_at.cst_decode(),
+                gestures: self.gestures.cst_decode(),
+                signature: self.signature.cst_decode(),
+                native_payload: self.native_payload.cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::api::FrbPresentationBindingContext>
         for wire_cst_frb_presentation_binding_context
     {
@@ -3459,6 +3818,29 @@ mod io {
                 redirect_uri: self.redirect_uri.cst_decode(),
                 error: self.error.cst_decode(),
                 error_description: self.error_description.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::status::FrbStatusDecision> for wire_cst_frb_status_decision {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::status::FrbStatusDecision {
+            crate::status::FrbStatusDecision {
+                purpose: self.purpose.cst_decode(),
+                index: self.index.cst_decode(),
+                asserted: self.asserted.cst_decode(),
+                list_size: self.list_size.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::status::FrbStatusEntry> for wire_cst_frb_status_entry {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::status::FrbStatusEntry {
+            crate::status::FrbStatusEntry {
+                id: self.id.cst_decode(),
+                purpose: self.purpose.cst_decode(),
+                index: self.index.cst_decode(),
+                list_url: self.list_url.cst_decode(),
+                entry_json: self.entry_json.cst_decode(),
             }
         }
     }
@@ -3536,6 +3918,16 @@ mod io {
     impl CstDecode<Vec<crate::credential::CredentialGroup>> for *mut wire_cst_list_credential_group {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<crate::credential::CredentialGroup> {
+            let vec = unsafe {
+                let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
+                flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
+            };
+            vec.into_iter().map(CstDecode::cst_decode).collect()
+        }
+    }
+    impl CstDecode<Vec<crate::status::FrbStatusEntry>> for *mut wire_cst_list_frb_status_entry {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::status::FrbStatusEntry> {
             let vec = unsafe {
                 let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
                 flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
@@ -3867,6 +4259,24 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
+    impl NewWithNullPtr for wire_cst_frb_liveness_challenge {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                challenge_id: core::ptr::null_mut(),
+                nonce: core::ptr::null_mut(),
+                issued_at: core::ptr::null_mut(),
+                expires_at: core::ptr::null_mut(),
+                gestures: core::ptr::null_mut(),
+                signature: core::ptr::null_mut(),
+                native_payload: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_liveness_challenge {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
     impl NewWithNullPtr for wire_cst_frb_presentation_binding_context {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -3908,6 +4318,37 @@ mod io {
         }
     }
     impl Default for wire_cst_frb_presentation_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_status_decision {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                purpose: core::ptr::null_mut(),
+                index: Default::default(),
+                asserted: Default::default(),
+                list_size: Default::default(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_status_decision {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_status_entry {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                id: core::ptr::null_mut(),
+                purpose: core::ptr::null_mut(),
+                index: Default::default(),
+                list_url: core::ptr::null_mut(),
+                entry_json: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_status_entry {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -4132,6 +4573,19 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge(
+        gestures: *mut wire_cst_list_String,
+        ttl_seconds: u64,
+        signing_secret: *mut wire_cst_list_prim_u_8_strict,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__create_liveness_challenge_impl(
+            gestures,
+            ttl_seconds,
+            signing_secret,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(
         port_: i64,
         credential: *mut wire_cst_credential,
@@ -4163,6 +4617,34 @@ mod io {
         models_dir: *mut wire_cst_list_prim_u_8_strict,
     ) {
         wire__crate__biometrics__estimate_face_age_impl(port_, image, models_dir)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__status__evaluate_bitstring_status(
+        port_: i64,
+        entry_json: *mut wire_cst_list_prim_u_8_strict,
+        status_list_credential_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__status__evaluate_bitstring_status_impl(
+            port_,
+            entry_json,
+            status_list_credential_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__evaluate_liveness_gesture(
+        gesture: *mut wire_cst_list_prim_u_8_strict,
+        smiling_probability: *mut f64,
+        head_euler_angle_x: *mut f64,
+        head_euler_angle_y: *mut f64,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__evaluate_liveness_gesture_impl(
+            gesture,
+            smiling_probability,
+            head_euler_angle_x,
+            head_euler_angle_y,
+        )
     }
 
     #[unsafe(no_mangle)]
@@ -4238,6 +4720,14 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__status__parse_status_entries(
+        port_: i64,
+        credential_status_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__status__parse_status_entries_impl(port_, credential_status_json)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential(
         port_: i64,
         json: *mut wire_cst_list_prim_u_8_strict,
@@ -4287,6 +4777,14 @@ mod io {
             threshold,
             models_dir,
         )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge(
+        native_payload: *mut wire_cst_list_prim_u_8_strict,
+        signing_secret: *mut wire_cst_list_prim_u_8_strict,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
     }
 
     #[unsafe(no_mangle)]
@@ -4565,6 +5063,11 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_f_64(value: f64) -> *mut f64 {
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(value)
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_cst_new_box_autoadd_frb_wallet_qr_input(
     ) -> *mut wire_cst_frb_wallet_qr_input {
         flutter_rust_bridge::for_generated::new_leak_box_ptr(
@@ -4656,6 +5159,20 @@ mod io {
         let wrap = wire_cst_list_credential_group {
             ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(
                 <wire_cst_credential_group>::new_with_null_ptr(),
+                len,
+            ),
+            len,
+        };
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(wrap)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_cst_new_list_frb_status_entry(
+        len: i32,
+    ) -> *mut wire_cst_list_frb_status_entry {
+        let wrap = wire_cst_list_frb_status_entry {
+            ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(
+                <wire_cst_frb_status_entry>::new_with_null_ptr(),
                 len,
             ),
             len,
@@ -4844,6 +5361,17 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_liveness_challenge {
+        challenge_id: *mut wire_cst_list_prim_u_8_strict,
+        nonce: *mut wire_cst_list_prim_u_8_strict,
+        issued_at: *mut wire_cst_list_prim_u_8_strict,
+        expires_at: *mut wire_cst_list_prim_u_8_strict,
+        gestures: *mut wire_cst_list_String,
+        signature: *mut wire_cst_list_prim_u_8_strict,
+        native_payload: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
     pub struct wire_cst_frb_presentation_binding_context {
         challenge: *mut wire_cst_list_prim_u_8_strict,
         domain: *mut wire_cst_list_prim_u_8_strict,
@@ -4865,6 +5393,23 @@ mod io {
         redirect_uri: *mut wire_cst_list_prim_u_8_strict,
         error: *mut wire_cst_list_prim_u_8_strict,
         error_description: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_status_decision {
+        purpose: *mut wire_cst_list_prim_u_8_strict,
+        index: u64,
+        asserted: bool,
+        list_size: u64,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_status_entry {
+        id: *mut wire_cst_list_prim_u_8_strict,
+        purpose: *mut wire_cst_list_prim_u_8_strict,
+        index: u64,
+        list_url: *mut wire_cst_list_prim_u_8_strict,
+        entry_json: *mut wire_cst_list_prim_u_8_strict,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -4918,6 +5463,12 @@ mod io {
     #[derive(Clone, Copy)]
     pub struct wire_cst_list_credential_group {
         ptr: *mut wire_cst_credential_group,
+        len: i32,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_list_frb_status_entry {
+        ptr: *mut wire_cst_frb_status_entry,
         len: i32,
     }
     #[repr(C)]
@@ -5313,6 +5864,31 @@ mod web {
             }
         }
     }
+    impl CstDecode<crate::biometrics::FrbLivenessChallenge>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                7,
+                "Expected 7 elements, got {}",
+                self_.length()
+            );
+            crate::biometrics::FrbLivenessChallenge {
+                challenge_id: self_.get(0).cst_decode(),
+                nonce: self_.get(1).cst_decode(),
+                issued_at: self_.get(2).cst_decode(),
+                expires_at: self_.get(3).cst_decode(),
+                gestures: self_.get(4).cst_decode(),
+                signature: self_.get(5).cst_decode(),
+                native_payload: self_.get(6).cst_decode(),
+            }
+        }
+    }
     impl CstDecode<crate::api::FrbPresentationBindingContext>
         for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
     {
@@ -5376,6 +5952,51 @@ mod web {
                 redirect_uri: self_.get(1).cst_decode(),
                 error: self_.get(2).cst_decode(),
                 error_description: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::status::FrbStatusDecision>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::status::FrbStatusDecision {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::status::FrbStatusDecision {
+                purpose: self_.get(0).cst_decode(),
+                index: self_.get(1).cst_decode(),
+                asserted: self_.get(2).cst_decode(),
+                list_size: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::status::FrbStatusEntry>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::status::FrbStatusEntry {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                5,
+                "Expected 5 elements, got {}",
+                self_.length()
+            );
+            crate::status::FrbStatusEntry {
+                id: self_.get(0).cst_decode(),
+                purpose: self_.get(1).cst_decode(),
+                index: self_.get(2).cst_decode(),
+                list_url: self_.get(3).cst_decode(),
+                entry_json: self_.get(4).cst_decode(),
             }
         }
     }
@@ -5503,6 +6124,18 @@ mod web {
     {
         // Codec=Cst (C-struct based), see doc to use other codecs
         fn cst_decode(self) -> Vec<crate::credential::CredentialGroup> {
+            self.dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap()
+                .iter()
+                .map(CstDecode::cst_decode)
+                .collect()
+        }
+    }
+    impl CstDecode<Vec<crate::status::FrbStatusEntry>>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<crate::status::FrbStatusEntry> {
             self.dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
                 .unwrap()
                 .iter()
@@ -5891,6 +6524,19 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__biometrics__create_liveness_challenge(
+        gestures: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        ttl_seconds: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        signing_secret: String,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__create_liveness_challenge_impl(
+            gestures,
+            ttl_seconds,
+            signing_secret,
+        )
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__create_selectable_credential(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
@@ -5922,6 +6568,34 @@ mod web {
         models_dir: Option<String>,
     ) {
         wire__crate__biometrics__estimate_face_age_impl(port_, image, models_dir)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__status__evaluate_bitstring_status(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        entry_json: String,
+        status_list_credential_json: String,
+    ) {
+        wire__crate__status__evaluate_bitstring_status_impl(
+            port_,
+            entry_json,
+            status_list_credential_json,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__biometrics__evaluate_liveness_gesture(
+        gesture: String,
+        smiling_probability: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        head_euler_angle_x: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        head_euler_angle_y: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__evaluate_liveness_gesture_impl(
+            gesture,
+            smiling_probability,
+            head_euler_angle_x,
+            head_euler_angle_y,
+        )
     }
 
     #[wasm_bindgen]
@@ -5997,6 +6671,14 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__status__parse_status_entries(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        credential_status_json: String,
+    ) {
+        wire__crate__status__parse_status_entries_impl(port_, credential_status_json)
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__parse_verifiable_credential(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         json: String,
@@ -6046,6 +6728,14 @@ mod web {
             threshold,
             models_dir,
         )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__biometrics__verify_liveness_challenge(
+        native_payload: String,
+        signing_secret: String,
+    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
+        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
     }
 
     #[wasm_bindgen]

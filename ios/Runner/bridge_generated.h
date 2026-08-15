@@ -172,6 +172,19 @@ typedef struct wire_cst_list_credential_group {
   int32_t len;
 } wire_cst_list_credential_group;
 
+typedef struct wire_cst_frb_status_entry {
+  struct wire_cst_list_prim_u_8_strict *id;
+  struct wire_cst_list_prim_u_8_strict *purpose;
+  uint64_t index;
+  struct wire_cst_list_prim_u_8_strict *list_url;
+  struct wire_cst_list_prim_u_8_strict *entry_json;
+} wire_cst_frb_status_entry;
+
+typedef struct wire_cst_list_frb_status_entry {
+  struct wire_cst_frb_status_entry *ptr;
+  int32_t len;
+} wire_cst_list_frb_status_entry;
+
 typedef struct wire_cst_frb_age_estimate {
   uint8_t estimated_age;
   float confidence;
@@ -230,6 +243,16 @@ typedef struct wire_cst_frb_issuer_metadata {
   struct wire_cst_list_prim_u_8_strict *credential_configurations_json;
 } wire_cst_frb_issuer_metadata;
 
+typedef struct wire_cst_frb_liveness_challenge {
+  struct wire_cst_list_prim_u_8_strict *challenge_id;
+  struct wire_cst_list_prim_u_8_strict *nonce;
+  struct wire_cst_list_prim_u_8_strict *issued_at;
+  struct wire_cst_list_prim_u_8_strict *expires_at;
+  struct wire_cst_list_String *gestures;
+  struct wire_cst_list_prim_u_8_strict *signature;
+  struct wire_cst_list_prim_u_8_strict *native_payload;
+} wire_cst_frb_liveness_challenge;
+
 typedef struct wire_cst_frb_presentation_binding_context {
   struct wire_cst_list_prim_u_8_strict *challenge;
   struct wire_cst_list_prim_u_8_strict *domain;
@@ -250,6 +273,13 @@ typedef struct wire_cst_frb_presentation_response {
   struct wire_cst_list_prim_u_8_strict *error;
   struct wire_cst_list_prim_u_8_strict *error_description;
 } wire_cst_frb_presentation_response;
+
+typedef struct wire_cst_frb_status_decision {
+  struct wire_cst_list_prim_u_8_strict *purpose;
+  uint64_t index;
+  bool asserted;
+  uint64_t list_size;
+} wire_cst_frb_status_decision;
 
 typedef struct wire_cst_frb_token_response {
   struct wire_cst_list_prim_u_8_strict *access_token;
@@ -286,6 +316,10 @@ void frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints(int64
                                                                            struct wire_cst_list_prim_u_8_strict *issuer_id,
                                                                            bool trust_profile_verified);
 
+WireSyncRust2DartDco frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge(struct wire_cst_list_String *gestures,
+                                                                                                   uint64_t ttl_seconds,
+                                                                                                   struct wire_cst_list_prim_u_8_strict *signing_secret);
+
 void frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(int64_t port_,
                                                                                struct wire_cst_credential *credential,
                                                                                int32_t privacy_level);
@@ -299,6 +333,15 @@ void frbgen_marty_authenticator_wire__crate__api__credential_to_json(int64_t por
 void frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age(int64_t port_,
                                                                            struct wire_cst_list_prim_u_8_strict *image,
                                                                            struct wire_cst_list_prim_u_8_strict *models_dir);
+
+void frbgen_marty_authenticator_wire__crate__status__evaluate_bitstring_status(int64_t port_,
+                                                                               struct wire_cst_list_prim_u_8_strict *entry_json,
+                                                                               struct wire_cst_list_prim_u_8_strict *status_list_credential_json);
+
+WireSyncRust2DartDco frbgen_marty_authenticator_wire__crate__biometrics__evaluate_liveness_gesture(struct wire_cst_list_prim_u_8_strict *gesture,
+                                                                                                   double *smiling_probability,
+                                                                                                   double *head_euler_angle_x,
+                                                                                                   double *head_euler_angle_y);
 
 void frbgen_marty_authenticator_wire__crate__api__evaluate_presentation_request(int64_t port_,
                                                                                 struct wire_cst_list_prim_u_8_strict *request_json,
@@ -327,6 +370,9 @@ void frbgen_marty_authenticator_wire__crate__api__parse_mdoc_credential(int64_t 
 void frbgen_marty_authenticator_wire__crate__api__parse_sd_jwt_credential(int64_t port_,
                                                                           struct wire_cst_list_prim_u_8_strict *sd_jwt);
 
+void frbgen_marty_authenticator_wire__crate__status__parse_status_entries(int64_t port_,
+                                                                          struct wire_cst_list_prim_u_8_strict *credential_status_json);
+
 void frbgen_marty_authenticator_wire__crate__api__parse_verifiable_credential(int64_t port_,
                                                                               struct wire_cst_list_prim_u_8_strict *json);
 
@@ -347,6 +393,9 @@ void frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match(int64
                                                                            struct wire_cst_list_prim_u_8_strict *probe_image,
                                                                            float *threshold,
                                                                            struct wire_cst_list_prim_u_8_strict *models_dir);
+
+WireSyncRust2DartDco frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge(struct wire_cst_list_prim_u_8_strict *native_payload,
+                                                                                                   struct wire_cst_list_prim_u_8_strict *signing_secret);
 
 void frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain(int64_t port_,
                                                                           struct wire_cst_list_list_prim_u_8_strict *x5chain);
@@ -446,6 +495,8 @@ struct wire_cst_credential_status *frbgen_marty_authenticator_cst_new_box_autoad
 
 float *frbgen_marty_authenticator_cst_new_box_autoadd_f_32(float value);
 
+double *frbgen_marty_authenticator_cst_new_box_autoadd_f_64(double value);
+
 struct wire_cst_frb_wallet_qr_input *frbgen_marty_authenticator_cst_new_box_autoadd_frb_wallet_qr_input(void);
 
 struct wire_cst_m_doc_credential *frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential(void);
@@ -468,6 +519,8 @@ struct wire_cst_list_credential *frbgen_marty_authenticator_cst_new_list_credent
 
 struct wire_cst_list_credential_group *frbgen_marty_authenticator_cst_new_list_credential_group(int32_t len);
 
+struct wire_cst_list_frb_status_entry *frbgen_marty_authenticator_cst_new_list_frb_status_entry(int32_t len);
+
 struct wire_cst_list_frb_zk_proof_entry *frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry(int32_t len);
 
 struct wire_cst_list_list_prim_u_8_strict *frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict(int32_t len);
@@ -482,6 +535,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_credential_status);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_f_32);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_f_64);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_frb_wallet_qr_input);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_m_doc_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_box_autoadd_proof);
@@ -493,6 +547,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_String);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_credential_group);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_frb_status_entry);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_frb_zk_proof_entry);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_list_prim_u_8_strict);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_cst_new_list_prim_u_8_loose);
@@ -535,8 +590,13 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__evaluate_liveness_gesture);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__status__evaluate_bitstring_status);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__status__parse_status_entries);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);
     return dummy_var;
 }

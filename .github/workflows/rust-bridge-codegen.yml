@@ -71,6 +71,11 @@ jobs:
       - name: Test native wallet routing and validation
         run: cargo test --locked --manifest-path rust/Cargo.toml --lib wallet_
 
+      - name: Test native status-list and liveness behavior
+        run: |
+          cargo test --locked --manifest-path rust/Cargo.toml --lib status::tests
+          cargo test --locked --manifest-path rust/Cargo.toml --lib liveness_tests
+
       - name: Upload generated bridge surfaces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -112,5 +117,15 @@ jobs:
           if grep -REn --include='*.dart' \
             'Ecdsa\.p256|newKeyPair\(|_computeKid|normalizeOid4vciCredentialOfferUri' lib; then
             echo 'P-256 holder keys and OID4VCI offer normalization must remain in Rust.' >&2
+            exit 1
+          fi
+
+      - name: Enforce native status-list and liveness ownership
+        shell: bash
+        run: |
+          if grep -REn --include='*.dart' \
+            'gzip\.decode|base64Decode\(|Hmac\(sha256|local-dev-secret' \
+            lib/models lib/services lib/views; then
+            echo 'Status-list decoding and liveness challenge signing must remain in Rust.' >&2
             exit 1
           fi

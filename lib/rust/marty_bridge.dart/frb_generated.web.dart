@@ -13,6 +13,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_web.dart';
+import 'status.dart';
 
 abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustLibApiImplPlatform({
@@ -55,6 +56,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double dco_decode_box_autoadd_f_32(dynamic raw);
+
+  @protected
+  double dco_decode_box_autoadd_f_64(dynamic raw);
 
   @protected
   FrbWalletQrInput dco_decode_box_autoadd_frb_wallet_qr_input(dynamic raw);
@@ -119,6 +123,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
+  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw);
+
+  @protected
   FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
     dynamic raw,
   );
@@ -128,6 +135,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbPresentationResponse dco_decode_frb_presentation_response(dynamic raw);
+
+  @protected
+  FrbStatusDecision dco_decode_frb_status_decision(dynamic raw);
+
+  @protected
+  FrbStatusEntry dco_decode_frb_status_entry(dynamic raw);
 
   @protected
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
@@ -163,6 +176,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<CredentialGroup> dco_decode_list_credential_group(dynamic raw);
 
   @protected
+  List<FrbStatusEntry> dco_decode_list_frb_status_entry(dynamic raw);
+
+  @protected
   List<FrbZkProofEntry> dco_decode_list_frb_zk_proof_entry(dynamic raw);
 
   @protected
@@ -190,6 +206,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
+
+  @protected
+  double? dco_decode_opt_box_autoadd_f_64(dynamic raw);
 
   @protected
   FrbWalletQrInput? dco_decode_opt_box_autoadd_frb_wallet_qr_input(dynamic raw);
@@ -275,6 +294,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_box_autoadd_f_64(SseDeserializer deserializer);
+
+  @protected
   FrbWalletQrInput sse_decode_box_autoadd_frb_wallet_qr_input(
     SseDeserializer deserializer,
   );
@@ -353,6 +375,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
     SseDeserializer deserializer,
   );
@@ -366,6 +393,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbPresentationResponse sse_decode_frb_presentation_response(
     SseDeserializer deserializer,
   );
+
+  @protected
+  FrbStatusDecision sse_decode_frb_status_decision(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbStatusEntry sse_decode_frb_status_entry(SseDeserializer deserializer);
 
   @protected
   FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
@@ -405,6 +440,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<FrbStatusEntry> sse_decode_list_frb_status_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<FrbZkProofEntry> sse_decode_list_frb_zk_proof_entry(
     SseDeserializer deserializer,
   );
@@ -438,6 +478,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
+
+  @protected
+  double? sse_decode_opt_box_autoadd_f_64(SseDeserializer deserializer);
 
   @protected
   FrbWalletQrInput? sse_decode_opt_box_autoadd_frb_wallet_qr_input(
@@ -530,6 +573,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double cst_encode_box_autoadd_f_32(double raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_f_32(raw);
+  }
+
+  @protected
+  double cst_encode_box_autoadd_f_64(double raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return cst_encode_f_64(raw);
   }
 
   @protected
@@ -710,6 +759,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_frb_liveness_challenge(FrbLivenessChallenge raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.challengeId),
+      cst_encode_String(raw.nonce),
+      cst_encode_String(raw.issuedAt),
+      cst_encode_String(raw.expiresAt),
+      cst_encode_list_String(raw.gestures),
+      cst_encode_String(raw.signature),
+      cst_encode_String(raw.nativePayload),
+    ].jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_frb_presentation_binding_context(
     FrbPresentationBindingContext raw,
   ) {
@@ -741,6 +804,29 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.redirectUri),
       cst_encode_opt_String(raw.error),
       cst_encode_opt_String(raw.errorDescription),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_status_decision(FrbStatusDecision raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.purpose),
+      cst_encode_u_64(raw.index),
+      cst_encode_bool(raw.asserted),
+      cst_encode_u_64(raw.listSize),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_status_entry(FrbStatusEntry raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.id),
+      cst_encode_String(raw.purpose),
+      cst_encode_u_64(raw.index),
+      cst_encode_String(raw.listUrl),
+      cst_encode_String(raw.entryJson),
     ].jsify()!;
   }
 
@@ -824,6 +910,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  JSAny cst_encode_list_frb_status_entry(List<FrbStatusEntry> raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.map(cst_encode_frb_status_entry).toList().jsify()!;
+  }
+
+  @protected
   JSAny cst_encode_list_frb_zk_proof_entry(List<FrbZkProofEntry> raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw.map(cst_encode_frb_zk_proof_entry).toList().jsify()!;
@@ -887,6 +979,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double? cst_encode_opt_box_autoadd_f_32(double? raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw == null ? null : cst_encode_box_autoadd_f_32(raw);
+  }
+
+  @protected
+  double? cst_encode_opt_box_autoadd_f_64(double? raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw == null ? null : cst_encode_box_autoadd_f_64(raw);
   }
 
   @protected
@@ -1092,6 +1190,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_f_64(double self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_frb_wallet_qr_input(
     FrbWalletQrInput self,
     SseSerializer serializer,
@@ -1197,6 +1298,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_frb_liveness_challenge(
+    FrbLivenessChallenge self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_frb_presentation_binding_context(
     FrbPresentationBindingContext self,
     SseSerializer serializer,
@@ -1211,6 +1318,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_presentation_response(
     FrbPresentationResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_status_decision(
+    FrbStatusDecision self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_status_entry(
+    FrbStatusEntry self,
     SseSerializer serializer,
   );
 
@@ -1267,6 +1386,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_frb_status_entry(
+    List<FrbStatusEntry> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_frb_zk_proof_entry(
     List<FrbZkProofEntry> self,
     SseSerializer serializer,
@@ -1310,6 +1435,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_f_64(double? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_box_autoadd_frb_wallet_qr_input(
@@ -1411,6 +1539,17 @@ class RustLibWire implements BaseWire {
     trust_profile_verified,
   );
 
+  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__create_liveness_challenge(
+    JSAny gestures,
+    JSAny ttl_seconds,
+    String signing_secret,
+  ) => wasmModule.wire__crate__biometrics__create_liveness_challenge(
+    gestures,
+    ttl_seconds,
+    signing_secret,
+  );
+
   void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -1439,6 +1578,29 @@ class RustLibWire implements BaseWire {
     port_,
     image,
     models_dir,
+  );
+
+  void wire__crate__status__evaluate_bitstring_status(
+    NativePortType port_,
+    String entry_json,
+    String status_list_credential_json,
+  ) => wasmModule.wire__crate__status__evaluate_bitstring_status(
+    port_,
+    entry_json,
+    status_list_credential_json,
+  );
+
+  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__evaluate_liveness_gesture(
+    String gesture,
+    double? smiling_probability,
+    double? head_euler_angle_x,
+    double? head_euler_angle_y,
+  ) => wasmModule.wire__crate__biometrics__evaluate_liveness_gesture(
+    gesture,
+    smiling_probability,
+    head_euler_angle_x,
+    head_euler_angle_y,
   );
 
   void wire__crate__api__evaluate_presentation_request(
@@ -1499,6 +1661,14 @@ class RustLibWire implements BaseWire {
     String sd_jwt,
   ) => wasmModule.wire__crate__api__parse_sd_jwt_credential(port_, sd_jwt);
 
+  void wire__crate__status__parse_status_entries(
+    NativePortType port_,
+    String credential_status_json,
+  ) => wasmModule.wire__crate__status__parse_status_entries(
+    port_,
+    credential_status_json,
+  );
+
   void wire__crate__api__parse_verifiable_credential(
     NativePortType port_,
     String json,
@@ -1542,6 +1712,15 @@ class RustLibWire implements BaseWire {
     probe_image,
     threshold,
     models_dir,
+  );
+
+  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__verify_liveness_challenge(
+    String native_payload,
+    String signing_secret,
+  ) => wasmModule.wire__crate__biometrics__verify_liveness_challenge(
+    native_payload,
+    signing_secret,
   );
 
   void wire__crate__api__verify_mdoc_trust_chain(
@@ -1783,6 +1962,13 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     bool trust_profile_verified,
   );
 
+  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__create_liveness_challenge(
+    JSAny gestures,
+    JSAny ttl_seconds,
+    String signing_secret,
+  );
+
   external void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -1803,6 +1989,20 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     NativePortType port_,
     String image,
     String? models_dir,
+  );
+
+  external void wire__crate__status__evaluate_bitstring_status(
+    NativePortType port_,
+    String entry_json,
+    String status_list_credential_json,
+  );
+
+  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__evaluate_liveness_gesture(
+    String gesture,
+    double? smiling_probability,
+    double? head_euler_angle_x,
+    double? head_euler_angle_y,
   );
 
   external void wire__crate__api__evaluate_presentation_request(
@@ -1848,6 +2048,11 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String sd_jwt,
   );
 
+  external void wire__crate__status__parse_status_entries(
+    NativePortType port_,
+    String credential_status_json,
+  );
+
   external void wire__crate__api__parse_verifiable_credential(
     NativePortType port_,
     String json,
@@ -1877,6 +2082,12 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String probe_image,
     double? threshold,
     String? models_dir,
+  );
+
+  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
+  wire__crate__biometrics__verify_liveness_challenge(
+    String native_payload,
+    String signing_secret,
   );
 
   external void wire__crate__api__verify_mdoc_trust_chain(

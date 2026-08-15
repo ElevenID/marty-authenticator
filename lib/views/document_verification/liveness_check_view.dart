@@ -10,6 +10,13 @@ import '../../services/liveness_camera_image_converter.dart';
 import '../../widgets/common/back_button.dart';
 import 'review_and_submit_view.dart';
 
+typedef LivenessChallengeFactory =
+    Future<LivenessChallenge> Function({
+      required List<LivenessGesture> gestures,
+      required Duration ttl,
+      required String signingSecret,
+    });
+
 class LivenessCheckView extends StatefulWidget {
   final DocumentVerificationConfig config;
   final List<LivenessGesture>? gesturesOverride;
@@ -18,6 +25,8 @@ class LivenessCheckView extends StatefulWidget {
   final Widget Function(LivenessChallenge? challenge)? reviewBuilder;
   final bool enableExpiryTicker;
   final Duration challengeTtl;
+  final String livenessSigningSecret;
+  final LivenessChallengeFactory? challengeFactory;
 
   const LivenessCheckView({
     super.key,
@@ -28,6 +37,10 @@ class LivenessCheckView extends StatefulWidget {
     this.reviewBuilder,
     this.enableExpiryTicker = true,
     this.challengeTtl = const Duration(seconds: 60),
+    this.livenessSigningSecret = const String.fromEnvironment(
+      'MARTY_LIVENESS_SIGNING_SECRET',
+    ),
+    this.challengeFactory,
   });
 
   @override
@@ -50,15 +63,32 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
     _gestures =
         widget.gesturesOverride ??
         DocumentVerificationConfig.generateRandomGestures();
-    _challenge = LivenessChallenge.create(
-      gestures: _gestures,
-      ttl: widget.challengeTtl,
-      signingSecret: 'local-dev-secret',
-    );
     _expirySeconds = widget.challengeTtl.inSeconds;
-    if (widget.enableExpiryTicker) _startExpiryTicker();
+    _initializeChallenge();
     _initializeCamera();
     _initializeFaceDetector();
+  }
+
+  Future<void> _initializeChallenge() async {
+    try {
+      if (widget.livenessSigningSecret.isEmpty) {
+        throw StateError('Liveness signing key is unavailable');
+      }
+      final factory = widget.challengeFactory ?? LivenessChallenge.create;
+      final challenge = await factory(
+        gestures: _gestures,
+        ttl: widget.challengeTtl,
+        signingSecret: widget.livenessSigningSecret,
+      );
+      if (!mounted) return;
+      setState(() => _challenge = challenge);
+      if (widget.enableExpiryTicker) _startExpiryTicker();
+    } catch (error) {
+      Logger.error('Unable to create native liveness challenge: $error');
+      if (mounted) {
+        setState(() => _feedback = 'Liveness challenge unavailable');
+      }
+    }
   }
 
   void _startExpiryTicker() {
@@ -214,6 +244,10 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   }
 
   void _finishVerification() {
+    if (_challenge == null || _challenge!.isExpired) {
+      setState(() => _feedback = 'Liveness challenge unavailable');
+      return;
+    }
     _controller?.stopImageStream();
     Navigator.pushReplacement(
       context,
