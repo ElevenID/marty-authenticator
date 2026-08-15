@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   flutter-quality:
-    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@36445743268192fde0cc42019a09a71cedf202ed
+    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@f4672c65826a8f0962426a3e8401b7ff3ff3c3ad
     with:
       flutter-version: "3.44.6"
       test-command: flutter test --coverage
