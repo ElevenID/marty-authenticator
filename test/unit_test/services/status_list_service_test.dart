@@ -17,14 +17,18 @@ class _FixtureNativeAdapter implements StatusListNativeAdapter {
     String credentialStatusJson,
   ) async {
     if (fail) throw StateError('native parser rejected input');
-    final entry = jsonDecode(credentialStatusJson) as Map<String, dynamic>;
-    return [
-      NativeStatusEntry(
-        purpose: entry['statusPurpose'] as String,
-        listUrl: entry['statusListCredential'] as String,
-        entryJson: credentialStatusJson,
-      ),
-    ];
+    final decoded = jsonDecode(credentialStatusJson);
+    final entries = decoded is List ? decoded : [decoded];
+    return entries
+        .map((value) {
+          final entry = Map<String, dynamic>.from(value as Map);
+          return NativeStatusEntry(
+            purpose: entry['statusPurpose'] as String,
+            listUrl: entry['statusListCredential'] as String,
+            entryJson: jsonEncode(entry),
+          );
+        })
+        .toList(growable: false);
   }
 
   @override
@@ -42,9 +46,11 @@ class _FixtureNativeAdapter implements StatusListNativeAdapter {
 }
 
 void main() {
-  final fixture = jsonDecode(
-    File('test/fixtures/status_list_behavior.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
+  final fixture =
+      jsonDecode(
+            File('test/fixtures/status_list_behavior.json').readAsStringSync(),
+          )
+          as Map<String, dynamic>;
   final vectors = (fixture['vectors'] as List).cast<Map<String, dynamic>>();
 
   for (final vector in vectors.where((vector) => vector['asserted'] is bool)) {
@@ -71,20 +77,45 @@ void main() {
     });
   }
 
-  test('native rejection fails closed without a Python or Dart fallback', () async {
+  test(
+    'native rejection fails closed without a Python or Dart fallback',
+    () async {
+      final service = StatusListService(
+        httpClient: MockClient((_) async => http.Response('{}', 200)),
+        native: const _FixtureNativeAdapter(asserted: false, fail: true),
+      );
+      addTearDown(service.dispose);
+
+      final result = await service.checkCredentialStatus(
+        Map<String, dynamic>.from(vectors.first['entry'] as Map),
+      );
+
+      expect(result.success, isFalse);
+      expect(result.isRevoked, isNull);
+      expect(result.error, contains('native parser rejected input'));
+    },
+  );
+
+  test('object-or-array status input preserves both W3C purposes', () async {
     final service = StatusListService(
       httpClient: MockClient((_) async => http.Response('{}', 200)),
-      native: const _FixtureNativeAdapter(asserted: false, fail: true),
+      native: const _FixtureNativeAdapter(asserted: true),
     );
     addTearDown(service.dispose);
+    final revocation = Map<String, dynamic>.from(vectors.first['entry'] as Map);
+    final suspension = Map<String, dynamic>.from(revocation)
+      ..['id'] = 'https://issuer.example/status/suspension#5'
+      ..['statusPurpose'] = 'suspension'
+      ..['statusListCredential'] = 'https://issuer.example/status/suspension';
 
-    final result = await service.checkCredentialStatus(
-      Map<String, dynamic>.from(vectors.first['entry'] as Map),
-    );
+    final result = await service.checkCredentialStatus([
+      revocation,
+      suspension,
+    ]);
 
-    expect(result.success, isFalse);
-    expect(result.isRevoked, isNull);
-    expect(result.error, contains('native parser rejected input'));
+    expect(result.success, isTrue);
+    expect(result.isRevoked, isTrue);
+    expect(result.isSuspended, isTrue);
   });
 
   test('credential without status remains a successful no-op', () async {

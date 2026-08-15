@@ -10,11 +10,12 @@ import '../../services/liveness_camera_image_converter.dart';
 import '../../widgets/common/back_button.dart';
 import 'review_and_submit_view.dart';
 
-typedef LivenessChallengeFactory = Future<LivenessChallenge> Function({
-  required List<LivenessGesture> gestures,
-  required Duration ttl,
-  required String signingSecret,
-});
+typedef LivenessChallengeFactory =
+    Future<LivenessChallenge> Function({
+      required List<LivenessGesture> gestures,
+      required Duration ttl,
+      required String signingSecret,
+    });
 
 class LivenessCheckView extends StatefulWidget {
   final DocumentVerificationConfig config;

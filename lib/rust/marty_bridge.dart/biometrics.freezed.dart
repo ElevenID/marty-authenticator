@@ -812,4 +812,279 @@ as double,
 
 }
 
+/// @nodoc
+mixin _$FrbLivenessChallenge {
+
+ String get challengeId; String get nonce; String get issuedAt; String get expiresAt; List<String> get gestures; String get signature; String get nativePayload;
+/// Create a copy of FrbLivenessChallenge
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FrbLivenessChallengeCopyWith<FrbLivenessChallenge> get copyWith => _$FrbLivenessChallengeCopyWithImpl<FrbLivenessChallenge>(this as FrbLivenessChallenge, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FrbLivenessChallenge&&(identical(other.challengeId, challengeId) || other.challengeId == challengeId)&&(identical(other.nonce, nonce) || other.nonce == nonce)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&const DeepCollectionEquality().equals(other.gestures, gestures)&&(identical(other.signature, signature) || other.signature == signature)&&(identical(other.nativePayload, nativePayload) || other.nativePayload == nativePayload));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,challengeId,nonce,issuedAt,expiresAt,const DeepCollectionEquality().hash(gestures),signature,nativePayload);
+
+@override
+String toString() {
+  return 'FrbLivenessChallenge(challengeId: $challengeId, nonce: $nonce, issuedAt: $issuedAt, expiresAt: $expiresAt, gestures: $gestures, signature: $signature, nativePayload: $nativePayload)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FrbLivenessChallengeCopyWith<$Res>  {
+  factory $FrbLivenessChallengeCopyWith(FrbLivenessChallenge value, $Res Function(FrbLivenessChallenge) _then) = _$FrbLivenessChallengeCopyWithImpl;
+@useResult
+$Res call({
+ String challengeId, String nonce, String issuedAt, String expiresAt, List<String> gestures, String signature, String nativePayload
+});
+
+
+
+
+}
+/// @nodoc
+class _$FrbLivenessChallengeCopyWithImpl<$Res>
+    implements $FrbLivenessChallengeCopyWith<$Res> {
+  _$FrbLivenessChallengeCopyWithImpl(this._self, this._then);
+
+  final FrbLivenessChallenge _self;
+  final $Res Function(FrbLivenessChallenge) _then;
+
+/// Create a copy of FrbLivenessChallenge
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? challengeId = null,Object? nonce = null,Object? issuedAt = null,Object? expiresAt = null,Object? gestures = null,Object? signature = null,Object? nativePayload = null,}) {
+  return _then(_self.copyWith(
+challengeId: null == challengeId ? _self.challengeId : challengeId // ignore: cast_nullable_to_non_nullable
+as String,nonce: null == nonce ? _self.nonce : nonce // ignore: cast_nullable_to_non_nullable
+as String,issuedAt: null == issuedAt ? _self.issuedAt : issuedAt // ignore: cast_nullable_to_non_nullable
+as String,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as String,gestures: null == gestures ? _self.gestures : gestures // ignore: cast_nullable_to_non_nullable
+as List<String>,signature: null == signature ? _self.signature : signature // ignore: cast_nullable_to_non_nullable
+as String,nativePayload: null == nativePayload ? _self.nativePayload : nativePayload // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FrbLivenessChallenge].
+extension FrbLivenessChallengePatterns on FrbLivenessChallenge {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FrbLivenessChallenge value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FrbLivenessChallenge value)  $default,){
+final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge():
+return $default(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FrbLivenessChallenge value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String challengeId,  String nonce,  String issuedAt,  String expiresAt,  List<String> gestures,  String signature,  String nativePayload)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge() when $default != null:
+return $default(_that.challengeId,_that.nonce,_that.issuedAt,_that.expiresAt,_that.gestures,_that.signature,_that.nativePayload);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String challengeId,  String nonce,  String issuedAt,  String expiresAt,  List<String> gestures,  String signature,  String nativePayload)  $default,) {final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge():
+return $default(_that.challengeId,_that.nonce,_that.issuedAt,_that.expiresAt,_that.gestures,_that.signature,_that.nativePayload);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String challengeId,  String nonce,  String issuedAt,  String expiresAt,  List<String> gestures,  String signature,  String nativePayload)?  $default,) {final _that = this;
+switch (_that) {
+case _FrbLivenessChallenge() when $default != null:
+return $default(_that.challengeId,_that.nonce,_that.issuedAt,_that.expiresAt,_that.gestures,_that.signature,_that.nativePayload);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _FrbLivenessChallenge implements FrbLivenessChallenge {
+  const _FrbLivenessChallenge({required this.challengeId, required this.nonce, required this.issuedAt, required this.expiresAt, required final  List<String> gestures, required this.signature, required this.nativePayload}): _gestures = gestures;
+  
+
+@override final  String challengeId;
+@override final  String nonce;
+@override final  String issuedAt;
+@override final  String expiresAt;
+ final  List<String> _gestures;
+@override List<String> get gestures {
+  if (_gestures is EqualUnmodifiableListView) return _gestures;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_gestures);
+}
+
+@override final  String signature;
+@override final  String nativePayload;
+
+/// Create a copy of FrbLivenessChallenge
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FrbLivenessChallengeCopyWith<_FrbLivenessChallenge> get copyWith => __$FrbLivenessChallengeCopyWithImpl<_FrbLivenessChallenge>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FrbLivenessChallenge&&(identical(other.challengeId, challengeId) || other.challengeId == challengeId)&&(identical(other.nonce, nonce) || other.nonce == nonce)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&const DeepCollectionEquality().equals(other._gestures, _gestures)&&(identical(other.signature, signature) || other.signature == signature)&&(identical(other.nativePayload, nativePayload) || other.nativePayload == nativePayload));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,challengeId,nonce,issuedAt,expiresAt,const DeepCollectionEquality().hash(_gestures),signature,nativePayload);
+
+@override
+String toString() {
+  return 'FrbLivenessChallenge(challengeId: $challengeId, nonce: $nonce, issuedAt: $issuedAt, expiresAt: $expiresAt, gestures: $gestures, signature: $signature, nativePayload: $nativePayload)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FrbLivenessChallengeCopyWith<$Res> implements $FrbLivenessChallengeCopyWith<$Res> {
+  factory _$FrbLivenessChallengeCopyWith(_FrbLivenessChallenge value, $Res Function(_FrbLivenessChallenge) _then) = __$FrbLivenessChallengeCopyWithImpl;
+@override @useResult
+$Res call({
+ String challengeId, String nonce, String issuedAt, String expiresAt, List<String> gestures, String signature, String nativePayload
+});
+
+
+
+
+}
+/// @nodoc
+class __$FrbLivenessChallengeCopyWithImpl<$Res>
+    implements _$FrbLivenessChallengeCopyWith<$Res> {
+  __$FrbLivenessChallengeCopyWithImpl(this._self, this._then);
+
+  final _FrbLivenessChallenge _self;
+  final $Res Function(_FrbLivenessChallenge) _then;
+
+/// Create a copy of FrbLivenessChallenge
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? challengeId = null,Object? nonce = null,Object? issuedAt = null,Object? expiresAt = null,Object? gestures = null,Object? signature = null,Object? nativePayload = null,}) {
+  return _then(_FrbLivenessChallenge(
+challengeId: null == challengeId ? _self.challengeId : challengeId // ignore: cast_nullable_to_non_nullable
+as String,nonce: null == nonce ? _self.nonce : nonce // ignore: cast_nullable_to_non_nullable
+as String,issuedAt: null == issuedAt ? _self.issuedAt : issuedAt // ignore: cast_nullable_to_non_nullable
+as String,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as String,gestures: null == gestures ? _self._gestures : gestures // ignore: cast_nullable_to_non_nullable
+as List<String>,signature: null == signature ? _self.signature : signature // ignore: cast_nullable_to_non_nullable
+as String,nativePayload: null == nativePayload ? _self.nativePayload : nativePayload // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
 // dart format on

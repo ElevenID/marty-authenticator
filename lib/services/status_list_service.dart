@@ -136,7 +136,7 @@ class StatusListService {
        _native = native;
 
   Future<StatusCheckResult> checkCredentialStatus(
-    Map<String, dynamic>? credentialStatus,
+    Object? credentialStatus,
   ) async {
     if (credentialStatus == null) {
       return StatusCheckResult.noStatusEntry();
@@ -171,13 +171,11 @@ class StatusListService {
     }
   }
 
-  Future<bool?> checkRevocationStatus(
-    Map<String, dynamic>? credentialStatus,
-  ) async => (await checkCredentialStatus(credentialStatus)).isRevoked;
+  Future<bool?> checkRevocationStatus(Object? credentialStatus) async =>
+      (await checkCredentialStatus(credentialStatus)).isRevoked;
 
-  Future<bool?> checkSuspensionStatus(
-    Map<String, dynamic>? credentialStatus,
-  ) async => (await checkCredentialStatus(credentialStatus)).isSuspended;
+  Future<bool?> checkSuspensionStatus(Object? credentialStatus) async =>
+      (await checkCredentialStatus(credentialStatus)).isSuspended;
 
   Future<String> _getStatusListCredential(String url) async {
     final cached = _cache[url];
@@ -194,7 +192,9 @@ class StatusListService {
     }
     final decoded = jsonDecode(response.body);
     if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('Status-list credential must be a JSON object');
+      throw const FormatException(
+        'Status-list credential must be a JSON object',
+      );
     }
     final credentialJson = jsonEncode(decoded);
     _cache[url] = _CachedStatusList(

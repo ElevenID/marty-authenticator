@@ -8,8 +8,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'biometrics.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `build_provider`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`
+// These functions are ignored because they are not marked as `pub`: `build_provider`, `gesture_prompt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// Verify that a probe face image matches a reference face image.
 ///
@@ -50,6 +50,40 @@ Future<FrbAgeEstimate> estimateFaceAge({
   modelsDir: modelsDir,
 );
 
+/// Create and sign an active-liveness challenge in Rust.
+FrbLivenessChallenge createLivenessChallenge({
+  required List<String> gestures,
+  required BigInt ttlSeconds,
+  required String signingSecret,
+}) => RustLib.instance.api.crateBiometricsCreateLivenessChallenge(
+  gestures: gestures,
+  ttlSeconds: ttlSeconds,
+  signingSecret: signingSecret,
+);
+
+/// Verify a canonical active-liveness challenge and fail closed on expiry,
+/// tampering, malformed input, or a wrong key.
+bool verifyLivenessChallenge({
+  required String nativePayload,
+  required String signingSecret,
+}) => RustLib.instance.api.crateBiometricsVerifyLivenessChallenge(
+  nativePayload: nativePayload,
+  signingSecret: signingSecret,
+);
+
+/// Apply the canonical active-liveness gesture threshold policy.
+bool evaluateLivenessGesture({
+  required String gesture,
+  double? smilingProbability,
+  double? headEulerAngleX,
+  double? headEulerAngleY,
+}) => RustLib.instance.api.crateBiometricsEvaluateLivenessGesture(
+  gesture: gesture,
+  smilingProbability: smilingProbability,
+  headEulerAngleX: headEulerAngleX,
+  headEulerAngleY: headEulerAngleY,
+);
+
 /// Age estimation result.
 @freezed
 sealed class FrbAgeEstimate with _$FrbAgeEstimate {
@@ -88,4 +122,18 @@ sealed class FrbFaceQuality with _$FrbFaceQuality {
     required double faceSize,
     required double pose,
   }) = _FrbFaceQuality;
+}
+
+/// Signed active-liveness challenge created by the canonical biometric kernel.
+@freezed
+sealed class FrbLivenessChallenge with _$FrbLivenessChallenge {
+  const factory FrbLivenessChallenge({
+    required String challengeId,
+    required String nonce,
+    required String issuedAt,
+    required String expiresAt,
+    required List<String> gestures,
+    required String signature,
+    required String nativePayload,
+  }) = _FrbLivenessChallenge;
 }
