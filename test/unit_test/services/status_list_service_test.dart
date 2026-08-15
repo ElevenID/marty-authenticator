@@ -9,8 +9,13 @@ import 'package:marty_authenticator/services/status_list_service.dart';
 class _FixtureNativeAdapter implements StatusListNativeAdapter {
   final bool asserted;
   final bool fail;
+  final String? decisionPurpose;
 
-  const _FixtureNativeAdapter({required this.asserted, this.fail = false});
+  const _FixtureNativeAdapter({
+    required this.asserted,
+    this.fail = false,
+    this.decisionPurpose,
+  });
 
   @override
   Future<List<NativeStatusEntry>> parseEntries(
@@ -39,7 +44,7 @@ class _FixtureNativeAdapter implements StatusListNativeAdapter {
     if (fail) throw StateError('native evaluator rejected input');
     final entry = jsonDecode(entryJson) as Map<String, dynamic>;
     return NativeStatusDecision(
-      purpose: entry['statusPurpose'] as String,
+      purpose: decisionPurpose ?? entry['statusPurpose'] as String,
       asserted: asserted,
     );
   }
@@ -129,5 +134,64 @@ void main() {
     expect(result.success, isTrue);
     expect(result.isRevoked, isNull);
     expect(result.isSuspended, isNull);
+  });
+
+  test(
+    'compatibility helpers preserve status semantics and cache control',
+    () async {
+      var requests = 0;
+      final service = StatusListService(
+        httpClient: MockClient((_) async {
+          requests++;
+          return http.Response('{}', 200);
+        }),
+        native: const _FixtureNativeAdapter(asserted: true),
+      );
+      addTearDown(service.dispose);
+      final entry = Map<String, dynamic>.from(vectors.first['entry'] as Map);
+
+      expect(await service.checkRevocationStatus(entry), isTrue);
+      expect(await service.checkSuspensionStatus(entry), isNull);
+      expect(StatusCheckResult.success(isSuspended: true).isInvalid, isTrue);
+      expect(StatusCheckResult.success(isRevoked: false).isInvalid, isFalse);
+      expect(requests, 1);
+
+      service.clearCache();
+      expect(await service.checkRevocationStatus(entry), isTrue);
+      expect(requests, 2);
+    },
+  );
+
+  test('unsupported native purpose fails closed', () async {
+    final service = StatusListService(
+      httpClient: MockClient((_) async => http.Response('{}', 200)),
+      native: const _FixtureNativeAdapter(
+        asserted: false,
+        decisionPurpose: 'message',
+      ),
+    );
+    addTearDown(service.dispose);
+
+    final result = await service.checkCredentialStatus(
+      Map<String, dynamic>.from(vectors.first['entry'] as Map),
+    );
+
+    expect(result.success, isFalse);
+    expect(result.error, contains('unsupported status purpose'));
+  });
+
+  test('status endpoint failures remain invalid native operations', () async {
+    final service = StatusListService(
+      httpClient: MockClient((_) async => http.Response('unavailable', 503)),
+      native: const _FixtureNativeAdapter(asserted: false),
+    );
+    addTearDown(service.dispose);
+
+    final result = await service.checkCredentialStatus(
+      Map<String, dynamic>.from(vectors.first['entry'] as Map),
+    );
+
+    expect(result.success, isFalse);
+    expect(result.error, contains('endpoint returned 503'));
   });
 }
