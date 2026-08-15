@@ -5,7 +5,7 @@ edition = "2021"
 description = "Flutter bridge to marty-verification for credential operations"
 license = "AGPL-3.0-only"
 repository = "https://github.com/ElevenID/marty-authenticator"
-rust-version = "1.95"
+rust-version = "1.87"
 
 [lib]
 name = "marty_authenticator_bridge"
@@ -13,20 +13,20 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8" }
-marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8" }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
-marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8" }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
 
 # Sync for policy caching
 marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "6c07332551081d531260c0ffe3469f231bbdb0ec" }
 
 # Biometric face verification (ONNX-backed for on-device matching)
-marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8", features = ["native", "onnx", "liveness"] }
-marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "54ff554906f5fa2791b7fcb6a5965d7e8db8b0e8" }
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", features = ["native", "onnx", "liveness"] }
+marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "19f5d8c747da3e8422f53a47f311b59c147c3f22" }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.12.0"
