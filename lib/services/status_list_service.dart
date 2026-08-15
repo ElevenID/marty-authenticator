@@ -131,9 +131,8 @@ class StatusListService {
 
   StatusListService({
     http.Client? httpClient,
-    StatusListNativeAdapter native = const RustStatusListNativeAdapter(),
-  }) : _httpClient = httpClient ?? http.Client(),
-       _native = native;
+    this._native = const RustStatusListNativeAdapter(),
+  }) : _httpClient = httpClient ?? http.Client();
 
   Future<StatusCheckResult> checkCredentialStatus(
     Object? credentialStatus,
