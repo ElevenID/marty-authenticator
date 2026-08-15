@@ -65,7 +65,7 @@ class LivenessChallenge {
   }) async {
     final native = rust_biometrics.createLivenessChallenge(
       gestures: gestures.map((gesture) => gesture.name).toList(growable: false),
-      ttlSeconds: ttl.inSeconds,
+      ttlSeconds: BigInt.from(ttl.inSeconds),
       signingSecret: signingSecret,
     );
     return LivenessChallenge(
