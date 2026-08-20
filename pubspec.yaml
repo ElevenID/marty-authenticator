@@ -47,7 +47,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.4.2
-  flutter_secure_storage: ^10.3.1
+  flutter_secure_storage: ^11.0.0
   flutter_svg: ^2.0.16
   flutter_zxing: ^2.1.0
   font_awesome_flutter: ^11.0.0
@@ -71,7 +71,7 @@ dependencies:
   package_info_plus: ^10.2.1
   # v13 requires Android API 37, which is not yet in the stable SDK channel.
   # Track the coordinated upgrade in issue #25.
-  permission_handler: 12.0.3
+  permission_handler: 13.0.1
   pointycastle: ^3.9.1
   shared_preferences: ^2.3.2
   simple_icons: ^16.23.0
@@ -95,7 +95,7 @@ dev_dependencies:
   # flutter_rust_bridge 2.12.0 strips a generated support struct with a regex
   # that is incompatible with ffigen 21's allocator constructors. Keep this
   # pinned until upstream issue #3350 is fixed.
-  ffigen: 20.1.1
+  ffigen: 21.0.0
   camera_platform_interface: ^2.13.1
   build_runner: ^2.4.13
   dependency_validator: ^5.0.5
