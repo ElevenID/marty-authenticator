@@ -47,19 +47,19 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.4.2
-  flutter_secure_storage: ^10.3.1
+  flutter_secure_storage: ^11.0.0
   flutter_svg: ^2.0.16
   flutter_zxing: ^2.1.0
   font_awesome_flutter: ^11.0.0
   getwidget: ^7.0.0
-  google_mlkit_face_detection: ^0.14.0
+  google_mlkit_face_detection: ^0.15.1
   hex: ^0.2.0
   home_widget: ^0.9.3
   http: ^1.6.0
-  image: ^4.3.0
+  image: ^4.9.2
   image_cropper: ^12.2.1
   image_picker: ^1.1.2
-  intl: ^0.20.2
+  intl: ^0.20.3
   json_annotation: ^4.9.0
   local_auth: ^3.0.0
   local_auth_android: ^2.0.0
@@ -71,7 +71,7 @@ dependencies:
   package_info_plus: ^10.2.1
   # v13 requires Android API 37, which is not yet in the stable SDK channel.
   # Track the coordinated upgrade in issue #25.
-  permission_handler: 12.0.3
+  permission_handler: 13.0.1
   pointycastle: ^3.9.1
   shared_preferences: ^2.3.2
   simple_icons: ^16.23.0
@@ -81,7 +81,7 @@ dependencies:
 
   # SpruceID integration dependencies - Real SDK libraries
   ffi: ^2.1.2 # For native library integration
-  flutter_rust_bridge: ^2.12.0 # Keep Dart and Rust bridge runtimes ABI-aligned
+  flutter_rust_bridge: ^2.13.0 # Keep Dart and Rust bridge runtimes ABI-aligned
   freezed_annotation: 3.1.0 # Runtime annotations for generated bridge models
   cbor: ^6.3.7 # For mDoc CBOR encoding/decoding
   dart_jsonwebtoken: ^3.1.1 # For JWT handling in VCs
@@ -95,11 +95,11 @@ dev_dependencies:
   # flutter_rust_bridge 2.12.0 strips a generated support struct with a regex
   # that is incompatible with ffigen 21's allocator constructors. Keep this
   # pinned until upstream issue #3350 is fixed.
-  ffigen: 20.1.1
+  ffigen: 21.0.0
   camera_platform_interface: ^2.13.1
-  build_runner: ^2.4.13
-  dependency_validator: ^5.0.5
-  freezed: 3.2.5 # Required by pinned flutter_rust_bridge code generation
+  build_runner: ^2.16.0
+  dependency_validator: ^5.0.6
+  freezed: 4.0.0 # Required by pinned flutter_rust_bridge code generation
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_test:
@@ -107,7 +107,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   json_serializable: ^6.14.1
-  mockito: ^5.4.4
+  mockito: ^5.8.1
 
 # Dependency overrides to address WASM compatibility issues
 dependency_overrides:
