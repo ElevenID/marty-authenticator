@@ -63,18 +63,16 @@ jobs:
         run: flutter pub get --enforce-lockfile
 
       - name: Install pinned bridge generator
-        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+        run: cargo install flutter_rust_bridge_codegen --version 2.13.0 --locked
 
       - name: Generate bridge surfaces
         run: flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml
 
-      - name: Test native wallet routing and validation
-        run: cargo test --locked --manifest-path rust/Cargo.toml --lib wallet_
+      - name: Analyze generated bridge types
+        run: dart analyze lib/rust/marty_bridge.dart
 
-      - name: Test native status-list and liveness behavior
-        run: |
-          cargo test --locked --manifest-path rust/Cargo.toml --lib status::tests
-          cargo test --locked --manifest-path rust/Cargo.toml --lib liveness_tests
+      - name: Test native bridge behavior and lifecycle
+        run: cargo test --locked --manifest-path rust/Cargo.toml --lib
 
       - name: Upload generated bridge surfaces
         if: always()

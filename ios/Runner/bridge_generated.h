@@ -380,6 +380,8 @@ void frbgen_marty_authenticator_wire__crate__api__rank_matching_credentials(int6
                                                                             struct wire_cst_list_prim_u_8_strict *policy_json,
                                                                             struct wire_cst_list_rankable_credential_input *credentials);
 
+void frbgen_marty_authenticator_wire__crate__biometrics__shutdown_biometrics(int64_t port_);
+
 void frbgen_marty_authenticator_wire__crate__api__sync_policies(int64_t port_,
                                                                 struct wire_cst_list_prim_u_8_strict *license_jwt,
                                                                 struct wire_cst_list_prim_u_8_strict *endpoint);
@@ -593,6 +595,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__evaluate_liveness_gesture);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__shutdown_biometrics);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__status__evaluate_bitstring_status);
