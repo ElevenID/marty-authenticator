@@ -14,6 +14,40 @@ fn issuer_metadata_conversion_requires_a_resolved_token_endpoint() {
     assert_eq!(converted.token_endpoint, "https://as.example/custom-token");
 }
 
+#[test]
+fn authorization_request_keeps_configuration_redirect_and_pkce() {
+    let metadata = json!({
+        "credential_issuer": "https://issuer.example",
+        "token_endpoint": "https://as.example/token",
+        "credential_endpoint": "https://issuer.example/credential",
+        "authorization_endpoint": "https://as.example/authorize",
+        "grant_types_supported": ["authorization_code"],
+        "credential_configurations_json": "{}"
+    });
+    let request = wallet_build_auth_request(
+        metadata.to_string(),
+        "EmployeeCredential".into(),
+        "wallet".into(),
+        "https://wallet.example/callback".into(),
+        Some("issuer-state".into()),
+    )
+    .unwrap();
+    let url = url::Url::parse(&request.authorization_url).unwrap();
+    assert_eq!(url.host_str(), Some("as.example"));
+    assert_eq!(url.path(), "/authorize");
+    let query: std::collections::HashMap<_, _> = url.query_pairs().into_owned().collect();
+    assert_eq!(query["redirect_uri"], request.redirect_uri);
+    assert_eq!(query["state"], request.state);
+    assert_eq!(query["issuer_state"], "issuer-state");
+    assert_eq!(query["code_challenge_method"], "S256");
+    assert!(!request.code_verifier.is_empty());
+    let details: serde_json::Value = serde_json::from_str(&query["authorization_details"]).unwrap();
+    assert_eq!(
+        details[0]["credential_configuration_id"],
+        "EmployeeCredential"
+    );
+}
+
 fn encode_query_json(value: &str) -> String {
     url::form_urlencoded::byte_serialize(value.as_bytes()).collect()
 }

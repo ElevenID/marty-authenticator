@@ -1,0 +1,44 @@
+name: Reusable dependency review
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v4
+        if: github.event_name == 'pull_request'
+        with:
+          fail-on-severity: moderate
+          deny-licenses: >-
+            AGPL-1.0-only, AGPL-1.0-or-later,
+            AGPL-3.0-only, AGPL-3.0-or-later,
+            SSPL-1.0, BUSL-1.1
+          # GitHub's Pub dependency snapshots currently emit lowercase SPDX
+          # identifiers for these packages. Limit the exception to their exact
+          # package URLs; vulnerability and denied-license checks still apply.
+          # flutter_rust_bridge 2.13.0 was verified against its shipped MIT LICENSE.
+          # GitHub reports it as lowercase "mit". Restrict this addition to that version.
+          # Owner: ElevenID security. Review/remove by 2026-11-01.
+          allow-dependencies-licenses: >-
+            pkg:pub/flutter_rust_bridge@2.13.0,
+            pkg:pub/listen,
+            pkg:pub/permission_handler,
+            pkg:pub/permission_handler_android,
+            pkg:pub/permission_handler_apple,
+            pkg:pub/permission_handler_html,
+            pkg:pub/permission_handler_platform_interface,
+            pkg:pub/permission_handler_windows,
+            pkg:pub/win32
+          retry-on-snapshot-warnings: true
+          retry-on-snapshot-warnings-timeout: 600
