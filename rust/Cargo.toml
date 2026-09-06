@@ -17,7 +17,7 @@ marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "56cc26c2
 marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "56cc26c23ca2de73092ea03d7069f8f9f88914a2", default-features = false, features = ["iaca", "csca"] }
 marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "56cc26c23ca2de73092ea03d7069f8f9f88914a2" }
 
-# OID4VCI/VP wallet (holder) â€” no issuer or verifier features
+# OID4VCI/VP wallet (holder) — no issuer or verifier features
 marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "56cc26c23ca2de73092ea03d7069f8f9f88914a2", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "56cc26c23ca2de73092ea03d7069f8f9f88914a2" }
 
