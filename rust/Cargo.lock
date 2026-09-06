@@ -4245,7 +4245,7 @@ dependencies = [
 [[package]]
 name = "marty-biometrics"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -4264,7 +4264,7 @@ dependencies = [
 [[package]]
 name = "marty-crypto"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -4311,7 +4311,7 @@ dependencies = [
 [[package]]
 name = "marty-iso18013"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4337,7 +4337,7 @@ dependencies = [
 [[package]]
 name = "marty-oid4vci"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -4369,7 +4369,7 @@ dependencies = [
 [[package]]
 name = "marty-secure-storage"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
@@ -4393,7 +4393,7 @@ dependencies = [
 [[package]]
 name = "marty-status"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "base64 0.22.1",
  "flate2",
@@ -4405,7 +4405,7 @@ dependencies = [
 [[package]]
 name = "marty-sync"
 version = "0.1.4"
-source = "git+https://github.com/ElevenID/marty-verifier?rev=71b68cabea7cd94d16687098660560eef8da518a#71b68cabea7cd94d16687098660560eef8da518a"
+source = "git+https://github.com/ElevenID/marty-verifier?rev=8d410be68859ecff5c09f2c5663760556f0b4e05#8d410be68859ecff5c09f2c5663760556f0b4e05"
 dependencies = [
  "base64 0.22.1",
  "blake3",
@@ -4428,7 +4428,7 @@ dependencies = [
 [[package]]
 name = "marty-types"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "chrono",
  "serde",
@@ -4439,7 +4439,7 @@ dependencies = [
 [[package]]
 name = "marty-verification"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -4500,7 +4500,7 @@ dependencies = [
 [[package]]
 name = "marty-zkp"
 version = "0.1.61"
-source = "git+https://github.com/ElevenID/marty-core?rev=d0d91717fa49f7d1a70c26d691d4fd617643032f#d0d91717fa49f7d1a70c26d691d4fd617643032f"
+source = "git+https://github.com/ElevenID/marty-core?rev=56cc26c23ca2de73092ea03d7069f8f9f88914a2#56cc26c23ca2de73092ea03d7069f8f9f88914a2"
 dependencies = [
  "bindgen",
  "cc",
