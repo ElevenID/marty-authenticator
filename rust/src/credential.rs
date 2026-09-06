@@ -293,18 +293,13 @@ pub struct SelectableCredential {
 }
 
 /// Privacy level for credential presentation.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PrivacyLevel {
     /// Disclose all claims
     Full,
     /// Disclose only required claims
+    #[default]
     Minimal,
     /// Custom claim selection
     Custom,
-}
-
-impl Default for PrivacyLevel {
-    fn default() -> Self {
-        PrivacyLevel::Minimal
-    }
 }

@@ -10,8 +10,8 @@ dependencies:
     decision: upgrade
     advisories: []
     tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/25
-    review-after: 2026-09-01
-    rationale: Version 13 requires compileSdk 37, which the stable Android SDK channel used by hosted CI does not publish yet.
+    review-after: 2026-10-01
+    rationale: Rechecked 2026-09-06 against the upstream changelog and Google's repository2-3.xml; version 13 requires compileSdk 37 and platforms;android-37 is still absent. Retain 12.0.3 until the SDK and permission behavior migration can be validated together.
   - package: flutter_secure_storage_web
     ecosystem: pub
     owner: ElevenID

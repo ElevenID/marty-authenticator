@@ -8,6 +8,8 @@
 
 mod frb_generated; /* AUTO INJECTED BY flutter_rust_bridge. This line may not be accurate, and you can change it according to your needs. */
 
+mod operations;
+
 pub mod api;
 pub mod biometrics;
 pub mod credential;
