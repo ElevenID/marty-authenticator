@@ -22,7 +22,7 @@ marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "f099f87
 marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54" }
 
 # Sync for policy caching
-marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "6c07332551081d531260c0ffe3469f231bbdb0ec" }
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "91b58e78e79e4954ee867d765a429aaa82e22c42" }
 
 # Biometric face verification (ONNX-backed for on-device matching)
 marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "f099f8779ca51a9dfa9a62970538c66f9c812c54", features = ["native", "onnx", "liveness"] }

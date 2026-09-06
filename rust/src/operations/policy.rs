@@ -11,23 +11,10 @@ pub(crate) async fn sync_policies(
     use marty_sync::PolicySyncProvider;
 
     let provider = PolicySyncProvider::new(endpoint, license_jwt);
-    let policies = provider
+    provider
         .fetch_all()
         .await
-        .map_err(|e| anyhow::anyhow!("Policy sync failed: {}", e))?;
-
-    // marty-sync is released independently from marty-core. Keep this boundary
-    // as serialization-only DTO mapping so the mobile bridge exposes the
-    // canonical core type without reproducing policy behavior.
-    policies
-        .into_iter()
-        .map(|policy| {
-            let value = serde_json::to_value(policy)
-                .map_err(|e| anyhow::anyhow!("Failed to map synced policy: {e}"))?;
-            serde_json::from_value(value)
-                .map_err(|e| anyhow::anyhow!("Synced policy is incompatible with core: {e}"))
-        })
-        .collect()
+        .map_err(|e| anyhow::anyhow!("Policy sync failed: {}", e))
 }
 
 pub(crate) fn evaluate_presentation_request(
@@ -154,4 +141,103 @@ pub(crate) fn check_issuer_constraints(
         is_trusted: result.is_trusted(),
         violation_message: result.violation_message().map(String::from),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn synced_policy_values_reach_the_bridge_without_remapping() {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let endpoint = format!("http://{}", listener.local_addr().unwrap());
+        let body = serde_json::json!([{
+            "id":"fixture", "name":"Policy", "description":null, "purpose":"test",
+            "accepted_credential_types":["example"], "required_claims":[], "holder_binding":"none",
+            "trust_profile_id":null, "allowed_issuers":[],
+            "freshness_requirements":{"max_credential_age_seconds":null,"max_proof_age_seconds":300,"require_live_revocation_check":false},
+            "prefer_predicates":true,"single_presentation":false,"derived_attribute_preferences":{},
+            "credential_ranking_strategy":"freshest_first","credential_ranking_weights":{},
+            "metadata":{"nested":[1,true,"value"]},"version":7
+        }]).to_string();
+        let server = std::thread::spawn(move || {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+            let mut stream = loop {
+                match listener.accept() {
+                    Ok((stream, _)) => break stream,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        assert!(std::time::Instant::now() < deadline, "no local request");
+                        std::thread::sleep(std::time::Duration::from_millis(5));
+                    }
+                    Err(error) => panic!("accept: {error}"),
+                }
+            };
+            stream
+                .set_read_timeout(Some(std::time::Duration::from_secs(5)))
+                .unwrap();
+            let mut request = Vec::new();
+            while !request.ends_with(b"\r\n\r\n") {
+                let mut byte = [0];
+                stream.read_exact(&mut byte).unwrap();
+                request.push(byte[0]);
+                assert!(request.len() < 8192);
+            }
+            write!(stream, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", body.len(), body).unwrap();
+            String::from_utf8(request).unwrap()
+        });
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let policies = runtime.block_on(async {
+            tokio::time::timeout(
+                std::time::Duration::from_secs(5),
+                super::sync_policies("fixture-token".into(), endpoint),
+            )
+            .await
+            .unwrap()
+            .unwrap()
+        });
+        assert_eq!(policies.len(), 1);
+        assert_eq!(policies[0].id, "fixture");
+        assert_eq!(policies[0].version, 7);
+        assert_eq!(
+            policies[0].metadata["nested"],
+            serde_json::json!([1, true, "value"])
+        );
+        let request = server.join().unwrap();
+        assert!(request.starts_with("GET /api/v1/identity/presentation-policies/sync "));
+        assert!(request
+            .to_ascii_lowercase()
+            .contains("authorization: bearer fixture-token"));
+    }
+
+    #[test]
+    fn synced_policies_use_the_bridge_core_type_directly() {
+        fn same_type<
+            F: std::future::Future<
+                Output = Result<
+                    Vec<marty_verification::policy::PresentationPolicy>,
+                    marty_sync::SyncError,
+                >,
+            >,
+        >(
+            _: F,
+        ) {
+        }
+        let provider = marty_sync::PolicySyncProvider::new("invalid URL".into(), String::new());
+        same_type(provider.fetch_all());
+    }
+
+    #[test]
+    fn sync_errors_retain_bridge_context() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let error = runtime
+            .block_on(super::sync_policies(String::new(), "invalid URL".into()))
+            .unwrap_err();
+        assert!(error.to_string().starts_with("Policy sync failed:"));
+    }
 }
