@@ -44,11 +44,17 @@ pub(crate) async fn wallet_fetch_issuer_metadata(
     issuer_url: String,
 ) -> anyhow::Result<FrbIssuerMetadata> {
     let engine = marty_oid4vci::WalletEngine::new();
-    let meta = engine
+    let mut meta = engine
         .fetch_issuer_metadata(&issuer_url)
         .await
         .map_err(|e| anyhow::anyhow!("Issuer metadata fetch error: {}", e))?;
-    Ok(FrbIssuerMetadata::from(meta))
+    meta.token_endpoint = Some(
+        engine
+            .resolve_token_endpoint(&meta)
+            .await
+            .map_err(|e| anyhow::anyhow!("Token endpoint discovery error: {}", e))?,
+    );
+    FrbIssuerMetadata::try_from(meta)
 }
 
 pub(crate) async fn wallet_exchange_pre_auth_token(
@@ -75,6 +81,7 @@ pub(crate) fn wallet_build_auth_request(
         .map_err(|e| anyhow::anyhow!("Invalid issuer_metadata_json: {}", e))?;
     let meta = marty_oid4vci::IssuerMetadata {
         credential_issuer: frb_meta.credential_issuer.clone(),
+        authorization_servers: Vec::new(),
         token_endpoint: Some(frb_meta.token_endpoint.clone()),
         nonce_endpoint: None,
         credential_endpoint: frb_meta.credential_endpoint.clone(),
@@ -155,18 +162,165 @@ pub(crate) async fn wallet_request_credential(
     proof_jwt: String,
 ) -> anyhow::Result<FrbCredentialResponse> {
     use marty_oid4vci::types::CredentialFormat;
-    let format = CredentialFormat::from_str_loose(&credential_format)
+    CredentialFormat::from_str_loose(&credential_format)
         .ok_or_else(|| anyhow::anyhow!("Unknown credential format: {}", credential_format))?;
+    let configuration_id = credential_configuration_id
+        .as_deref()
+        .filter(|id| !id.trim().is_empty())
+        .ok_or_else(|| anyhow::anyhow!("Credential configuration ID is required"))?;
     let engine = marty_oid4vci::WalletEngine::new();
     let resp = engine
         .request_credential(
             &credential_endpoint,
             &access_token,
-            &format,
-            credential_configuration_id.as_deref(),
+            configuration_id,
             &proof_jwt,
         )
         .await
         .map_err(|e| anyhow::anyhow!("Credential request error: {}", e))?;
     Ok(FrbCredentialResponse::from(resp))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::{json, Value};
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    fn run(future: impl std::future::Future<Output = ()>) {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(async {
+                tokio::time::timeout(std::time::Duration::from_secs(10), future)
+                    .await
+                    .expect("local wallet test timed out")
+            });
+    }
+
+    async fn server(
+        responses: impl FnOnce(&str) -> Vec<Value>,
+    ) -> (String, tokio::task::JoinHandle<Vec<(String, Value)>>) {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let responses = responses(&base);
+        let task = tokio::spawn(async move {
+            let mut requests = Vec::new();
+            for response in responses {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut header = Vec::new();
+                while !header.ends_with(b"\r\n\r\n") {
+                    header.push(stream.read_u8().await.unwrap());
+                    assert!(header.len() < 8192);
+                }
+                let header = String::from_utf8(header).unwrap();
+                let length = header
+                    .lines()
+                    .find_map(|line| {
+                        let (name, value) = line.split_once(':')?;
+                        name.eq_ignore_ascii_case("content-length")
+                            .then(|| value.trim().parse::<usize>().unwrap())
+                    })
+                    .unwrap_or(0);
+                assert!(length < 65536);
+                let mut body = vec![0; length];
+                stream.read_exact(&mut body).await.unwrap();
+                requests.push((
+                    header,
+                    if body.is_empty() {
+                        Value::Null
+                    } else {
+                        serde_json::from_slice(&body).unwrap()
+                    },
+                ));
+                let body = response.to_string();
+                let response = format!("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len());
+                stream.write_all(response.as_bytes()).await.unwrap();
+            }
+            requests
+        });
+        (base, task)
+    }
+
+    #[test]
+    fn metadata_discovers_authorization_server_and_preserves_legacy_endpoint() {
+        run(async {
+            for legacy in [false, true] {
+                let (base, requests) = server(|base| {
+                    let mut metadata = json!({
+                        "credential_issuer": base,
+                        "credential_endpoint": format!("{base}/credential"),
+                        "authorization_servers": [format!("{base}/oauth")]
+                    });
+                    if legacy {
+                        metadata["token_endpoint"] = json!(format!("{base}/custom-token"));
+                        vec![metadata]
+                    } else {
+                        vec![metadata, json!({"issuer": format!("{base}/oauth"), "token_endpoint": format!("{base}/custom-token")})]
+                    }
+                }).await;
+                let metadata = wallet_fetch_issuer_metadata(base.clone()).await.unwrap();
+                assert_eq!(metadata.token_endpoint, format!("{base}/custom-token"));
+                let requests = requests.await.unwrap();
+                assert_eq!(requests.len(), if legacy { 1 } else { 2 });
+                assert!(requests[0]
+                    .0
+                    .starts_with("GET /.well-known/openid-credential-issuer "));
+                if !legacy {
+                    assert!(requests[1]
+                        .0
+                        .starts_with("GET /.well-known/oauth-authorization-server/oauth "));
+                }
+            }
+        });
+    }
+
+    #[test]
+    fn credential_request_uses_configuration_and_plural_proofs() {
+        run(async {
+            let (base, requests) =
+                server(|_| vec![json!({"credentials": [{"credential": "issued-token"}]})]).await;
+            wallet_request_credential(
+                format!("{base}/credential"),
+                "fixture-token".into(),
+                "jwt_vc_json".into(),
+                Some("EmployeeCredential".into()),
+                "fixture.jwt.proof".into(),
+            )
+            .await
+            .unwrap();
+            let requests = requests.await.unwrap();
+            assert!(requests[0].0.starts_with("POST /credential "));
+            assert!(requests[0]
+                .0
+                .to_ascii_lowercase()
+                .contains("authorization: bearer fixture-token\r\n"));
+            assert_eq!(
+                requests[0].1,
+                json!({
+                    "credential_configuration_id": "EmployeeCredential",
+                    "proofs": {"jwt": ["fixture.jwt.proof"]}
+                })
+            );
+        });
+    }
+
+    #[test]
+    fn credential_request_rejects_missing_configuration_before_network_io() {
+        run(async {
+            for id in [None, Some(String::new()), Some("  ".into())] {
+                let error = wallet_request_credential(
+                    "invalid endpoint".into(),
+                    String::new(),
+                    "jwt_vc_json".into(),
+                    id,
+                    "proof".into(),
+                )
+                .await
+                .unwrap_err();
+                assert_eq!(error.to_string(), "Credential configuration ID is required");
+            }
+        });
+    }
 }

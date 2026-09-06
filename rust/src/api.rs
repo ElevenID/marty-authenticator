@@ -221,20 +221,25 @@ pub struct FrbIssuerMetadata {
     pub credential_configurations_json: String,
 }
 
-impl From<marty_oid4vci::IssuerMetadata> for FrbIssuerMetadata {
-    fn from(m: marty_oid4vci::IssuerMetadata) -> Self {
-        let token_endpoint = m.token_endpoint();
+impl TryFrom<marty_oid4vci::IssuerMetadata> for FrbIssuerMetadata {
+    type Error = anyhow::Error;
+
+    fn try_from(m: marty_oid4vci::IssuerMetadata) -> anyhow::Result<Self> {
+        let token_endpoint = m
+            .token_endpoint
+            .filter(|endpoint| !endpoint.trim().is_empty())
+            .ok_or_else(|| anyhow::anyhow!("Issuer token endpoint has not been resolved"))?;
         let credential_configurations_json =
             serde_json::to_string(&m.credential_configurations_supported)
                 .unwrap_or_else(|_| "{}".to_string());
-        Self {
+        Ok(Self {
             credential_issuer: m.credential_issuer,
             token_endpoint,
             credential_endpoint: m.credential_endpoint,
             authorization_endpoint: m.authorization_endpoint,
             grant_types_supported: m.grant_types_supported,
             credential_configurations_json,
-        }
+        })
     }
 }
 

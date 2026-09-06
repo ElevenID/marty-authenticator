@@ -1,6 +1,19 @@
 use super::*;
 use serde_json::json;
 
+#[test]
+fn issuer_metadata_conversion_requires_a_resolved_token_endpoint() {
+    let raw = json!({
+        "credential_issuer": "https://issuer.example",
+        "credential_endpoint": "https://issuer.example/credential"
+    });
+    let mut metadata: marty_oid4vci::IssuerMetadata = serde_json::from_value(raw).unwrap();
+    assert!(FrbIssuerMetadata::try_from(metadata.clone()).is_err());
+    metadata.token_endpoint = Some("https://as.example/custom-token".into());
+    let converted = FrbIssuerMetadata::try_from(metadata).unwrap();
+    assert_eq!(converted.token_endpoint, "https://as.example/custom-token");
+}
+
 fn encode_query_json(value: &str) -> String {
     url::form_urlencoded::byte_serialize(value.as_bytes()).collect()
 }
