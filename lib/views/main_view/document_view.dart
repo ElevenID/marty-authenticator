@@ -11,7 +11,6 @@ import '../../widgets/cascading_card_list.dart';
 import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
 import '../../utils/view_utils.dart';
-import '../../utils/riverpod/providers/credentials_provider.dart';
 import '../qr_scanner_view/qr_scanner_view.dart';
 import '../card_details_screen.dart';
 import '../grouped_card_details_screen.dart';
@@ -153,14 +152,11 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     }
     if (!mounted) return;
 
-    final qrCode = await Navigator.pushNamed(context, QRScannerView.routeName);
-    if (qrCode == null || !mounted) return;
-    final handled = await ref
-        .read(credentialsProvider.notifier)
-        .handleCredentialOffer(qrCode.toString());
-    if (!handled) {
-      showErrorStatusMessage(message: (l) => l.invalidQrScan);
-    }
+    await Navigator.pushNamed(context, QRScannerView.routeName);
+    if (!mounted) return;
+    // The scanner completes the verified remote-KMS receipt flow. Reload its
+    // durable receipts when the scanner closes; no second offer is issued here.
+    await ref.read(cardStateProvider.notifier).refreshCards();
   }
 
   Widget _buildExpiredPassesButton(int count) {
@@ -207,7 +203,8 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     CardGroup? targetGroup;
 
     for (final group in cardGroups) {
-      if (group.cards.any((card) => card.title == cardData.title)) {
+      if (cardData.id != null &&
+          group.cards.any((card) => card.id == cardData.id)) {
         targetGroup = group;
         break;
       }
@@ -216,7 +213,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     if (targetGroup != null) {
       // Find the index of the tapped card in the group
       final cardIndex = targetGroup.cards.indexWhere(
-        (card) => card.title == cardData.title,
+        (card) => card.id == cardData.id,
       );
 
       Navigator.push(
