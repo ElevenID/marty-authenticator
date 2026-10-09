@@ -7,7 +7,7 @@ import 'credential.dart';
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -225,6 +225,30 @@ Future<FrbCredentialResponse> walletRequestCredential({
   credentialFormat: credentialFormat,
   credentialConfigurationId: credentialConfigurationId,
   proofJwt: proofJwt,
+);
+
+/// Prepare pre-authorized SD-JWT receipt. Only one offered configuration is
+/// accepted until an explicit credential-selection UI is available.
+Future<FrbPreparedSdJwtReceipt> walletPrepareVerifiedSdJwtReceipt({
+  required String offerUri,
+  String? txCode,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletPrepareVerifiedSdJwtReceipt(
+  offerUri: offerUri,
+  txCode: txCode,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Consume a prepared receipt once, verify the remote ES256 signature, and
+/// admit only a credential verified with a fresh paired issuer-key snapshot.
+Future<FrbVerifiedSdJwtReceipt> walletCompleteVerifiedSdJwtReceipt({
+  required String sessionId,
+  required List<int> remoteSignature,
+  required String issuerSnapshotJson,
+}) => RustLib.instance.api.crateApiWalletCompleteVerifiedSdJwtReceipt(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+  issuerSnapshotJson: issuerSnapshotJson,
 );
 
 /// Parse an `openid4vp://` or `https://…` presentation request URI.
@@ -492,6 +516,28 @@ class FrbPreparedSdJwtPresentation {
           signingInput == other.signingInput;
 }
 
+/// One-use remote ES256 proof challenge for an OID4VCI credential offer.
+class FrbPreparedSdJwtReceipt {
+  final String sessionId;
+  final Uint8List signingInput;
+
+  const FrbPreparedSdJwtReceipt({
+    required this.sessionId,
+    required this.signingInput,
+  });
+
+  @override
+  int get hashCode => sessionId.hashCode ^ signingInput.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPreparedSdJwtReceipt &&
+          runtimeType == other.runtimeType &&
+          sessionId == other.sessionId &&
+          signingInput == other.signingInput;
+}
+
 /// Presentation holder-binding values validated by the canonical Rust wallet.
 class FrbPresentationBindingContext {
   final String challenge;
@@ -628,6 +674,39 @@ class FrbTokenResponse {
           tokenType == other.tokenType &&
           expiresIn == other.expiresIn &&
           scope == other.scope;
+}
+
+/// An issuer-signed SD-JWT verified against fresh issuer trust and the paired
+/// public presentation key. No access token or signing key crosses this API.
+class FrbVerifiedSdJwtReceipt {
+  final String credential;
+  final String issuer;
+  final String credentialType;
+  final String format;
+
+  const FrbVerifiedSdJwtReceipt({
+    required this.credential,
+    required this.issuer,
+    required this.credentialType,
+    required this.format,
+  });
+
+  @override
+  int get hashCode =>
+      credential.hashCode ^
+      issuer.hashCode ^
+      credentialType.hashCode ^
+      format.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbVerifiedSdJwtReceipt &&
+          runtimeType == other.runtimeType &&
+          credential == other.credential &&
+          issuer == other.issuer &&
+          credentialType == other.credentialType &&
+          format == other.format;
 }
 
 /// A protocol QR/deep-link accepted by the canonical Rust wallet parsers.

@@ -27,6 +27,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
@@ -92,9 +93,44 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? pin,
     String? keyId,
   }) async {
-    throw UnsupportedError(
-      'Credential receipt requires the remote-KMS OID4VCI flow',
-    );
+    if (keyId != null) {
+      throw UnsupportedError('Local holder key selection is retired');
+    }
+    final holder = RemoteHolderPairingService();
+    try {
+      final publicJwk = await holder.publicJwkForPurpose(
+        'presentation_signing',
+      );
+      final prepared = await rust_api.walletPrepareVerifiedSdJwtReceipt(
+        offerUri: credentialOffer,
+        txCode: pin,
+        holderPublicJwkJson: jsonEncode(publicJwk),
+      );
+      final signature = await holder.signInput(
+        purpose: 'presentation_signing',
+        signingInput: prepared.signingInput,
+      );
+      final snapshot = await holder.fetchIssuerKeys();
+      final receipt = await rust_api.walletCompleteVerifiedSdJwtReceipt(
+        sessionId: prepared.sessionId,
+        remoteSignature: signature,
+        issuerSnapshotJson: jsonEncode(snapshot),
+      );
+      final id = const Uuid().v4();
+      await WalletCredentialStore.store(
+        StoredCredential(
+          id: id,
+          format: receipt.format,
+          issuer: receipt.issuer,
+          types: [receipt.credentialType],
+          rawJson: receipt.credential,
+          issuedAt: DateTime.now().toUtc(),
+        ),
+      );
+      return {'id': id, 'format': receipt.format, 'issuer': receipt.issuer};
+    } finally {
+      holder.close();
+    }
   }
 
   @override

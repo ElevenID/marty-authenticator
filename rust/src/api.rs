@@ -323,6 +323,25 @@ pub struct FrbPreparedSdJwtPresentation {
     pub signing_input: Vec<u8>,
 }
 
+/// One-use remote ES256 proof challenge for an OID4VCI credential offer.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPreparedSdJwtReceipt {
+    pub session_id: String,
+    pub signing_input: Vec<u8>,
+}
+
+/// An issuer-signed SD-JWT verified against fresh issuer trust and the paired
+/// public presentation key. No access token or signing key crosses this API.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbVerifiedSdJwtReceipt {
+    pub credential: String,
+    pub issuer: String,
+    pub credential_type: String,
+    pub format: String,
+}
+
 /// One ZK proof to include in a presentation.
 #[frb]
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -502,6 +521,48 @@ pub async fn wallet_request_credential(
         proof_jwt,
     )
     .await
+}
+
+/// Prepare pre-authorized SD-JWT receipt. Only one offered configuration is
+/// accepted until an explicit credential-selection UI is available.
+#[frb]
+pub async fn wallet_prepare_verified_sd_jwt_receipt(
+    offer_uri: String,
+    tx_code: Option<String>,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtReceipt> {
+    let prepared = crate::operations::verified_issuance::prepare(
+        &offer_uri,
+        tx_code.as_deref(),
+        &holder_public_jwk_json,
+    )
+    .await?;
+    Ok(FrbPreparedSdJwtReceipt {
+        session_id: prepared.session_id,
+        signing_input: prepared.signing_input,
+    })
+}
+
+/// Consume a prepared receipt once, verify the remote ES256 signature, and
+/// admit only a credential verified with a fresh paired issuer-key snapshot.
+#[frb]
+pub async fn wallet_complete_verified_sd_jwt_receipt(
+    session_id: String,
+    remote_signature: Vec<u8>,
+    issuer_snapshot_json: String,
+) -> anyhow::Result<FrbVerifiedSdJwtReceipt> {
+    let verified = crate::operations::verified_issuance::complete(
+        &session_id,
+        &remote_signature,
+        &issuer_snapshot_json,
+    )
+    .await?;
+    Ok(FrbVerifiedSdJwtReceipt {
+        credential: verified.credential,
+        issuer: verified.issuer,
+        credential_type: verified.credential_type,
+        format: verified.format,
+    })
 }
 
 /// Parse an `openid4vp://` or `https://…` presentation request URI.

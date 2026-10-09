@@ -4,17 +4,15 @@ import 'package:marty_authenticator/services/spruce_platform_service_extended.da
 void main() {
   final service = SpruceIdPlatformServiceExtended();
 
-  test(
-    'old credential-offer handler cannot invoke a local signing key',
-    () async {
-      await expectLater(
-        service.handleOID4VCOfferSDK(
-          credentialOffer: 'openid-credential-offer://unused',
-        ),
-        throwsA(isA<UnsupportedError>()),
-      );
-    },
-  );
+  test('credential offers reject legacy local-key selection', () async {
+    await expectLater(
+      service.handleOID4VCOfferSDK(
+        credentialOffer: 'openid-credential-offer://unused',
+        keyId: 'local-key',
+      ),
+      throwsA(isA<UnsupportedError>()),
+    );
+  });
 
   test('old presentation handler cannot invoke a local signing key', () async {
     await expectLater(

@@ -129,6 +129,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  FrbPreparedSdJwtReceipt dco_decode_frb_prepared_sd_jwt_receipt(dynamic raw);
+
+  @protected
   FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
     dynamic raw,
   );
@@ -147,6 +150,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
+
+  @protected
+  FrbVerifiedSdJwtReceipt dco_decode_frb_verified_sd_jwt_receipt(dynamic raw);
 
   @protected
   FrbWalletQrInput dco_decode_frb_wallet_qr_input(dynamic raw);
@@ -388,6 +394,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  FrbPreparedSdJwtReceipt sse_decode_frb_prepared_sd_jwt_receipt(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   FrbPresentationBindingContext sse_decode_frb_presentation_binding_context(
     SseDeserializer deserializer,
   );
@@ -412,6 +423,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
+
+  @protected
+  FrbVerifiedSdJwtReceipt sse_decode_frb_verified_sd_jwt_receipt(
+    SseDeserializer deserializer,
+  );
 
   @protected
   FrbWalletQrInput sse_decode_frb_wallet_qr_input(SseDeserializer deserializer);
@@ -1103,6 +1119,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_frb_prepared_sd_jwt_receipt(
+    FrbPreparedSdJwtReceipt apiObj,
+    wire_cst_frb_prepared_sd_jwt_receipt wireObj,
+  ) {
+    wireObj.session_id = cst_encode_String(apiObj.sessionId);
+    wireObj.signing_input = cst_encode_list_prim_u_8_strict(
+      apiObj.signingInput,
+    );
+  }
+
+  @protected
   void cst_api_fill_to_wire_frb_presentation_binding_context(
     FrbPresentationBindingContext apiObj,
     wire_cst_frb_presentation_binding_context wireObj,
@@ -1172,6 +1199,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     wireObj.token_type = cst_encode_String(apiObj.tokenType);
     wireObj.expires_in = cst_encode_opt_box_autoadd_u_64(apiObj.expiresIn);
     wireObj.scope = cst_encode_opt_String(apiObj.scope);
+  }
+
+  @protected
+  void cst_api_fill_to_wire_frb_verified_sd_jwt_receipt(
+    FrbVerifiedSdJwtReceipt apiObj,
+    wire_cst_frb_verified_sd_jwt_receipt wireObj,
+  ) {
+    wireObj.credential = cst_encode_String(apiObj.credential);
+    wireObj.issuer = cst_encode_String(apiObj.issuer);
+    wireObj.credential_type = cst_encode_String(apiObj.credentialType);
+    wireObj.format = cst_encode_String(apiObj.format);
   }
 
   @protected
@@ -1520,6 +1558,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_frb_prepared_sd_jwt_receipt(
+    FrbPreparedSdJwtReceipt self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_frb_presentation_binding_context(
     FrbPresentationBindingContext self,
     SseSerializer serializer,
@@ -1552,6 +1596,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_token_response(
     FrbTokenResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_verified_sd_jwt_receipt(
+    FrbVerifiedSdJwtReceipt self,
     SseSerializer serializer,
   );
 
@@ -2653,6 +2703,44 @@ class RustLibWire implements BaseWire {
             )
           >();
 
+  void wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> remote_signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+  ) {
+    return _wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+      port_,
+      session_id,
+      remote_signature,
+      issuer_snapshot_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_complete_verified_sd_jwt_receiptPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_complete_verified_sd_jwt_receipt',
+      );
+  late final _wire__crate__api__wallet_complete_verified_sd_jwt_receipt =
+      _wire__crate__api__wallet_complete_verified_sd_jwt_receiptPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__wallet_exchange_auth_code_token(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> token_endpoint,
@@ -2885,6 +2973,44 @@ class RustLibWire implements BaseWire {
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_String>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> offer_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> tx_code,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+  ) {
+    return _wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+      port_,
+      offer_uri,
+      tx_code,
+      holder_public_jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_prepare_verified_sd_jwt_receiptPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_receipt',
+      );
+  late final _wire__crate__api__wallet_prepare_verified_sd_jwt_receipt =
+      _wire__crate__api__wallet_prepare_verified_sd_jwt_receiptPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             )
@@ -3869,6 +3995,12 @@ final class wire_cst_frb_prepared_sd_jwt_presentation extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> signing_input;
 }
 
+final class wire_cst_frb_prepared_sd_jwt_receipt extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> signing_input;
+}
+
 final class wire_cst_frb_presentation_binding_context extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> challenge;
 
@@ -3928,6 +4060,16 @@ final class wire_cst_frb_token_response extends ffi.Struct {
   external ffi.Pointer<ffi.Uint64> expires_in;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> scope;
+}
+
+final class wire_cst_frb_verified_sd_jwt_receipt extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> credential_type;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> format;
 }
 
 final class wire_cst_issuer_check_result_output extends ffi.Struct {

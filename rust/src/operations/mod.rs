@@ -7,4 +7,5 @@ pub(crate) mod policy;
 pub(crate) mod presentation;
 pub(crate) mod proofs;
 pub(crate) mod qr;
+pub(crate) mod verified_issuance;
 pub(crate) mod verified_presentation;
