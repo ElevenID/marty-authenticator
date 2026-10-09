@@ -28,11 +28,13 @@ class RemoteHolderPairingService {
     if (!_tokenPattern.hasMatch(value)) return false;
     try {
       final bytes = base64Url.decode('$value=');
-      return bytes.length == 32 && base64UrlEncode(bytes).replaceAll('=', '') == value;
+      return bytes.length == 32 &&
+          base64UrlEncode(bytes).replaceAll('=', '') == value;
     } catch (_) {
       return false;
     }
   }
+
   final http.Client _client;
   final Future<void> Function(String) _storeEnrollment;
   final Future<String?> Function() _readEnrollment;
@@ -54,7 +56,8 @@ class RemoteHolderPairingService {
   }
 
   static Uri _requiredOrigin(Object? value) {
-    if (value is! String) throw const FormatException('Invalid remote wallet origin');
+    if (value is! String)
+      throw const FormatException('Invalid remote wallet origin');
     final origin = Uri.tryParse(value);
     if (origin == null ||
         origin.scheme != 'https' ||
@@ -73,7 +76,9 @@ class RemoteHolderPairingService {
     int limit,
   ) async {
     final bytes = <int>[];
-    await for (final chunk in response.stream.timeout(const Duration(seconds: 45))) {
+    await for (final chunk in response.stream.timeout(
+      const Duration(seconds: 45),
+    )) {
       bytes.addAll(chunk);
       if (bytes.length > limit) {
         throw const FormatException('Remote wallet response is too large');
@@ -91,13 +96,14 @@ class RemoteHolderPairingService {
       throw StateError('Remote wallet pairing is already in progress');
     }
     late final Future<String> run;
-    run = _pairInner(
-      apiOrigin: apiOrigin,
-      pairingCode: pairingCode,
-      platform: platform,
-    ).whenComplete(() {
-      if (identical(_pairingInFlight, run)) _pairingInFlight = null;
-    });
+    run =
+        _pairInner(
+          apiOrigin: apiOrigin,
+          pairingCode: pairingCode,
+          platform: platform,
+        ).whenComplete(() {
+          if (identical(_pairingInFlight, run)) _pairingInFlight = null;
+        });
     _pairingInFlight = run;
     return run;
   }
@@ -127,7 +133,9 @@ class RemoteHolderPairingService {
       'pairing_code': pairingCode,
       'platform': platform,
     });
-    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
       throw StateError('Remote wallet pairing was rejected');
     }
@@ -146,7 +154,9 @@ class RemoteHolderPairingService {
     };
     if (data.keys.toSet().difference(expectedFields).isNotEmpty ||
         expectedFields.difference(data.keys.toSet()).isNotEmpty) {
-      throw const FormatException('Remote wallet pairing response has unexpected fields');
+      throw const FormatException(
+        'Remote wallet pairing response has unexpected fields',
+      );
     }
     final bearer = data['device_credential'];
     final pairingId = data['pairing_id'];
@@ -223,12 +233,16 @@ class RemoteHolderPairingService {
         deviceId.isEmpty) {
       throw const FormatException('Stored enrollment is invalid');
     }
-    final request = http.Request('POST', origin.resolve('/v1/devices/pairing-ack'))
-      ..followRedirects = false;
+    final request = http.Request(
+      'POST',
+      origin.resolve('/v1/devices/pairing-ack'),
+    )..followRedirects = false;
     request.headers['authorization'] = 'Bearer $bearer';
     request.headers['content-type'] = 'application/json';
     request.body = jsonEncode({'pairing_id': pairingId});
-    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
       throw StateError('Remote wallet confirmation was rejected');
     }
@@ -236,7 +250,9 @@ class RemoteHolderPairingService {
     if (result is! Map<String, dynamic> ||
         result.length != 1 ||
         result['confirmed'] != true) {
-      throw const FormatException('Remote wallet confirmation response is invalid');
+      throw const FormatException(
+        'Remote wallet confirmation response is invalid',
+      );
     }
     data['confirmed'] = true;
     await _storeEnrollment(jsonEncode(data));
@@ -262,7 +278,8 @@ class RemoteHolderPairingService {
 
   Future<String> _renewIfDueInner({required bool force}) async {
     final stored = await _readEnrollment();
-    if (stored == null) throw const FormatException('Remote wallet is not paired');
+    if (stored == null)
+      throw const FormatException('Remote wallet is not paired');
     final data = jsonDecode(stored);
     if (data is! Map<String, dynamic>) {
       throw const FormatException('Stored enrollment is invalid');
@@ -270,7 +287,9 @@ class RemoteHolderPairingService {
     final origin = _requiredOrigin(data['api_origin']);
     final current = data['device_credential'];
     final registrationId = data['registration_id'];
-    final expiresAt = DateTime.tryParse(data['credential_expires_at']?.toString() ?? '');
+    final expiresAt = DateTime.tryParse(
+      data['credential_expires_at']?.toString() ?? '',
+    );
     final pending = data['pending_credential'];
     if (current is! String ||
         !_canonicalToken(current) ||
@@ -278,12 +297,15 @@ class RemoteHolderPairingService {
         registrationId.isEmpty ||
         expiresAt == null ||
         data['confirmed'] != true ||
-        (pending != null && (pending is! String || !_canonicalToken(pending)))) {
+        (pending != null &&
+            (pending is! String || !_canonicalToken(pending)))) {
       throw const FormatException('Stored enrollment is invalid');
     }
     if (!force &&
         pending == null &&
-        expiresAt.isAfter(DateTime.now().toUtc().add(const Duration(hours: 12)))) {
+        expiresAt.isAfter(
+          DateTime.now().toUtc().add(const Duration(hours: 12)),
+        )) {
       return registrationId;
     }
     final replacement = pending as String? ?? _createReplacement();
@@ -295,24 +317,33 @@ class RemoteHolderPairingService {
       await _storeEnrollment(jsonEncode(data));
     }
     final request = http.Request(
-      'POST', origin.resolve('/v1/devices/holder-credential-rotations'),
+      'POST',
+      origin.resolve('/v1/devices/holder-credential-rotations'),
     )..followRedirects = false;
     request.headers['authorization'] = 'Bearer $current';
     request.headers['content-type'] = 'application/json';
     request.body = jsonEncode({'replacement_credential': replacement});
-    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
       throw StateError('Remote wallet credential renewal was rejected');
     }
     final result = await _readBoundedJson(response, 1024);
     if (result is! Map<String, dynamic> ||
-        result.keys.toSet().difference({'registration_id', 'credential_expires_at'}).isNotEmpty ||
+        result.keys.toSet().difference({
+          'registration_id',
+          'credential_expires_at',
+        }).isNotEmpty ||
         result.length != 2 ||
         result['registration_id'] != registrationId) {
       throw const FormatException('Credential renewal response is invalid');
     }
-    final renewedExpiry = DateTime.tryParse(result['credential_expires_at']?.toString() ?? '');
-    if (renewedExpiry == null || !renewedExpiry.isAfter(DateTime.now().toUtc())) {
+    final renewedExpiry = DateTime.tryParse(
+      result['credential_expires_at']?.toString() ?? '',
+    );
+    if (renewedExpiry == null ||
+        !renewedExpiry.isAfter(DateTime.now().toUtc())) {
       throw const FormatException('Credential renewal expiry is invalid');
     }
     data['device_credential'] = replacement;
@@ -326,17 +357,25 @@ class RemoteHolderPairingService {
   /// pairing. Callers must use the result immediately; it is never cached.
   Future<Map<String, dynamic>> fetchIssuerKeys() async {
     final paired = await _currentConfirmedBearer();
-    final request = http.Request('GET', paired.origin.resolve('/v1/devices/wallet-issuer-keys'))
-      ..followRedirects = false;
+    final request = http.Request(
+      'GET',
+      paired.origin.resolve('/v1/devices/wallet-issuer-keys'),
+    )..followRedirects = false;
     request.headers['authorization'] = 'Bearer ${paired.bearer}';
-    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
       throw StateError('Wallet issuer trust is unavailable');
     }
     final snapshot = await _readBoundedJson(response, 256 * 1024);
     if (snapshot is! Map<String, dynamic> ||
         snapshot.keys.toSet().difference({
-          'organization_id', 'trust_profile_id', 'generated_at', 'expires_at', 'issuer_keys',
+          'organization_id',
+          'trust_profile_id',
+          'generated_at',
+          'expires_at',
+          'issuer_keys',
         }).isNotEmpty ||
         snapshot.length != 5 ||
         snapshot['organization_id'] is! String ||
@@ -346,8 +385,12 @@ class RemoteHolderPairingService {
       throw const FormatException('Wallet issuer trust snapshot is invalid');
     }
     final now = DateTime.now().toUtc();
-    final generatedAt = DateTime.tryParse(snapshot['generated_at']?.toString() ?? '')?.toUtc();
-    final trustExpiresAt = DateTime.tryParse(snapshot['expires_at']?.toString() ?? '')?.toUtc();
+    final generatedAt = DateTime.tryParse(
+      snapshot['generated_at']?.toString() ?? '',
+    )?.toUtc();
+    final trustExpiresAt = DateTime.tryParse(
+      snapshot['expires_at']?.toString() ?? '',
+    )?.toUtc();
     if (generatedAt == null ||
         trustExpiresAt == null ||
         generatedAt.isAfter(now.add(const Duration(seconds: 5))) ||
@@ -362,7 +405,12 @@ class RemoteHolderPairingService {
     }
     for (final key in keys) {
       if (key is! Map<String, dynamic> ||
-          key.keys.toSet().difference({'issuer', 'key_id', 'algorithm', 'public_jwk'}).isNotEmpty ||
+          key.keys.toSet().difference({
+            'issuer',
+            'key_id',
+            'algorithm',
+            'public_jwk',
+          }).isNotEmpty ||
           key['issuer'] is! String ||
           (key['issuer'] as String).isEmpty ||
           key['algorithm'] is! String ||
@@ -373,12 +421,27 @@ class RemoteHolderPairingService {
       }
       final jwk = key['public_jwk'] as Map<String, dynamic>;
       if (jwk.keys.any((name) {
-        final normalized = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-        return {'d', 'p', 'q', 'dp', 'dq', 'qi', 'oth', 'k'}.contains(normalized) ||
-            normalized.contains('private') || normalized.contains('secret') ||
+        final normalized = name.toLowerCase().replaceAll(
+          RegExp(r'[^a-z0-9]'),
+          '',
+        );
+        return {
+              'd',
+              'p',
+              'q',
+              'dp',
+              'dq',
+              'qi',
+              'oth',
+              'k',
+            }.contains(normalized) ||
+            normalized.contains('private') ||
+            normalized.contains('secret') ||
             normalized.contains('seed');
       })) {
-        throw const FormatException('Wallet issuer trust contains private key material');
+        throw const FormatException(
+          'Wallet issuer trust contains private key material',
+        );
       }
     }
     return snapshot;
@@ -397,24 +460,32 @@ class RemoteHolderPairingService {
       throw const FormatException('Remote signing input is invalid');
     }
     final paired = await _currentConfirmedBearer();
-    final request = http.Request('POST', paired.origin.resolve('/v1/devices/holder-signatures'))
-      ..followRedirects = false;
+    final request = http.Request(
+      'POST',
+      paired.origin.resolve('/v1/devices/holder-signatures'),
+    )..followRedirects = false;
     request.headers['authorization'] = 'Bearer ${paired.bearer}';
     request.headers['content-type'] = 'application/json';
     request.body = jsonEncode({
       'purpose': purpose,
       'payload_b64': base64UrlEncode(signingInput).replaceAll('=', ''),
     });
-    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
       throw StateError('Remote wallet signing was rejected');
     }
     final signed = await _readBoundedJson(response, 2048);
     if (signed is! Map<String, dynamic> ||
         signed.keys.toSet().difference({
-          'signature_b64', 'signature_encoding', 'transcoded_signature_b64',
+          'signature_b64',
+          'signature_encoding',
+          'transcoded_signature_b64',
         }).isNotEmpty) {
-      throw const FormatException('Remote wallet signature response is invalid');
+      throw const FormatException(
+        'Remote wallet signature response is invalid',
+      );
     }
     final encoded = purpose == 'presentation_signing'
         ? signed['transcoded_signature_b64']
@@ -426,7 +497,8 @@ class RemoteHolderPairingService {
       throw const FormatException('Remote wallet signature is invalid');
     }
     final bytes = base64Url.decode('$encoded==');
-    if (bytes.length != 64 || base64UrlEncode(bytes).replaceAll('=', '') != encoded) {
+    if (bytes.length != 64 ||
+        base64UrlEncode(bytes).replaceAll('=', '') != encoded) {
       throw const FormatException('Remote wallet signature is invalid');
     }
     return bytes;
@@ -442,22 +514,28 @@ class RemoteHolderPairingService {
     };
   }
 
-  Future<({
-    Uri origin,
-    String bearer,
-    Map<String, String> holderBindingPublicJwk,
-    Map<String, String> presentationSigningPublicJwk,
-  })> _currentConfirmedBearer() async {
+  Future<
+    ({
+      Uri origin,
+      String bearer,
+      Map<String, String> holderBindingPublicJwk,
+      Map<String, String> presentationSigningPublicJwk,
+    })
+  >
+  _currentConfirmedBearer() async {
     await renewIfDue();
     final stored = await _readEnrollment();
-    if (stored == null) throw const FormatException('Remote wallet is not paired');
+    if (stored == null)
+      throw const FormatException('Remote wallet is not paired');
     final data = jsonDecode(stored);
     if (data is! Map<String, dynamic> || data['confirmed'] != true) {
       throw const FormatException('Stored enrollment is not confirmed');
     }
     final origin = _requiredOrigin(data['api_origin']);
     final bearer = data['device_credential'];
-    final expiresAt = DateTime.tryParse(data['credential_expires_at']?.toString() ?? '');
+    final expiresAt = DateTime.tryParse(
+      data['credential_expires_at']?.toString() ?? '',
+    );
     if (bearer is! String ||
         !_canonicalToken(bearer) ||
         expiresAt == null ||
@@ -468,10 +546,14 @@ class RemoteHolderPairingService {
       origin: origin,
       bearer: bearer,
       holderBindingPublicJwk: _publicJwk(
-        data['holder_binding_public_jwk'], 'OKP', 'Ed25519',
+        data['holder_binding_public_jwk'],
+        'OKP',
+        'Ed25519',
       ),
       presentationSigningPublicJwk: _publicJwk(
-        data['presentation_signing_public_jwk'], 'EC', 'P-256',
+        data['presentation_signing_public_jwk'],
+        'EC',
+        'P-256',
       ),
     );
   }

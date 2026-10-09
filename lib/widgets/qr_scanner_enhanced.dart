@@ -825,12 +825,17 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           final deviceId = await pairingService.confirmStored();
           if (mounted) _showSuccess('Wallet paired as $deviceId');
         } catch (_) {
-          if (mounted) _showError('Confirmation still pending. Request a new code if it expires.');
+          if (mounted)
+            _showError(
+              'Confirmation still pending. Request a new code if it expires.',
+            );
         }
       }
     } catch (_) {
       if (mounted) {
-        _showError('Remote wallet pairing failed. Request a new code and try again.');
+        _showError(
+          'Remote wallet pairing failed. Request a new code and try again.',
+        );
       }
     } finally {
       pairingService.close();
