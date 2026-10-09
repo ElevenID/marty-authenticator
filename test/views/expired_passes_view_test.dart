@@ -69,6 +69,7 @@ void main() {
     final container = await showTwoExpiredPasses(tester);
     await tester.tap(find.byType(ListTile).first);
     await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.info_outline), findsNothing);
     expect(find.text('Delete'), findsOneWidget);
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
