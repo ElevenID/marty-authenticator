@@ -26,7 +26,7 @@ class ChannelRegistry(private val context: Context) {
 
     // Handlers
     private val fileHandler = FileHandler(context)
-    private val spruceIdHandler = SpruceIdHandlerRefactored(context)
+    private val spruceIdHandler = SpruceIdHandlerRefactored()
 
     // Channels
     private var fileChannel: MethodChannel? = null
@@ -44,12 +44,6 @@ class ChannelRegistry(private val context: Context) {
     fun registerChannels(binaryMessenger: BinaryMessenger) {
         Log.d(TAG, "Registering all method channels")
 
-        // Initialize SpruceID handler
-        val initialized = spruceIdHandler.initialize()
-        if (!initialized) {
-            Log.w(TAG, "SpruceID handler initialization failed - channels will return errors")
-        }
-
         setupFileChannel(binaryMessenger)
         setupPkiChannel(binaryMessenger)
         setupJwtChannel(binaryMessenger)
@@ -57,7 +51,7 @@ class ChannelRegistry(private val context: Context) {
         setupWalletChannel(binaryMessenger)
         setupW3cChannel(binaryMessenger)
 
-        Log.d(TAG, "All method channels registered successfully")
+        Log.d(TAG, "Method channels registered; unsupported holder operations fail closed")
     }
 
     /**
