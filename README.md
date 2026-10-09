@@ -21,10 +21,6 @@ The pi-authenticator can also be configured to support PUSH authentication witho
 
 We use the [Flutter](https://flutter.dev/) framework for developing our application. This enables us to use a single code base for both Android and iOS, for development itself we use [Android Studio](https://developer.android.com/studio) with the official [Flutter plugin](https://github.com/flutter/flutter-intellij).
 
-## TODO - Cleanup Notes
-
-- **`local_plugins/` directory**: Contains legacy migration plugin (`pi-authenticator-legacy`) that is not currently used. Can be removed if no migration from older native app versions is needed. Keeping as reference for now.
-
 The app can be built for Android by running `flutter build apk [--release | --debug]` at the root of the project. Building an iOS IPA requires Apple tooling and signing credentials.
 For testing purposes the application can be run in release mode by running `flutter run --release`.
 

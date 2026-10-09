@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const roots = [
@@ -36,6 +36,17 @@ for (const name of ['pubspec.yaml', 'pubspec.lock']) {
   const source = readFileSync(resolve(name), 'utf8');
   if (/pi[_-]authenticator[_-]legacy/.test(source)) {
     throw new Error(`legacy private-key plugin is in the app graph: ${name}`);
+  }
+}
+
+for (const path of [
+  'local_plugins/pi-authenticator-legacy',
+  'ios/Runner/AppDelegate.swift.original',
+  'lib/services/spruce_api_server.py',
+  'lib/services/spruce_backend_service.py',
+]) {
+  if (existsSync(resolve(path))) {
+    throw new Error(`retired local-key source remains in the repository: ${path}`);
   }
 }
 
