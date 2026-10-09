@@ -95,4 +95,37 @@ void main() {
     expect(await WalletCredentialStore.getById('first'), isNotNull);
     expect(await WalletCredentialStore.getById('second'), isNotNull);
   });
+
+  testWidgets('select all and unhide preserves both same-title receipts', (
+    tester,
+  ) async {
+    final container = await showTwoExpiredPasses(tester);
+
+    await tester.tap(find.text('Edit').first);
+    await tester.pump();
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+    expect(find.text('2 Passes Selected'), findsOneWidget);
+
+    await tester.tap(find.text('Deselect All'));
+    await tester.pump();
+    expect(find.text('2 Passes Selected'), findsNothing);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+    await tester.tap(find.text('Unhide'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(expiredCardsProvider), isEmpty);
+    expect(
+      container
+          .read(activeCardGroupsProvider)
+          .single
+          .cards
+          .map((card) => card.id),
+      containsAll(['first', 'second']),
+    );
+    expect(await WalletCredentialStore.getById('first'), isNotNull);
+    expect(await WalletCredentialStore.getById('second'), isNotNull);
+  });
 }
