@@ -54,6 +54,9 @@ class _Holder extends RemoteHolderPairingService {
 class _Bridge implements VerifiedWalletBridge {
   bool rejectReceipt = false;
   String presentationRoute = 'oid4vp';
+  FrbPresentationRequest? requestOverride;
+  String expectedQueryId = 'identity-query';
+  List<String> expectedClaims = const ['given_name'];
   int receiptCompletions = 0;
   int presentationParses = 0;
   int presentationPreparations = 0;
@@ -104,6 +107,7 @@ class _Bridge implements VerifiedWalletBridge {
   }) async {
     presentationParses++;
     expect(requestUri, 'openid4vp://approved');
+    if (requestOverride != null) return requestOverride!;
     return FrbPresentationRequest(
       clientId: 'https://verifier.example',
       nonce: 'request-nonce',
@@ -140,8 +144,8 @@ class _Bridge implements VerifiedWalletBridge {
     expect(requestUri, 'openid4vp://approved');
     expect(approvedRequestDigest, 'bound-request-digest');
     expect(credential, 'header.payload.signature~');
-    expect(queryId, 'identity-query');
-    expect(claimsToDisclose, ['given_name']);
+    expect(queryId, expectedQueryId);
+    expect(claimsToDisclose, expectedClaims);
     expect(jsonDecode(issuerSnapshotJson), contains('issuer_keys'));
     expect(jsonDecode(holderPublicJwkJson), containsPair('kty', 'EC'));
     return FrbPreparedSdJwtPresentation(
@@ -310,4 +314,137 @@ void main() {
     expect(bridge.presentationPreparations, 1);
     expect(bridge.presentationCompletions, 1);
   });
+
+  test(
+    'presentation definition binds approved fields to remote signing',
+    () async {
+      await WalletCredentialStore.store(
+        StoredCredential(
+          id: 'stored-identity',
+          format: 'dc+sd-jwt',
+          issuer: 'https://issuer.example',
+          types: const ['ExampleIdentity'],
+          rawJson: 'header.payload.signature~',
+          issuedAt: DateTime.utc(2026, 10, 9),
+        ),
+      );
+      final bridge = _Bridge()
+        ..expectedQueryId = 'definition-identity'
+        ..requestOverride = FrbPresentationRequest(
+          clientId: 'https://verifier.example',
+          nonce: 'request-nonce',
+          responseUri: 'https://verifier.example/response',
+          requestDigest: 'bound-request-digest',
+          queryType: 'presentation_definition',
+          presentationDefinitionJson: jsonEncode({
+            'purpose': 'Prove identity',
+            'input_descriptors': [
+              {
+                'id': 'definition-identity',
+                'format': {
+                  'dc+sd-jwt': {
+                    'alg': ['ES256'],
+                  },
+                },
+                'constraints': {
+                  'fields': [
+                    {
+                      'path': [r'$.given_name'],
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+        );
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        _Holder.new,
+      );
+
+      late UserSelectionRequiredException selection;
+      try {
+        await service.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://approved',
+        );
+        fail('Credential selection should be required');
+      } on UserSelectionRequiredException catch (error) {
+        selection = error;
+      }
+      expect(selection.requestDetails['purpose'], 'Prove identity');
+      expect(selection.matches.single['requestedFields'], {
+        'credential': ['given_name'],
+      });
+      expect(
+        await service.completeOID4VPRequestSDK(
+          sessionId: selection.sessionId,
+          selectedCredentialId: 'stored-identity',
+          selectedFields: const ['credential/given_name'],
+        ),
+        {'ok': true, 'redirect_uri': 'https://verifier.example/done'},
+      );
+      expect(bridge.presentationPreparations, 1);
+      expect(bridge.presentationCompletions, 1);
+    },
+  );
+
+  test(
+    'unsupported presentation definitions stop before remote signing',
+    () async {
+      final bridge = _Bridge();
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        _Holder.new,
+      );
+      for (final fields in [
+        [
+          {
+            'path': [r'$.given_name'],
+            'filter': {'const': 'Alice'},
+          },
+        ],
+        [
+          {
+            'path': [r'$.given_name'],
+          },
+          {
+            'path': [r'$.given_name'],
+          },
+        ],
+        [
+          {
+            'path': [r'$..private_key'],
+          },
+        ],
+      ]) {
+        bridge.requestOverride = FrbPresentationRequest(
+          clientId: 'https://verifier.example',
+          nonce: 'request-nonce',
+          responseUri: 'https://verifier.example/response',
+          requestDigest: 'bound-request-digest',
+          queryType: 'presentation_definition',
+          presentationDefinitionJson: jsonEncode({
+            'input_descriptors': [
+              {
+                'id': 'definition-identity',
+                'format': {
+                  'dc+sd-jwt': {
+                    'alg': ['ES256'],
+                  },
+                },
+                'constraints': {'fields': fields},
+              },
+            ],
+          }),
+        );
+        await expectLater(
+          service.initiateOID4VPRequestSDK(
+            presentationRequest: 'openid4vp://approved',
+          ),
+          throwsStateError,
+        );
+      }
+      expect(bridge.presentationPreparations, 0);
+    },
+  );
 }
