@@ -25,7 +25,6 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -78,7 +77,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   SpruceIdPlatformServiceExtended._internal() : super.protected();
 
   // The unregistered holder SDK channel is retired. Live wallet paths use Rust.
-  final Map<String, String> _presentationSessionRoutes = {};
+  final Set<String> _presentationSessions = {};
   final Map<String, _PendingVerifiedPresentation>
   _pendingVerifiedPresentations = {};
 
@@ -138,64 +137,21 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }) async {
     final holder = RemoteHolderPairingService();
     try {
-      MethodChannel channel = w3cChannel;
-      String method = 'handleVpRequest';
-
       final route = await rust_api.walletRoutePresentationRequest(
         input: presentationRequest,
       );
       if (route == 'mdoc') {
-        channel = mdocChannel;
-        method = 'createMdocResponse';
-      } else if (route != 'oid4vp') {
+        throw UnsupportedError(
+          'mDoc presentation requires a verified remote-KMS session',
+        );
+      }
+      if (route != 'oid4vp') {
         throw StateError(
           'Native wallet returned an unsupported presentation route',
         );
       }
       await holder.renewIfDue();
-
-      if (route == 'oid4vp') {
-        return await _initiateVerifiedPresentation(presentationRequest);
-      }
-
-      final result = await channel.invokeMethod(method, {
-        'request': presentationRequest,
-        'requestUrl': presentationRequest,
-      });
-
-      final resultMap = Map<String, dynamic>.from(result);
-
-      if (resultMap['status'] == 'user_selection_required') {
-        final sessionId = resultMap['sessionId'];
-        if (sessionId is! String || sessionId.isEmpty) {
-          throw StateError('Presentation selection session is invalid');
-        }
-        if (_presentationSessionRoutes.containsKey(sessionId)) {
-          throw StateError('Presentation selection session was reused');
-        }
-        if (_presentationSessionRoutes.length >= 16) {
-          _presentationSessionRoutes.remove(
-            _presentationSessionRoutes.keys.first,
-          );
-        }
-        _presentationSessionRoutes[sessionId] = route;
-        throw UserSelectionRequiredException(
-          sessionId: sessionId,
-          matches: List<Map<String, dynamic>>.from(resultMap['matches'] ?? []),
-          requestDetails: {
-            'verifier': resultMap['verifier'],
-            'purpose': resultMap['purpose'],
-          },
-        );
-      }
-
-      return resultMap;
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK OID4VP initiation failed: ${e.message}',
-        e.details,
-      );
+      return await _initiateVerifiedPresentation(presentationRequest);
     } finally {
       holder.close();
     }
@@ -207,35 +163,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String selectedCredentialId,
     List<String>? selectedFields,
   }) async {
-    try {
-      final route = _presentationSessionRoutes[sessionId];
-      if (route == null) {
-        throw StateError('Presentation selection session is unknown');
-      }
-      if (route == 'oid4vp') {
-        _presentationSessionRoutes.remove(sessionId);
-        return await _completeVerifiedPresentation(
-          sessionId,
-          selectedCredentialId,
-          selectedFields,
-        );
-      }
-      final channel = route == 'mdoc' ? mdocChannel : w3cChannel;
-      final method = route == 'mdoc' ? 'createMdocResponse' : 'handleVpRequest';
-      final result = await channel.invokeMethod(method, {
-        'sessionId': sessionId,
-        'selectedCredentialId': selectedCredentialId,
-        'selectedFields': selectedFields,
-      });
-      _presentationSessionRoutes.remove(sessionId);
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK OID4VP completion failed: ${e.message}',
-        e.details,
-      );
+    if (!_presentationSessions.remove(sessionId)) {
+      throw StateError('Presentation selection session is unknown');
     }
+    return await _completeVerifiedPresentation(
+      sessionId,
+      selectedCredentialId,
+      selectedFields,
+    );
   }
 
   Future<Map<String, dynamic>> _initiateVerifiedPresentation(
@@ -378,15 +313,15 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     final sessionId = base64UrlEncode(
       List<int>.generate(32, (_) => random.nextInt(256)),
     ).replaceAll('=', '');
-    if (_presentationSessionRoutes.containsKey(sessionId)) {
+    if (_presentationSessions.contains(sessionId)) {
       throw StateError('Presentation session collision');
     }
-    if (_presentationSessionRoutes.length >= 16) {
-      final evicted = _presentationSessionRoutes.keys.first;
-      _presentationSessionRoutes.remove(evicted);
+    if (_presentationSessions.length >= 16) {
+      final evicted = _presentationSessions.first;
+      _presentationSessions.remove(evicted);
       _pendingVerifiedPresentations.remove(evicted);
     }
-    _presentationSessionRoutes[sessionId] = 'oid4vp';
+    _presentationSessions.add(sessionId);
     _pendingVerifiedPresentations[sessionId] = _PendingVerifiedPresentation(
       requestUri: requestUri,
       requestDigest: request.requestDigest,
@@ -656,22 +591,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required List<String> requiredClaims,
     List<String>? policies,
   }) async {
-    try {
-      final result = await jwtChannel
-          .invokeMethod('verifySdJwtPresentationSDK', {
-            'presentation': presentation,
-            'requiredClaims': requiredClaims,
-            'policies': policies ?? [],
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK SD-JWT presentation verification failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'SD-JWT presentation verification requires a trusted Rust verifier',
+    );
   }
 
   // ========================
@@ -684,40 +606,18 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     bool enableProximityDetection = true,
     Map<String, dynamic>? deviceConfig,
   }) async {
-    try {
-      final result = await mdocChannel.invokeMethod('initializeMdocSDK', {
-        'mdocData': mdocData,
-        'enableProximityDetection': enableProximityDetection,
-        'deviceConfig': deviceConfig ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK mDoc initialization failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'mDoc initialization requires a verified remote-KMS session',
+    );
   }
 
   @override
   Future<Map<String, dynamic>> handleMdocOid4vpRequestSDK({
     required String requestUrl,
   }) async {
-    try {
-      final result = await mdocChannel.invokeMethod('createMdocResponse', {
-        'requestUrl': requestUrl,
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK mDoc OID4VP request handling failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'mDoc OID4VP requires a verified remote-KMS session',
+    );
   }
 
   @override
@@ -774,21 +674,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String backupPassphrase,
     Map<String, dynamic>? backupOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('backupCredentialsSDK', {
-        'credentialIds': credentialIds ?? [],
-        'backupPassphrase': backupPassphrase,
-        'backupOptions': backupOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential backup failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential backup requires verified remote-KMS custody',
+    );
   }
 
   @override
@@ -797,21 +685,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String backupPassphrase,
     Map<String, dynamic>? restoreOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('restoreCredentialsSDK', {
-        'backupData': backupData,
-        'backupPassphrase': backupPassphrase,
-        'restoreOptions': restoreOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential restore failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential restore requires verified remote-KMS custody',
+    );
   }
 
   // ========================
@@ -824,21 +700,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? syncToken,
     Map<String, dynamic>? syncOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('syncCredentialsSDK', {
-        'syncEndpoint': syncEndpoint,
-        'syncToken': syncToken,
-        'syncOptions': syncOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential sync failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential sync requires verified remote-KMS custody',
+    );
   }
 
   @override
@@ -847,21 +711,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String exportFormat,
     Map<String, dynamic>? exportOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('exportCredentialsSDK', {
-        'credentialIds': credentialIds,
-        'exportFormat': exportFormat,
-        'exportOptions': exportOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential export failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential export requires verified remote-KMS custody',
+    );
   }
 
   @override
@@ -870,21 +722,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? expectedFormat,
     Map<String, dynamic>? importOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('importCredentialsSDK', {
-        'credentialData': credentialData,
-        'expectedFormat': expectedFormat,
-        'importOptions': importOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential import failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential import requires cryptographic verification and remote-KMS custody',
+    );
   }
 }
 

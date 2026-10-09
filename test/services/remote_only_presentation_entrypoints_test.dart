@@ -139,4 +139,33 @@ void main() {
       );
     },
   );
+
+  test(
+    'unsupported wallet and mDoc channels fail before native dispatch',
+    () async {
+      final calls = <Future<Object?> Function()>[
+        () => service.verifySdJwtPresentationSDK(
+          presentation: 'unverified',
+          requiredClaims: const [],
+        ),
+        () => service.initializeMdocSDK(mdocData: const {}),
+        () => service.handleMdocOid4vpRequestSDK(requestUrl: 'unverified'),
+        () => service.backupCredentialsSDK(backupPassphrase: 'unused'),
+        () => service.restoreCredentialsSDK(
+          backupData: 'unverified',
+          backupPassphrase: 'unused',
+        ),
+        () =>
+            service.syncCredentialsSDK(syncEndpoint: 'https://unused.example'),
+        () => service.exportCredentialsSDK(
+          credentialIds: const [],
+          exportFormat: 'unverified',
+        ),
+        () => service.importCredentialsSDK(credentialData: 'unverified'),
+      ];
+      for (final call in calls) {
+        await expectLater(call(), throwsA(isA<UnsupportedError>()));
+      }
+    },
+  );
 }
