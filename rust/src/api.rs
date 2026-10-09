@@ -501,7 +501,8 @@ pub async fn wallet_parse_presentation_request(
     crate::operations::presentation::wallet_parse_presentation_request(request_uri).await
 }
 
-/// Build and submit a standard VP presentation.
+/// Retired unverified VP entry point. Always rejects until the verified
+/// remote-KMS presenter is exposed through the bridge.
 #[frb]
 pub async fn wallet_build_and_submit_presentation(
     response_uri: String,
