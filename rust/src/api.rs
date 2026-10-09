@@ -307,9 +307,20 @@ pub struct FrbPresentationRequest {
     pub client_id: String,
     pub nonce: String,
     pub response_uri: String,
+    pub response_mode: Option<String>,
+    pub state: Option<String>,
+    pub request_digest: String,
     pub query_type: String,
     pub presentation_definition_json: Option<String>,
     pub dcql_query_json: Option<String>,
+}
+
+/// Verified presentation awaiting one remote KMS ES256 signature.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPreparedSdJwtPresentation {
+    pub session_id: String,
+    pub signing_input: Vec<u8>,
 }
 
 /// One ZK proof to include in a presentation.
@@ -499,6 +510,48 @@ pub async fn wallet_parse_presentation_request(
     request_uri: String,
 ) -> anyhow::Result<FrbPresentationRequest> {
     crate::operations::presentation::wallet_parse_presentation_request(request_uri).await
+}
+
+/// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
+/// the exact signing input for the paired non-exportable presentation key.
+#[frb]
+pub async fn wallet_prepare_verified_sd_jwt_presentation(
+    request_uri: String,
+    approved_request_digest: String,
+    credential: String,
+    query_id: String,
+    claims_to_disclose: Vec<String>,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtPresentation> {
+    let prepared = crate::operations::verified_presentation::prepare(
+        crate::operations::verified_presentation::Selection {
+            request_uri,
+            approved_request_digest,
+            credential,
+            query_id,
+            claims_to_disclose,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        },
+    )
+    .await?;
+    Ok(FrbPreparedSdJwtPresentation {
+        session_id: prepared.session_id,
+        signing_input: prepared.signing_input,
+    })
+}
+
+/// Consume the prepared session once, verify the remote signature against the
+/// paired public key, and submit with the original OID4VP request state.
+#[frb]
+pub async fn wallet_complete_verified_sd_jwt_presentation(
+    session_id: String,
+    remote_signature: Vec<u8>,
+) -> anyhow::Result<FrbPresentationResponse> {
+    crate::operations::verified_presentation::complete(&session_id, &remote_signature)
+        .await
+        .map(Into::into)
 }
 
 /// Retired unverified VP entry point. Always rejects until the verified

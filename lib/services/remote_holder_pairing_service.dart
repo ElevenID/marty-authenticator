@@ -432,7 +432,22 @@ class RemoteHolderPairingService {
     return bytes;
   }
 
-  Future<({Uri origin, String bearer})> _currentConfirmedBearer() async {
+  /// Returns only the public key pinned when this bearer was paired.
+  Future<Map<String, String>> publicJwkForPurpose(String purpose) async {
+    final paired = await _currentConfirmedBearer();
+    return switch (purpose) {
+      'holder_binding' => paired.holderBindingPublicJwk,
+      'presentation_signing' => paired.presentationSigningPublicJwk,
+      _ => throw const FormatException('Remote signing purpose is invalid'),
+    };
+  }
+
+  Future<({
+    Uri origin,
+    String bearer,
+    Map<String, String> holderBindingPublicJwk,
+    Map<String, String> presentationSigningPublicJwk,
+  })> _currentConfirmedBearer() async {
     await renewIfDue();
     final stored = await _readEnrollment();
     if (stored == null) throw const FormatException('Remote wallet is not paired');
@@ -449,7 +464,16 @@ class RemoteHolderPairingService {
         !expiresAt.toUtc().isAfter(DateTime.now().toUtc())) {
       throw const FormatException('Stored enrollment is invalid');
     }
-    return (origin: origin, bearer: bearer);
+    return (
+      origin: origin,
+      bearer: bearer,
+      holderBindingPublicJwk: _publicJwk(
+        data['holder_binding_public_jwk'], 'OKP', 'Ed25519',
+      ),
+      presentationSigningPublicJwk: _publicJwk(
+        data['presentation_signing_public_jwk'], 'EC', 'P-256',
+      ),
+    );
   }
 
   static Map<String, String> _publicJwk(Object? value, String kty, String crv) {

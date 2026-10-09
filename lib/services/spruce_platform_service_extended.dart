@@ -23,12 +23,15 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import 'remote_holder_pairing_service.dart';
+import 'wallet_credential_store.dart';
 import 'spruce_platform_service.dart';
 
 /// Exception thrown when user selection is required for a presentation request
@@ -47,6 +50,24 @@ class UserSelectionRequiredException implements Exception {
   String toString() => 'UserSelectionRequiredException(sessionId: $sessionId)';
 }
 
+class _PendingVerifiedPresentation {
+  final String requestUri;
+  final String requestDigest;
+  final String queryId;
+  final List<String> requiredClaims;
+  final Map<String, String> credentials;
+  final DateTime createdAt;
+
+  const _PendingVerifiedPresentation({
+    required this.requestUri,
+    required this.requestDigest,
+    required this.queryId,
+    required this.requiredClaims,
+    required this.credentials,
+    required this.createdAt,
+  });
+}
+
 /// Extended platform service implementation with SDK capabilities
 /// Uses the refactored Android and iOS handlers with SDK integration
 class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
@@ -58,6 +79,8 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   // Additional SDK-enabled channels
   final MethodChannel _sdkChannel = const MethodChannel('spruce_id_sdk');
   final Map<String, String> _presentationSessionRoutes = {};
+  final Map<String, _PendingVerifiedPresentation>
+  _pendingVerifiedPresentations = {};
 
   // ========================
   // SDK-Enhanced OID4VC Operations
@@ -69,25 +92,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? pin,
     String? keyId,
   }) async {
-    try {
-      final normalizedOffer = await rust_api.walletNormalizeCredentialOffer(
-        input: credentialOffer,
-      );
-
-      // Use refactored Android/iOS handlers with SDK integration
-      final result = await w3cChannel.invokeMethod(
-        'handleOID4VCOfferRefactored',
-        {'offer': normalizedOffer, 'pin': pin, 'keyId': keyId ?? 'default-key'},
-      );
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK OID4VC offer handling failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Credential receipt requires the remote-KMS OID4VCI flow',
+    );
   }
 
   @override
@@ -112,6 +119,10 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       }
       await holder.renewIfDue();
 
+      if (route == 'oid4vp') {
+        return await _initiateVerifiedPresentation(presentationRequest);
+      }
+
       final result = await channel.invokeMethod(method, {
         'request': presentationRequest,
         'requestUrl': presentationRequest,
@@ -128,7 +139,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
           throw StateError('Presentation selection session was reused');
         }
         if (_presentationSessionRoutes.length >= 16) {
-          _presentationSessionRoutes.remove(_presentationSessionRoutes.keys.first);
+          _presentationSessionRoutes.remove(
+            _presentationSessionRoutes.keys.first,
+          );
         }
         _presentationSessionRoutes[sessionId] = route;
         throw UserSelectionRequiredException(
@@ -164,6 +177,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       if (route == null) {
         throw StateError('Presentation selection session is unknown');
       }
+      if (route == 'oid4vp') {
+        _presentationSessionRoutes.remove(sessionId);
+        return await _completeVerifiedPresentation(
+          sessionId,
+          selectedCredentialId,
+          selectedFields,
+        );
+      }
       final channel = route == 'mdoc' ? mdocChannel : w3cChannel;
       final method = route == 'mdoc' ? 'createMdocResponse' : 'handleVpRequest';
       final result = await channel.invokeMethod(method, {
@@ -182,6 +203,252 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     }
   }
 
+  Future<Map<String, dynamic>> _initiateVerifiedPresentation(
+    String requestUri,
+  ) async {
+    final request = await rust_api.walletParsePresentationRequest(
+      requestUri: requestUri,
+    );
+    if (request.clientId.isEmpty ||
+        request.nonce.isEmpty ||
+        request.requestDigest.isEmpty) {
+      throw StateError('Presentation request is invalid');
+    }
+    late final String queryId;
+    final requestedClaims = <String>[];
+    String? purpose;
+    if (request.queryType == 'dcql_query') {
+      final query = jsonDecode(request.dcqlQueryJson ?? 'null');
+      if (query is! Map<String, dynamic> ||
+          query['credentials'] is! List ||
+          (query['credentials'] as List).length != 1) {
+        throw StateError('Presentation query is unsupported');
+      }
+      final credential = (query['credentials'] as List).single;
+      if (credential is! Map<String, dynamic> ||
+          credential['id'] is! String ||
+          credential['meta'] != null ||
+          !{'dc+sd-jwt', 'vc+sd-jwt'}.contains(credential['format'])) {
+        throw StateError('Presentation credential format is unsupported');
+      }
+      queryId = credential['id'] as String;
+      final claims = credential['claims'] ?? [];
+      if (claims is! List) throw StateError('Presentation claims are invalid');
+      for (final claim in claims) {
+        if (claim is! Map<String, dynamic> ||
+            claim['path'] is! List ||
+            (claim['path'] as List).length != 1 ||
+            (claim['path'] as List).single is! String) {
+          throw StateError('Presentation claim path is unsupported');
+        }
+        requestedClaims.add((claim['path'] as List).single as String);
+      }
+    } else if (request.queryType == 'presentation_definition') {
+      final definition = jsonDecode(
+        request.presentationDefinitionJson ?? 'null',
+      );
+      if (definition is! Map<String, dynamic> ||
+          definition['input_descriptors'] is! List ||
+          (definition['input_descriptors'] as List).length != 1) {
+        throw StateError('Presentation definition is unsupported');
+      }
+      final descriptor = (definition['input_descriptors'] as List).single;
+      if (descriptor is! Map<String, dynamic> || descriptor['id'] is! String) {
+        throw StateError('Presentation descriptor is invalid');
+      }
+      final formats = descriptor['format'];
+      if (formats != null &&
+          (formats is! Map<String, dynamic> ||
+              !formats.entries.any((entry) {
+                if (!{
+                  'dc+sd-jwt',
+                  'vc+sd-jwt',
+                  'sd_jwt_vc',
+                }.contains(entry.key)) {
+                  return false;
+                }
+                final requirement = entry.value;
+                if (requirement is! Map<String, dynamic>) {
+                  return false;
+                }
+                final algorithms = requirement['alg'];
+                return algorithms == null ||
+                    (algorithms is List && algorithms.contains('ES256'));
+              }))) {
+        throw StateError('Presentation descriptor format is unsupported');
+      }
+      queryId = descriptor['id'] as String;
+      purpose = definition['purpose'] is String
+          ? definition['purpose'] as String
+          : null;
+      final constraints = descriptor['constraints'];
+      final fields = constraints is Map<String, dynamic>
+          ? constraints['fields'] ?? []
+          : [];
+      if (fields is! List) throw StateError('Presentation fields are invalid');
+      for (final field in fields) {
+        if (field is! Map<String, dynamic> ||
+            field['filter'] != null ||
+            field['zk_predicate'] != null ||
+            field['optional'] == true ||
+            field['path'] is! List ||
+            (field['path'] as List).length != 1) {
+          throw StateError('Presentation field constraint is unsupported');
+        }
+        final path = (field['path'] as List).single;
+        if (path is! String ||
+            !RegExp(r'^\$\.[A-Za-z_][A-Za-z0-9_]*$').hasMatch(path)) {
+          throw StateError('Presentation field path is unsupported');
+        }
+        requestedClaims.add(path.substring(2));
+      }
+    } else {
+      throw StateError('Presentation query type is unsupported');
+    }
+    if (queryId.isEmpty ||
+        requestedClaims.length > 64 ||
+        requestedClaims.any(
+          (claim) =>
+              claim.length > 256 ||
+              !RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$').hasMatch(claim),
+        ) ||
+        requestedClaims.toSet().length != requestedClaims.length) {
+      throw StateError('Presentation request claims are invalid');
+    }
+
+    final tokens = <String, String>{};
+    final matches = <Map<String, dynamic>>[];
+    for (final credential in await WalletCredentialStore.getAll()) {
+      if (!{
+        'dc+sd-jwt',
+        'vc+sd-jwt',
+        'sd_jwt_vc',
+      }.contains(credential.format)) {
+        continue;
+      }
+      final token = _storedSdJwt(credential.rawJson);
+      if (token == null) continue;
+      tokens[credential.id] = token;
+      matches.add({
+        'id': credential.id,
+        'type': credential.types.join(', '),
+        'issuer': credential.issuer,
+        'requestedFields': {'credential': requestedClaims},
+      });
+    }
+    if (matches.isEmpty) {
+      throw StateError('No stored SD-JWT credential is available');
+    }
+    final random = Random.secure();
+    final sessionId = base64UrlEncode(
+      List<int>.generate(32, (_) => random.nextInt(256)),
+    ).replaceAll('=', '');
+    if (_presentationSessionRoutes.containsKey(sessionId)) {
+      throw StateError('Presentation session collision');
+    }
+    if (_presentationSessionRoutes.length >= 16) {
+      final evicted = _presentationSessionRoutes.keys.first;
+      _presentationSessionRoutes.remove(evicted);
+      _pendingVerifiedPresentations.remove(evicted);
+    }
+    _presentationSessionRoutes[sessionId] = 'oid4vp';
+    _pendingVerifiedPresentations[sessionId] = _PendingVerifiedPresentation(
+      requestUri: requestUri,
+      requestDigest: request.requestDigest,
+      queryId: queryId,
+      requiredClaims: requestedClaims,
+      credentials: tokens,
+      createdAt: DateTime.now().toUtc(),
+    );
+    throw UserSelectionRequiredException(
+      sessionId: sessionId,
+      matches: matches,
+      requestDetails: {'verifier': request.clientId, 'purpose': purpose},
+    );
+  }
+
+  static String? _storedSdJwt(String raw) {
+    Object? value;
+    try {
+      value = jsonDecode(raw);
+    } catch (_) {
+      value = raw;
+    }
+    if (value is Map<String, dynamic>) value = value['credential'];
+    if (value is! String ||
+        value.isEmpty ||
+        value.length > 1024 * 1024 ||
+        !value.contains('~')) {
+      return null;
+    }
+    return value;
+  }
+
+  Future<Map<String, dynamic>> _completeVerifiedPresentation(
+    String sessionId,
+    String selectedCredentialId,
+    List<String>? selectedFields,
+  ) async {
+    final pending = _pendingVerifiedPresentations.remove(sessionId);
+    if (pending == null ||
+        DateTime.now().toUtc().difference(pending.createdAt) >
+            const Duration(minutes: 2)) {
+      throw StateError('Presentation approval expired');
+    }
+    final credential = pending.credentials[selectedCredentialId];
+    if (credential == null) {
+      throw StateError('Selected credential is unavailable');
+    }
+    if (selectedFields == null) {
+      throw StateError('Presentation disclosures require explicit approval');
+    }
+    final selected = selectedFields.map((field) {
+      if (!field.startsWith('credential/')) {
+        throw StateError('Selected disclosure field is invalid');
+      }
+      return field.substring('credential/'.length);
+    }).toSet();
+    if (!selected.containsAll(pending.requiredClaims) ||
+        selected.difference(pending.requiredClaims.toSet()).isNotEmpty) {
+      throw StateError(
+        'Selected disclosure does not match the approved request',
+      );
+    }
+
+    final holder = RemoteHolderPairingService();
+    try {
+      final snapshot = await holder.fetchIssuerKeys();
+      final publicJwk = await holder.publicJwkForPurpose(
+        'presentation_signing',
+      );
+      final prepared = await rust_api.walletPrepareVerifiedSdJwtPresentation(
+        requestUri: pending.requestUri,
+        approvedRequestDigest: pending.requestDigest,
+        credential: credential,
+        queryId: pending.queryId,
+        claimsToDisclose: pending.requiredClaims,
+        issuerSnapshotJson: jsonEncode(snapshot),
+        holderPublicJwkJson: jsonEncode(publicJwk),
+      );
+      final signature = await holder.signInput(
+        purpose: 'presentation_signing',
+        signingInput: prepared.signingInput,
+      );
+      final response = await rust_api.walletCompleteVerifiedSdJwtPresentation(
+        sessionId: prepared.sessionId,
+        remoteSignature: signature,
+      );
+      if (!response.ok) {
+        throw StateError(
+          response.errorDescription ?? 'Verifier rejected presentation',
+        );
+      }
+      return {'ok': true, 'redirect_uri': response.redirectUri};
+    } finally {
+      holder.close();
+    }
+  }
+
   @override
   Future<Map<String, dynamic>> handleOID4VPRequestSDK({
     required String presentationRequest,
@@ -189,26 +456,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required List<String> disclosureOptions,
     String? keyId,
   }) async {
-    // Legacy method - redirect to initiate/complete flow if possible
-    // or just call the old method if it still exists on iOS
-    try {
-      // Use refactored Android/iOS handlers with SDK integration
-      final result = await w3cChannel
-          .invokeMethod('handleOID4VPRequestRefactored', {
-            'request': presentationRequest,
-            'selectedCredentials': selectedCredentials,
-            'disclosureOptions': disclosureOptions,
-            'keyId': keyId ?? 'default-key',
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK OID4VP request handling failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Presentations require the verified remote-KMS selection flow',
+    );
   }
 
   @override
@@ -219,25 +469,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required Map<String, List<String>> selectiveDisclosure,
     String? keyId,
   }) async {
-    try {
-      // Use refactored Android/iOS handlers with SDK integration
-      final result = await w3cChannel
-          .invokeMethod('createPresentationRefactored', {
-            'credentials': credentials,
-            'challenge': challenge,
-            'domain': domain,
-            'selectiveDisclosure': selectiveDisclosure,
-            'keyId': keyId ?? 'default-key',
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK presentation creation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'Presentation creation requires a verified remote-KMS request',
+    );
   }
 
   // ========================

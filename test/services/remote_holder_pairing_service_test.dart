@@ -34,6 +34,16 @@ void main() {
     },
   };
 
+  String confirmedEnrollment() => jsonEncode({
+    ...response(),
+    'api_origin': 'https://wallet.example/',
+    'confirmed': true,
+    'credential_expires_at': DateTime.now()
+        .toUtc()
+        .add(const Duration(days: 1))
+        .toIso8601String(),
+  });
+
   test('redeems one remote ticket and securely stores only the expected envelope', () async {
     String? stored;
     final client = MockClient((request) async {
@@ -225,11 +235,7 @@ void main() {
   });
 
   test('fetches fresh issuer trust with only the confirmed paired bearer', () async {
-    final stored = jsonEncode({
-      ...response(),
-      'api_origin': 'https://wallet.example/',
-      'confirmed': true,
-    });
+    final stored = confirmedEnrollment();
     final now = DateTime.now().toUtc();
     final snapshot = {
       'organization_id': 'org-1',
@@ -279,9 +285,7 @@ void main() {
         },
       ],
     };
-    String stored = jsonEncode({
-      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
-    });
+    String stored = confirmedEnrollment();
     final service = RemoteHolderPairingService(
       client: MockClient((_) async => http.Response(jsonEncode(snapshot), 200)),
       readEnrollment: () async => stored,
@@ -296,9 +300,7 @@ void main() {
   });
 
   test('sends exact JWS input to remote ES256 key and requires raw JOSE output', () async {
-    final stored = jsonEncode({
-      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
-    });
+    final stored = confirmedEnrollment();
     final raw = List<int>.filled(64, 17);
     final encoded = base64UrlEncode(raw).replaceAll('=', '');
     final service = RemoteHolderPairingService(
@@ -326,9 +328,7 @@ void main() {
   });
 
   test('rejects malformed remote signature and signing before acknowledgment', () async {
-    String stored = jsonEncode({
-      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
-    });
+    String stored = confirmedEnrollment();
     var calls = 0;
     final service = RemoteHolderPairingService(
       client: MockClient((_) async {
@@ -350,6 +350,27 @@ void main() {
       purpose: 'holder_binding', signingInput: [1],
     ), throwsFormatException);
     expect(calls, 1);
+    service.close();
+  });
+
+  test('reads only paired public keys and rejects a modified stored key', () async {
+    String stored = confirmedEnrollment();
+    final service = RemoteHolderPairingService(readEnrollment: () async => stored);
+    expect(
+      (await service.publicJwkForPurpose('presentation_signing'))['kid'],
+      'remote-presentation-1',
+    );
+    expect(
+      (await service.publicJwkForPurpose('holder_binding'))['kid'],
+      'remote-binding-1',
+    );
+    final tampered = jsonDecode(stored) as Map<String, dynamic>;
+    tampered['presentation_signing_public_jwk']['d'] = 'private';
+    stored = jsonEncode(tampered);
+    await expectLater(
+      service.publicJwkForPurpose('presentation_signing'),
+      throwsFormatException,
+    );
     service.close();
   });
 }

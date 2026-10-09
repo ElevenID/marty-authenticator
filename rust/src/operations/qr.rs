@@ -205,8 +205,8 @@ fn parse_remote_pairing_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrI
     let mut api = None;
     for (key, value) in parsed.query_pairs() {
         match key.as_ref() {
-            "code" if code.replace(value.into_owned()).is_none() => {}
-            "api" if api.replace(value.into_owned()).is_none() => {}
+            "code" if code.is_none() => code = Some(value.into_owned()),
+            "api" if api.is_none() => api = Some(value.into_owned()),
             _ => {
                 return Err(anyhow::anyhow!(
                     "Wallet pairing URI has unsupported or duplicate parameters"

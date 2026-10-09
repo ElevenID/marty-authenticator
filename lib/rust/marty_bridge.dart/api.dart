@@ -7,7 +7,7 @@ import 'credential.dart';
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -234,7 +234,38 @@ Future<FrbPresentationRequest> walletParsePresentationRequest({
   requestUri: requestUri,
 );
 
-/// Build and submit a standard VP presentation.
+/// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
+/// the exact signing input for the paired non-exportable presentation key.
+Future<FrbPreparedSdJwtPresentation> walletPrepareVerifiedSdJwtPresentation({
+  required String requestUri,
+  required String approvedRequestDigest,
+  required String credential,
+  required String queryId,
+  required List<String> claimsToDisclose,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletPrepareVerifiedSdJwtPresentation(
+  requestUri: requestUri,
+  approvedRequestDigest: approvedRequestDigest,
+  credential: credential,
+  queryId: queryId,
+  claimsToDisclose: claimsToDisclose,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Consume the prepared session once, verify the remote signature against the
+/// paired public key, and submit with the original OID4VP request state.
+Future<FrbPresentationResponse> walletCompleteVerifiedSdJwtPresentation({
+  required String sessionId,
+  required List<int> remoteSignature,
+}) => RustLib.instance.api.crateApiWalletCompleteVerifiedSdJwtPresentation(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+);
+
+/// Retired unverified VP entry point. Always rejects until the verified
+/// remote-KMS presenter is exposed through the bridge.
 Future<FrbPresentationResponse> walletBuildAndSubmitPresentation({
   required String responseUri,
   String? presentationDefinitionJson,
@@ -439,6 +470,28 @@ class FrbIssuerMetadata {
           credentialConfigurationsJson == other.credentialConfigurationsJson;
 }
 
+/// Verified presentation awaiting one remote KMS ES256 signature.
+class FrbPreparedSdJwtPresentation {
+  final String sessionId;
+  final Uint8List signingInput;
+
+  const FrbPreparedSdJwtPresentation({
+    required this.sessionId,
+    required this.signingInput,
+  });
+
+  @override
+  int get hashCode => sessionId.hashCode ^ signingInput.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPreparedSdJwtPresentation &&
+          runtimeType == other.runtimeType &&
+          sessionId == other.sessionId &&
+          signingInput == other.signingInput;
+}
+
 /// Presentation holder-binding values validated by the canonical Rust wallet.
 class FrbPresentationBindingContext {
   final String challenge;
@@ -466,6 +519,9 @@ class FrbPresentationRequest {
   final String clientId;
   final String nonce;
   final String responseUri;
+  final String? responseMode;
+  final String? state;
+  final String requestDigest;
   final String queryType;
   final String? presentationDefinitionJson;
   final String? dcqlQueryJson;
@@ -474,6 +530,9 @@ class FrbPresentationRequest {
     required this.clientId,
     required this.nonce,
     required this.responseUri,
+    this.responseMode,
+    this.state,
+    required this.requestDigest,
     required this.queryType,
     this.presentationDefinitionJson,
     this.dcqlQueryJson,
@@ -484,6 +543,9 @@ class FrbPresentationRequest {
       clientId.hashCode ^
       nonce.hashCode ^
       responseUri.hashCode ^
+      responseMode.hashCode ^
+      state.hashCode ^
+      requestDigest.hashCode ^
       queryType.hashCode ^
       presentationDefinitionJson.hashCode ^
       dcqlQueryJson.hashCode;
@@ -496,6 +558,9 @@ class FrbPresentationRequest {
           clientId == other.clientId &&
           nonce == other.nonce &&
           responseUri == other.responseUri &&
+          responseMode == other.responseMode &&
+          state == other.state &&
+          requestDigest == other.requestDigest &&
           queryType == other.queryType &&
           presentationDefinitionJson == other.presentationDefinitionJson &&
           dcqlQueryJson == other.dcqlQueryJson;

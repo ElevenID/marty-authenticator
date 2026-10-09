@@ -10,6 +10,7 @@ pub(crate) async fn wallet_parse_presentation_request(
         .parse_presentation_request(&request_uri)
         .await
         .map_err(|e| anyhow::anyhow!("Presentation request parse error: {}", e))?;
+    let request_digest = super::verified_presentation::request_digest(&request)?;
     let presentation_definition_json = request
         .presentation_definition
         .as_ref()
@@ -33,6 +34,9 @@ pub(crate) async fn wallet_parse_presentation_request(
         client_id: request.client_id,
         nonce: request.nonce,
         response_uri: request.response_uri,
+        response_mode: request.response_mode,
+        state: request.state,
+        request_digest,
         query_type,
         presentation_definition_json,
         dcql_query_json,

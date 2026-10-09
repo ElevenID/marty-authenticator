@@ -9,6 +9,11 @@ use serde_json::Value;
 
 const MAX_SNAPSHOT_BYTES: usize = 256 * 1024;
 
+pub(crate) struct FreshIssuerTrust {
+    pub resolver: TrustedSdJwtIssuerKeys,
+    pub expires_at: DateTime<Utc>,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Snapshot {
@@ -31,7 +36,7 @@ struct IssuerKey {
 pub(crate) fn resolver_from_snapshot(
     json: &str,
     now: DateTime<Utc>,
-) -> anyhow::Result<TrustedSdJwtIssuerKeys> {
+) -> anyhow::Result<FreshIssuerTrust> {
     anyhow::ensure!(
         json.len() <= MAX_SNAPSHOT_BYTES,
         "issuer trust snapshot is too large"
@@ -67,7 +72,10 @@ pub(crate) fn resolver_from_snapshot(
             ))
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
-    TrustedSdJwtIssuerKeys::new(keys).map_err(Into::into)
+    Ok(FreshIssuerTrust {
+        resolver: TrustedSdJwtIssuerKeys::new(keys)?,
+        expires_at: snapshot.expires_at,
+    })
 }
 
 #[cfg(test)]
@@ -99,7 +107,8 @@ mod tests {
     #[test]
     fn fresh_public_snapshot_resolves_only_the_exact_issuer_identity() {
         let now = Utc::now();
-        let resolver = resolver_from_snapshot(&snapshot(now).to_string(), now).unwrap();
+        let trusted = resolver_from_snapshot(&snapshot(now).to_string(), now).unwrap();
+        let resolver = trusted.resolver;
         assert!(resolver
             .resolve(
                 "did:web:issuer.example",
