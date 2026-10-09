@@ -111,9 +111,19 @@ class ExpiredPassDetailsView extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton(
-            onPressed: () {
-              ref.read(cardStateProvider.notifier).deleteCard(cardData);
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                await ref.read(cardStateProvider.notifier).deleteCard(cardData);
+                if (context.mounted) Navigator.pop(context);
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not delete this pass.'),
+                    ),
+                  );
+                }
+              }
             },
             child: const Text(
               'Delete',

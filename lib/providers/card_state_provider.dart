@@ -64,6 +64,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       }
     } catch (e) {
       Logger.error('Error loading credentials from WalletCredentialStore: $e');
+      return;
     }
 
     if (allCards.isEmpty) {
@@ -290,6 +291,10 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       newGroups.add(group.copyWith(cards: newCards));
     }
     state = newGroups;
-    await saveCards();
+    try {
+      await saveCards();
+    } catch (_) {
+      // The verified receipt is already deleted; layout is only a preference.
+    }
   }
 }
