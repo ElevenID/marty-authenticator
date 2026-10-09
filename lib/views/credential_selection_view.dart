@@ -28,13 +28,10 @@
 /// - Comprehensive selective disclosure controls
 library;
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/selectable_credential.dart';
-import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../services/spruce_sdk_services.dart';
 import '../widgets/spruce_credential_selection_widget.dart';
 import '../widgets/selective_disclosure_sheet.dart';
@@ -218,62 +215,9 @@ class _CredentialSelectionViewState
     List<SelectableCredential> selectedCredentials,
     Map<String, List<String>> selectiveDisclosure,
   ) async {
-    try {
-      final client = ref.read(spruceIdClientExtendedProvider);
-
-      // Generate secure key for presentation if needed
-      final keyResult = await client.generateSecureKeySDK(
-        algorithm: 'Ed25519',
-        useHardwareModule: true,
-        keyPolicies: {
-          'user_presence_required': true,
-          'purpose': 'presentation_signing',
-        },
-      );
-
-      final keyId = keyResult['keyId'] as String;
-
-      // Prepare credential data for presentation
-      final credentialData = selectedCredentials.map((cred) {
-        final disclosedClaims = <String, dynamic>{};
-        final disclosedAttributes = selectiveDisclosure[cred.id] ?? [];
-
-        for (final attr in disclosedAttributes) {
-          if (cred.claims.containsKey(attr)) {
-            disclosedClaims[attr] = cred.claims[attr];
-          }
-        }
-
-        return {
-          'id': cred.id,
-          'type': cred.type,
-          'credentialSubject': disclosedClaims,
-          'issuer': cred.issuer,
-        };
-      }).toList();
-
-      final binding = await rust_api.walletValidatePresentationContext(
-        requestJson: jsonEncode({
-          'challenge': widget.challenge,
-          'domain': widget.domain,
-        }),
-      );
-
-      // Create presentation using the native-validated holder binding.
-      final presentation = await client.createPresentationSDK(
-        credentials: credentialData,
-        challenge: binding.challenge,
-        domain: binding.domain,
-        selectiveDisclosure: selectiveDisclosure,
-        keyId: keyId,
-      );
-
-      // Show success and return result
-      _showPresentationSuccess(presentation);
-    } catch (e) {
-      _showError('Failed to create presentation: $e');
-      Logger.error('Presentation creation failed', error: e);
-    }
+    _showError(
+      'Use a verified OID4VP request with a paired remote-KMS holder to present credentials.',
+    );
   }
 
   Future<void> _showAdvancedDisclosureSheet(
@@ -310,69 +254,9 @@ class _CredentialSelectionViewState
     }
   }
 
-  void _showPresentationSuccess(Map<String, dynamic> presentation) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Presentation Created'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Verifiable presentation created successfully with selective disclosure.',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Presentation ID: ${presentation['id'] ?? 'N/A'}',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Security Level: ${_securityAssessment?.overallSecurityLevel.name ?? 'Unknown'}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(presentation); // Return result
-            },
-            child: const Text('OK'),
-          ),
-          ElevatedButton(
-            onPressed: () => _sharePresentation(presentation),
-            child: const Text('Share'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _sharePresentation(Map<String, dynamic> presentation) async {
-    // Implementation would depend on sharing mechanism (QR code, NFC, etc.)
-    _showInfo('Presentation sharing functionality would be implemented here');
-  }
-
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
-  }
-
-  void _showInfo(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 

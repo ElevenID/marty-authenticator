@@ -633,23 +633,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     List<String>? alwaysDisclose,
     String? keyId,
   }) async {
-    try {
-      final result = await jwtChannel.invokeMethod('createAdvancedSdJwtSDK', {
-        'issuer': issuer,
-        'claims': claims,
-        'disclosureTree': disclosureTree,
-        'alwaysDisclose': alwaysDisclose ?? [],
-        'keyId': keyId ?? 'default-key',
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK advanced SD-JWT creation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'createAdvancedSdJwtSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -659,22 +645,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String challenge,
     String? keyId,
   }) async {
-    try {
-      final result = await jwtChannel.invokeMethod('presentSdJwtSDK', {
-        'sdJwt': sdJwt,
-        'disclosureRequest': disclosureRequest,
-        'challenge': challenge,
-        'keyId': keyId ?? 'default-key',
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK SD-JWT presentation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'presentSdJwtSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -755,24 +728,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     List<String>? hiddenAttributes,
     String? keyId,
   }) async {
-    try {
-      final result = await mdocChannel
-          .invokeMethod('createMdocPresentationSDK', {
-            'docType': docType,
-            'requestedAttributes': requestedAttributes,
-            'ageVerificationOptions': ageVerificationOptions,
-            'hiddenAttributes': hiddenAttributes ?? [],
-            'keyId': keyId ?? 'default-key',
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK mDoc presentation creation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'createMdocPresentationSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -781,21 +739,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
     Map<String, dynamic>? securityOptions,
   }) async {
-    try {
-      final result = await mdocChannel.invokeMethod('establishMdocSessionSDK', {
-        'sessionRequest': sessionRequest,
-        'keyId': keyId ?? 'default-key',
-        'securityOptions': securityOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK mDoc session establishment failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'establishMdocSessionSDK requires a verified remote-KMS flow',
+    );
   }
 
   // ========================
@@ -817,21 +763,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
     Map<String, dynamic>? refreshOptions,
   }) async {
-    try {
-      final result = await walletChannel.invokeMethod('refreshCredentialSDK', {
-        'credentialId': credentialId,
-        'keyId': keyId ?? 'default-key',
-        'refreshOptions': refreshOptions ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential refresh failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'refreshCredentialSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override

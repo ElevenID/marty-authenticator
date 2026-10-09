@@ -58,4 +58,41 @@ void main() {
       throwsA(isA<UnsupportedError>()),
     );
   });
+
+  test(
+    'registered native wrappers cannot request a default local key',
+    () async {
+      await expectLater(
+        service.createAdvancedSdJwtSDK(
+          issuer: 'https://issuer.example',
+          claims: const {},
+          disclosureTree: const {},
+        ),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        service.presentSdJwtSDK(
+          sdJwt: 'unused',
+          disclosureRequest: const {},
+          challenge: 'unused',
+        ),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        service.createMdocPresentationSDK(
+          docType: 'unused',
+          requestedAttributes: const [],
+        ),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        service.establishMdocSessionSDK(sessionRequest: const {}),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        service.refreshCredentialSDK(credentialId: 'unused'),
+        throwsA(isA<UnsupportedError>()),
+      );
+    },
+  );
 }
