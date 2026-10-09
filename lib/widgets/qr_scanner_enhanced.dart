@@ -35,6 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 
 import '../services/qr_scanner_service_enhanced.dart';
+import '../services/remote_holder_pairing_service.dart';
 import '../services/spruce_client_extended.dart';
 import '../services/spruce_platform_service_extended.dart';
 import '../widgets/presentation_request_view.dart';
@@ -752,9 +753,59 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       _handlePresentationRequest(result);
     } else if (qrType == QRType.credentialOffer) {
       _handleCredentialOffer(result);
+    } else if (qrType == QRType.remotePairing) {
+      _handleRemotePairing(result);
     }
 
     _resultPreviewController.reverse();
+  }
+
+  Future<void> _handleRemotePairing(EnrichedQRResult result) async {
+    final content = result.validatedResult.parsedData.parsedContent;
+    final origin = content?['api_origin'];
+    final code = content?['pairing_code'];
+    if (origin is! String ||
+        code is! String ||
+        kIsWeb ||
+        (!Platform.isAndroid && !Platform.isIOS)) {
+      _showError('Remote wallet pairing requires an Android or iOS app');
+      return;
+    }
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pair remote wallet'),
+        content: Text(
+          'Connect this wallet to $origin? Signing keys will remain in the remote KMS.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Pair'),
+          ),
+        ],
+      ),
+    );
+    if (approved != true || !mounted) return;
+    final pairingService = RemoteHolderPairingService();
+    try {
+      final deviceId = await pairingService.pair(
+        apiOrigin: origin,
+        pairingCode: code,
+        platform: Platform.isAndroid ? 'android' : 'ios',
+      );
+      if (mounted) _showSuccess('Wallet paired as $deviceId');
+    } catch (_) {
+      if (mounted) {
+        _showError('Remote wallet pairing failed. Request a new code and try again.');
+      }
+    } finally {
+      pairingService.close();
+    }
   }
 
   IconData _getQRTypeIcon(QRType type) {
@@ -765,6 +816,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return Icons.card_membership;
       case QRType.mdocDeviceEngagement:
         return Icons.contactless;
+      case QRType.remotePairing:
+        return Icons.phonelink_lock;
       default:
         return Icons.qr_code;
     }
@@ -778,6 +831,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return 'Credential Offer';
       case QRType.mdocDeviceEngagement:
         return 'mDoc Device Engagement';
+      case QRType.remotePairing:
+        return 'Remote Wallet Pairing';
       default:
         return 'QR Code';
     }
@@ -815,6 +870,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return 'Share';
       case QRType.credentialOffer:
         return 'Accept';
+      case QRType.remotePairing:
+        return 'Pair';
       default:
         return 'Process';
     }

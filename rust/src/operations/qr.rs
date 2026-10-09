@@ -94,6 +94,9 @@ pub(crate) async fn wallet_validate_qr_input(
 ) -> anyhow::Result<Option<FrbWalletQrInput>> {
     use marty_oid4vci::WalletInputKind;
 
+    if let Some(pairing) = parse_remote_pairing_qr(&raw_data)? {
+        return Ok(Some(pairing));
+    }
     if let Some(push_registration) = parse_push_registration_qr(&raw_data)? {
         return Ok(Some(push_registration));
     }
@@ -176,6 +179,74 @@ pub(crate) async fn wallet_validate_qr_input(
             }))
         }
     }
+}
+
+fn parse_remote_pairing_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrInput>> {
+    let parsed = match url::Url::parse(raw_data) {
+        Ok(parsed) => parsed,
+        Err(error) if raw_data.starts_with("marty:") => {
+            return Err(anyhow::anyhow!("Wallet pairing URI is invalid: {error}"));
+        }
+        Err(_) => return Ok(None),
+    };
+    if parsed.scheme() != "marty" || parsed.host_str() != Some("pair") {
+        return Ok(None);
+    }
+    if parsed.path() != ""
+        || !parsed.username().is_empty()
+        || parsed.password().is_some()
+        || parsed.fragment().is_some()
+    {
+        return Err(anyhow::anyhow!(
+            "Wallet pairing URI has unsupported components"
+        ));
+    }
+    let mut code = None;
+    let mut api = None;
+    for (key, value) in parsed.query_pairs() {
+        match key.as_ref() {
+            "code" if code.replace(value.into_owned()).is_none() => {}
+            "api" if api.replace(value.into_owned()).is_none() => {}
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Wallet pairing URI has unsupported or duplicate parameters"
+                ))
+            }
+        }
+    }
+    let code = code.ok_or_else(|| anyhow::anyhow!("Wallet pairing code is missing"))?;
+    if code.len() != 43
+        || !code
+            .bytes()
+            .all(|value| value.is_ascii_alphanumeric() || value == b'-' || value == b'_')
+    {
+        return Err(anyhow::anyhow!("Wallet pairing code is invalid"));
+    }
+    let origin = api.ok_or_else(|| anyhow::anyhow!("Wallet pairing API origin is missing"))?;
+    let origin = url::Url::parse(&origin)
+        .map_err(|_| anyhow::anyhow!("Wallet pairing API origin is invalid"))?;
+    if origin.scheme() != "https"
+        || origin.host_str().is_none()
+        || !origin.username().is_empty()
+        || origin.password().is_some()
+        || origin.path() != "/"
+        || origin.query().is_some()
+        || origin.fragment().is_some()
+    {
+        return Err(anyhow::anyhow!(
+            "Wallet pairing requires a bare HTTPS API origin"
+        ));
+    }
+    Ok(Some(FrbWalletQrInput {
+        kind: "remote_pairing".into(),
+        normalized: parsed.to_string(),
+        parsed_content_json: serde_json::json!({
+            "pairing_code": code,
+            "api_origin": origin.as_str(),
+        })
+        .to_string(),
+        requires_external_provider: false,
+    }))
 }
 
 fn parse_push_registration_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrInput>> {

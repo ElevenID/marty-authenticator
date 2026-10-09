@@ -115,6 +115,7 @@ class QRScannerServiceEnhanced {
           'presentation_request' => QRType.presentationRequest,
           'mdoc_device_engagement' => QRType.mdocDeviceEngagement,
           'push_registration' => QRType.pushRegistration,
+          'remote_pairing' => QRType.remotePairing,
           _ => throw StateError(
             'Native wallet parser returned an unsupported kind',
           ),
@@ -122,7 +123,7 @@ class QRScannerServiceEnhanced {
         return ParsedQRData(
           type: type,
           format: switch (type) {
-            QRType.pushRegistration => QRFormat.url,
+            QRType.pushRegistration || QRType.remotePairing => QRFormat.url,
             QRType.mdocDeviceEngagement => QRFormat.raw,
             _ => QRFormat.openid,
           },
@@ -837,6 +838,7 @@ enum QRType {
   credentialOffer,
   mdocDeviceEngagement,
   pushRegistration, // marty://push-register QR for enabling push notifications
+  remotePairing, // marty://pair uses a server-issued, one-time KMS enrollment ticket
   unknown,
 }
 
