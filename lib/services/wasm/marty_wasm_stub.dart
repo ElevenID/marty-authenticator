@@ -10,15 +10,6 @@
 
 import 'dart:async';
 
-/// Result of JWT verification
-class WasmVerifyResult {
-  final bool valid;
-  final Map<String, dynamic>? payload;
-  final String? error;
-
-  WasmVerifyResult({required this.valid, this.payload, this.error});
-}
-
 /// Stub wrapper for non-web platforms
 class MartyWasm {
   static MartyWasm? _instance;
@@ -79,14 +70,6 @@ class MartyWasm {
     required String vpToken,
     required Map<String, dynamic> presentationSubmission,
     String? state,
-  }) async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
-  Future<WasmVerifyResult> verifyJwtClaims({
-    required String jwt,
-    String? expectedIssuer,
-    String? expectedAudience,
   }) async {
     throw UnsupportedError('WASM not available on this platform');
   }

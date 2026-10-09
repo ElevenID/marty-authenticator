@@ -56,8 +56,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   Future<Map<String, dynamic>> verifyVerifiableCredential(
     Map<String, dynamic> credential,
   ) async {
-    // WASM verifyJwtClaims?
-    throw UnimplementedError('verifyVerifiableCredential not supported on Web');
+    throw UnsupportedError('Cryptographic credential verification is required on Web');
   }
 
   // PKI/X.509 Methods
@@ -103,17 +102,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
 
   @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
-    await initializeW3C();
-    final res = await _wasm.verifyJwtClaims(
-      jwt: jwt,
-      expectedIssuer: issuer.isNotEmpty ? issuer : null,
-    );
-
-    if (!res.valid) {
-      throw Exception('JWT verification failed: ${res.error}');
-    }
-
-    return res.payload ?? {};
+    throw UnsupportedError('Cryptographic JWT verification is required on Web');
   }
 
   @override
@@ -130,9 +119,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
     String sdJwt,
     List<String> requiredClaims,
   ) async {
-    // Basic verification of the JWT part for now
-    final jwt = sdJwt.split('~')[0];
-    return verifyJWT(jwt, '');
+    throw UnsupportedError('Cryptographic SD-JWT verification is required on Web');
   }
 
   // mDoc Methods

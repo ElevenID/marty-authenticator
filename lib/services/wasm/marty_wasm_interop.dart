@@ -5,23 +5,6 @@ import 'dart:js_interop_unsafe';
 
 import '../../utils/logger.dart';
 
-class WasmVerifyResult {
-  final bool valid;
-  final Map<String, dynamic>? payload;
-  final String? error;
-
-  WasmVerifyResult({required this.valid, this.payload, this.error});
-
-  factory WasmVerifyResult.fromJson(String source) {
-    final value = jsonDecode(source) as Map<String, dynamic>;
-    return WasmVerifyResult(
-      valid: value['valid'] as bool,
-      payload: value['payload'] as Map<String, dynamic>?,
-      error: value['error'] as String?,
-    );
-  }
-}
-
 /// Modern Dart JS-interop wrapper for the marty-rs WebAssembly module.
 class MartyWasm {
   static MartyWasm? _instance;
@@ -124,14 +107,6 @@ class MartyWasm {
             ]),
           )
           as Map<String, dynamic>;
-
-  Future<WasmVerifyResult> verifyJwtClaims({
-    required String jwt,
-    String? expectedIssuer,
-    String? expectedAudience,
-  }) async => WasmVerifyResult.fromJson(
-    _call('verify_jwt_claims', [jwt, expectedIssuer, expectedAudience]),
-  );
 
   Future<List<Map<String, dynamic>>> extractCredentialsFromVp(
     String vpJwt,
