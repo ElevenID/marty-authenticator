@@ -49,6 +49,10 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
         'Local signing is retired; use a paired remote KMS wallet',
       );
 
+  Future<T> _retiredCredentialStorage<T>() async => throw UnsupportedError(
+    'Legacy credential storage is retired; use verified wallet receipts',
+  );
+
   @override
   bool get isInitialized => _initialized;
 
@@ -263,68 +267,19 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<void> storeCredential(Map<String, dynamic> credential) async {
-    try {
-      await _walletChannel.invokeMethod(SpruceIdWalletMethods.storeCredential, {
-        'credential': credential,
-      });
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to store credential: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<void> storeCredential(Map<String, dynamic> credential) =>
+      _retiredCredentialStorage<void>();
 
   @override
-  Future<List<Map<String, dynamic>>> getStoredCredentials() async {
-    try {
-      final result = await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.getCredentials,
-      );
-      return List<Map<String, dynamic>>.from(result ?? []);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to get credentials: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<List<Map<String, dynamic>>> getStoredCredentials() =>
+      _retiredCredentialStorage<List<Map<String, dynamic>>>();
 
   @override
-  Future<List<Map<String, dynamic>>> getCredentialsByType(String type) async {
-    try {
-      final result = await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.getCredentialsByType,
-        {'type': type},
-      );
-      return List<Map<String, dynamic>>.from(result ?? []);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to get credentials by type: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<List<Map<String, dynamic>>> getCredentialsByType(String type) =>
+      _retiredCredentialStorage<List<Map<String, dynamic>>>();
 
   @override
-  Future<void> deleteCredential(String id) async {
-    try {
-      await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.deleteCredential,
-        {'id': id},
-      );
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to delete credential: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<void> deleteCredential(String id) => _retiredCredentialStorage<void>();
 }
 
 /// Provider for SpruceID platform service

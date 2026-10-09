@@ -9,9 +9,6 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   final MartyWasm _wasm = MartyWasm.instance;
   bool _initialized = false;
 
-  // Simple in-memory storage for web session
-  final List<Map<String, dynamic>> _storedCredentials = [];
-
   @override
   bool get isInitialized => _initialized;
 
@@ -148,27 +145,29 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   // Wallet Methods
   @override
   Future<void> storeCredential(Map<String, dynamic> credential) async {
-    _storedCredentials.add(credential);
+    throw UnsupportedError(
+      'Credential storage requires a verified remote-KMS wallet receipt',
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getStoredCredentials() async {
-    return List.from(_storedCredentials);
+    throw UnsupportedError(
+      'Legacy credential storage is retired; use verified wallet receipts',
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getCredentialsByType(String type) async {
-    return _storedCredentials
-        .where(
-          (c) =>
-              c['type'] == type ||
-              (c['type'] is List && (c['type'] as List).contains(type)),
-        )
-        .toList();
+    throw UnsupportedError(
+      'Legacy credential storage is retired; use verified wallet receipts',
+    );
   }
 
   @override
   Future<void> deleteCredential(String id) async {
-    _storedCredentials.removeWhere((c) => c['id'] == id);
+    throw UnsupportedError(
+      'Legacy credential storage is retired; use verified wallet receipts',
+    );
   }
 }

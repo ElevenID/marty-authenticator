@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/services/spruce_platform_service.dart';
 import 'package:marty_authenticator/services/spruce_platform_service_extended.dart';
+import 'package:marty_authenticator/services/spruce_platform_service_web.dart';
 
 void main() {
   final service = SpruceIdPlatformServiceExtended();
@@ -33,6 +34,28 @@ void main() {
       ),
       throwsA(isA<UnsupportedError>()),
     );
+  });
+
+  test('legacy platform credential stores reject unverified data', () async {
+    final stores = [SpruceIdPlatformService(), SpruceIdPlatformServiceWeb()];
+    for (final store in stores) {
+      await expectLater(
+        store.storeCredential(const {'id': 'unverified'}),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        store.getStoredCredentials(),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        store.getCredentialsByType('Example'),
+        throwsA(isA<UnsupportedError>()),
+      );
+      await expectLater(
+        store.deleteCredential('unverified'),
+        throwsA(isA<UnsupportedError>()),
+      );
+    }
   });
 
   test('old presentation handler cannot invoke a local signing key', () async {

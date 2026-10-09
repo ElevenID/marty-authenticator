@@ -4,15 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/card_data.dart';
-import '../interfaces/spruce_interfaces.dart';
-import '../services/spruce_platform_service.dart';
 import '../services/wallet_credential_store.dart';
 import '../utils/logger.dart';
 
 final cardStateProvider =
     StateNotifierProvider<CardStateNotifier, List<CardGroup>>((ref) {
-      final spruceService = ref.watch(spruceIdPlatformServiceProvider);
-      return CardStateNotifier(spruceService);
+      return CardStateNotifier();
     });
 
 final activeCardGroupsProvider = Provider<List<CardGroup>>((ref) {
@@ -42,43 +39,26 @@ final expiredCardsProvider = Provider<List<CardData>>((ref) {
 final draggingCardProvider = StateProvider<CardData?>((ref) => null);
 
 class CardStateNotifier extends StateNotifier<List<CardGroup>> {
-  final ISpruceIdPlatformService _spruceService;
-
-  CardStateNotifier(this._spruceService) : super([]) {
+  CardStateNotifier() : super([]) {
     loadCards();
   }
 
   final _storage = const FlutterSecureStorage();
   static const _storageKey = 'card_groups_data';
 
-  /// Loads all credentials from both the Spruce SDK channel and the
-  /// OID4VCI [WalletCredentialStore], then groups them by issuer.
+  /// Loads verified OID4VCI receipts from [WalletCredentialStore] and
+  /// groups them by issuer.
   Future<void> loadCards() async {
     Logger.debug('DEBUG: loadCards called');
     final List<CardData> allCards = [];
 
-    // 1. Load from Spruce SDK native channel (legacy / third-party wallets).
-    try {
-      final credentials = await _spruceService.getStoredCredentials();
-      Logger.debug(
-        'DEBUG: Loaded ${credentials.length} credentials from Spruce channel',
-      );
-      allCards.addAll(credentials.map(_mapCredentialToCardData));
-    } catch (e) {
-      Logger.error('Error loading credentials from SpruceID: $e');
-    }
-
-    // 2. Load OID4VCI-issued credentials from WalletCredentialStore.
     try {
       final stored = await WalletCredentialStore.getAll();
       Logger.debug(
         'DEBUG: Loaded ${stored.length} credentials from WalletCredentialStore',
       );
-      final existingIds = allCards.map((c) => c.id).whereType<String>().toSet();
       for (final cred in stored) {
-        if (!existingIds.contains(cred.id)) {
-          allCards.add(_mapStoredCredentialToCardData(cred));
-        }
+        allCards.add(_mapStoredCredentialToCardData(cred));
       }
     } catch (e) {
       Logger.error('Error loading credentials from WalletCredentialStore: $e');
@@ -105,64 +85,8 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
     );
   }
 
-  /// Refreshes the wallet card list from all credential sources.
+  /// Refreshes the wallet card list from verified receipts.
   Future<void> refreshCards() => loadCards();
-
-  CardData _mapCredentialToCardData(Map<String, dynamic> credential) {
-    // Extract fields
-    final id = credential['id'] as String?;
-    final type = credential['type'] as String? ?? 'Unknown';
-    final issuer = credential['issuer'] as String? ?? 'Unknown Issuer';
-    final data = credential['data'] as Map<String, dynamic>? ?? {};
-
-    // Check expiration
-    bool isExpired = credential['isExpired'] as bool? ?? false;
-    if (!isExpired && credential.containsKey('expirationDate')) {
-      try {
-        final expiry = DateTime.parse(credential['expirationDate'] as String);
-        isExpired = expiry.isBefore(DateTime.now());
-      } catch (e) {
-        // If we can't parse the date, assume not expired
-        isExpired = false;
-      }
-    }
-
-    // Determine UI properties based on type
-    String title = type;
-    IconData icon = Icons.credit_card;
-    Color color = Colors.blue;
-    List<Color> gradient = [Colors.blue, Colors.blueAccent];
-
-    if (type.contains('DriverLicense') || type.contains('mDL')) {
-      title = "Driver's License";
-      icon = Icons.drive_eta;
-      color = Colors.deepPurple;
-      gradient = [Colors.deepPurple, Colors.purpleAccent];
-    } else if (type.contains('VerifiableId')) {
-      title = "Digital ID";
-      icon = Icons.perm_identity;
-      color = Colors.teal;
-      gradient = [Colors.teal, Colors.tealAccent];
-    }
-
-    // For now, expose all data as both metadata and privateData
-    // In a real app, we would filter this based on the schema
-
-    return CardData(
-      title: title,
-      subtitle: issuer,
-      icon: icon,
-      color: color,
-      gradient: gradient,
-      id: id,
-      type: type,
-      issuer: issuer,
-      isExpired: isExpired,
-      rawData: data,
-      metadata: data,
-      privateData: data,
-    );
-  }
 
   /// Maps a [StoredCredential] (OID4VCI-received) to [CardData] for display.
   CardData _mapStoredCredentialToCardData(StoredCredential cred) {
@@ -296,22 +220,17 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
   }
 
   Future<void> deleteCard(CardData card) async {
+    final id = card.id;
+    if (id == null || card.rawData?['_source'] != 'wallet_credential_store') {
+      throw StateError('Only verified wallet credentials can be deleted');
+    }
+    await WalletCredentialStore.delete(id);
     List<CardGroup> newGroups = [];
     for (var group in state) {
       final newCards = List<CardData>.from(group.cards);
-      newCards.removeWhere((c) => c.title == card.title);
+      newCards.removeWhere((c) => c.id == id);
       newGroups.add(group.copyWith(cards: newCards));
     }
     state = newGroups;
-    saveCards();
-    // Also remove from WalletCredentialStore if issued via OID4VCI.
-    if (card.rawData?['_source'] == 'wallet_credential_store' &&
-        card.id != null) {
-      try {
-        await WalletCredentialStore.delete(card.id!);
-      } catch (e) {
-        Logger.error('Failed to delete OID4VCI credential from store: $e');
-      }
-    }
   }
 }
