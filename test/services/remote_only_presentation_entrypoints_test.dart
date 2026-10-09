@@ -1,8 +1,29 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:marty_authenticator/services/spruce_platform_service.dart';
 import 'package:marty_authenticator/services/spruce_platform_service_extended.dart';
 
 void main() {
   final service = SpruceIdPlatformServiceExtended();
+
+  test(
+    'base platform signing entry points fail before native channels',
+    () async {
+      final base = SpruceIdPlatformService();
+      final calls = <Future<Object?> Function()>[
+        () => base.createDid(),
+        () => base.signVerifiableCredential(const {}),
+        () => base.generateKeyPair(),
+        () => base.createCSR('unused'),
+        () => base.signWithCertificate(const {}, 'unused'),
+        () => base.createJWT('unused', const {}),
+        () => base.createSdJwt('unused', const {}, const []),
+        () => base.createMdocResponse(const [], const []),
+      ];
+      for (final call in calls) {
+        await expectLater(call(), throwsA(isA<UnsupportedError>()));
+      }
+    },
+  );
 
   test('credential offers reject legacy local-key selection', () async {
     await expectLater(
