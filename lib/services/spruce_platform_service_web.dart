@@ -56,7 +56,9 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   Future<Map<String, dynamic>> verifyVerifiableCredential(
     Map<String, dynamic> credential,
   ) async {
-    throw UnsupportedError('Cryptographic credential verification is required on Web');
+    throw UnsupportedError(
+      'Cryptographic credential verification is required on Web',
+    );
   }
 
   // PKI/X.509 Methods
