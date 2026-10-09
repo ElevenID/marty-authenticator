@@ -338,7 +338,7 @@ void main() {
           'issuer': 'did:example:issuer',
           'key_id': null,
           'algorithm': 'EdDSA',
-          'public_jwk': {
+          'public_jwk': <String, dynamic>{
             'kty': 'OKP',
             'crv': 'Ed25519',
             'x': 'public',
@@ -354,6 +354,13 @@ void main() {
     );
     await expectLater(service.fetchIssuerKeys(), throwsFormatException);
     (snapshot['issuer_keys'] as List).first['public_jwk'].remove('d');
+    (snapshot['issuer_keys'] as List).first['public_jwk']['extension'] = {
+      'nested': [
+        {'private_key': 'forbidden'},
+      ],
+    };
+    await expectLater(service.fetchIssuerKeys(), throwsFormatException);
+    (snapshot['issuer_keys'] as List).first['public_jwk'].remove('extension');
     snapshot['expires_at'] = now
         .subtract(const Duration(seconds: 1))
         .toIso8601String();

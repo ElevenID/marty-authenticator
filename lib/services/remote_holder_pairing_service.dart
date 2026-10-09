@@ -35,6 +35,28 @@ class RemoteHolderPairingService {
     }
   }
 
+  static bool _containsPrivateKeyField(Object? value) {
+    if (value is List) {
+      return value.any(_containsPrivateKeyField);
+    }
+    if (value is! Map) return false;
+    for (final entry in value.entries) {
+      if (entry.key is! String) return true;
+      final normalized = (entry.key as String).toLowerCase().replaceAll(
+        RegExp(r'[^a-z0-9]'),
+        '',
+      );
+      if ({'d', 'p', 'q', 'dp', 'dq', 'qi', 'oth', 'k'}.contains(normalized) ||
+          normalized.contains('private') ||
+          normalized.contains('secret') ||
+          normalized.contains('seed') ||
+          _containsPrivateKeyField(entry.value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   final http.Client _client;
   final Future<void> Function(String) _storeEnrollment;
   final Future<String?> Function() _readEnrollment;
@@ -422,25 +444,7 @@ class RemoteHolderPairingService {
         throw const FormatException('Wallet issuer trust key is invalid');
       }
       final jwk = key['public_jwk'] as Map<String, dynamic>;
-      if (jwk.keys.any((name) {
-        final normalized = name.toLowerCase().replaceAll(
-          RegExp(r'[^a-z0-9]'),
-          '',
-        );
-        return {
-              'd',
-              'p',
-              'q',
-              'dp',
-              'dq',
-              'qi',
-              'oth',
-              'k',
-            }.contains(normalized) ||
-            normalized.contains('private') ||
-            normalized.contains('secret') ||
-            normalized.contains('seed');
-      })) {
+      if (_containsPrivateKeyField(jwk)) {
         throw const FormatException(
           'Wallet issuer trust contains private key material',
         );
