@@ -54,3 +54,8 @@ jobs:
 
       - name: Run Flutter tests
         run: flutter test --no-pub # Use --no-pub since pub get was already run/cached
+
+      - name: Build web release and audit public WASM artifact
+        run: |
+          flutter build web -t lib/main_document.dart --release --no-pub
+          node scripts/audit_public_wasm.mjs build/web

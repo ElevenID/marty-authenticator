@@ -1,7 +1,7 @@
-import init, * as martyRs from '/assets/packages/marty_rs/_marty_rs.js';
+import init, * as martyRs from './marty_rs/_marty_rs.js';
 
 try {
-  await init('/assets/packages/marty_rs/_marty_rs_bg.wasm');
+  await init(new URL('./marty_rs/_marty_rs_bg.wasm', import.meta.url));
   globalThis.marty_rs = {
     create_credential_offer: martyRs.create_credential_offer,
     generate_offer_uri: martyRs.generate_offer_uri,
