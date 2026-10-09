@@ -799,6 +799,35 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         platform: Platform.isAndroid ? 'android' : 'ios',
       );
       if (mounted) _showSuccess('Wallet paired as $deviceId');
+    } on RemotePairingConfirmationPending {
+      if (!mounted) return;
+      final retry = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Pairing confirmation pending'),
+          content: const Text(
+            'The remote wallet credential was saved, but the server did not confirm it. Retry confirmation before this pairing expires.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Later'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+      if (retry == true) {
+        try {
+          final deviceId = await pairingService.confirmStored();
+          if (mounted) _showSuccess('Wallet paired as $deviceId');
+        } catch (_) {
+          if (mounted) _showError('Confirmation still pending. Request a new code if it expires.');
+        }
+      }
     } catch (_) {
       if (mounted) {
         _showError('Remote wallet pairing failed. Request a new code and try again.');
