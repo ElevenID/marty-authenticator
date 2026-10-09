@@ -322,6 +322,136 @@ class RemoteHolderPairingService {
     return registrationId;
   }
 
+  /// Fetches current operator-governed public issuer keys for this confirmed
+  /// pairing. Callers must use the result immediately; it is never cached.
+  Future<Map<String, dynamic>> fetchIssuerKeys() async {
+    final paired = await _currentConfirmedBearer();
+    final request = http.Request('GET', paired.origin.resolve('/v1/devices/wallet-issuer-keys'))
+      ..followRedirects = false;
+    request.headers['authorization'] = 'Bearer ${paired.bearer}';
+    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    if (response.statusCode != 200) {
+      throw StateError('Wallet issuer trust is unavailable');
+    }
+    final snapshot = await _readBoundedJson(response, 256 * 1024);
+    if (snapshot is! Map<String, dynamic> ||
+        snapshot.keys.toSet().difference({
+          'organization_id', 'trust_profile_id', 'generated_at', 'expires_at', 'issuer_keys',
+        }).isNotEmpty ||
+        snapshot.length != 5 ||
+        snapshot['organization_id'] is! String ||
+        (snapshot['organization_id'] as String).isEmpty ||
+        snapshot['trust_profile_id'] is! String ||
+        !_uuidPattern.hasMatch(snapshot['trust_profile_id'] as String)) {
+      throw const FormatException('Wallet issuer trust snapshot is invalid');
+    }
+    final now = DateTime.now().toUtc();
+    final generatedAt = DateTime.tryParse(snapshot['generated_at']?.toString() ?? '')?.toUtc();
+    final trustExpiresAt = DateTime.tryParse(snapshot['expires_at']?.toString() ?? '')?.toUtc();
+    if (generatedAt == null ||
+        trustExpiresAt == null ||
+        generatedAt.isAfter(now.add(const Duration(seconds: 5))) ||
+        !trustExpiresAt.isAfter(now) ||
+        !trustExpiresAt.isAfter(generatedAt) ||
+        trustExpiresAt.isAfter(generatedAt.add(const Duration(minutes: 1)))) {
+      throw const FormatException('Wallet issuer trust snapshot is expired');
+    }
+    final keys = snapshot['issuer_keys'];
+    if (keys is! List || keys.isEmpty || keys.length > 256) {
+      throw const FormatException('Wallet issuer trust keys are invalid');
+    }
+    for (final key in keys) {
+      if (key is! Map<String, dynamic> ||
+          key.keys.toSet().difference({'issuer', 'key_id', 'algorithm', 'public_jwk'}).isNotEmpty ||
+          key['issuer'] is! String ||
+          (key['issuer'] as String).isEmpty ||
+          key['algorithm'] is! String ||
+          !{'ES256', 'ES384', 'EdDSA', 'RS256'}.contains(key['algorithm']) ||
+          (key['key_id'] != null && key['key_id'] is! String) ||
+          key['public_jwk'] is! Map<String, dynamic>) {
+        throw const FormatException('Wallet issuer trust key is invalid');
+      }
+      final jwk = key['public_jwk'] as Map<String, dynamic>;
+      if (jwk.keys.any((name) {
+        final normalized = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+        return {'d', 'p', 'q', 'dp', 'dq', 'qi', 'oth', 'k'}.contains(normalized) ||
+            normalized.contains('private') || normalized.contains('secret') ||
+            normalized.contains('seed');
+      })) {
+        throw const FormatException('Wallet issuer trust contains private key material');
+      }
+    }
+    return snapshot;
+  }
+
+  /// Signs an exact JWS input with the paired, non-exportable remote key.
+  /// The ES256 result is returned in JOSE's raw 64-byte form.
+  Future<List<int>> signInput({
+    required String purpose,
+    required List<int> signingInput,
+  }) async {
+    if (purpose != 'holder_binding' && purpose != 'presentation_signing') {
+      throw const FormatException('Remote signing purpose is invalid');
+    }
+    if (signingInput.isEmpty || signingInput.length > 64 * 1024) {
+      throw const FormatException('Remote signing input is invalid');
+    }
+    final paired = await _currentConfirmedBearer();
+    final request = http.Request('POST', paired.origin.resolve('/v1/devices/holder-signatures'))
+      ..followRedirects = false;
+    request.headers['authorization'] = 'Bearer ${paired.bearer}';
+    request.headers['content-type'] = 'application/json';
+    request.body = jsonEncode({
+      'purpose': purpose,
+      'payload_b64': base64UrlEncode(signingInput).replaceAll('=', ''),
+    });
+    final response = await _client.send(request).timeout(const Duration(seconds: 45));
+    if (response.statusCode != 200) {
+      throw StateError('Remote wallet signing was rejected');
+    }
+    final signed = await _readBoundedJson(response, 2048);
+    if (signed is! Map<String, dynamic> ||
+        signed.keys.toSet().difference({
+          'signature_b64', 'signature_encoding', 'transcoded_signature_b64',
+        }).isNotEmpty) {
+      throw const FormatException('Remote wallet signature response is invalid');
+    }
+    final encoded = purpose == 'presentation_signing'
+        ? signed['transcoded_signature_b64']
+        : signed['signature_b64'];
+    if (signed['signature_encoding'] !=
+            (purpose == 'presentation_signing' ? 'der' : 'raw') ||
+        encoded is! String ||
+        !RegExp(r'^[A-Za-z0-9_-]{86}$').hasMatch(encoded)) {
+      throw const FormatException('Remote wallet signature is invalid');
+    }
+    final bytes = base64Url.decode('$encoded==');
+    if (bytes.length != 64 || base64UrlEncode(bytes).replaceAll('=', '') != encoded) {
+      throw const FormatException('Remote wallet signature is invalid');
+    }
+    return bytes;
+  }
+
+  Future<({Uri origin, String bearer})> _currentConfirmedBearer() async {
+    await renewIfDue();
+    final stored = await _readEnrollment();
+    if (stored == null) throw const FormatException('Remote wallet is not paired');
+    final data = jsonDecode(stored);
+    if (data is! Map<String, dynamic> || data['confirmed'] != true) {
+      throw const FormatException('Stored enrollment is not confirmed');
+    }
+    final origin = _requiredOrigin(data['api_origin']);
+    final bearer = data['device_credential'];
+    final expiresAt = DateTime.tryParse(data['credential_expires_at']?.toString() ?? '');
+    if (bearer is! String ||
+        !_canonicalToken(bearer) ||
+        expiresAt == null ||
+        !expiresAt.toUtc().isAfter(DateTime.now().toUtc())) {
+      throw const FormatException('Stored enrollment is invalid');
+    }
+    return (origin: origin, bearer: bearer);
+  }
+
   static Map<String, String> _publicJwk(Object? value, String kty, String crv) {
     final expectedFields = kty == 'EC'
         ? {'kty', 'crv', 'x', 'y', 'kid'}

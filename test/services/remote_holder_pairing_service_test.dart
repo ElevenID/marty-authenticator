@@ -223,4 +223,133 @@ void main() {
     expect(jsonDecode(stored!)['device_credential'], replacement);
     service.close();
   });
+
+  test('fetches fresh issuer trust with only the confirmed paired bearer', () async {
+    final stored = jsonEncode({
+      ...response(),
+      'api_origin': 'https://wallet.example/',
+      'confirmed': true,
+    });
+    final now = DateTime.now().toUtc();
+    final snapshot = {
+      'organization_id': 'org-1',
+      'trust_profile_id': pairingId,
+      'generated_at': now.toIso8601String(),
+      'expires_at': now.add(const Duration(seconds: 30)).toIso8601String(),
+      'issuer_keys': [
+        {
+          'issuer': 'did:example:issuer',
+          'key_id': 'issuer-key-1',
+          'algorithm': 'EdDSA',
+          'public_jwk': {'kty': 'OKP', 'crv': 'Ed25519', 'x': 'public'},
+        },
+      ],
+    };
+    var calls = 0;
+    final service = RemoteHolderPairingService(
+      client: MockClient((request) async {
+        calls += 1;
+        expect(request.method, 'GET');
+        expect(request.followRedirects, isFalse);
+        expect(request.url.toString(), 'https://wallet.example/v1/devices/wallet-issuer-keys');
+        expect(request.headers['authorization'], 'Bearer $bearer');
+        return http.Response(jsonEncode(snapshot), 200);
+      }),
+      readEnrollment: () async => stored,
+    );
+    expect(await service.fetchIssuerKeys(), snapshot);
+    expect(await service.fetchIssuerKeys(), snapshot);
+    expect(calls, 2, reason: 'issuer trust must be refreshed for each use');
+    service.close();
+  });
+
+  test('rejects private, stale, and unconfirmed issuer trust reads', () async {
+    final now = DateTime.now().toUtc();
+    final snapshot = {
+      'organization_id': 'org-1',
+      'trust_profile_id': pairingId,
+      'generated_at': now.toIso8601String(),
+      'expires_at': now.add(const Duration(seconds: 30)).toIso8601String(),
+      'issuer_keys': [
+        {
+          'issuer': 'did:example:issuer',
+          'key_id': null,
+          'algorithm': 'EdDSA',
+          'public_jwk': {'kty': 'OKP', 'crv': 'Ed25519', 'x': 'public', 'd': 'private'},
+        },
+      ],
+    };
+    String stored = jsonEncode({
+      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
+    });
+    final service = RemoteHolderPairingService(
+      client: MockClient((_) async => http.Response(jsonEncode(snapshot), 200)),
+      readEnrollment: () async => stored,
+    );
+    await expectLater(service.fetchIssuerKeys(), throwsFormatException);
+    (snapshot['issuer_keys'] as List).first['public_jwk'].remove('d');
+    snapshot['expires_at'] = now.subtract(const Duration(seconds: 1)).toIso8601String();
+    await expectLater(service.fetchIssuerKeys(), throwsFormatException);
+    stored = jsonEncode({...response(), 'api_origin': 'https://wallet.example/', 'confirmed': false});
+    await expectLater(service.fetchIssuerKeys(), throwsFormatException);
+    service.close();
+  });
+
+  test('sends exact JWS input to remote ES256 key and requires raw JOSE output', () async {
+    final stored = jsonEncode({
+      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
+    });
+    final raw = List<int>.filled(64, 17);
+    final encoded = base64UrlEncode(raw).replaceAll('=', '');
+    final service = RemoteHolderPairingService(
+      client: MockClient((request) async {
+        expect(request.url.toString(), 'https://wallet.example/v1/devices/holder-signatures');
+        expect(request.followRedirects, isFalse);
+        expect(request.headers['authorization'], 'Bearer $bearer');
+        expect(jsonDecode(request.body), {
+          'purpose': 'presentation_signing',
+          'payload_b64': base64UrlEncode(utf8.encode('header.payload')).replaceAll('=', ''),
+        });
+        return http.Response(jsonEncode({
+          'signature_b64': 'remote-der-signature',
+          'signature_encoding': 'der',
+          'transcoded_signature_b64': encoded,
+        }), 200);
+      }),
+      readEnrollment: () async => stored,
+    );
+    expect(await service.signInput(
+      purpose: 'presentation_signing',
+      signingInput: utf8.encode('header.payload'),
+    ), raw);
+    service.close();
+  });
+
+  test('rejects malformed remote signature and signing before acknowledgment', () async {
+    String stored = jsonEncode({
+      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true,
+    });
+    var calls = 0;
+    final service = RemoteHolderPairingService(
+      client: MockClient((_) async {
+        calls += 1;
+        return http.Response(jsonEncode({
+          'signature_b64': base64UrlEncode(List<int>.filled(64, 17)).replaceAll('=', ''),
+          'signature_encoding': 'raw',
+        }), 200);
+      }),
+      readEnrollment: () async => stored,
+    );
+    await expectLater(service.signInput(
+      purpose: 'presentation_signing', signingInput: [1],
+    ), throwsFormatException);
+    stored = jsonEncode({
+      ...response(), 'api_origin': 'https://wallet.example/', 'confirmed': false,
+    });
+    await expectLater(service.signInput(
+      purpose: 'holder_binding', signingInput: [1],
+    ), throwsFormatException);
+    expect(calls, 1);
+    service.close();
+  });
 }
