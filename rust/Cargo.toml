@@ -13,20 +13,20 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e" }
-marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e", default-features = false, features = ["iaca", "csca"] }
-marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e", features = ["prover"] }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31", default-features = false, features = ["iaca", "csca"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31", features = ["prover"] }
 
 # OID4VCI/VP wallet (holder) — no issuer or verifier features
-marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
-marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e" }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31" }
 
 # Sync for policy caching
-marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "19431ecc5a4562934e6c6108567cec7167997c0b" }
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "206f80e" }
 
 # Biometric face verification (ONNX-backed for on-device matching)
-marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e", features = ["native", "onnx", "liveness"] }
-marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "6855721d7e863682f18fad613ec46f9f4975e33e" }
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31", features = ["native", "onnx", "liveness"] }
+marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "7c50d31" }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.13.0"
