@@ -26,16 +26,6 @@ void main() {
     },
   );
 
-  test('credential offers reject legacy local-key selection', () async {
-    await expectLater(
-      service.handleOID4VCOfferSDK(
-        credentialOffer: 'openid-credential-offer://unused',
-        keyId: 'local-key',
-      ),
-      throwsA(isA<UnsupportedError>()),
-    );
-  });
-
   test('legacy platform credential stores reject unverified data', () async {
     final stores = [SpruceIdPlatformService(), SpruceIdPlatformServiceWeb()];
     for (final store in stores) {

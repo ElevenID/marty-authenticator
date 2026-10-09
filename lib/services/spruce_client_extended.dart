@@ -48,12 +48,10 @@ class SpruceIdClientExtended extends SpruceIdClient
   Future<Map<String, dynamic>> handleOID4VCOfferSDK({
     required String credentialOffer,
     String? pin,
-    String? keyId,
   }) async {
     return await _platformService.handleOID4VCOfferSDK(
       credentialOffer: credentialOffer,
       pin: pin,
-      keyId: keyId,
     );
   }
 

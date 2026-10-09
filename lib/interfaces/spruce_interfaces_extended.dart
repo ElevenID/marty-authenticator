@@ -38,7 +38,6 @@ abstract class ISpruceIdPlatformServiceExtended
   Future<Map<String, dynamic>> handleOID4VCOfferSDK({
     required String credentialOffer,
     String? pin,
-    String? keyId,
   });
 
   /// Handle OID4VP presentation request using SDK
@@ -308,7 +307,6 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
   Future<Map<String, dynamic>> handleOID4VCOfferSDK({
     required String credentialOffer,
     String? pin,
-    String? keyId,
   });
 
   /// Handle OID4VP presentation request using SDK directly

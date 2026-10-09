@@ -103,11 +103,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Map<String, dynamic>> handleOID4VCOfferSDK({
     required String credentialOffer,
     String? pin,
-    String? keyId,
   }) async {
-    if (keyId != null) {
-      throw UnsupportedError('Local holder key selection is retired');
-    }
     final holder = _holderFactory();
     try {
       final publicJwk = await holder.publicJwkForPurpose(
