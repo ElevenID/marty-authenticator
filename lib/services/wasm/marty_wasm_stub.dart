@@ -10,25 +10,6 @@
 
 import 'dart:async';
 
-/// Result of a WASM key generation operation
-class WasmKeyResult {
-  final String did;
-  final Map<String, dynamic> jwk;
-  final String keyId;
-
-  WasmKeyResult({required this.did, required this.jwk, required this.keyId});
-
-  String get jwkJson => throw UnimplementedError('WASM not available');
-}
-
-/// Result of credential creation
-class WasmCredentialResult {
-  final String jwt;
-  final String credentialId;
-
-  WasmCredentialResult({required this.jwt, required this.credentialId});
-}
-
 /// Result of JWT verification
 class WasmVerifyResult {
   final bool valid;
@@ -51,25 +32,6 @@ class MartyWasm {
   /// Initialize - no-op on non-web
   Future<void> initialize() async {
     // WASM not available on mobile/desktop - use native SpruceID SDK instead
-  }
-
-  Future<WasmKeyResult> generateP256Key() async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
-  Future<WasmKeyResult> generateEd25519Key() async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
-  Future<WasmCredentialResult> createVerifiableCredential({
-    required String issuerDid,
-    required String issuerJwkJson,
-    String? subjectId,
-    required String credentialType,
-    required Map<String, dynamic> claims,
-    int? expirationSeconds,
-  }) async {
-    throw UnsupportedError('WASM not available on this platform');
   }
 
   Future<Map<String, dynamic>> createCredentialOffer({
@@ -110,16 +72,6 @@ class MartyWasm {
     required String offerId,
     String format = 'oid4vci',
   }) {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
-  Future<String> createPresentation({
-    required String holderDid,
-    required String holderJwkJson,
-    required List<String> credentialJwts,
-    required String audience,
-    String? nonce,
-  }) async {
     throw UnsupportedError('WASM not available on this platform');
   }
 

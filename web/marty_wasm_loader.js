@@ -3,22 +3,13 @@ import init, * as martyRs from '/assets/packages/marty_rs/_marty_rs.js';
 try {
   await init('/assets/packages/marty_rs/_marty_rs_bg.wasm');
   globalThis.marty_rs = {
-    ...martyRs,
-    create_verifiable_credential: (
-      issuerDid,
-      issuerJwk,
-      subjectId,
-      credentialType,
-      claims,
-      expirationSeconds,
-    ) => martyRs.create_verifiable_credential(
-      issuerDid,
-      issuerJwk,
-      subjectId,
-      credentialType,
-      claims,
-      expirationSeconds == null ? null : BigInt(expirationSeconds),
-    ),
+    create_credential_offer: martyRs.create_credential_offer,
+    generate_offer_uri: martyRs.generate_offer_uri,
+    create_authorization_response: martyRs.create_authorization_response,
+    verify_jwt_claims: martyRs.verify_jwt_claims,
+    extract_credentials_from_vp: martyRs.extract_credentials_from_vp,
+    get_version: martyRs.get_version,
+    health_check: martyRs.health_check,
   };
 } catch (error) {
   console.error('Failed to initialize marty-rs WebAssembly', error);

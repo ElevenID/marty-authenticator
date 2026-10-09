@@ -47,12 +47,8 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
     Map<String, dynamic> credential, {
     String? keyId,
   }) async {
-    // This requires issuer DID and key, which should be managed.
-    // For now, on web we often just issue using the WASM createVerifiableCredential directly
-    // but that API requires passing issuerDid and jwk.
-    // The interface here assumes the service manages the keys (implied by just passing credential).
-    throw UnimplementedError(
-      'signVerifiableCredential with managed keys not supported on Web',
+    throw UnsupportedError(
+      'Remote KMS credential signing is required on Web',
     );
   }
 
