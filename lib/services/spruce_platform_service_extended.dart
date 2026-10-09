@@ -28,6 +28,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
+import 'remote_holder_pairing_service.dart';
 import 'spruce_platform_service.dart';
 
 /// Exception thrown when user selection is required for a presentation request
@@ -93,6 +94,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
     required String presentationRequest,
   }) async {
+    final holder = RemoteHolderPairingService();
     try {
       MethodChannel channel = w3cChannel;
       String method = 'handleVpRequest';
@@ -108,6 +110,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
           'Native wallet returned an unsupported presentation route',
         );
       }
+      await holder.renewIfDue();
 
       final result = await channel.invokeMethod(method, {
         'request': presentationRequest,
@@ -145,6 +148,8 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         'SDK OID4VP initiation failed: ${e.message}',
         e.details,
       );
+    } finally {
+      holder.close();
     }
   }
 

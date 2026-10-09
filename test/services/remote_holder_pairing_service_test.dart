@@ -6,8 +6,8 @@ import 'package:http/testing.dart';
 import 'package:marty_authenticator/services/remote_holder_pairing_service.dart';
 
 void main() {
-  const code = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-  const bearer = 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB';
+  final code = base64UrlEncode(List<int>.filled(32, 10)).replaceAll('=', '');
+  final bearer = base64UrlEncode(List<int>.filled(32, 11)).replaceAll('=', '');
   const pairingId = '11111111-2222-4333-8444-555555555555';
 
   Map<String, dynamic> response() => {
@@ -22,14 +22,14 @@ void main() {
     'holder_binding_public_jwk': {
       'kty': 'OKP',
       'crv': 'Ed25519',
-      'x': List.filled(43, 'C').join(),
+      'x': base64UrlEncode(List<int>.filled(32, 12)).replaceAll('=', ''),
       'kid': 'remote-binding-1',
     },
     'presentation_signing_public_jwk': {
       'kty': 'EC',
       'crv': 'P-256',
-      'x': List.filled(43, 'D').join(),
-      'y': List.filled(43, 'E').join(),
+      'x': base64UrlEncode(List<int>.filled(32, 13)).replaceAll('=', ''),
+      'y': base64UrlEncode(List<int>.filled(32, 14)).replaceAll('=', ''),
       'kid': 'remote-presentation-1',
     },
   };
@@ -65,6 +65,7 @@ void main() {
     expect(enrolled['device_credential'], bearer);
     expect(enrolled['pairing_id'], pairingId);
     expect(enrolled['api_origin'], 'https://wallet.example/');
+    expect(enrolled['confirmed'], isTrue);
     expect(enrolled['holder_binding_public_jwk']['kid'], 'remote-binding-1');
     expect(enrolled.toString(), isNot(contains('private_key')));
     service.close();
@@ -138,8 +139,88 @@ void main() {
       throwsA(isA<RemotePairingConfirmationPending>()),
     );
     expect(jsonDecode(stored!)['device_credential'], bearer);
+    expect(jsonDecode(stored!)['confirmed'], isFalse);
     expect(await service.confirmStored(), 'device-1');
+    expect(jsonDecode(stored!)['confirmed'], isTrue);
     expect(acknowledgments, 2);
+    service.close();
+  });
+
+  test('persists a pending replacement and retries rotation after a lost response', () async {
+    final replacement = base64UrlEncode(List<int>.filled(32, 15)).replaceAll('=', '');
+    String? stored = jsonEncode({
+      ...response(),
+      'api_origin': 'https://wallet.example/',
+      'confirmed': true,
+    });
+    var attempts = 0;
+    final service = RemoteHolderPairingService(
+      client: MockClient((request) async {
+        expect(request.url.toString(), 'https://wallet.example/v1/devices/holder-credential-rotations');
+        expect(request.followRedirects, isFalse);
+        expect(request.headers['authorization'], 'Bearer $bearer');
+        expect(jsonDecode(request.body), {'replacement_credential': replacement});
+        expect(jsonDecode(stored!)['pending_credential'], replacement);
+        attempts += 1;
+        return http.Response(
+          jsonEncode({
+            'registration_id': 'registration-1',
+            'credential_expires_at': DateTime.now().toUtc().add(const Duration(days: 1)).toIso8601String(),
+          }),
+          attempts == 1 ? 503 : 200,
+        );
+      }),
+      storeEnrollment: (value) async => stored = value,
+      readEnrollment: () async => stored,
+      createReplacement: () => replacement,
+    );
+    await expectLater(service.renewIfDue(force: true), throwsStateError);
+    expect(jsonDecode(stored!)['device_credential'], bearer);
+    expect(await service.renewIfDue(), 'registration-1');
+    expect(jsonDecode(stored!)['device_credential'], replacement);
+    expect(jsonDecode(stored!).containsKey('pending_credential'), isFalse);
+    expect(attempts, 2);
+    service.close();
+  });
+
+  test('does not renew an enrollment awaiting pairing acknowledgment', () async {
+    final stored = jsonEncode({
+      ...response(),
+      'api_origin': 'https://wallet.example/',
+      'confirmed': false,
+    });
+    final service = RemoteHolderPairingService(
+      client: MockClient((_) async => throw StateError('unexpected network call')),
+      readEnrollment: () async => stored,
+    );
+    await expectLater(service.renewIfDue(), throwsFormatException);
+    service.close();
+  });
+
+  test('coalesces simultaneous renewal attempts so only one bearer is installed', () async {
+    final replacement = base64UrlEncode(List<int>.filled(32, 16)).replaceAll('=', '');
+    String? stored = jsonEncode({...response(), 'api_origin': 'https://wallet.example/', 'confirmed': true});
+    var calls = 0;
+    final service = RemoteHolderPairingService(
+      client: MockClient((_) async {
+        calls += 1;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        return http.Response(jsonEncode({
+          'registration_id': 'registration-1',
+          'credential_expires_at': DateTime.now().toUtc().add(const Duration(days: 1)).toIso8601String(),
+        }), 200);
+      }),
+      storeEnrollment: (value) async => stored = value,
+      readEnrollment: () async => stored,
+      createReplacement: () => replacement,
+    );
+    final results = await Future.wait([
+      service.renewIfDue(force: true),
+      service.renewIfDue(force: true),
+    ]);
+    expect(results, ['registration-1', 'registration-1']);
+    expect(calls, 1);
+    expect(jsonDecode(stored!)['device_credential'], replacement);
     service.close();
   });
 }
