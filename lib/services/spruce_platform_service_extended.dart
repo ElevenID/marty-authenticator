@@ -77,8 +77,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   factory SpruceIdPlatformServiceExtended() => _instance;
   SpruceIdPlatformServiceExtended._internal() : super.protected();
 
-  // Additional SDK-enabled channels
-  final MethodChannel _sdkChannel = const MethodChannel('spruce_id_sdk');
+  // The unregistered holder SDK channel is retired. Live wallet paths use Rust.
   final Map<String, String> _presentationSessionRoutes = {};
   final Map<String, _PendingVerifiedPresentation>
   _pendingVerifiedPresentations = {};
@@ -519,20 +518,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
     Map<String, dynamic>? holderConfig,
   }) async {
-    try {
-      final result = await _sdkChannel.invokeMethod('initializeHolderSDK', {
-        'keyId': keyId ?? 'default-key',
-        'config': holderConfig ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Holder SDK initialization failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'initializeHolderSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -544,25 +532,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? presentationFormat,
     String? keyId,
   }) async {
-    try {
-      final result = await _sdkChannel
-          .invokeMethod('createVerifiablePresentationSDK', {
-            'credentials': credentials,
-            'challenge': challenge,
-            'domain': domain ?? '',
-            'selectiveDisclosure': selectiveDisclosure ?? {},
-            'presentationFormat': presentationFormat ?? 'jwt_vp',
-            'keyId': keyId ?? 'default-key',
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK verifiable presentation creation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'createVerifiablePresentationSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -572,22 +544,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? verificationMethod,
     String? proofPurpose,
   }) async {
-    try {
-      final result = await _sdkChannel.invokeMethod('signPresentationSDK', {
-        'presentation': presentation,
-        'keyId': keyId,
-        'verificationMethod': verificationMethod,
-        'proofPurpose': proofPurpose ?? 'authentication',
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK presentation signing failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'signPresentationSDK requires a verified remote-KMS flow',
+    );
   }
 
   // ========================
@@ -599,40 +558,18 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required List<Map<String, dynamic>> operations,
     String? keyId,
   }) async {
-    try {
-      final result = await _sdkChannel.invokeMethod(
-        'batchProcessCredentialsSDK',
-        {'operations': operations, 'keyId': keyId ?? 'default-key'},
-      );
-
-      return List<Map<String, dynamic>>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK batch credential processing failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'batchProcessCredentialsSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
   Future<Map<String, dynamic>> getCredentialCapabilitiesSDK(
     String credentialId,
   ) async {
-    try {
-      final result = await _sdkChannel.invokeMethod(
-        'getCredentialCapabilitiesSDK',
-        {'credentialId': credentialId},
-      );
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential capabilities retrieval failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'getCredentialCapabilitiesSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -641,21 +578,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? schemaId,
     List<String>? policies,
   }) async {
-    try {
-      final result = await _sdkChannel.invokeMethod('validateCredentialSDK', {
-        'credential': credential,
-        'schemaId': schemaId,
-        'policies': policies ?? [],
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK credential validation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'validateCredentialSDK requires a verified remote-KMS flow',
+    );
   }
 
   // ========================
@@ -668,21 +593,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     bool useHardwareModule = true,
     Map<String, dynamic>? keyPolicies,
   }) async {
-    try {
-      final result = await _sdkChannel.invokeMethod('generateSecureKeySDK', {
-        'algorithm': algorithm,
-        'useHardwareModule': useHardwareModule,
-        'keyPolicies': keyPolicies ?? {},
-      });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK secure key generation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'generateSecureKeySDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -692,23 +605,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required Map<String, dynamic> payload,
     Map<String, dynamic>? options,
   }) async {
-    try {
-      final result = await _sdkChannel
-          .invokeMethod('performCryptoOperationSDK', {
-            'operation': operation,
-            'keyId': keyId,
-            'payload': payload,
-            'options': options ?? {},
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK crypto operation failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'performCryptoOperationSDK requires a verified remote-KMS flow',
+    );
   }
 
   @override
@@ -717,22 +616,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String? keyId,
     Map<String, dynamic>? channelOptions,
   }) async {
-    try {
-      final result = await _sdkChannel
-          .invokeMethod('establishSecureChannelSDK', {
-            'peerDid': peerDid,
-            'keyId': keyId ?? 'default-key',
-            'channelOptions': channelOptions ?? {},
-          });
-
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'SDK secure channel establishment failed: ${e.message}',
-        e.details,
-      );
-    }
+    throw UnsupportedError(
+      'establishSecureChannelSDK requires a verified remote-KMS flow',
+    );
   }
 
   // ========================
@@ -920,48 +806,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Stream<Map<String, dynamic>>> monitorCredentialStatusSDK(
     String credentialId,
   ) async {
-    final StreamController<Map<String, dynamic>> controller =
-        StreamController();
-
-    try {
-      // Set up platform channel stream for credential monitoring
-      const EventChannel eventChannel = EventChannel(
-        'spruce_id_credential_monitor',
-      );
-
-      await _sdkChannel.invokeMethod('startCredentialMonitoring', {
-        'credentialId': credentialId,
-      });
-
-      eventChannel
-          .receiveBroadcastStream(credentialId)
-          .listen(
-            (data) {
-              controller.add(Map<String, dynamic>.from(data));
-            },
-            onError: (error) {
-              controller.addError(
-                SpruceIdException(
-                  'MONITOR_ERROR',
-                  'Credential monitoring error: $error',
-                ),
-              );
-            },
-            onDone: () {
-              controller.close();
-            },
-          );
-
-      return controller.stream;
-    } catch (e) {
-      controller.addError(
-        SpruceIdException(
-          'MONITOR_SETUP_ERROR',
-          'Failed to setup credential monitoring: $e',
-        ),
-      );
-      return controller.stream;
-    }
+    throw UnsupportedError(
+      'Credential monitoring requires a verified remote-KMS flow',
+    );
   }
 
   @override

@@ -29,6 +29,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../interfaces/spruce_interfaces_extended.dart';
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../utils/logger.dart';
+import 'remote_holder_pairing_service.dart';
 import 'spruce_platform_service_extended.dart';
 import '../spruce_client.dart';
 
@@ -261,12 +262,17 @@ class SpruceIdClientExtended extends SpruceIdClient
     Map<String, dynamic>? config,
     bool enableAdvancedFeatures = true,
   }) async {
-    // Initialize base SDK
     await initialize();
-
-    // Initialize advanced features if requested
     if (enableAdvancedFeatures) {
-      await _platformService.initializeHolderSDK(holderConfig: config);
+      if (config != null && config.isNotEmpty) {
+        throw UnsupportedError('Local holder SDK configuration is retired');
+      }
+      final holder = RemoteHolderPairingService();
+      try {
+        await holder.publicJwkForPurpose('presentation_signing');
+      } finally {
+        holder.close();
+      }
     }
   }
 

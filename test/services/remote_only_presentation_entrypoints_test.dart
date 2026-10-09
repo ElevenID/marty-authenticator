@@ -39,4 +39,23 @@ void main() {
       );
     },
   );
+
+  test('unregistered holder SDK key and signing methods fail closed', () async {
+    await expectLater(
+      service.initializeHolderSDK(keyId: 'local-key'),
+      throwsA(isA<UnsupportedError>()),
+    );
+    await expectLater(
+      service.generateSecureKeySDK(),
+      throwsA(isA<UnsupportedError>()),
+    );
+    await expectLater(
+      service.signPresentationSDK(presentation: const {}, keyId: 'local-key'),
+      throwsA(isA<UnsupportedError>()),
+    );
+    await expectLater(
+      service.monitorCredentialStatusSDK('credential-id'),
+      throwsA(isA<UnsupportedError>()),
+    );
+  });
 }
