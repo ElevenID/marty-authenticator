@@ -121,6 +121,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         if (sessionId is! String || sessionId.isEmpty) {
           throw StateError('Presentation selection session is invalid');
         }
+        if (_presentationSessionRoutes.containsKey(sessionId)) {
+          throw StateError('Presentation selection session was reused');
+        }
         if (_presentationSessionRoutes.length >= 16) {
           _presentationSessionRoutes.remove(_presentationSessionRoutes.keys.first);
         }
