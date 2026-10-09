@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +46,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
 
   final _storage = const FlutterSecureStorage();
   static const _storageKey = 'card_groups_data';
+  Future<void> _lastWrite = Future.value();
 
   /// Loads verified OID4VCI receipts from [WalletCredentialStore] and
   /// groups them by issuer.
@@ -77,9 +79,10 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       groupedCards.putIfAbsent(issuer, () => []).add(card);
     }
 
-    state = groupedCards.entries
+    final groups = groupedCards.entries
         .map((e) => CardGroup(title: e.key, cards: e.value))
         .toList();
+    state = await _restoreLayout(groups);
     Logger.debug(
       'DEBUG: CardStateNotifier state updated with ${state.length} groups',
     );
@@ -139,50 +142,104 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
     );
   }
 
-  Future<void> saveCards() async {
-    final data = jsonEncode(state.map((group) => group.toMap()).toList());
-    await _storage.write(key: _storageKey, value: data);
+  Future<List<CardGroup>> _restoreLayout(List<CardGroup> groups) async {
+    try {
+      final raw = await _storage.read(key: _storageKey);
+      if (raw == null) return groups;
+      if (raw.length > 64 * 1024) {
+        throw const FormatException('Layout is too large');
+      }
+      final layout = jsonDecode(raw);
+      if (layout is! Map<String, dynamic> ||
+          layout['version'] != 1 ||
+          layout['groups'] is! List ||
+          layout['expired_ids'] is! List) {
+        throw const FormatException('Wallet layout is invalid');
+      }
+      final expired = (layout['expired_ids'] as List).cast<String>().toSet();
+      final current = {for (final group in groups) group.title: group};
+      final restored = <CardGroup>[];
+      for (final item in layout['groups'] as List) {
+        if (item is! Map<String, dynamic> ||
+            item['title'] is! String ||
+            item['ids'] is! List) {
+          throw const FormatException('Wallet group layout is invalid');
+        }
+        final group = current.remove(item['title']);
+        if (group == null) continue;
+        final byId = {for (final card in group.cards) card.id: card};
+        final cards = <CardData>[];
+        for (final id in (item['ids'] as List).cast<String>()) {
+          final card = byId.remove(id);
+          if (card != null) cards.add(card);
+        }
+        cards.addAll(byId.values);
+        restored.add(group.copyWith(cards: cards));
+      }
+      restored.addAll(current.values);
+      return restored
+          .map(
+            (group) => group.copyWith(
+              cards: group.cards
+                  .map(
+                    (card) =>
+                        card.copyWith(isExpired: expired.contains(card.id)),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList();
+    } catch (error) {
+      Logger.warning('Ignoring invalid wallet card layout: $error');
+      return groups;
+    }
+  }
+
+  Future<void> saveCards() {
+    final data = jsonEncode({
+      'version': 1,
+      'groups': [
+        for (final group in state)
+          {
+            'title': group.title,
+            'ids': group.cards
+                .map((card) => card.id)
+                .whereType<String>()
+                .toList(),
+          },
+      ],
+      'expired_ids': [
+        for (final card in state.expand((group) => group.cards))
+          if (card.isExpired && card.id != null) card.id,
+      ],
+    });
+    final write = _lastWrite.then(
+      (_) => _storage.write(key: _storageKey, value: data),
+    );
+    _lastWrite = write.catchError((Object error) {
+      Logger.error('Failed to save wallet card layout: $error');
+    });
+    return write;
   }
 
   void reorderCard(CardData card, int newGroupIndex, int newIndex) {
-    List<CardGroup> newGroups = [];
-
-    // 1. Remove card from its current position
-    for (var group in state) {
-      // Check if this group contains the card (by title/properties since we don't have ID)
-      // Assuming card object reference might be different if reloaded, but here we pass the object.
-      // Ideally we should match by ID. Since we don't have ID, we rely on object equality or title.
-      // CardData uses default equality (props) if it extends Equatable, but it doesn't.
-      // So it uses identity. If the passed 'card' is from the current state, it works.
-      if (group.cards.contains(card)) {
-        final newCards = List<CardData>.from(group.cards)..remove(card);
-        newGroups.add(group.copyWith(cards: newCards));
-      } else {
-        newGroups.add(group);
-      }
+    final id = card.id;
+    if (id == null || newGroupIndex < 0 || newGroupIndex >= state.length) {
+      return;
     }
+    final group = state[newGroupIndex];
+    final oldIndex = group.cards.indexWhere((candidate) => candidate.id == id);
+    if (oldIndex < 0) return;
 
-    // 2. Insert card at new position
-    if (newGroupIndex >= 0 && newGroupIndex < newGroups.length) {
-      final targetGroup = newGroups[newGroupIndex];
-      final newCards = List<CardData>.from(targetGroup.cards);
-
-      // Clamp index
-      final insertIndex = newIndex.clamp(0, newCards.length);
-      newCards.insert(insertIndex, card);
-
-      newGroups[newGroupIndex] = targetGroup.copyWith(cards: newCards);
-    }
-
-    // 3. Update sort orders
-    newGroups = newGroups.map((group) {
-      final updatedCards = group.cards.asMap().entries.map((entry) {
-        return entry.value.copyWith(sortOrder: entry.key);
-      }).toList();
-      return group.copyWith(cards: updatedCards);
-    }).toList();
-
-    state = newGroups;
+    final cards = List<CardData>.from(group.cards)..removeAt(oldIndex);
+    cards.insert(newIndex.clamp(0, cards.length), group.cards[oldIndex]);
+    final ordered = [
+      for (final (index, value) in cards.indexed)
+        value.copyWith(sortOrder: index),
+    ];
+    final groups = List<CardGroup>.from(state);
+    groups[newGroupIndex] = group.copyWith(cards: ordered);
+    state = groups;
     saveCards();
   }
 
@@ -204,11 +261,12 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
   }
 
   void toggleCardExpired(CardData card) {
+    final id = card.id;
+    if (id == null) return;
     List<CardGroup> newGroups = [];
     for (var group in state) {
       final newCards = group.cards.map((c) {
-        if (c.title == card.title) {
-          // Using title as ID for now
+        if (c.id == id) {
           return c.copyWith(isExpired: !c.isExpired);
         }
         return c;
@@ -232,5 +290,6 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       newGroups.add(group.copyWith(cards: newCards));
     }
     state = newGroups;
+    await saveCards();
   }
 }

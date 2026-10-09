@@ -100,7 +100,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   }
 
   Widget _buildExpiredCardItem(CardData card) {
-    final isSelected = selectedCards.contains(card.title);
+    final isSelected = selectedCards.contains(card.id);
 
     return ListTile(
       leading: isEditMode
@@ -147,11 +147,13 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   }
 
   void _toggleSelection(CardData card) {
+    final id = card.id;
+    if (id == null) return;
     setState(() {
-      if (selectedCards.contains(card.title)) {
-        selectedCards.remove(card.title);
+      if (selectedCards.contains(id)) {
+        selectedCards.remove(id);
       } else {
-        selectedCards.add(card.title);
+        selectedCards.add(id);
       }
     });
   }
@@ -162,7 +164,10 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
       if (selectedCards.length == expiredCards.length) {
         selectedCards.clear();
       } else {
-        selectedCards = expiredCards.map((c) => c.title).toSet();
+        selectedCards = expiredCards
+            .map((c) => c.id)
+            .whereType<String>()
+            .toSet();
       }
     });
   }
@@ -170,7 +175,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   void _deleteSelected() {
     final expiredCards = ref.read(expiredCardsProvider);
     final cardsToDelete = expiredCards
-        .where((c) => selectedCards.contains(c.title))
+        .where((c) => selectedCards.contains(c.id))
         .toList();
 
     for (var card in cardsToDelete) {
@@ -185,7 +190,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   void _unhideSelected() {
     final expiredCards = ref.read(expiredCardsProvider);
     final cardsToUnhide = expiredCards
-        .where((c) => selectedCards.contains(c.title))
+        .where((c) => selectedCards.contains(c.id))
         .toList();
 
     for (var card in cardsToUnhide) {
