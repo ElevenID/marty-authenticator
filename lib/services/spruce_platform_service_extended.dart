@@ -25,12 +25,13 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
-import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import 'remote_holder_pairing_service.dart';
+import 'verified_wallet_bridge.dart';
 import 'wallet_credential_store.dart';
 import 'spruce_platform_service.dart';
 
@@ -72,9 +73,22 @@ class _PendingVerifiedPresentation {
 /// Uses the refactored Android and iOS handlers with SDK integration
 class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     implements ISpruceIdPlatformServiceExtended {
-  static final _instance = SpruceIdPlatformServiceExtended._internal();
+  static final _instance = SpruceIdPlatformServiceExtended._internal(
+    const RustVerifiedWalletBridge(),
+    () => RemoteHolderPairingService(),
+  );
   factory SpruceIdPlatformServiceExtended() => _instance;
-  SpruceIdPlatformServiceExtended._internal() : super.protected();
+  SpruceIdPlatformServiceExtended._internal(this._bridge, this._holderFactory)
+    : super.protected();
+
+  @visibleForTesting
+  SpruceIdPlatformServiceExtended.withDependencies(
+    VerifiedWalletBridge bridge,
+    RemoteHolderPairingService Function() holderFactory,
+  ) : this._internal(bridge, holderFactory);
+
+  final VerifiedWalletBridge _bridge;
+  final RemoteHolderPairingService Function() _holderFactory;
 
   // The unregistered holder SDK channel is retired. Live wallet paths use Rust.
   final Set<String> _presentationSessions = {};
@@ -94,12 +108,12 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     if (keyId != null) {
       throw UnsupportedError('Local holder key selection is retired');
     }
-    final holder = RemoteHolderPairingService();
+    final holder = _holderFactory();
     try {
       final publicJwk = await holder.publicJwkForPurpose(
         'presentation_signing',
       );
-      final prepared = await rust_api.walletPrepareVerifiedSdJwtReceipt(
+      final prepared = await _bridge.prepareReceipt(
         offerUri: credentialOffer,
         txCode: pin,
         holderPublicJwkJson: jsonEncode(publicJwk),
@@ -109,7 +123,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         signingInput: prepared.signingInput,
       );
       final snapshot = await holder.fetchIssuerKeys();
-      final receipt = await rust_api.walletCompleteVerifiedSdJwtReceipt(
+      final receipt = await _bridge.completeReceipt(
         sessionId: prepared.sessionId,
         remoteSignature: signature,
         issuerSnapshotJson: jsonEncode(snapshot),
@@ -135,11 +149,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
     required String presentationRequest,
   }) async {
-    final holder = RemoteHolderPairingService();
+    final holder = _holderFactory();
     try {
-      final route = await rust_api.walletRoutePresentationRequest(
-        input: presentationRequest,
-      );
+      final route = await _bridge.routePresentation(input: presentationRequest);
       if (route == 'mdoc') {
         throw UnsupportedError(
           'mDoc presentation requires a verified remote-KMS session',
@@ -176,9 +188,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Map<String, dynamic>> _initiateVerifiedPresentation(
     String requestUri,
   ) async {
-    final request = await rust_api.walletParsePresentationRequest(
-      requestUri: requestUri,
-    );
+    final request = await _bridge.parsePresentation(requestUri: requestUri);
     if (request.clientId.isEmpty ||
         request.nonce.isEmpty ||
         request.requestDigest.isEmpty) {
@@ -385,13 +395,13 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       );
     }
 
-    final holder = RemoteHolderPairingService();
+    final holder = _holderFactory();
     try {
       final snapshot = await holder.fetchIssuerKeys();
       final publicJwk = await holder.publicJwkForPurpose(
         'presentation_signing',
       );
-      final prepared = await rust_api.walletPrepareVerifiedSdJwtPresentation(
+      final prepared = await _bridge.preparePresentation(
         requestUri: pending.requestUri,
         approvedRequestDigest: pending.requestDigest,
         credential: credential,
@@ -404,7 +414,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         purpose: 'presentation_signing',
         signingInput: prepared.signingInput,
       );
-      final response = await rust_api.walletCompleteVerifiedSdJwtPresentation(
+      final response = await _bridge.completePresentation(
         sessionId: prepared.sessionId,
         remoteSignature: signature,
       );
