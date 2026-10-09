@@ -230,7 +230,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CardDetailsScreen(cardData: cardData.toMap()),
+          builder: (context) => CardDetailsScreen(card: cardData),
         ),
       );
     }
