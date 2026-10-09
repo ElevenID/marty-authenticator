@@ -34,29 +34,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
 
   @override
   Future<Map<String, dynamic>> createDid({String method = 'key'}) async {
-    await initializeW3C();
-
-    if (method == 'key') {
-      // Ed25519 -> did:key
-      final result = await _wasm.generateEd25519Key();
-      return {
-        'did': result.did,
-        'keyId': result.keyId,
-        'keys': [result.jwk], // Return as list of keys
-        'verificationMethod': result.did, // Simplified
-      };
-    } else if (method == 'jwk') {
-      // P-256 -> did:jwk
-      final result = await _wasm.generateP256Key();
-      return {
-        'did': result.did,
-        'keyId': result.keyId,
-        'keys': [result.jwk],
-        'verificationMethod': result.did,
-      };
-    }
-
-    throw UnimplementedError('DID method "$method" not supported on Web');
+    throw UnsupportedError('Remote KMS DID creation is required on Web');
   }
 
   @override
@@ -92,18 +70,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
     String keyType = 'RSA',
     int keySize = 2048,
   }) async {
-    await initializeW3C();
-    if (keyType == 'EC' || keyType == 'P-256') {
-      final res = await _wasm.generateP256Key();
-      return {
-        'publicKey': res.jwk,
-        'privateKey': res.jwk,
-        'keyId': res.keyId,
-        'type': 'EC',
-      };
-    }
-    // RSA not supported in WASM subset
-    throw UnimplementedError('Key type "$keyType" not supported on Web');
+    throw UnsupportedError('Remote KMS key generation is required on Web');
   }
 
   @override
