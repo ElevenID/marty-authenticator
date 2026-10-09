@@ -10,9 +10,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
 
-  testWidgets('deleting one same-title expired pass preserves the other', (
-    tester,
-  ) async {
+  Future<ProviderContainer> showTwoExpiredPasses(WidgetTester tester) async {
     for (final id in ['first', 'second']) {
       await WalletCredentialStore.store(
         StoredCredential(
@@ -42,6 +40,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(ListTile), findsNWidgets(2));
+    return container;
+  }
+
+  testWidgets('deleting one same-title expired pass preserves the other', (
+    tester,
+  ) async {
+    final container = await showTwoExpiredPasses(tester);
 
     await tester.tap(find.text('Edit').first);
     await tester.pump();
@@ -55,6 +60,39 @@ void main() {
       'second',
     ]);
     expect(await WalletCredentialStore.getById('first'), isNull);
+    expect(await WalletCredentialStore.getById('second'), isNotNull);
+  });
+
+  testWidgets('expired pass details delete only the selected receipt', (
+    tester,
+  ) async {
+    final container = await showTwoExpiredPasses(tester);
+    await tester.tap(find.byType(ListTile).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Delete'), findsOneWidget);
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(expiredCardsProvider).map((card) => card.id), [
+      'second',
+    ]);
+    expect(await WalletCredentialStore.getById('first'), isNull);
+    expect(await WalletCredentialStore.getById('second'), isNotNull);
+  });
+
+  testWidgets('expired pass details unhide only the selected receipt', (
+    tester,
+  ) async {
+    final container = await showTwoExpiredPasses(tester);
+    await tester.tap(find.byType(ListTile).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Unhide'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(expiredCardsProvider).map((card) => card.id), [
+      'second',
+    ]);
+    expect(await WalletCredentialStore.getById('first'), isNotNull);
     expect(await WalletCredentialStore.getById('second'), isNotNull);
   });
 }
