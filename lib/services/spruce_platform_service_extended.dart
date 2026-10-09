@@ -56,6 +56,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 
   // Additional SDK-enabled channels
   final MethodChannel _sdkChannel = const MethodChannel('spruce_id_sdk');
+  final Map<String, String> _presentationSessionRoutes = {};
 
   // ========================
   // SDK-Enhanced OID4VC Operations
@@ -116,8 +117,16 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       final resultMap = Map<String, dynamic>.from(result);
 
       if (resultMap['status'] == 'user_selection_required') {
+        final sessionId = resultMap['sessionId'];
+        if (sessionId is! String || sessionId.isEmpty) {
+          throw StateError('Presentation selection session is invalid');
+        }
+        if (_presentationSessionRoutes.length >= 16) {
+          _presentationSessionRoutes.remove(_presentationSessionRoutes.keys.first);
+        }
+        _presentationSessionRoutes[sessionId] = route;
         throw UserSelectionRequiredException(
-          sessionId: resultMap['sessionId'],
+          sessionId: sessionId,
           matches: List<Map<String, dynamic>>.from(resultMap['matches'] ?? []),
           requestDetails: {
             'verifier': resultMap['verifier'],
@@ -143,23 +152,19 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     List<String>? selectedFields,
   }) async {
     try {
-      // Try VP completion first (W3C channel)
-      try {
-        final result = await w3cChannel.invokeMethod('handleVpRequest', {
-          'sessionId': sessionId,
-          'selectedCredentialId': selectedCredentialId,
-          'selectedFields': selectedFields,
-        });
-        return Map<String, dynamic>.from(result);
-      } on PlatformException catch (_) {
-        // Fallback to mDoc completion (mDoc channel)
-        final result = await mdocChannel.invokeMethod('createMdocResponse', {
-          'sessionId': sessionId,
-          'selectedCredentialId': selectedCredentialId,
-          'selectedFields': selectedFields,
-        });
-        return Map<String, dynamic>.from(result);
+      final route = _presentationSessionRoutes[sessionId];
+      if (route == null) {
+        throw StateError('Presentation selection session is unknown');
       }
+      final channel = route == 'mdoc' ? mdocChannel : w3cChannel;
+      final method = route == 'mdoc' ? 'createMdocResponse' : 'handleVpRequest';
+      final result = await channel.invokeMethod(method, {
+        'sessionId': sessionId,
+        'selectedCredentialId': selectedCredentialId,
+        'selectedFields': selectedFields,
+      });
+      _presentationSessionRoutes.remove(sessionId);
+      return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
       throw SpruceIdException(
         e.code,
