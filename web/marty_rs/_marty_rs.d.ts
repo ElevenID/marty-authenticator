@@ -51,17 +51,6 @@ export function dtc_create(request_json: string): string;
 export function dtc_verify(request_json: string): string;
 
 /**
- * Extract credential from a VP JWT
- *
- * # Arguments
- * * `vp_jwt` - The VP JWT string
- *
- * # Returns
- * JSON array of credential objects
- */
-export function extract_credentials_from_vp(vp_jwt: string): string;
-
-/**
  * Generate a credential offer URI for QR code display
  *
  * # Arguments
@@ -108,19 +97,6 @@ export function open_badge_ob2_verify(request_json: string): string;
  */
 export function open_badge_ob3_verify(request_json: string): Promise<string>;
 
-/**
- * Verify a JWT structure and claims (does NOT verify cryptographic signature)
- *
- * # Arguments
- * * `jwt` - The JWT string to verify
- * * `expected_issuer` - Optional expected issuer
- * * `expected_audience` - Optional expected audience
- *
- * # Returns
- * JSON: { "valid": bool, "payload": {...}, "error": "..." }
- */
-export function verify_jwt_claims(jwt: string, expected_issuer?: string | null, expected_audience?: string | null): string;
-
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
@@ -129,16 +105,14 @@ export interface InitOutput {
     readonly create_credential_offer: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => void;
     readonly dtc_create: (a: number, b: number, c: number) => void;
     readonly dtc_verify: (a: number, b: number, c: number) => void;
-    readonly extract_credentials_from_vp: (a: number, b: number, c: number) => void;
     readonly generate_offer_uri: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
     readonly get_version: (a: number) => void;
     readonly health_check: (a: number) => void;
     readonly open_badge_ob2_verify: (a: number, b: number, c: number) => void;
     readonly open_badge_ob3_verify: (a: number, b: number) => number;
-    readonly verify_jwt_claims: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
     readonly init_panic_hook: () => void;
-    readonly __wasm_bindgen_func_elem_4455: (a: number, b: number, c: number, d: number) => void;
-    readonly __wasm_bindgen_func_elem_4469: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4435: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4449: (a: number, b: number, c: number, d: number) => void;
     readonly __wbindgen_export: (a: number) => void;
     readonly __wbindgen_export2: (a: number, b: number, c: number) => void;
     readonly __wbindgen_export3: (a: number, b: number) => number;

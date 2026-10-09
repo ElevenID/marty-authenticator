@@ -74,12 +74,6 @@ class MartyWasm {
     throw UnsupportedError('WASM not available on this platform');
   }
 
-  Future<List<Map<String, dynamic>>> extractCredentialsFromVp(
-    String vpJwt,
-  ) async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
   String getVersion() {
     throw UnsupportedError('WASM not available on this platform');
   }

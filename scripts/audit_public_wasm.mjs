@@ -12,7 +12,6 @@ const allowed = new Set([
   'default',
   'dtc_create',
   'dtc_verify',
-  'extract_credentials_from_vp',
   'generate_offer_uri',
   'get_version',
   'health_check',
@@ -20,13 +19,14 @@ const allowed = new Set([
   'init_panic_hook',
   'open_badge_ob2_verify',
   'open_badge_ob3_verify',
-  'verify_jwt_claims',
 ]);
 const forbidden = new Set([
   'generate_p256_key',
   'generate_ed25519_key',
   'create_verifiable_credential',
   'create_presentation',
+  'extract_credentials_from_vp',
+  'verify_jwt_claims',
 ]);
 const files = [
   '_marty_rs.js',

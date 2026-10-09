@@ -108,11 +108,6 @@ class MartyWasm {
           )
           as Map<String, dynamic>;
 
-  Future<List<Map<String, dynamic>>> extractCredentialsFromVp(
-    String vpJwt,
-  ) async => (jsonDecode(_call('extract_credentials_from_vp', [vpJwt])) as List)
-      .cast<Map<String, dynamic>>();
-
   String getVersion() => _call('get_version');
   String healthCheck() => _call('health_check');
 }

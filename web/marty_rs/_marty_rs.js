@@ -171,44 +171,6 @@ export function dtc_verify(request_json) {
 }
 
 /**
- * Extract credential from a VP JWT
- *
- * # Arguments
- * * `vp_jwt` - The VP JWT string
- *
- * # Returns
- * JSON array of credential objects
- * @param {string} vp_jwt
- * @returns {string}
- */
-export function extract_credentials_from_vp(vp_jwt) {
-    let deferred3_0;
-    let deferred3_1;
-    try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passStringToWasm0(vp_jwt, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.extract_credentials_from_vp(retptr, ptr0, len0);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-        var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
-        var ptr2 = r0;
-        var len2 = r1;
-        if (r3) {
-            ptr2 = 0; len2 = 0;
-            throw takeObject(r2);
-        }
-        deferred3_0 = ptr2;
-        deferred3_1 = len2;
-        return getStringFromWasm0(ptr2, len2);
-    } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_export2(deferred3_0, deferred3_1, 1);
-    }
-}
-
-/**
  * Generate a credential offer URI for QR code display
  *
  * # Arguments
@@ -347,52 +309,6 @@ export function open_badge_ob3_verify(request_json) {
     const ret = wasm.open_badge_ob3_verify(ptr0, len0);
     return takeObject(ret);
 }
-
-/**
- * Verify a JWT structure and claims (does NOT verify cryptographic signature)
- *
- * # Arguments
- * * `jwt` - The JWT string to verify
- * * `expected_issuer` - Optional expected issuer
- * * `expected_audience` - Optional expected audience
- *
- * # Returns
- * JSON: { "valid": bool, "payload": {...}, "error": "..." }
- * @param {string} jwt
- * @param {string | null} [expected_issuer]
- * @param {string | null} [expected_audience]
- * @returns {string}
- */
-export function verify_jwt_claims(jwt, expected_issuer, expected_audience) {
-    let deferred5_0;
-    let deferred5_1;
-    try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passStringToWasm0(jwt, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
-        const len0 = WASM_VECTOR_LEN;
-        var ptr1 = isLikeNone(expected_issuer) ? 0 : passStringToWasm0(expected_issuer, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
-        var len1 = WASM_VECTOR_LEN;
-        var ptr2 = isLikeNone(expected_audience) ? 0 : passStringToWasm0(expected_audience, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
-        var len2 = WASM_VECTOR_LEN;
-        wasm.verify_jwt_claims(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
-        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
-        var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
-        var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
-        var ptr4 = r0;
-        var len4 = r1;
-        if (r3) {
-            ptr4 = 0; len4 = 0;
-            throw takeObject(r2);
-        }
-        deferred5_0 = ptr4;
-        deferred5_1 = len4;
-        return getStringFromWasm0(ptr4, len4);
-    } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_export2(deferred5_0, deferred5_1, 1);
-    }
-}
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
@@ -471,7 +387,7 @@ function __wbg_get_imports() {
                     const a = state0.a;
                     state0.a = 0;
                     try {
-                        return __wasm_bindgen_func_elem_4469(a, state0.b, arg0, arg1);
+                        return __wasm_bindgen_func_elem_4449(a, state0.b, arg0, arg1);
                     } finally {
                         state0.a = a;
                     }
@@ -552,7 +468,7 @@ function __wbg_get_imports() {
         },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
             // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 792, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
-            const ret = makeMutClosure(arg0, arg1, __wasm_bindgen_func_elem_4455);
+            const ret = makeMutClosure(arg0, arg1, __wasm_bindgen_func_elem_4435);
             return addHeapObject(ret);
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
@@ -579,10 +495,10 @@ function __wbg_get_imports() {
     };
 }
 
-function __wasm_bindgen_func_elem_4455(arg0, arg1, arg2) {
+function __wasm_bindgen_func_elem_4435(arg0, arg1, arg2) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        wasm.__wasm_bindgen_func_elem_4455(retptr, arg0, arg1, addHeapObject(arg2));
+        wasm.__wasm_bindgen_func_elem_4435(retptr, arg0, arg1, addHeapObject(arg2));
         var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
         var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
         if (r1) {
@@ -593,8 +509,8 @@ function __wasm_bindgen_func_elem_4455(arg0, arg1, arg2) {
     }
 }
 
-function __wasm_bindgen_func_elem_4469(arg0, arg1, arg2, arg3) {
-    wasm.__wasm_bindgen_func_elem_4469(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wasm_bindgen_func_elem_4449(arg0, arg1, arg2, arg3) {
+    wasm.__wasm_bindgen_func_elem_4449(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 function addHeapObject(obj) {
