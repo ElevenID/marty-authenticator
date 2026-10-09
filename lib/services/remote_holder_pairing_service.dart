@@ -56,8 +56,9 @@ class RemoteHolderPairingService {
   }
 
   static Uri _requiredOrigin(Object? value) {
-    if (value is! String)
+    if (value is! String) {
       throw const FormatException('Invalid remote wallet origin');
+    }
     final origin = Uri.tryParse(value);
     if (origin == null ||
         origin.scheme != 'https' ||
@@ -278,8 +279,9 @@ class RemoteHolderPairingService {
 
   Future<String> _renewIfDueInner({required bool force}) async {
     final stored = await _readEnrollment();
-    if (stored == null)
+    if (stored == null) {
       throw const FormatException('Remote wallet is not paired');
+    }
     final data = jsonDecode(stored);
     if (data is! Map<String, dynamic>) {
       throw const FormatException('Stored enrollment is invalid');
@@ -525,8 +527,9 @@ class RemoteHolderPairingService {
   _currentConfirmedBearer() async {
     await renewIfDue();
     final stored = await _readEnrollment();
-    if (stored == null)
+    if (stored == null) {
       throw const FormatException('Remote wallet is not paired');
+    }
     final data = jsonDecode(stored);
     if (data is! Map<String, dynamic> || data['confirmed'] != true) {
       throw const FormatException('Stored enrollment is not confirmed');
