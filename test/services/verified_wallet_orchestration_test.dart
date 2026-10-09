@@ -53,6 +53,7 @@ class _Holder extends RemoteHolderPairingService {
 
 class _Bridge implements VerifiedWalletBridge {
   bool rejectReceipt = false;
+  bool rejectPresentation = false;
   String presentationRoute = 'oid4vp';
   FrbPresentationRequest? requestOverride;
   String expectedQueryId = 'identity-query';
@@ -162,9 +163,10 @@ class _Bridge implements VerifiedWalletBridge {
     presentationCompletions++;
     expect(sessionId, 'presentation-session');
     expect(remoteSignature, [4, 5, 6]);
-    return const FrbPresentationResponse(
-      ok: true,
-      redirectUri: 'https://verifier.example/done',
+    return FrbPresentationResponse(
+      ok: !rejectPresentation,
+      redirectUri: rejectPresentation ? null : 'https://verifier.example/done',
+      errorDescription: rejectPresentation ? 'Verifier rejected proof' : null,
     );
   }
 }
@@ -445,6 +447,123 @@ void main() {
         );
       }
       expect(bridge.presentationPreparations, 0);
+    },
+  );
+
+  test('malformed DCQL approval never reaches remote signing', () async {
+    final bridge = _Bridge();
+    final service = SpruceIdPlatformServiceExtended.withDependencies(
+      bridge,
+      _Holder.new,
+    );
+    for (final credential in [
+      {'id': 'identity-query', 'format': 'mso_mdoc'},
+      {
+        'id': 'identity-query',
+        'format': 'dc+sd-jwt',
+        'meta': {
+          'vct_values': ['ExampleIdentity'],
+        },
+      },
+      {
+        'id': 'identity-query',
+        'format': 'dc+sd-jwt',
+        'claims': [
+          {
+            'path': ['given_name'],
+          },
+          {
+            'path': ['given_name'],
+          },
+        ],
+      },
+      {
+        'id': 'identity-query',
+        'format': 'dc+sd-jwt',
+        'claims': [
+          {
+            'path': ['nested', 'private'],
+          },
+        ],
+      },
+    ]) {
+      bridge.requestOverride = FrbPresentationRequest(
+        clientId: 'https://verifier.example',
+        nonce: 'request-nonce',
+        responseUri: 'https://verifier.example/response',
+        requestDigest: 'bound-request-digest',
+        queryType: 'dcql_query',
+        dcqlQueryJson: jsonEncode({
+          'credentials': [credential],
+        }),
+      );
+      await expectLater(
+        service.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://approved',
+        ),
+        throwsStateError,
+      );
+    }
+    expect(bridge.presentationPreparations, 0);
+  });
+
+  test(
+    'verifier rejection remains failure and consumes the approval',
+    () async {
+      await WalletCredentialStore.store(
+        StoredCredential(
+          id: 'stored-identity',
+          format: 'dc+sd-jwt',
+          issuer: 'https://issuer.example',
+          types: const ['ExampleIdentity'],
+          rawJson: 'header.payload.signature~',
+          issuedAt: DateTime.utc(2026, 10, 9),
+        ),
+      );
+      final bridge = _Bridge()..rejectPresentation = true;
+      final holders = <_Holder>[];
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        () {
+          final holder = _Holder();
+          holders.add(holder);
+          return holder;
+        },
+      );
+      late UserSelectionRequiredException selection;
+      try {
+        await service.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://approved',
+        );
+        fail('Credential selection should be required');
+      } on UserSelectionRequiredException catch (error) {
+        selection = error;
+      }
+
+      await expectLater(
+        service.completeOID4VPRequestSDK(
+          sessionId: selection.sessionId,
+          selectedCredentialId: 'stored-identity',
+          selectedFields: const ['credential/given_name'],
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            'Verifier rejected proof',
+          ),
+        ),
+      );
+      await expectLater(
+        service.completeOID4VPRequestSDK(
+          sessionId: selection.sessionId,
+          selectedCredentialId: 'stored-identity',
+          selectedFields: const ['credential/given_name'],
+        ),
+        throwsStateError,
+      );
+      expect(bridge.presentationCompletions, 1);
+      expect(holders.every((holder) => holder.closed), isTrue);
     },
   );
 }
