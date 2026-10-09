@@ -212,19 +212,6 @@ Future<FrbTokenResponse> walletExchangeAuthCodeToken({
   clientId: clientId,
 );
 
-/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
-Future<String> walletCreateProofJwt({
-  required String holderKid,
-  required String cNonce,
-  required String issuerUrl,
-  required String jwkJson,
-}) => RustLib.instance.api.crateApiWalletCreateProofJwt(
-  holderKid: holderKid,
-  cNonce: cNonce,
-  issuerUrl: issuerUrl,
-  jwkJson: jwkJson,
-);
-
 /// Request a credential from the issuer.
 Future<FrbCredentialResponse> walletRequestCredential({
   required String credentialEndpoint,

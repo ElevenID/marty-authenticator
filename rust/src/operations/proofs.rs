@@ -26,7 +26,7 @@ pub(crate) fn zk_prove_from_presentation_definition(
     if let Some(descriptor) = pd.input_descriptors.into_iter().next() {
         let predicate = marty_zkp::ZkPredicate::from_id(&descriptor.id);
         let claim_name = predicate.required_claim();
-        let claim_value = secrets.get(claim_name).ok_or_else(|| {
+        let claim_value = secrets.get(&claim_name).ok_or_else(|| {
             anyhow::anyhow!(
                 "Missing '{}' in secrets for predicate '{}'",
                 claim_name,

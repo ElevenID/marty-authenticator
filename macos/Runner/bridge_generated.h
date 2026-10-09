@@ -421,12 +421,6 @@ void frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request(int6
                                                                             struct wire_cst_list_prim_u_8_strict *redirect_uri,
                                                                             struct wire_cst_list_prim_u_8_strict *issuer_state);
 
-void frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt(int64_t port_,
-                                                                          struct wire_cst_list_prim_u_8_strict *holder_kid,
-                                                                          struct wire_cst_list_prim_u_8_strict *c_nonce,
-                                                                          struct wire_cst_list_prim_u_8_strict *issuer_url,
-                                                                          struct wire_cst_list_prim_u_8_strict *jwk_json);
-
 void frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token(int64_t port_,
                                                                                   struct wire_cst_list_prim_u_8_strict *token_endpoint,
                                                                                   struct wire_cst_list_prim_u_8_strict *code,
@@ -577,7 +571,6 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_presentation);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_and_submit_zk_presentation);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_build_auth_request);
-    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata);

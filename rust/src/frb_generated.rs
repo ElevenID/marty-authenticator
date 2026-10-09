@@ -826,40 +826,6 @@ fn wire__crate__api__wallet_build_auth_request_impl(
         },
     )
 }
-fn wire__crate__api__wallet_create_proof_jwt_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    holder_kid: impl CstDecode<String>,
-    c_nonce: impl CstDecode<String>,
-    issuer_url: impl CstDecode<String>,
-    jwk_json: impl CstDecode<String>,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "wallet_create_proof_jwt",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let api_holder_kid = holder_kid.cst_decode();
-            let api_c_nonce = c_nonce.cst_decode();
-            let api_issuer_url = issuer_url.cst_decode();
-            let api_jwk_json = jwk_json.cst_decode();
-            move |context| {
-                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::wallet_create_proof_jwt(
-                            api_holder_kid,
-                            api_c_nonce,
-                            api_issuer_url,
-                            api_jwk_json,
-                        )?;
-                        std::result::Result::Ok(output_ok)
-                    })(),
-                )
-            }
-        },
-    )
-}
 fn wire__crate__api__wallet_exchange_auth_code_token_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     token_endpoint: impl CstDecode<String>,
@@ -4877,19 +4843,6 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt(
-        port_: i64,
-        holder_kid: *mut wire_cst_list_prim_u_8_strict,
-        c_nonce: *mut wire_cst_list_prim_u_8_strict,
-        issuer_url: *mut wire_cst_list_prim_u_8_strict,
-        jwk_json: *mut wire_cst_list_prim_u_8_strict,
-    ) {
-        wire__crate__api__wallet_create_proof_jwt_impl(
-            port_, holder_kid, c_nonce, issuer_url, jwk_json,
-        )
-    }
-
-    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token(
         port_: i64,
         token_endpoint: *mut wire_cst_list_prim_u_8_strict,
@@ -6831,19 +6784,6 @@ mod web {
             client_id,
             redirect_uri,
             issuer_state,
-        )
-    }
-
-    #[wasm_bindgen]
-    pub fn wire__crate__api__wallet_create_proof_jwt(
-        port_: flutter_rust_bridge::for_generated::MessagePort,
-        holder_kid: String,
-        c_nonce: String,
-        issuer_url: String,
-        jwk_json: String,
-    ) {
-        wire__crate__api__wallet_create_proof_jwt_impl(
-            port_, holder_kid, c_nonce, issuer_url, jwk_json,
         )
     }
 

@@ -474,17 +474,6 @@ pub async fn wallet_exchange_auth_code_token(
     .await
 }
 
-/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
-#[frb]
-pub fn wallet_create_proof_jwt(
-    holder_kid: String,
-    c_nonce: String,
-    issuer_url: String,
-    jwk_json: String,
-) -> anyhow::Result<String> {
-    crate::operations::issuance::wallet_create_proof_jwt(holder_kid, c_nonce, issuer_url, jwk_json)
-}
-
 /// Request a credential from the issuer.
 #[frb]
 pub async fn wallet_request_credential(

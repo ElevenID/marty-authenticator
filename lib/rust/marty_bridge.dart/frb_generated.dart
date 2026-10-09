@@ -216,13 +216,6 @@ abstract class RustLibApi extends BaseApi {
     String? issuerState,
   });
 
-  Future<String> crateApiWalletCreateProofJwt({
-    required String holderKid,
-    required String cNonce,
-    required String issuerUrl,
-    required String jwkJson,
-  });
-
   Future<FrbTokenResponse> crateApiWalletExchangeAuthCodeToken({
     required String tokenEndpoint,
     required String code,
@@ -1267,45 +1260,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "redirectUri",
           "issuerState",
         ],
-      );
-
-  @override
-  Future<String> crateApiWalletCreateProofJwt({
-    required String holderKid,
-    required String cNonce,
-    required String issuerUrl,
-    required String jwkJson,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          var arg0 = cst_encode_String(holderKid);
-          var arg1 = cst_encode_String(cNonce);
-          var arg2 = cst_encode_String(issuerUrl);
-          var arg3 = cst_encode_String(jwkJson);
-          return wire.wire__crate__api__wallet_create_proof_jwt(
-            port_,
-            arg0,
-            arg1,
-            arg2,
-            arg3,
-          );
-        },
-        codec: DcoCodec(
-          decodeSuccessData: dco_decode_String,
-          decodeErrorData: dco_decode_AnyhowException,
-        ),
-        constMeta: kCrateApiWalletCreateProofJwtConstMeta,
-        argValues: [holderKid, cNonce, issuerUrl, jwkJson],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWalletCreateProofJwtConstMeta =>
-      const TaskConstMeta(
-        debugName: "wallet_create_proof_jwt",
-        argNames: ["holderKid", "cNonce", "issuerUrl", "jwkJson"],
       );
 
   @override
