@@ -47,9 +47,7 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
     Map<String, dynamic> credential, {
     String? keyId,
   }) async {
-    throw UnsupportedError(
-      'Remote KMS credential signing is required on Web',
-    );
+    throw UnsupportedError('Remote KMS credential signing is required on Web');
   }
 
   @override
@@ -121,7 +119,9 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
     String sdJwt,
     List<String> requiredClaims,
   ) async {
-    throw UnsupportedError('Cryptographic SD-JWT verification is required on Web');
+    throw UnsupportedError(
+      'Cryptographic SD-JWT verification is required on Web',
+    );
   }
 
   // mDoc Methods
