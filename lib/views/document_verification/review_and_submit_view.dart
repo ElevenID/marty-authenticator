@@ -4,16 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/liveness_challenge.dart';
 import '../../providers/verification_state_provider.dart';
 import '../../widgets/common/back_button.dart';
-// import '../../utils/lock_auth.dart';
-// import 'package:marty_authenticator/l10n/app_localizations.dart';
 
 class ReviewAndSubmitView extends ConsumerStatefulWidget {
   final LivenessChallenge? livenessChallenge;
-  final Future<void> Function()? submitRequest;
+  final Future<bool> Function()? authenticate;
+  final Future<void> Function(LivenessChallenge challenge)? submitRequest;
 
   const ReviewAndSubmitView({
     super.key,
     this.livenessChallenge,
+    this.authenticate,
     this.submitRequest,
   });
 
@@ -25,38 +25,32 @@ class ReviewAndSubmitView extends ConsumerStatefulWidget {
 class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
   bool _isSubmitting = false;
 
+  bool get _canSubmit =>
+      widget.livenessChallenge != null &&
+      !widget.livenessChallenge!.isExpired &&
+      widget.livenessChallenge!.nativePayload != null &&
+      widget.authenticate != null &&
+      widget.submitRequest != null;
+
   Future<void> _submit() async {
+    if (!_canSubmit) return;
     setState(() => _isSubmitting = true);
     try {
-      // For web testing, skip localization check
-      // final localization = AppLocalizations.of(context);
-      // if (localization == null) return;
-
-      // For web testing, always authenticate successfully
-      final bool didAuthenticate = true; // await lockAuth(
-      //   reason: (l10n) => 'Please authenticate to submit your ID verification',
-      //   localization: localization,
-      // );
-
-      if (didAuthenticate) {
-        // Simulate network request
-        await (widget.submitRequest?.call() ??
-            Future.delayed(const Duration(seconds: 2)));
-
-        // Update state
-        await ref
-            .read(verificationStateProvider.notifier)
-            .setStatus(VerificationStatus.pendingApproval);
-
-        if (!mounted) return;
-
-        // Pop back to root or show success
-        Navigator.of(context).popUntil((route) => route.isFirst);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Verification submitted successfully!')),
-        );
+      final challenge = widget.livenessChallenge!;
+      if (!await widget.authenticate!()) {
+        throw StateError('Authentication was not completed');
       }
+      if (challenge.isExpired) throw StateError('Liveness challenge expired');
+      await widget.submitRequest!(challenge);
+      await ref
+          .read(verificationStateProvider.notifier)
+          .setStatus(VerificationStatus.pendingApproval);
+
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Verification submitted successfully!')),
+      );
     } catch (e) {
       Logger.error(e.toString());
       if (mounted) {
@@ -87,8 +81,8 @@ class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Ready to Submit',
+            Text(
+              _canSubmit ? 'Ready to Submit' : 'Submission Unavailable',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -97,8 +91,10 @@ class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Your document and liveness check have been captured. Please authenticate to securely submit your information for verification.',
+            Text(
+              _canSubmit
+                  ? 'Authenticate to securely submit your document and liveness check for verification.'
+                  : 'Verified authentication and submission are not available for this request.',
               style: TextStyle(color: Colors.grey, fontSize: 16),
               textAlign: TextAlign.center,
             ),
@@ -125,7 +121,7 @@ class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
               const Center(child: CircularProgressIndicator())
             else
               ElevatedButton(
-                onPressed: _submit,
+                onPressed: _canSubmit ? _submit : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
