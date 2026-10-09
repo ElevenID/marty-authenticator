@@ -1,5 +1,12 @@
 # Grouped Credentials Feature Implementation
 
+> Historical implementation note. The active wallet now groups verified
+> `WalletCredentialStore` receipts by issuer in `lib/providers/card_state_provider.dart`
+> and displays them from `lib/views/main_view/document_view.dart`. The former
+> `CredentialsState` provider described below was retired because it loaded an
+> obsolete wallet store and inserted sample credentials. This document does
+> not describe the current credential custody or acceptance path.
+
 ## Overview
 
 Implemented a credential grouping system that organizes active (non-expired) credentials by their issuer, displaying them as stackable cards with horizontal scrolling capability when expanded.
