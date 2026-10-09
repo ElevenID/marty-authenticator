@@ -76,21 +76,11 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     fun initialize(): Boolean {
         return try {
             // Initialize SDK components
-            keyManager = KeyManager()
             storageManager = StorageManager(context)
             credentialPack = CredentialPack()
 
-            // Initialize adapter layer
-            keyManager?.let { km ->
-                // Generate default signing key if it doesn't exist
-                if (!km.keyExists(DEFAULT_SIGNING_KEY_ID)) {
-                    km.generateSigningKey(DEFAULT_SIGNING_KEY_ID, byteArrayOf())
-                }
-                signer = Signer(DEFAULT_SIGNING_KEY_ID, km)
-            }
-
             isInitialized = true
-            Log.d(TAG, "SpruceID SDK with adapters initialized")
+            Log.d(TAG, "SpruceID storage initialized; remote holder signing is required")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Initialization failed", e)
@@ -102,34 +92,30 @@ class SpruceIdHandlerRefactored(private val context: Context) {
         try {
             when (call.method) {
                 // DID operations - Using SDK DidMethodUtils
-                "createDid" -> createDid(call, result)
-                "resolveDid" -> resolveDid(call, result)
+                "createDid" -> remoteKmsRequired(result)
+                "resolveDid" -> cryptographicVerificationRequired(result)
 
                 // W3C Credential operations - Using SDK signing
-                "signCredential" -> signCredential(call, result)
-                "verifyCredential" -> verifyCredential(call, result)
+                "signCredential" -> remoteKmsRequired(result)
+                "verifyCredential" -> cryptographicVerificationRequired(result)
 
                 // OID4VC operations - Using SDK Oid4vci + HttpClientWrapper
-                "handleCredentialOffer", "handleOID4VCOffer", "handleOID4VCOfferRefactored" -> handleCredentialOfferAsync(call, result)
+                "handleCredentialOffer", "handleOID4VCOffer", "handleOID4VCOfferRefactored" -> remoteKmsRequired(result)
 
                 // VP operations - Using SDK Holder + Signer
-                "handleVpRequest" -> handleVpRequestAsync(call, result)
+                "handleVpRequest" -> remoteKmsRequired(result)
 
                 // mDoc operations - Using SDK Oid4vp180137
-                "createMdocResponse" -> createMdocResponseAsync(call, result)
-                "initializeMdl" -> initializeMdl(call, result)
-                "presentForAgeVerification" -> presentForAgeVerification(call, result)
-                "handleMdlProximityData" -> handleMdlProximityData(call, result)
+                "createMdocResponse" -> remoteKmsRequired(result)
+                "initializeMdl", "handleMdlProximityData" -> sessionRequired(result)
+                "presentForAgeVerification" -> cryptographicVerificationRequired(result)
 
                 // Storage operations - Using SDK CredentialPack
-                "storeCredential" -> storeCredentialWithPack(call, result)
-                "getCredentials" -> getCredentialsFromPack(result)
-                "getCredentialsByType" -> getCredentialsByTypeFromPack(call, result)
-                "deleteCredential" -> deleteCredentialFromPack(call, result)
+                "storeCredential", "getCredentials", "getCredentialsByType", "deleteCredential" -> walletStorageRequired(result)
 
                 // SD-JWT operations
-                "createSdJwt" -> createSdJwt(call, result)
-                "verifySdJwt" -> verifySdJwt(call, result)
+                "createSdJwt" -> remoteKmsRequired(result)
+                "verifySdJwt" -> cryptographicVerificationRequired(result)
 
                 // Support methods
                 "getSupportedMethods" -> getSupportedMethods(result)
@@ -142,6 +128,30 @@ class SpruceIdHandlerRefactored(private val context: Context) {
             result.error("HANDLER_ERROR", "Method ${call.method} failed: ${e.message}", null)
         }
     }
+
+    private fun remoteKmsRequired(result: MethodChannel.Result) = result.error(
+        "REMOTE_KMS_REQUIRED",
+        "Holder signing requires a remote KMS-backed key reference",
+        null
+    )
+
+    private fun cryptographicVerificationRequired(result: MethodChannel.Result) = result.error(
+        "CRYPTOGRAPHIC_VERIFICATION_REQUIRED",
+        "Verification requires a trusted cryptographic verifier",
+        null
+    )
+
+    private fun sessionRequired(result: MethodChannel.Result) = result.error(
+        "SESSION_IMPLEMENTATION_REQUIRED",
+        "mDoc proximity requires a real transport and session state",
+        null
+    )
+
+    private fun walletStorageRequired(result: MethodChannel.Result) = result.error(
+        "WALLET_STORAGE_REQUIRED",
+        "Wallet storage requires a verified persistent repository",
+        null
+    )
 
     // =============================================================================
     // DID Operations - Using SDK DidMethodUtils (same as before but cleaner)
@@ -768,11 +778,11 @@ class SpruceIdHandlerRefactored(private val context: Context) {
     }
 
     private fun getSupportedMethods(result: MethodChannel.Result) {
-        result.success(listOf("key", "web", "jwk"))
+        result.success(emptyList<String>())
     }
 
     private fun getSupportedFormats(result: MethodChannel.Result) {
-        result.success(listOf("jwt_vc", "jwt_vp", "ldp_vc", "ldp_vp"))
+        result.success(emptyList<String>())
     }
 
     // =============================================================================
