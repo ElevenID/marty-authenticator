@@ -4,11 +4,12 @@ import 'package:marty_authenticator/models/liveness_challenge.dart';
 
 void main() {
   test('native challenge data remains serializable', () {
+    final now = DateTime.now().toUtc();
     final challenge = LivenessChallenge(
       challengeId: 'lv-native',
       nonce: 'nonce-native',
-      issuedAt: DateTime.utc(2026),
-      expiresAt: DateTime.utc(2026, 1, 1, 0, 1),
+      issuedAt: now,
+      expiresAt: now.add(const Duration(minutes: 1)),
       gestures: const [LivenessGesture.smile, LivenessGesture.lookUp],
       signature: 'a' * 64,
       nativePayload: '{"challenge_id":"lv-native"}',
@@ -26,32 +27,44 @@ void main() {
     expect(restored.nativePayload, challenge.nativePayload);
   });
 
-  test('parsing uses safe defaults for invalid external data', () {
-    final challenge = LivenessChallenge.fromJson({
-      'gestures': ['lookDown', 'unknown'],
-      'issued_at': DateTime.utc(2025),
-      'expires_at': 'not-a-date',
-    });
-
-    expect(challenge.challengeId, isEmpty);
-    expect(challenge.nonce, isEmpty);
-    expect(challenge.signature, isEmpty);
-    expect(challenge.gestures, [
+  test('malformed or expired remote challenge data fails closed', () {
+    final now = DateTime.now().toUtc();
+    final valid = <String, dynamic>{
+      'challenge_id': 'lv-test',
+      'nonce': 'nonce-test',
+      'issued_at': now.toIso8601String(),
+      'expires_at': now.add(const Duration(minutes: 1)).toIso8601String(),
+      'gestures': ['lookDown'],
+      'signature': 'signed-payload',
+      'native_payload': 'opaque-payload',
+    };
+    expect(LivenessChallenge.fromJson(valid).gestures, [
       LivenessGesture.lookDown,
-      LivenessGesture.smile,
     ]);
-    expect(challenge.issuedAt, DateTime.utc(2025));
-    expect(
-      challenge.expiresAt,
-      DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-    );
-    expect(challenge.isExpired, isTrue);
 
-    final defaults = LivenessChallenge.fromJson(const {});
-    expect(defaults.gestures, isEmpty);
-    expect(
-      defaults.issuedAt,
-      DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-    );
+    final invalid = [
+      <String, dynamic>{},
+      {
+        ...valid,
+        'gestures': ['lookDown', 'unknown'],
+      },
+      {
+        ...valid,
+        'gestures': ['lookDown', 'lookDown'],
+      },
+      {...valid, 'gestures': <String>[]},
+      {...valid, 'issued_at': 'not-a-date'},
+      {
+        ...valid,
+        'expires_at': now
+            .subtract(const Duration(seconds: 1))
+            .toIso8601String(),
+      },
+      {...valid, 'signature': ''},
+      {...valid, 'native_payload': null},
+    ];
+    for (final json in invalid) {
+      expect(() => LivenessChallenge.fromJson(json), throwsFormatException);
+    }
   });
 }

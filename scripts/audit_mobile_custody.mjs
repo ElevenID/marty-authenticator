@@ -49,6 +49,11 @@ for (const path of [
   }
 }
 
+const livenessView = readFileSync(resolve('lib/views/document_verification/liveness_check_view.dart'), 'utf8');
+if (/generateRandomGestures|gesturesOverride|challengeTtl/.test(livenessView)) {
+  throw new Error('mobile liveness gestures or expiry must come from the remote challenge');
+}
+
 for (const path of [
   'rust/src/biometrics.rs',
   'rust/src/frb_generated.rs',

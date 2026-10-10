@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,31 +12,23 @@ import '../../services/liveness_camera_image_converter.dart';
 import '../../widgets/common/back_button.dart';
 import 'review_and_submit_view.dart';
 
-typedef LivenessChallengeFactory =
-    Future<LivenessChallenge> Function({
-      required List<LivenessGesture> gestures,
-      required Duration ttl,
-    });
+typedef LivenessChallengeFactory = Future<LivenessChallenge> Function();
 
 class LivenessCheckView extends StatefulWidget {
   final DocumentVerificationConfig config;
-  final List<LivenessGesture>? gesturesOverride;
   final Widget? cameraPreviewOverride;
   final Duration mockGestureDelay;
   final Widget Function(LivenessChallenge? challenge)? reviewBuilder;
   final bool enableExpiryTicker;
-  final Duration challengeTtl;
   final LivenessChallengeFactory? challengeFactory;
 
   const LivenessCheckView({
     super.key,
     required this.config,
-    this.gesturesOverride,
     this.cameraPreviewOverride,
     this.mockGestureDelay = const Duration(seconds: 2),
     this.reviewBuilder,
     this.enableExpiryTicker = true,
-    this.challengeTtl = const Duration(seconds: 60),
     this.challengeFactory,
   });
 
@@ -51,18 +45,13 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   String _feedback = '';
   LivenessChallenge? _challenge;
   int _expirySeconds = 0;
+  Timer? _expiryTimer;
+  Timer? _mockGestureTimer;
 
   @override
   void initState() {
     super.initState();
-    _gestures =
-        widget.gesturesOverride ??
-        DocumentVerificationConfig.generateRandomGestures();
-    _expirySeconds = widget.challengeTtl.inSeconds;
     _initializeChallenge();
-    if (widget.challengeFactory == null) return;
-    _initializeCamera();
-    _initializeFaceDetector();
   }
 
   Future<void> _initializeChallenge() async {
@@ -71,13 +60,19 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
       if (factory == null) {
         throw StateError('Remote liveness challenge provider is unavailable');
       }
-      final challenge = await factory(
-        gestures: _gestures,
-        ttl: widget.challengeTtl,
-      );
+      final challenge = await factory();
+      challenge.validateForCapture();
       if (!mounted) return;
-      setState(() => _challenge = challenge);
+      setState(() {
+        _challenge = challenge;
+        _gestures = challenge.gestures;
+        _expirySeconds = challenge.expiresAt
+            .difference(DateTime.now().toUtc())
+            .inSeconds;
+      });
       if (widget.enableExpiryTicker) _startExpiryTicker();
+      _initializeFaceDetector();
+      _initializeCamera();
     } catch (_) {
       Logger.error('Unable to obtain remote liveness challenge');
       if (mounted) {
@@ -87,18 +82,21 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
   }
 
   void _startExpiryTicker() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted || _challenge == null) return false;
+    _expiryTimer?.cancel();
+    _expiryTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _challenge == null) {
+        timer.cancel();
+        return;
+      }
       final remaining = _challenge!.expiresAt
           .difference(DateTime.now().toUtc())
           .inSeconds;
       if (remaining <= 0) {
         setState(() => _expirySeconds = 0);
-        return false;
+        timer.cancel();
+        return;
       }
       setState(() => _expirySeconds = remaining);
-      return true;
     });
   }
 
@@ -161,20 +159,26 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
     }
   }
 
-  void _startWebMock() async {
-    while (mounted && _currentGestureIndex < _gestures.length) {
-      await Future.delayed(widget.mockGestureDelay);
-      if (!mounted) return;
+  void _startWebMock() {
+    _mockGestureTimer?.cancel();
+    _mockGestureTimer = Timer.periodic(widget.mockGestureDelay, (timer) {
+      if (!mounted || _currentGestureIndex >= _gestures.length) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         _currentGestureIndex++;
         if (_currentGestureIndex >= _gestures.length) {
           _feedback = 'Gesture capture complete';
-          _finishVerification();
         } else {
           _feedback = 'Gesture captured';
         }
       });
-    }
+      if (_currentGestureIndex >= _gestures.length) {
+        timer.cancel();
+        _finishVerification();
+      }
+    });
   }
 
   Future<void> _processImage(CameraImage image) async {
@@ -256,6 +260,8 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   @override
   void dispose() {
+    _expiryTimer?.cancel();
+    _mockGestureTimer?.cancel();
     _controller?.dispose();
     _faceDetector?.close();
     super.dispose();
@@ -263,7 +269,8 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.challengeFactory == null) {
+    if (widget.challengeFactory == null ||
+        (_challenge == null && _feedback == 'Liveness challenge unavailable')) {
       return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

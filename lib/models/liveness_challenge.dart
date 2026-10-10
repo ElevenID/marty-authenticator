@@ -21,6 +21,21 @@ class LivenessChallenge {
 
   bool get isExpired => DateTime.now().toUtc().isAfter(expiresAt);
 
+  void validateForCapture() {
+    if (challengeId.isEmpty ||
+        nonce.isEmpty ||
+        signature.isEmpty ||
+        nativePayload == null ||
+        nativePayload!.isEmpty ||
+        gestures.isEmpty ||
+        gestures.length > LivenessGesture.values.length ||
+        gestures.toSet().length != gestures.length ||
+        !expiresAt.isAfter(issuedAt) ||
+        isExpired) {
+      throw const FormatException('Invalid remote liveness challenge');
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'challenge_id': challengeId,
@@ -34,27 +49,35 @@ class LivenessChallenge {
   }
 
   factory LivenessChallenge.fromJson(Map<String, dynamic> json) {
-    final gestureValues = (json['gestures'] as List? ?? [])
-        .map((gesture) => gesture.toString())
-        .toList();
-    final parsedGestures = gestureValues
-        .map(
-          (value) => LivenessGesture.values.firstWhere(
-            (gesture) => gesture.name == value,
-            orElse: () => LivenessGesture.smile,
-          ),
-        )
-        .toList();
-
-    return LivenessChallenge(
-      challengeId: json['challenge_id']?.toString() ?? '',
-      nonce: json['nonce']?.toString() ?? '',
+    final rawGestures = json['gestures'];
+    if (rawGestures is! List || rawGestures.any((value) => value is! String)) {
+      throw const FormatException('Invalid remote liveness gestures');
+    }
+    final gestures = rawGestures.map((value) {
+      for (final gesture in LivenessGesture.values) {
+        if (gesture.name == value) return gesture;
+      }
+      throw const FormatException('Unknown remote liveness gesture');
+    }).toList();
+    final challenge = LivenessChallenge(
+      challengeId: _requiredString(json, 'challenge_id'),
+      nonce: _requiredString(json, 'nonce'),
       issuedAt: _parseDate(json['issued_at']),
       expiresAt: _parseDate(json['expires_at']),
-      gestures: parsedGestures,
-      signature: json['signature']?.toString() ?? '',
-      nativePayload: json['native_payload']?.toString(),
+      gestures: gestures,
+      signature: _requiredString(json, 'signature'),
+      nativePayload: _requiredString(json, 'native_payload'),
     );
+    challenge.validateForCapture();
+    return challenge;
+  }
+
+  static String _requiredString(Map<String, dynamic> json, String key) {
+    final value = json[key];
+    if (value is! String || value.isEmpty) {
+      throw FormatException('Invalid remote liveness $key');
+    }
+    return value;
   }
 
   static DateTime _parseDate(dynamic value) {
@@ -62,10 +85,10 @@ class LivenessChallenge {
     if (value is String) {
       try {
         return DateTime.parse(value).toUtc();
-      } catch (_) {
-        return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      } on FormatException {
+        throw const FormatException('Invalid remote liveness timestamp');
       }
     }
-    return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+    throw const FormatException('Invalid remote liveness timestamp');
   }
 }
