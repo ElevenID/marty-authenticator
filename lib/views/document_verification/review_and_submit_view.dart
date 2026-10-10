@@ -25,22 +25,31 @@ class ReviewAndSubmitView extends ConsumerStatefulWidget {
 class _ReviewAndSubmitViewState extends ConsumerState<ReviewAndSubmitView> {
   bool _isSubmitting = false;
 
-  bool get _canSubmit =>
-      widget.livenessChallenge != null &&
-      !widget.livenessChallenge!.isExpired &&
-      widget.livenessChallenge!.nativePayload != null &&
-      widget.authenticate != null &&
-      widget.submitRequest != null;
+  bool get _canSubmit {
+    final challenge = widget.livenessChallenge;
+    if (challenge == null ||
+        widget.authenticate == null ||
+        widget.submitRequest == null) {
+      return false;
+    }
+    try {
+      challenge.validateForCapture();
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
     setState(() => _isSubmitting = true);
     try {
       final challenge = widget.livenessChallenge!;
+      challenge.validateForCapture();
       if (!await widget.authenticate!()) {
         throw StateError('Authentication was not completed');
       }
-      if (challenge.isExpired) throw StateError('Liveness challenge expired');
+      challenge.validateForCapture();
       await widget.submitRequest!(challenge);
       await ref
           .read(verificationStateProvider.notifier)

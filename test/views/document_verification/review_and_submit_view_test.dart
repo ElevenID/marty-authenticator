@@ -107,6 +107,38 @@ void main() {
     );
   });
 
+  testWidgets('malformed challenge cannot reach supplied handlers', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final valid = testChallenge();
+    final malformed = LivenessChallenge(
+      challengeId: valid.challengeId,
+      nonce: valid.nonce,
+      issuedAt: valid.issuedAt,
+      expiresAt: valid.expiresAt,
+      gestures: const [LivenessGesture.smile, LivenessGesture.smile],
+      signature: valid.signature,
+      nativePayload: valid.nativePayload,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: ReviewAndSubmitView(
+            livenessChallenge: malformed,
+            authenticate: () async => fail('Malformed challenge authenticated'),
+            submitRequest: (_) async => fail('Malformed challenge submitted'),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Submission Unavailable'), findsOneWidget);
+    expect(
+      tester.widget<ElevatedButton>(find.byType(ElevatedButton)).onPressed,
+      isNull,
+    );
+  });
+
   testWidgets('reports failed submissions and restores the button', (
     tester,
   ) async {
