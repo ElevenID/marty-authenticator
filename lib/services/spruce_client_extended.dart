@@ -23,11 +23,9 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/spruce_interfaces_extended.dart';
-import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../utils/logger.dart';
 import 'remote_holder_pairing_service.dart';
 import 'spruce_platform_service_extended.dart';
@@ -52,38 +50,6 @@ class SpruceIdClientExtended extends SpruceIdClient
     return await _platformService.handleOID4VCOfferSDK(
       credentialOffer: credentialOffer,
       pin: pin,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> handleOID4VPRequestSDK({
-    required String presentationRequest,
-    required List<Map<String, dynamic>> selectedCredentials,
-    required List<String> disclosureOptions,
-    String? keyId,
-  }) async {
-    return await _platformService.handleOID4VPRequestSDK(
-      presentationRequest: presentationRequest,
-      selectedCredentials: selectedCredentials,
-      disclosureOptions: disclosureOptions,
-      keyId: keyId,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createPresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    required String domain,
-    required Map<String, List<String>> selectiveDisclosure,
-    String? keyId,
-  }) async {
-    return await _platformService.createPresentationSDK(
-      credentials: credentials,
-      challenge: challenge,
-      domain: domain,
-      selectiveDisclosure: selectiveDisclosure,
-      keyId: keyId,
     );
   }
 
@@ -115,100 +81,6 @@ class SpruceIdClientExtended extends SpruceIdClient
       credential: credential,
       schemaId: schemaId,
       policies: policies,
-    );
-  }
-
-  // ========================
-  // SDK-Enhanced Holder Operations
-  // ========================
-
-  @override
-  Future<Map<String, dynamic>> initializeHolderSDK({
-    String? keyId,
-    Map<String, dynamic>? holderConfig,
-  }) async {
-    return await _platformService.initializeHolderSDK(
-      keyId: keyId,
-      holderConfig: holderConfig,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createVerifiablePresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    String? domain,
-    Map<String, List<String>>? selectiveDisclosure,
-    String? presentationFormat,
-    String? keyId,
-  }) async {
-    return await _platformService.createVerifiablePresentationSDK(
-      credentials: credentials,
-      challenge: challenge,
-      domain: domain,
-      selectiveDisclosure: selectiveDisclosure,
-      presentationFormat: presentationFormat,
-      keyId: keyId,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> signPresentationSDK({
-    required Map<String, dynamic> presentation,
-    required String keyId,
-    String? verificationMethod,
-    String? proofPurpose,
-  }) async {
-    return await _platformService.signPresentationSDK(
-      presentation: presentation,
-      keyId: keyId,
-      verificationMethod: verificationMethod,
-      proofPurpose: proofPurpose,
-    );
-  }
-
-  // ========================
-  // Enhanced Security Operations
-  // ========================
-
-  @override
-  Future<Map<String, dynamic>> generateSecureKeySDK({
-    String algorithm = 'Ed25519',
-    bool useHardwareModule = true,
-    Map<String, dynamic>? keyPolicies,
-  }) async {
-    return await _platformService.generateSecureKeySDK(
-      algorithm: algorithm,
-      useHardwareModule: useHardwareModule,
-      keyPolicies: keyPolicies,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> performCryptoOperationSDK({
-    required String operation,
-    required String keyId,
-    required Map<String, dynamic> payload,
-    Map<String, dynamic>? options,
-  }) async {
-    return await _platformService.performCryptoOperationSDK(
-      operation: operation,
-      keyId: keyId,
-      payload: payload,
-      options: options,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> establishSecureChannelSDK({
-    required String peerDid,
-    String? keyId,
-    Map<String, dynamic>? channelOptions,
-  }) async {
-    return await _platformService.establishSecureChannelSDK(
-      peerDid: peerDid,
-      keyId: keyId,
-      channelOptions: channelOptions,
     );
   }
 
@@ -283,24 +155,6 @@ class SpruceIdClientExtended extends SpruceIdClient
     return await handleOID4VCOfferSDK(
       credentialOffer: credentialOffer,
       pin: pin,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createAdvancedPresentation({
-    required List<Map<String, dynamic>> credentials,
-    required Map<String, dynamic> presentationRequest,
-    required Map<String, List<String>> selectiveDisclosure,
-  }) async {
-    final binding = await rust_api.walletValidatePresentationContext(
-      requestJson: jsonEncode(presentationRequest),
-    );
-
-    return await createPresentationSDK(
-      credentials: credentials,
-      challenge: binding.challenge,
-      domain: binding.domain,
-      selectiveDisclosure: selectiveDisclosure,
     );
   }
 

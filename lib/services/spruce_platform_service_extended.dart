@@ -425,71 +425,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     }
   }
 
-  @override
-  Future<Map<String, dynamic>> handleOID4VPRequestSDK({
-    required String presentationRequest,
-    required List<Map<String, dynamic>> selectedCredentials,
-    required List<String> disclosureOptions,
-    String? keyId,
-  }) async {
-    throw UnsupportedError(
-      'Presentations require the verified remote-KMS selection flow',
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createPresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    required String domain,
-    required Map<String, List<String>> selectiveDisclosure,
-    String? keyId,
-  }) async {
-    throw UnsupportedError(
-      'Presentation creation requires a verified remote-KMS request',
-    );
-  }
-
-  // ========================
-  // SDK-Enhanced Holder Operations
-  // ========================
-
-  @override
-  Future<Map<String, dynamic>> initializeHolderSDK({
-    String? keyId,
-    Map<String, dynamic>? holderConfig,
-  }) async {
-    throw UnsupportedError(
-      'initializeHolderSDK requires a verified remote-KMS flow',
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createVerifiablePresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    String? domain,
-    Map<String, List<String>>? selectiveDisclosure,
-    String? presentationFormat,
-    String? keyId,
-  }) async {
-    throw UnsupportedError(
-      'createVerifiablePresentationSDK requires a verified remote-KMS flow',
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> signPresentationSDK({
-    required Map<String, dynamic> presentation,
-    required String keyId,
-    String? verificationMethod,
-    String? proofPurpose,
-  }) async {
-    throw UnsupportedError(
-      'signPresentationSDK requires a verified remote-KMS flow',
-    );
-  }
-
   // ========================
   // Advanced Credential Operations
   // ========================
@@ -521,44 +456,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   }) async {
     throw UnsupportedError(
       'validateCredentialSDK requires a verified remote-KMS flow',
-    );
-  }
-
-  // ========================
-  // Enhanced Security Operations
-  // ========================
-
-  @override
-  Future<Map<String, dynamic>> generateSecureKeySDK({
-    String algorithm = 'Ed25519',
-    bool useHardwareModule = true,
-    Map<String, dynamic>? keyPolicies,
-  }) async {
-    throw UnsupportedError(
-      'generateSecureKeySDK requires a verified remote-KMS flow',
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> performCryptoOperationSDK({
-    required String operation,
-    required String keyId,
-    required Map<String, dynamic> payload,
-    Map<String, dynamic>? options,
-  }) async {
-    throw UnsupportedError(
-      'performCryptoOperationSDK requires a verified remote-KMS flow',
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> establishSecureChannelSDK({
-    required String peerDid,
-    String? keyId,
-    Map<String, dynamic>? channelOptions,
-  }) async {
-    throw UnsupportedError(
-      'establishSecureChannelSDK requires a verified remote-KMS flow',
     );
   }
 

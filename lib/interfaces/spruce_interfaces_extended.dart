@@ -40,26 +40,6 @@ abstract class ISpruceIdPlatformServiceExtended
     String? pin,
   });
 
-  /// Handle OID4VP presentation request using SDK
-  /// Enables advanced presentation protocols with selective disclosure
-  Future<Map<String, dynamic>> handleOID4VPRequestSDK({
-    required String presentationRequest,
-    required List<Map<String, dynamic>> selectedCredentials,
-    required List<String> disclosureOptions,
-    String? keyId,
-  });
-
-  /// Create credential presentation with advanced selective disclosure
-  /// Uses SDK for sophisticated claim selection and privacy-preserving disclosure
-  Future<Map<String, dynamic>> createPresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    required String domain,
-    required Map<String, List<String>>
-    selectiveDisclosure, // credential_id -> disclosed_claims
-    String? keyId,
-  });
-
   /// Initiate OID4VP request processing
   /// Returns session ID and matches if user selection is required
   Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
@@ -71,37 +51,6 @@ abstract class ISpruceIdPlatformServiceExtended
     required String sessionId,
     required String selectedCredentialId,
     List<String>? selectedFields,
-  });
-
-  // ========================
-  // SDK-Enhanced Holder Operations
-  // ========================
-
-  /// Initialize Holder SDK with advanced capabilities
-  /// Enables sophisticated credential management and presentation workflows
-  Future<Map<String, dynamic>> initializeHolderSDK({
-    String? keyId,
-    Map<String, dynamic>? holderConfig,
-  });
-
-  /// Create verifiable presentation using Holder SDK
-  /// Supports advanced presentation formats and selective disclosure
-  Future<Map<String, dynamic>> createVerifiablePresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    String? domain,
-    Map<String, List<String>>? selectiveDisclosure,
-    String? presentationFormat, // 'jwt_vp', 'ldp_vp', 'mdoc_vp'
-    String? keyId,
-  });
-
-  /// Sign presentation using SDK-integrated signer
-  /// Provides advanced cryptographic operations with hardware security support
-  Future<Map<String, dynamic>> signPresentationSDK({
-    required Map<String, dynamic> presentation,
-    required String keyId,
-    String? verificationMethod,
-    String? proofPurpose,
   });
 
   // ========================
@@ -128,35 +77,6 @@ abstract class ISpruceIdPlatformServiceExtended
     required Map<String, dynamic> credential,
     String? schemaId,
     List<String>? policies,
-  });
-
-  // ========================
-  // Enhanced Security Operations
-  // ========================
-
-  /// Generate key with hardware security module support
-  /// Advanced key generation with hardware-backed security
-  Future<Map<String, dynamic>> generateSecureKeySDK({
-    String algorithm = 'Ed25519',
-    bool useHardwareModule = true,
-    Map<String, dynamic>? keyPolicies,
-  });
-
-  /// Perform cryptographic operations with SDK security
-  /// Advanced crypto operations with enhanced security guarantees
-  Future<Map<String, dynamic>> performCryptoOperationSDK({
-    required String operation, // 'sign', 'verify', 'encrypt', 'decrypt'
-    required String keyId,
-    required Map<String, dynamic> payload,
-    Map<String, dynamic>? options,
-  });
-
-  /// Establish secure communication channel
-  /// SDK-enabled secure channels for credential exchange
-  Future<Map<String, dynamic>> establishSecureChannelSDK({
-    required String peerDid,
-    String? keyId,
-    Map<String, dynamic>? channelOptions,
   });
 
   // ========================
@@ -309,30 +229,6 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
     String? pin,
   });
 
-  /// Handle OID4VP presentation request using SDK directly
-  Future<Map<String, dynamic>> handleOID4VPRequestSDK({
-    required String presentationRequest,
-    required List<Map<String, dynamic>> selectedCredentials,
-    required List<String> disclosureOptions,
-    String? keyId,
-  });
-
-  /// Create credential presentation with SDK directly
-  Future<Map<String, dynamic>> createPresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    required String domain,
-    required Map<String, List<String>> selectiveDisclosure,
-    String? keyId,
-  });
-
-  /// Create advanced presentation with selective disclosure
-  Future<Map<String, dynamic>> createAdvancedPresentation({
-    required List<Map<String, dynamic>> credentials,
-    required Map<String, dynamic> presentationRequest,
-    required Map<String, List<String>> selectiveDisclosure,
-  });
-
   /// Enable background credential monitoring
   Future<void> enableCredentialMonitoring();
 
@@ -355,52 +251,6 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
     required Map<String, dynamic> credential,
     String? schemaId,
     List<String>? policies,
-  });
-
-  /// Initialize Holder SDK
-  Future<Map<String, dynamic>> initializeHolderSDK({
-    String? keyId,
-    Map<String, dynamic>? holderConfig,
-  });
-
-  /// Create Verifiable Presentation SDK
-  Future<Map<String, dynamic>> createVerifiablePresentationSDK({
-    required List<Map<String, dynamic>> credentials,
-    required String challenge,
-    String? domain,
-    Map<String, List<String>>? selectiveDisclosure,
-    String? presentationFormat,
-    String? keyId,
-  });
-
-  /// Sign Presentation SDK
-  Future<Map<String, dynamic>> signPresentationSDK({
-    required Map<String, dynamic> presentation,
-    required String keyId,
-    String? verificationMethod,
-    String? proofPurpose,
-  });
-
-  /// Generate Secure Key SDK
-  Future<Map<String, dynamic>> generateSecureKeySDK({
-    String algorithm = 'Ed25519',
-    bool useHardwareModule = true,
-    Map<String, dynamic>? keyPolicies,
-  });
-
-  /// Perform Crypto Operation SDK
-  Future<Map<String, dynamic>> performCryptoOperationSDK({
-    required String operation,
-    required String keyId,
-    required Map<String, dynamic> payload,
-    Map<String, dynamic>? options,
-  });
-
-  /// Establish Secure Channel SDK
-  Future<Map<String, dynamic>> establishSecureChannelSDK({
-    required String peerDid,
-    String? keyId,
-    Map<String, dynamic>? channelOptions,
   });
 
   /// Sync Credentials SDK
