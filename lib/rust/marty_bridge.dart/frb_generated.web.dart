@@ -123,9 +123,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
-  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw);
-
-  @protected
   FrbPreparedSdJwtPresentation dco_decode_frb_prepared_sd_jwt_presentation(
     dynamic raw,
   );
@@ -382,11 +379,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
     SseDeserializer deserializer,
   );
 
@@ -781,20 +773,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_opt_String(raw.authorizationEndpoint),
       cst_encode_list_String(raw.grantTypesSupported),
       cst_encode_String(raw.credentialConfigurationsJson),
-    ].jsify()!;
-  }
-
-  @protected
-  JSAny cst_encode_frb_liveness_challenge(FrbLivenessChallenge raw) {
-    // Codec=Cst (C-struct based), see doc to use other codecs
-    return [
-      cst_encode_String(raw.challengeId),
-      cst_encode_String(raw.nonce),
-      cst_encode_String(raw.issuedAt),
-      cst_encode_String(raw.expiresAt),
-      cst_encode_list_String(raw.gestures),
-      cst_encode_String(raw.signature),
-      cst_encode_String(raw.nativePayload),
     ].jsify()!;
   }
 
@@ -1358,12 +1336,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_frb_liveness_challenge(
-    FrbLivenessChallenge self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_frb_prepared_sd_jwt_presentation(
     FrbPreparedSdJwtPresentation self,
     SseSerializer serializer,
@@ -1617,17 +1589,6 @@ class RustLibWire implements BaseWire {
     trust_profile_verified,
   );
 
-  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__create_liveness_challenge(
-    JSAny gestures,
-    JSAny ttl_seconds,
-    String signing_secret,
-  ) => wasmModule.wire__crate__biometrics__create_liveness_challenge(
-    gestures,
-    ttl_seconds,
-    signing_secret,
-  );
-
   void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -1793,15 +1754,6 @@ class RustLibWire implements BaseWire {
     probe_image,
     threshold,
     models_dir,
-  );
-
-  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__verify_liveness_challenge(
-    String native_payload,
-    String signing_secret,
-  ) => wasmModule.wire__crate__biometrics__verify_liveness_challenge(
-    native_payload,
-    signing_secret,
   );
 
   void wire__crate__api__verify_mdoc_trust_chain(
@@ -2084,13 +2036,6 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     bool trust_profile_verified,
   );
 
-  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__create_liveness_challenge(
-    JSAny gestures,
-    JSAny ttl_seconds,
-    String signing_secret,
-  );
-
   external void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -2208,12 +2153,6 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String probe_image,
     double? threshold,
     String? models_dir,
-  );
-
-  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__verify_liveness_challenge(
-    String native_payload,
-    String signing_secret,
   );
 
   external void wire__crate__api__verify_mdoc_trust_chain(

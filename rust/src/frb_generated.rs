@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -224032378;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 518073499;
 
 // Section: executor
 
@@ -104,34 +104,6 @@ fn wire__crate__api__check_issuer_constraints_impl(
                     })(),
                 )
             }
-        },
-    )
-}
-fn wire__crate__biometrics__create_liveness_challenge_impl(
-    gestures: impl CstDecode<Vec<String>>,
-    ttl_seconds: impl CstDecode<u64>,
-    signing_secret: impl CstDecode<String>,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "create_liveness_challenge",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let api_gestures = gestures.cst_decode();
-            let api_ttl_seconds = ttl_seconds.cst_decode();
-            let api_signing_secret = signing_secret.cst_decode();
-            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::biometrics::create_liveness_challenge(
-                        api_gestures,
-                        api_ttl_seconds,
-                        api_signing_secret,
-                    )?;
-                    std::result::Result::Ok(output_ok)
-                })(),
-            )
         },
     )
 }
@@ -666,31 +638,6 @@ fn wire__crate__biometrics__verify_face_match_impl(
                     })(),
                 )
             }
-        },
-    )
-}
-fn wire__crate__biometrics__verify_liveness_challenge_impl(
-    native_payload: impl CstDecode<String>,
-    signing_secret: impl CstDecode<String>,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "verify_liveness_challenge",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let api_native_payload = native_payload.cst_decode();
-            let api_signing_secret = signing_secret.cst_decode();
-            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::biometrics::verify_liveness_challenge(
-                        api_native_payload,
-                        api_signing_secret,
-                    )?;
-                    std::result::Result::Ok(output_ok)
-                })(),
-            )
         },
     )
 }
@@ -1674,28 +1621,6 @@ impl SseDecode for crate::api::FrbIssuerMetadata {
     }
 }
 
-impl SseDecode for crate::biometrics::FrbLivenessChallenge {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_challengeId = <String>::sse_decode(deserializer);
-        let mut var_nonce = <String>::sse_decode(deserializer);
-        let mut var_issuedAt = <String>::sse_decode(deserializer);
-        let mut var_expiresAt = <String>::sse_decode(deserializer);
-        let mut var_gestures = <Vec<String>>::sse_decode(deserializer);
-        let mut var_signature = <String>::sse_decode(deserializer);
-        let mut var_nativePayload = <String>::sse_decode(deserializer);
-        return crate::biometrics::FrbLivenessChallenge {
-            challenge_id: var_challengeId,
-            nonce: var_nonce,
-            issued_at: var_issuedAt,
-            expires_at: var_expiresAt,
-            gestures: var_gestures,
-            signature: var_signature,
-            native_payload: var_nativePayload,
-        };
-    }
-}
-
 impl SseDecode for crate::api::FrbPreparedSdJwtPresentation {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2617,32 +2542,6 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbIssuerMetadata>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbLivenessChallenge {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [
-            self.challenge_id.into_into_dart().into_dart(),
-            self.nonce.into_into_dart().into_dart(),
-            self.issued_at.into_into_dart().into_dart(),
-            self.expires_at.into_into_dart().into_dart(),
-            self.gestures.into_into_dart().into_dart(),
-            self.signature.into_into_dart().into_dart(),
-            self.native_payload.into_into_dart().into_dart(),
-        ]
-        .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::biometrics::FrbLivenessChallenge
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbLivenessChallenge>
-    for crate::biometrics::FrbLivenessChallenge
-{
-    fn into_into_dart(self) -> crate::biometrics::FrbLivenessChallenge {
-        self
-    }
-}
-// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::FrbPreparedSdJwtPresentation {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -3300,19 +3199,6 @@ impl SseEncode for crate::api::FrbIssuerMetadata {
         <Option<String>>::sse_encode(self.authorization_endpoint, serializer);
         <Vec<String>>::sse_encode(self.grant_types_supported, serializer);
         <String>::sse_encode(self.credential_configurations_json, serializer);
-    }
-}
-
-impl SseEncode for crate::biometrics::FrbLivenessChallenge {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.challenge_id, serializer);
-        <String>::sse_encode(self.nonce, serializer);
-        <String>::sse_encode(self.issued_at, serializer);
-        <String>::sse_encode(self.expires_at, serializer);
-        <Vec<String>>::sse_encode(self.gestures, serializer);
-        <String>::sse_encode(self.signature, serializer);
-        <String>::sse_encode(self.native_payload, serializer);
     }
 }
 
@@ -4043,20 +3929,6 @@ mod io {
             }
         }
     }
-    impl CstDecode<crate::biometrics::FrbLivenessChallenge> for wire_cst_frb_liveness_challenge {
-        // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
-            crate::biometrics::FrbLivenessChallenge {
-                challenge_id: self.challenge_id.cst_decode(),
-                nonce: self.nonce.cst_decode(),
-                issued_at: self.issued_at.cst_decode(),
-                expires_at: self.expires_at.cst_decode(),
-                gestures: self.gestures.cst_decode(),
-                signature: self.signature.cst_decode(),
-                native_payload: self.native_payload.cst_decode(),
-            }
-        }
-    }
     impl CstDecode<crate::api::FrbPreparedSdJwtPresentation>
         for wire_cst_frb_prepared_sd_jwt_presentation
     {
@@ -4564,24 +4436,6 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
-    impl NewWithNullPtr for wire_cst_frb_liveness_challenge {
-        fn new_with_null_ptr() -> Self {
-            Self {
-                challenge_id: core::ptr::null_mut(),
-                nonce: core::ptr::null_mut(),
-                issued_at: core::ptr::null_mut(),
-                expires_at: core::ptr::null_mut(),
-                gestures: core::ptr::null_mut(),
-                signature: core::ptr::null_mut(),
-                native_payload: core::ptr::null_mut(),
-            }
-        }
-    }
-    impl Default for wire_cst_frb_liveness_challenge {
-        fn default() -> Self {
-            Self::new_with_null_ptr()
-        }
-    }
     impl NewWithNullPtr for wire_cst_frb_prepared_sd_jwt_presentation {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -4922,19 +4776,6 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge(
-        gestures: *mut wire_cst_list_String,
-        ttl_seconds: u64,
-        signing_secret: *mut wire_cst_list_prim_u_8_strict,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__create_liveness_challenge_impl(
-            gestures,
-            ttl_seconds,
-            signing_secret,
-        )
-    }
-
-    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(
         port_: i64,
         credential: *mut wire_cst_credential,
@@ -5133,14 +4974,6 @@ mod io {
             threshold,
             models_dir,
         )
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge(
-        native_payload: *mut wire_cst_list_prim_u_8_strict,
-        signing_secret: *mut wire_cst_list_prim_u_8_strict,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
     }
 
     #[unsafe(no_mangle)]
@@ -5770,17 +5603,6 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
-    pub struct wire_cst_frb_liveness_challenge {
-        challenge_id: *mut wire_cst_list_prim_u_8_strict,
-        nonce: *mut wire_cst_list_prim_u_8_strict,
-        issued_at: *mut wire_cst_list_prim_u_8_strict,
-        expires_at: *mut wire_cst_list_prim_u_8_strict,
-        gestures: *mut wire_cst_list_String,
-        signature: *mut wire_cst_list_prim_u_8_strict,
-        native_payload: *mut wire_cst_list_prim_u_8_strict,
-    }
-    #[repr(C)]
-    #[derive(Clone, Copy)]
     pub struct wire_cst_frb_prepared_sd_jwt_presentation {
         session_id: *mut wire_cst_list_prim_u_8_strict,
         signing_input: *mut wire_cst_list_prim_u_8_strict,
@@ -6293,31 +6115,6 @@ mod web {
                 authorization_endpoint: self_.get(3).cst_decode(),
                 grant_types_supported: self_.get(4).cst_decode(),
                 credential_configurations_json: self_.get(5).cst_decode(),
-            }
-        }
-    }
-    impl CstDecode<crate::biometrics::FrbLivenessChallenge>
-        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
-    {
-        // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
-            let self_ = self
-                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
-                .unwrap();
-            assert_eq!(
-                self_.length(),
-                7,
-                "Expected 7 elements, got {}",
-                self_.length()
-            );
-            crate::biometrics::FrbLivenessChallenge {
-                challenge_id: self_.get(0).cst_decode(),
-                nonce: self_.get(1).cst_decode(),
-                issued_at: self_.get(2).cst_decode(),
-                expires_at: self_.get(3).cst_decode(),
-                gestures: self_.get(4).cst_decode(),
-                signature: self_.get(5).cst_decode(),
-                native_payload: self_.get(6).cst_decode(),
             }
         }
     }
@@ -7021,19 +6818,6 @@ mod web {
     }
 
     #[wasm_bindgen]
-    pub fn wire__crate__biometrics__create_liveness_challenge(
-        gestures: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
-        ttl_seconds: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
-        signing_secret: String,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__create_liveness_challenge_impl(
-            gestures,
-            ttl_seconds,
-            signing_secret,
-        )
-    }
-
-    #[wasm_bindgen]
     pub fn wire__crate__api__create_selectable_credential(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
@@ -7232,14 +7016,6 @@ mod web {
             threshold,
             models_dir,
         )
-    }
-
-    #[wasm_bindgen]
-    pub fn wire__crate__biometrics__verify_liveness_challenge(
-        native_payload: String,
-        signing_secret: String,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
     }
 
     #[wasm_bindgen]

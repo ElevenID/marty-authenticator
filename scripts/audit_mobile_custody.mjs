@@ -50,6 +50,21 @@ for (const path of [
 }
 
 for (const path of [
+  'rust/src/biometrics.rs',
+  'rust/src/frb_generated.rs',
+  'lib/rust/marty_bridge.dart/biometrics.dart',
+  'lib/rust/marty_bridge.dart/biometrics.freezed.dart',
+  'lib/rust/marty_bridge.dart/frb_generated.dart',
+  'lib/rust/marty_bridge.dart/frb_generated.io.dart',
+  'lib/rust/marty_bridge.dart/frb_generated.web.dart',
+]) {
+  const source = readFileSync(resolve(path), 'utf8');
+  if (/createLivenessChallenge|verifyLivenessChallenge|FrbLivenessChallenge|create_liveness_challenge|verify_liveness_challenge|signing_secret/.test(source)) {
+    throw new Error(`retired native liveness signing remains in ${path}`);
+  }
+}
+
+for (const path of [
   'lib/interfaces/spruce_interfaces.dart',
   'lib/spruce_client.dart',
   'lib/services/spruce_platform_service.dart',

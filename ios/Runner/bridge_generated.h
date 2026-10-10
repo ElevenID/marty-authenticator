@@ -243,16 +243,6 @@ typedef struct wire_cst_frb_issuer_metadata {
   struct wire_cst_list_prim_u_8_strict *credential_configurations_json;
 } wire_cst_frb_issuer_metadata;
 
-typedef struct wire_cst_frb_liveness_challenge {
-  struct wire_cst_list_prim_u_8_strict *challenge_id;
-  struct wire_cst_list_prim_u_8_strict *nonce;
-  struct wire_cst_list_prim_u_8_strict *issued_at;
-  struct wire_cst_list_prim_u_8_strict *expires_at;
-  struct wire_cst_list_String *gestures;
-  struct wire_cst_list_prim_u_8_strict *signature;
-  struct wire_cst_list_prim_u_8_strict *native_payload;
-} wire_cst_frb_liveness_challenge;
-
 typedef struct wire_cst_frb_prepared_sd_jwt_presentation {
   struct wire_cst_list_prim_u_8_strict *session_id;
   struct wire_cst_list_prim_u_8_strict *signing_input;
@@ -336,10 +326,6 @@ void frbgen_marty_authenticator_wire__crate__api__check_issuer_constraints(int64
                                                                            struct wire_cst_list_prim_u_8_strict *issuer_id,
                                                                            bool trust_profile_verified);
 
-WireSyncRust2DartDco frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge(struct wire_cst_list_String *gestures,
-                                                                                                   uint64_t ttl_seconds,
-                                                                                                   struct wire_cst_list_prim_u_8_strict *signing_secret);
-
 void frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(int64_t port_,
                                                                                struct wire_cst_credential *credential,
                                                                                int32_t privacy_level);
@@ -415,9 +401,6 @@ void frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match(int64
                                                                            struct wire_cst_list_prim_u_8_strict *probe_image,
                                                                            float *threshold,
                                                                            struct wire_cst_list_prim_u_8_strict *models_dir);
-
-WireSyncRust2DartDco frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge(struct wire_cst_list_prim_u_8_strict *native_payload,
-                                                                                                   struct wire_cst_list_prim_u_8_strict *signing_secret);
 
 void frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain(int64_t port_,
                                                                           struct wire_cst_list_list_prim_u_8_strict *x5chain);
@@ -632,12 +615,10 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__zk_prove_from_presentation_definition);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__assess_face_quality);
-    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__estimate_face_age);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__evaluate_liveness_gesture);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__shutdown_biometrics);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_face_match);
-    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__status__evaluate_bitstring_status);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__status__parse_status_entries);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);

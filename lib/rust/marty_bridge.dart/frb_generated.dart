@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -224032378;
+  int get rustContentHash => 518073499;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -88,12 +88,6 @@ abstract class RustLibApi extends BaseApi {
     required String policyJson,
     required String issuerId,
     required bool trustProfileVerified,
-  });
-
-  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
-    required List<String> gestures,
-    required BigInt ttlSeconds,
-    required String signingSecret,
   });
 
   Future<SelectableCredential> crateApiCreateSelectableCredential({
@@ -183,11 +177,6 @@ abstract class RustLibApi extends BaseApi {
     required String probeImage,
     double? threshold,
     String? modelsDir,
-  });
-
-  bool crateBiometricsVerifyLivenessChallenge({
-    required String nativePayload,
-    required String signingSecret,
   });
 
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
@@ -401,41 +390,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "check_issuer_constraints",
         argNames: ["policyJson", "issuerId", "trustProfileVerified"],
-      );
-
-  @override
-  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
-    required List<String> gestures,
-    required BigInt ttlSeconds,
-    required String signingSecret,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          var arg0 = cst_encode_list_String(gestures);
-          var arg1 = cst_encode_u_64(ttlSeconds);
-          var arg2 = cst_encode_String(signingSecret);
-          return wire.wire__crate__biometrics__create_liveness_challenge(
-            arg0,
-            arg1,
-            arg2,
-          );
-        },
-        codec: DcoCodec(
-          decodeSuccessData: dco_decode_frb_liveness_challenge,
-          decodeErrorData: dco_decode_AnyhowException,
-        ),
-        constMeta: kCrateBiometricsCreateLivenessChallengeConstMeta,
-        argValues: [gestures, ttlSeconds, signingSecret],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateBiometricsCreateLivenessChallengeConstMeta =>
-      const TaskConstMeta(
-        debugName: "create_liveness_challenge",
-        argNames: ["gestures", "ttlSeconds", "signingSecret"],
       );
 
   @override
@@ -1078,38 +1032,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "verify_face_match",
         argNames: ["referenceImage", "probeImage", "threshold", "modelsDir"],
-      );
-
-  @override
-  bool crateBiometricsVerifyLivenessChallenge({
-    required String nativePayload,
-    required String signingSecret,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          var arg0 = cst_encode_String(nativePayload);
-          var arg1 = cst_encode_String(signingSecret);
-          return wire.wire__crate__biometrics__verify_liveness_challenge(
-            arg0,
-            arg1,
-          );
-        },
-        codec: DcoCodec(
-          decodeSuccessData: dco_decode_bool,
-          decodeErrorData: dco_decode_AnyhowException,
-        ),
-        constMeta: kCrateBiometricsVerifyLivenessChallengeConstMeta,
-        argValues: [nativePayload, signingSecret],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateBiometricsVerifyLivenessChallengeConstMeta =>
-      const TaskConstMeta(
-        debugName: "verify_liveness_challenge",
-        argNames: ["nativePayload", "signingSecret"],
       );
 
   @override
@@ -2246,23 +2168,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 7)
-      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
-    return FrbLivenessChallenge(
-      challengeId: dco_decode_String(arr[0]),
-      nonce: dco_decode_String(arr[1]),
-      issuedAt: dco_decode_String(arr[2]),
-      expiresAt: dco_decode_String(arr[3]),
-      gestures: dco_decode_list_String(arr[4]),
-      signature: dco_decode_String(arr[5]),
-      nativePayload: dco_decode_String(arr[6]),
-    );
-  }
-
-  @protected
   FrbPreparedSdJwtPresentation dco_decode_frb_prepared_sd_jwt_presentation(
     dynamic raw,
   ) {
@@ -3051,29 +2956,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       authorizationEndpoint: var_authorizationEndpoint,
       grantTypesSupported: var_grantTypesSupported,
       credentialConfigurationsJson: var_credentialConfigurationsJson,
-    );
-  }
-
-  @protected
-  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_challengeId = sse_decode_String(deserializer);
-    var var_nonce = sse_decode_String(deserializer);
-    var var_issuedAt = sse_decode_String(deserializer);
-    var var_expiresAt = sse_decode_String(deserializer);
-    var var_gestures = sse_decode_list_String(deserializer);
-    var var_signature = sse_decode_String(deserializer);
-    var var_nativePayload = sse_decode_String(deserializer);
-    return FrbLivenessChallenge(
-      challengeId: var_challengeId,
-      nonce: var_nonce,
-      issuedAt: var_issuedAt,
-      expiresAt: var_expiresAt,
-      gestures: var_gestures,
-      signature: var_signature,
-      nativePayload: var_nativePayload,
     );
   }
 
@@ -4054,21 +3936,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.authorizationEndpoint, serializer);
     sse_encode_list_String(self.grantTypesSupported, serializer);
     sse_encode_String(self.credentialConfigurationsJson, serializer);
-  }
-
-  @protected
-  void sse_encode_frb_liveness_challenge(
-    FrbLivenessChallenge self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.challengeId, serializer);
-    sse_encode_String(self.nonce, serializer);
-    sse_encode_String(self.issuedAt, serializer);
-    sse_encode_String(self.expiresAt, serializer);
-    sse_encode_list_String(self.gestures, serializer);
-    sse_encode_String(self.signature, serializer);
-    sse_encode_String(self.nativePayload, serializer);
   }
 
   @protected

@@ -121,9 +121,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
-  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw);
-
-  @protected
   FrbPreparedSdJwtPresentation dco_decode_frb_prepared_sd_jwt_presentation(
     dynamic raw,
   );
@@ -380,11 +377,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbIssuerMetadata sse_decode_frb_issuer_metadata(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
     SseDeserializer deserializer,
   );
 
@@ -1094,20 +1086,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
-  void cst_api_fill_to_wire_frb_liveness_challenge(
-    FrbLivenessChallenge apiObj,
-    wire_cst_frb_liveness_challenge wireObj,
-  ) {
-    wireObj.challenge_id = cst_encode_String(apiObj.challengeId);
-    wireObj.nonce = cst_encode_String(apiObj.nonce);
-    wireObj.issued_at = cst_encode_String(apiObj.issuedAt);
-    wireObj.expires_at = cst_encode_String(apiObj.expiresAt);
-    wireObj.gestures = cst_encode_list_String(apiObj.gestures);
-    wireObj.signature = cst_encode_String(apiObj.signature);
-    wireObj.native_payload = cst_encode_String(apiObj.nativePayload);
-  }
-
-  @protected
   void cst_api_fill_to_wire_frb_prepared_sd_jwt_presentation(
     FrbPreparedSdJwtPresentation apiObj,
     wire_cst_frb_prepared_sd_jwt_presentation wireObj,
@@ -1546,12 +1524,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_frb_liveness_challenge(
-    FrbLivenessChallenge self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_frb_prepared_sd_jwt_presentation(
     FrbPreparedSdJwtPresentation self,
     SseSerializer serializer,
@@ -1884,40 +1856,6 @@ class RustLibWire implements BaseWire {
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               bool,
-            )
-          >();
-
-  WireSyncRust2DartDco wire__crate__biometrics__create_liveness_challenge(
-    ffi.Pointer<wire_cst_list_String> gestures,
-    int ttl_seconds,
-    ffi.Pointer<wire_cst_list_prim_u_8_strict> signing_secret,
-  ) {
-    return _wire__crate__biometrics__create_liveness_challenge(
-      gestures,
-      ttl_seconds,
-      signing_secret,
-    );
-  }
-
-  late final _wire__crate__biometrics__create_liveness_challengePtr =
-      _lookup<
-        ffi.NativeFunction<
-          WireSyncRust2DartDco Function(
-            ffi.Pointer<wire_cst_list_String>,
-            ffi.Uint64,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
-        >
-      >(
-        'frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge',
-      );
-  late final _wire__crate__biometrics__create_liveness_challenge =
-      _wire__crate__biometrics__create_liveness_challengePtr
-          .asFunction<
-            WireSyncRust2DartDco Function(
-              ffi.Pointer<wire_cst_list_String>,
-              int,
-              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             )
           >();
 
@@ -2483,36 +2421,6 @@ class RustLibWire implements BaseWire {
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<ffi.Float>,
-              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-            )
-          >();
-
-  WireSyncRust2DartDco wire__crate__biometrics__verify_liveness_challenge(
-    ffi.Pointer<wire_cst_list_prim_u_8_strict> native_payload,
-    ffi.Pointer<wire_cst_list_prim_u_8_strict> signing_secret,
-  ) {
-    return _wire__crate__biometrics__verify_liveness_challenge(
-      native_payload,
-      signing_secret,
-    );
-  }
-
-  late final _wire__crate__biometrics__verify_liveness_challengePtr =
-      _lookup<
-        ffi.NativeFunction<
-          WireSyncRust2DartDco Function(
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
-          )
-        >
-      >(
-        'frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge',
-      );
-  late final _wire__crate__biometrics__verify_liveness_challenge =
-      _wire__crate__biometrics__verify_liveness_challengePtr
-          .asFunction<
-            WireSyncRust2DartDco Function(
-              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             )
           >();
@@ -3971,22 +3879,6 @@ final class wire_cst_frb_issuer_metadata extends ffi.Struct {
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict>
   credential_configurations_json;
-}
-
-final class wire_cst_frb_liveness_challenge extends ffi.Struct {
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> challenge_id;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> nonce;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> issued_at;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> expires_at;
-
-  external ffi.Pointer<wire_cst_list_String> gestures;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> signature;
-
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> native_payload;
 }
 
 final class wire_cst_frb_prepared_sd_jwt_presentation extends ffi.Struct {
