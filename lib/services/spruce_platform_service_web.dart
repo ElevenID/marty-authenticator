@@ -30,21 +30,8 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   }
 
   @override
-  Future<Map<String, dynamic>> createDid({String method = 'key'}) async {
-    throw UnsupportedError('Remote KMS DID creation is required on Web');
-  }
-
-  @override
   Future<Map<String, dynamic>> resolveDid(String did) async {
     throw UnimplementedError('resolveDid not supported on Web');
-  }
-
-  @override
-  Future<Map<String, dynamic>> signVerifiableCredential(
-    Map<String, dynamic> credential, {
-    String? keyId,
-  }) async {
-    throw UnsupportedError('Remote KMS credential signing is required on Web');
   }
 
   @override
@@ -58,30 +45,6 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
 
   // PKI/X.509 Methods
   @override
-  Future<Map<String, dynamic>> generateKeyPair({
-    String keyType = 'RSA',
-    int keySize = 2048,
-  }) async {
-    throw UnsupportedError('Remote KMS key generation is required on Web');
-  }
-
-  @override
-  Future<Map<String, dynamic>> createCSR(
-    String subject, {
-    String? keyId,
-  }) async {
-    throw UnimplementedError('createCSR not supported on Web');
-  }
-
-  @override
-  Future<Map<String, dynamic>> signWithCertificate(
-    Map<String, dynamic> document,
-    String certificateId,
-  ) async {
-    throw UnimplementedError('signWithCertificate not supported on Web');
-  }
-
-  @override
   Future<Map<String, dynamic>> verifyCertificateChain(
     List<String> certificateChain,
   ) async {
@@ -90,25 +53,8 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
 
   // JWT Methods
   @override
-  Future<Map<String, dynamic>> createJWT(
-    String issuer,
-    Map<String, dynamic> claims,
-  ) async {
-    throw UnimplementedError('createJWT not supported on Web');
-  }
-
-  @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
     throw UnsupportedError('Cryptographic JWT verification is required on Web');
-  }
-
-  @override
-  Future<Map<String, dynamic>> createSdJwt(
-    String issuer,
-    Map<String, dynamic> claims,
-    List<String> selectivelyDisclosableClaims,
-  ) async {
-    throw UnimplementedError('createSdJwt not supported on Web');
   }
 
   @override
@@ -132,14 +78,6 @@ class SpruceIdPlatformServiceWeb implements ISpruceIdPlatformService {
   @override
   Future<Map<String, dynamic>> presentForAgeVerification(int minimumAge) async {
     throw UnimplementedError('presentForAgeVerification not supported on Web');
-  }
-
-  @override
-  Future<Map<String, dynamic>> createMdocResponse(
-    List<String> requestedAttributes,
-    List<String> hiddenAttributes,
-  ) async {
-    throw UnimplementedError('createMdocResponse not supported on Web');
   }
 
   // Wallet Methods

@@ -44,11 +44,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
 
   bool _initialized = false;
 
-  Future<Map<String, dynamic>> _retiredLocalSigning() async =>
-      throw UnsupportedError(
-        'Local signing is retired; use a paired remote KMS wallet',
-      );
-
   Future<T> _retiredCredentialStorage<T>() async => throw UnsupportedError(
     'Legacy credential storage is retired; use verified wallet receipts',
   );
@@ -78,10 +73,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> createDid({String method = 'key'}) =>
-      _retiredLocalSigning();
-
-  @override
   Future<Map<String, dynamic>> resolveDid(String did) async {
     try {
       final result = await _w3cChannel.invokeMethod(
@@ -97,12 +88,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
       );
     }
   }
-
-  @override
-  Future<Map<String, dynamic>> signVerifiableCredential(
-    Map<String, dynamic> credential, {
-    String? keyId,
-  }) => _retiredLocalSigning();
 
   @override
   Future<Map<String, dynamic>> verifyVerifiableCredential(
@@ -128,22 +113,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> generateKeyPair({
-    String keyType = 'RSA',
-    int keySize = 2048,
-  }) => _retiredLocalSigning();
-
-  @override
-  Future<Map<String, dynamic>> createCSR(String subject, {String? keyId}) =>
-      _retiredLocalSigning();
-
-  @override
-  Future<Map<String, dynamic>> signWithCertificate(
-    Map<String, dynamic> document,
-    String certificateId,
-  ) => _retiredLocalSigning();
-
-  @override
   Future<Map<String, dynamic>> verifyCertificateChain(
     List<String> certificateChain,
   ) async {
@@ -167,12 +136,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> createJWT(
-    String issuer,
-    Map<String, dynamic> claims,
-  ) => _retiredLocalSigning();
-
-  @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
     try {
       final result = await _jwtChannel.invokeMethod(
@@ -188,13 +151,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
       );
     }
   }
-
-  @override
-  Future<Map<String, dynamic>> createSdJwt(
-    String issuer,
-    Map<String, dynamic> claims,
-    List<String> selectivelyDisclosableClaims,
-  ) => _retiredLocalSigning();
 
   @override
   Future<Map<String, dynamic>> verifySdJwt(
@@ -255,12 +211,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
       );
     }
   }
-
-  @override
-  Future<Map<String, dynamic>> createMdocResponse(
-    List<String> requestedAttributes,
-    List<String> hiddenAttributes,
-  ) => _retiredLocalSigning();
 
   // ========================
   // Wallet Methods (Technology agnostic)

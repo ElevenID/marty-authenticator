@@ -464,7 +464,7 @@ abstract class ISpruceIdMdocManagerExtended extends ISpruceIdMdocManager {
 }
 
 /// Extended SD-JWT manager with SDK capabilities
-abstract class ISpruceIdSdJwtManagerExtended extends ISpruceIdSdJwtManager {
+abstract class ISpruceIdSdJwtManagerExtended {
   /// Create SD-JWT with advanced disclosure patterns
   Future<Map<String, dynamic>> createAdvancedSdJwt({
     required String issuer,

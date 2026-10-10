@@ -161,11 +161,10 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
 // ========================
 
 /// Extended SD-JWT manager with SDK-enhanced selective disclosure
-class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
-    implements ISpruceIdSdJwtManagerExtended {
+class SpruceIdSdJwtManagerExtended implements ISpruceIdSdJwtManagerExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
-  SpruceIdSdJwtManagerExtended(this._platformService) : super(_platformService);
+  SpruceIdSdJwtManagerExtended(this._platformService);
 
   @override
   Future<Map<String, dynamic>> createAdvancedSdJwt({

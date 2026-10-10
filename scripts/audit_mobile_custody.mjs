@@ -50,6 +50,18 @@ for (const path of [
 }
 
 for (const path of [
+  'lib/interfaces/spruce_interfaces.dart',
+  'lib/spruce_client.dart',
+  'lib/services/spruce_platform_service.dart',
+  'lib/services/spruce_platform_service_web.dart',
+]) {
+  const source = readFileSync(resolve(path), 'utf8');
+  if (/\b(?:createDid|signVerifiableCredential|generateKeyPair|createCSR|signWithCertificate|createJWT|createSdJwt|createMdocResponse)\b/.test(source)) {
+    throw new Error(`retired local-key API remains in ${path}`);
+  }
+}
+
+for (const path of [
   'local_plugins/pi-authenticator-legacy',
   'ios/Runner/AppDelegate.swift.original',
   'lib/services/spruce_api_server.py',
