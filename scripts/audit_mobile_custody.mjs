@@ -40,6 +40,16 @@ for (const name of ['pubspec.yaml', 'pubspec.lock']) {
 }
 
 for (const path of [
+  'lib/models/liveness_challenge.dart',
+  'lib/views/document_verification/liveness_check_view.dart',
+]) {
+  const source = readFileSync(resolve(path), 'utf8');
+  if (/MARTY_LIVENESS_SIGNING_SECRET|createLivenessChallenge|verifyLivenessChallenge|signingSecret/.test(source)) {
+    throw new Error(`local liveness signing remains in active Flutter code: ${path}`);
+  }
+}
+
+for (const path of [
   'local_plugins/pi-authenticator-legacy',
   'ios/Runner/AppDelegate.swift.original',
   'lib/services/spruce_api_server.py',

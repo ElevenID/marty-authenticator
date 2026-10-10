@@ -1,4 +1,3 @@
-import '../rust/marty_bridge.dart/biometrics.dart' as rust_biometrics;
 import 'document_verification_config.dart';
 
 class LivenessChallenge {
@@ -55,27 +54,6 @@ class LivenessChallenge {
       gestures: parsedGestures,
       signature: json['signature']?.toString() ?? '',
       nativePayload: json['native_payload']?.toString(),
-    );
-  }
-
-  static Future<LivenessChallenge> create({
-    required List<LivenessGesture> gestures,
-    required Duration ttl,
-    required String signingSecret,
-  }) async {
-    final native = rust_biometrics.createLivenessChallenge(
-      gestures: gestures.map((gesture) => gesture.name).toList(growable: false),
-      ttlSeconds: BigInt.from(ttl.inSeconds),
-      signingSecret: signingSecret,
-    );
-    return LivenessChallenge(
-      challengeId: native.challengeId,
-      nonce: native.nonce,
-      issuedAt: DateTime.parse(native.issuedAt).toUtc(),
-      expiresAt: DateTime.parse(native.expiresAt).toUtc(),
-      gestures: gestures,
-      signature: native.signature,
-      nativePayload: native.nativePayload,
     );
   }
 

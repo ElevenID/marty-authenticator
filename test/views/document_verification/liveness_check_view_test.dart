@@ -7,7 +7,6 @@ import 'package:marty_authenticator/views/document_verification/liveness_check_v
 Future<LivenessChallenge> fakeChallengeFactory({
   required List<LivenessGesture> gestures,
   required Duration ttl,
-  required String signingSecret,
 }) async {
   final now = DateTime.now().toUtc();
   return LivenessChallenge(
@@ -22,6 +21,22 @@ Future<LivenessChallenge> fakeChallengeFactory({
 }
 
 void main() {
+  testWidgets('production route fails closed without a remote challenge', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivenessCheckView(config: DocumentVerificationConfig.passport),
+      ),
+    );
+    await tester.pump();
+    expect(
+      find.text('Remote liveness challenge is unavailable'),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets('walks through every liveness gesture and opens review', (
     tester,
   ) async {
@@ -40,7 +55,6 @@ void main() {
           cameraPreviewOverride: const ColoredBox(color: Colors.black),
           mockGestureDelay: const Duration(milliseconds: 10),
           enableExpiryTicker: false,
-          livenessSigningSecret: 'test-secret',
           challengeFactory: fakeChallengeFactory,
           reviewBuilder: (challenge) =>
               Scaffold(body: Text('Review ${challenge?.challengeId}')),
@@ -71,7 +85,6 @@ void main() {
         home: LivenessCheckView(
           config: DocumentVerificationConfig.passport,
           enableExpiryTicker: false,
-          livenessSigningSecret: 'test-secret',
           challengeFactory: fakeChallengeFactory,
         ),
       ),
@@ -88,7 +101,6 @@ void main() {
           cameraPreviewOverride: const ColoredBox(color: Colors.black),
           mockGestureDelay: const Duration(minutes: 1),
           challengeTtl: const Duration(milliseconds: 10),
-          livenessSigningSecret: 'test-secret',
           challengeFactory: fakeChallengeFactory,
         ),
       ),

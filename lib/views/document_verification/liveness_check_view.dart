@@ -14,7 +14,6 @@ typedef LivenessChallengeFactory =
     Future<LivenessChallenge> Function({
       required List<LivenessGesture> gestures,
       required Duration ttl,
-      required String signingSecret,
     });
 
 class LivenessCheckView extends StatefulWidget {
@@ -25,7 +24,6 @@ class LivenessCheckView extends StatefulWidget {
   final Widget Function(LivenessChallenge? challenge)? reviewBuilder;
   final bool enableExpiryTicker;
   final Duration challengeTtl;
-  final String livenessSigningSecret;
   final LivenessChallengeFactory? challengeFactory;
 
   const LivenessCheckView({
@@ -37,9 +35,6 @@ class LivenessCheckView extends StatefulWidget {
     this.reviewBuilder,
     this.enableExpiryTicker = true,
     this.challengeTtl = const Duration(seconds: 60),
-    this.livenessSigningSecret = const String.fromEnvironment(
-      'MARTY_LIVENESS_SIGNING_SECRET',
-    ),
     this.challengeFactory,
   });
 
@@ -65,26 +60,26 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
         DocumentVerificationConfig.generateRandomGestures();
     _expirySeconds = widget.challengeTtl.inSeconds;
     _initializeChallenge();
+    if (widget.challengeFactory == null) return;
     _initializeCamera();
     _initializeFaceDetector();
   }
 
   Future<void> _initializeChallenge() async {
     try {
-      if (widget.livenessSigningSecret.isEmpty) {
-        throw StateError('Liveness signing key is unavailable');
+      final factory = widget.challengeFactory;
+      if (factory == null) {
+        throw StateError('Remote liveness challenge provider is unavailable');
       }
-      final factory = widget.challengeFactory ?? LivenessChallenge.create;
       final challenge = await factory(
         gestures: _gestures,
         ttl: widget.challengeTtl,
-        signingSecret: widget.livenessSigningSecret,
       );
       if (!mounted) return;
       setState(() => _challenge = challenge);
       if (widget.enableExpiryTicker) _startExpiryTicker();
-    } catch (error) {
-      Logger.error('Unable to create native liveness challenge: $error');
+    } catch (_) {
+      Logger.error('Unable to obtain remote liveness challenge');
       if (mounted) {
         setState(() => _feedback = 'Liveness challenge unavailable');
       }
@@ -173,10 +168,10 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
       setState(() {
         _currentGestureIndex++;
         if (_currentGestureIndex >= _gestures.length) {
-          _feedback = 'Verification Complete!';
+          _feedback = 'Gesture capture complete';
           _finishVerification();
         } else {
-          _feedback = 'Good! (Mocked)';
+          _feedback = 'Gesture captured';
         }
       });
     }
@@ -234,7 +229,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
       setState(() {
         _currentGestureIndex++;
         if (_currentGestureIndex >= _gestures.length) {
-          _feedback = 'Verification Complete!';
+          _feedback = 'Gesture capture complete';
           _finishVerification();
         } else {
           _feedback = 'Good!';
@@ -268,6 +263,23 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.challengeFactory == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          leadingWidth: 100,
+          leading: const CustomBackButton(),
+          title: const Text('Liveness Check'),
+        ),
+        body: const Center(
+          child: Text(
+            'Remote liveness challenge is unavailable',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
     if (widget.cameraPreviewOverride == null &&
         (_controller == null || !_controller!.value.isInitialized)) {
       return const Scaffold(
