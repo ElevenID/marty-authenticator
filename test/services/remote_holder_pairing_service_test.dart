@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -135,6 +136,53 @@ void main() {
       throwsStateError,
     );
     expect(stored, isNull);
+    service.close();
+  });
+
+  test('serializes pairing and waits before checking renewal', () async {
+    final release = Completer<void>();
+    String? stored;
+    var pairCalls = 0;
+    final service = RemoteHolderPairingService(
+      client: MockClient((request) async {
+        if (request.url.path == '/v1/devices/pair') {
+          pairCalls++;
+          await release.future;
+          return http.Response(
+            jsonEncode({
+              ...response(),
+              'credential_expires_at': DateTime.now()
+                  .toUtc()
+                  .add(const Duration(days: 2))
+                  .toIso8601String(),
+            }),
+            200,
+          );
+        }
+        expect(request.url.path, '/v1/devices/pairing-ack');
+        return http.Response('{"confirmed":true}', 200);
+      }),
+      storeEnrollment: (value) async => stored = value,
+      readEnrollment: () async => stored,
+    );
+    final pairing = service.pair(
+      apiOrigin: 'https://wallet.example/',
+      pairingCode: code,
+      platform: 'android',
+    );
+    expect(
+      () => service.pair(
+        apiOrigin: 'https://wallet.example/',
+        pairingCode: code,
+        platform: 'android',
+      ),
+      throwsStateError,
+    );
+    final renewal = service.renewIfDue();
+    release.complete();
+    expect(await pairing, 'device-1');
+    expect(await renewal, 'registration-1');
+    expect(pairCalls, 1);
     service.close();
   });
 
@@ -375,6 +423,21 @@ void main() {
   });
 
   test(
+    'issuer trust rejects a non-success response without using its body',
+    () async {
+      final service = RemoteHolderPairingService(
+        client: MockClient((request) async {
+          expect(request.headers['authorization'], 'Bearer $bearer');
+          return http.Response('{"issuer_keys":[]}', 503);
+        }),
+        readEnrollment: () async => confirmedEnrollment(),
+      );
+      await expectLater(service.fetchIssuerKeys(), throwsStateError);
+      service.close();
+    },
+  );
+
+  test(
     'sends exact JWS input to remote ES256 key and requires raw JOSE output',
     () async {
       final stored = confirmedEnrollment();
@@ -450,6 +513,39 @@ void main() {
         throwsFormatException,
       );
       expect(calls, 1);
+      service.close();
+    },
+  );
+
+  test(
+    'remote signing rejects HTTP failure and accepts only raw holder output',
+    () async {
+      final raw = List<int>.filled(64, 19);
+      final encoded = base64UrlEncode(raw).replaceAll('=', '');
+      var reject = true;
+      final service = RemoteHolderPairingService(
+        client: MockClient((request) async {
+          expect(jsonDecode(request.body)['purpose'], 'holder_binding');
+          if (reject) return http.Response('{"signature_b64":"ignored"}', 503);
+          return http.Response(
+            jsonEncode({'signature_b64': encoded, 'signature_encoding': 'raw'}),
+            200,
+          );
+        }),
+        readEnrollment: () async => confirmedEnrollment(),
+      );
+      await expectLater(
+        service.signInput(purpose: 'holder_binding', signingInput: [1, 2]),
+        throwsStateError,
+      );
+      reject = false;
+      expect(
+        await service.signInput(
+          purpose: 'holder_binding',
+          signingInput: [1, 2],
+        ),
+        raw,
+      );
       service.close();
     },
   );
