@@ -56,11 +56,9 @@ class SpruceIdClientExtended extends SpruceIdClient
   @override
   Future<List<Map<String, dynamic>>> batchProcessCredentialsSDK({
     required List<Map<String, dynamic>> operations,
-    String? keyId,
   }) async {
     return await _platformService.batchProcessCredentialsSDK(
       operations: operations,
-      keyId: keyId,
     );
   }
 

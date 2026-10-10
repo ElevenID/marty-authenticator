@@ -432,7 +432,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   @override
   Future<List<Map<String, dynamic>>> batchProcessCredentialsSDK({
     required List<Map<String, dynamic>> operations,
-    String? keyId,
   }) async {
     throw UnsupportedError(
       'batchProcessCredentialsSDK requires a verified remote-KMS flow',
@@ -469,7 +468,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required Map<String, dynamic> claims,
     required Map<String, dynamic> disclosureTree,
     List<String>? alwaysDisclose,
-    String? keyId,
   }) async {
     throw UnsupportedError(
       'createAdvancedSdJwtSDK requires a verified remote-KMS flow',
@@ -481,7 +479,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required String sdJwt,
     required Map<String, dynamic> disclosureRequest,
     required String challenge,
-    String? keyId,
   }) async {
     throw UnsupportedError(
       'presentSdJwtSDK requires a verified remote-KMS flow',
@@ -529,7 +526,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     required List<String> requestedAttributes,
     Map<String, dynamic>? ageVerificationOptions,
     List<String>? hiddenAttributes,
-    String? keyId,
   }) async {
     throw UnsupportedError(
       'createMdocPresentationSDK requires a verified remote-KMS flow',
@@ -539,7 +535,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   @override
   Future<Map<String, dynamic>> establishMdocSessionSDK({
     required Map<String, dynamic> sessionRequest,
-    String? keyId,
     Map<String, dynamic>? securityOptions,
   }) async {
     throw UnsupportedError(
@@ -563,7 +558,6 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   @override
   Future<Map<String, dynamic>> refreshCredentialSDK({
     required String credentialId,
-    String? keyId,
     Map<String, dynamic>? refreshOptions,
   }) async {
     throw UnsupportedError(

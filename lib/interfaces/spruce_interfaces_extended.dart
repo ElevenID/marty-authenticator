@@ -62,7 +62,6 @@ abstract class ISpruceIdPlatformServiceExtended
   Future<List<Map<String, dynamic>>> batchProcessCredentialsSDK({
     required List<Map<String, dynamic>>
     operations, // operation_type, credential, params
-    String? keyId,
   });
 
   /// Get credential metadata and capabilities
@@ -90,7 +89,6 @@ abstract class ISpruceIdPlatformServiceExtended
     required Map<String, dynamic> claims,
     required Map<String, dynamic> disclosureTree, // nested disclosure patterns
     List<String>? alwaysDisclose,
-    String? keyId,
   });
 
   /// Present SD-JWT with privacy-preserving disclosure
@@ -99,7 +97,6 @@ abstract class ISpruceIdPlatformServiceExtended
     required String sdJwt,
     required Map<String, dynamic> disclosureRequest,
     required String challenge,
-    String? keyId,
   });
 
   /// Verify SD-JWT presentation with policy enforcement
@@ -135,14 +132,12 @@ abstract class ISpruceIdPlatformServiceExtended
     required List<String> requestedAttributes,
     Map<String, dynamic>? ageVerificationOptions,
     List<String>? hiddenAttributes,
-    String? keyId,
   });
 
   /// Establish mDoc session with enhanced security
   /// Advanced mDoc session management with security protocols
   Future<Map<String, dynamic>> establishMdocSessionSDK({
     required Map<String, dynamic> sessionRequest,
-    String? keyId,
     Map<String, dynamic>? securityOptions,
   });
 
@@ -160,7 +155,6 @@ abstract class ISpruceIdPlatformServiceExtended
   /// Advanced credential refresh with issuer coordination
   Future<Map<String, dynamic>> refreshCredentialSDK({
     required String credentialId,
-    String? keyId,
     Map<String, dynamic>? refreshOptions,
   });
 
@@ -238,7 +232,6 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
   /// Batch process credentials
   Future<List<Map<String, dynamic>>> batchProcessCredentialsSDK({
     required List<Map<String, dynamic>> operations,
-    String? keyId,
   });
 
   /// Get credential capabilities

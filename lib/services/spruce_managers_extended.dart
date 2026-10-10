@@ -97,25 +97,21 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     required List<String> requestedAttributes,
     Map<String, dynamic>? ageVerificationOptions,
     List<String>? hiddenAttributes,
-    String? keyId,
   }) async {
     return await _platformService.createMdocPresentationSDK(
       docType: docType,
       requestedAttributes: requestedAttributes,
       ageVerificationOptions: ageVerificationOptions,
       hiddenAttributes: hiddenAttributes,
-      keyId: keyId,
     );
   }
 
   Future<Map<String, dynamic>> establishMdocSessionSDK({
     required Map<String, dynamic> sessionRequest,
-    String? keyId,
     Map<String, dynamic>? securityOptions,
   }) async {
     return await _platformService.establishMdocSessionSDK(
       sessionRequest: sessionRequest,
-      keyId: keyId,
       securityOptions: securityOptions,
     );
   }
@@ -184,7 +180,6 @@ class SpruceIdSdJwtManagerExtended implements ISpruceIdSdJwtManagerExtended {
     required Map<String, dynamic> claims,
     required Map<String, dynamic> disclosureTree,
     List<String>? alwaysDisclose,
-    String? keyId,
   }) async {
     return createAdvancedSdJwt(
       issuer: issuer,
@@ -198,13 +193,11 @@ class SpruceIdSdJwtManagerExtended implements ISpruceIdSdJwtManagerExtended {
     required String sdJwt,
     required Map<String, dynamic> disclosureRequest,
     required String challenge,
-    String? keyId,
   }) async {
     return await _platformService.presentSdJwtSDK(
       sdJwt: sdJwt,
       disclosureRequest: disclosureRequest,
       challenge: challenge,
-      keyId: keyId,
     );
   }
 
@@ -297,12 +290,10 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
 
   Future<Map<String, dynamic>> refreshCredentialSDK({
     required String credentialId,
-    String? keyId,
     Map<String, dynamic>? refreshOptions,
   }) async {
     return await _platformService.refreshCredentialSDK(
       credentialId: credentialId,
-      keyId: keyId,
       refreshOptions: refreshOptions,
     );
   }
@@ -360,7 +351,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
       importOptions: importOptions,
     );
   }
-
 }
 
 // ========================
