@@ -77,6 +77,16 @@ for (const path of [
 }
 
 for (const path of [
+  'lib/interfaces/spruce_interfaces_extended.dart',
+  'lib/services/spruce_managers_extended.dart',
+]) {
+  const source = readFileSync(resolve(path), 'utf8');
+  if (/\b(?:storeCredentialSecure|setupAutomaticRenewalSDK|optimizeWalletStorageSDK|performProximityVerificationSDK|enableBiometricBindingSDK|createSelectiveDisclosureSchemaSDK)\b|default-storage-key|renewal-key|storage-optimization|default-schema/.test(source)) {
+    throw new Error(`retired placeholder key operation remains in ${path}`);
+  }
+}
+
+for (const path of [
   'local_plugins/pi-authenticator-legacy',
   'ios/Runner/AppDelegate.swift.original',
   'lib/services/spruce_api_server.py',

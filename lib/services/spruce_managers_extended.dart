@@ -120,34 +120,6 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     );
   }
 
-  Future<Map<String, dynamic>> performProximityVerificationSDK({
-    required String sessionId,
-    required Map<String, dynamic> proximityRequest,
-  }) async {
-    // Custom logic for proximity verification using SDK
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'proximity_verification',
-      keyId: sessionId,
-      payload: proximityRequest,
-    );
-  }
-
-  Future<Map<String, dynamic>> enableBiometricBindingSDK({
-    required String docId,
-    required String biometricTemplate,
-    Map<String, dynamic>? bindingOptions,
-  }) async {
-    // Custom logic for biometric binding using SDK
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'biometric_binding',
-      keyId: docId,
-      payload: {
-        'biometricTemplate': biometricTemplate,
-        'options': bindingOptions ?? {},
-      },
-    );
-  }
-
   @override
   Future<Map<String, dynamic>> handleOid4vpRequest(String requestUrl) async {
     return await _platformService.handleMdocOid4vpRequestSDK(
@@ -248,19 +220,6 @@ class SpruceIdSdJwtManagerExtended implements ISpruceIdSdJwtManagerExtended {
     );
   }
 
-  Future<Map<String, dynamic>> createSelectiveDisclosureSchemaSDK({
-    required Map<String, dynamic> schema,
-    required Map<String, dynamic> disclosureRules,
-    String? schemaId,
-  }) async {
-    // Custom logic for creating selective disclosure schema
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'create_disclosure_schema',
-      keyId: schemaId ?? 'default-schema',
-      payload: {'schema': schema, 'disclosureRules': disclosureRules},
-    );
-  }
-
   Future<Map<String, dynamic>> validateDisclosureComplianceSDK({
     required String presentation,
     required String schemaId,
@@ -286,19 +245,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
 
   SpruceIdWalletManagerExtended(this._platformService)
     : super(_platformService);
-
-  @override
-  Future<void> storeCredentialSecure({
-    required Map<String, dynamic> credential,
-    String? encryptionKey,
-    Map<String, dynamic>? securityOptions,
-  }) async {
-    await _platformService.performCryptoOperationSDK(
-      operation: 'store_credential',
-      keyId: encryptionKey ?? 'default-storage-key',
-      payload: {'credential': credential, 'options': securityOptions ?? {}},
-    );
-  }
 
   @override
   Future<List<Map<String, dynamic>>> getCredentialsWithMetadata() async {
@@ -415,41 +361,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
     );
   }
 
-  Future<Map<String, dynamic>> setupAutomaticRenewalSDK({
-    required List<String> credentialIds,
-    required Map<String, dynamic> renewalPolicy,
-    String? keyId,
-  }) async {
-    // Custom logic for automatic renewal setup
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'setup_automatic_renewal',
-      keyId: keyId ?? 'renewal-key',
-      payload: {'credentialIds': credentialIds, 'renewalPolicy': renewalPolicy},
-    );
-  }
-
-  Future<Map<String, dynamic>> analyzeWalletHealthSDK({
-    Map<String, dynamic>? healthCheckOptions,
-  }) async {
-    // Custom logic for wallet health analysis
-    final results = await _platformService.batchProcessCredentialsSDK(
-      operations: [
-        {'operation': 'health_check', 'options': healthCheckOptions ?? {}},
-      ],
-    );
-    return results.isNotEmpty ? results.first : {};
-  }
-
-  Future<Map<String, dynamic>> optimizeWalletStorageSDK({
-    Map<String, dynamic>? optimizationOptions,
-  }) async {
-    // Custom logic for wallet storage optimization
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'optimize_storage',
-      keyId: 'storage-optimization',
-      payload: optimizationOptions ?? {},
-    );
-  }
 }
 
 // ========================

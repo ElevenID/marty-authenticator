@@ -490,13 +490,6 @@ abstract class ISpruceIdSdJwtManagerExtended {
 
 /// Extended wallet manager with SDK capabilities
 abstract class ISpruceIdWalletManagerExtended extends ISpruceIdWalletManager {
-  /// Store credential with enhanced security
-  Future<void> storeCredentialSecure({
-    required Map<String, dynamic> credential,
-    String? encryptionKey,
-    Map<String, dynamic>? securityOptions,
-  });
-
   /// Get credentials with metadata
   Future<List<Map<String, dynamic>>> getCredentialsWithMetadata();
 
