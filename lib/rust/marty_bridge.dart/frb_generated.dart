@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -1019630657;
+  int get rustContentHash => 518073499;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -88,12 +88,6 @@ abstract class RustLibApi extends BaseApi {
     required String policyJson,
     required String issuerId,
     required bool trustProfileVerified,
-  });
-
-  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
-    required List<String> gestures,
-    required BigInt ttlSeconds,
-    required String signingSecret,
   });
 
   Future<SelectableCredential> crateApiCreateSelectableCredential({
@@ -185,11 +179,6 @@ abstract class RustLibApi extends BaseApi {
     String? modelsDir,
   });
 
-  bool crateBiometricsVerifyLivenessChallenge({
-    required String nativePayload,
-    required String signingSecret,
-  });
-
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
     required List<Uint8List> x5Chain,
   });
@@ -216,11 +205,16 @@ abstract class RustLibApi extends BaseApi {
     String? issuerState,
   });
 
-  Future<String> crateApiWalletCreateProofJwt({
-    required String holderKid,
-    required String cNonce,
-    required String issuerUrl,
-    required String jwkJson,
+  Future<FrbPresentationResponse>
+  crateApiWalletCompleteVerifiedSdJwtPresentation({
+    required String sessionId,
+    required List<int> remoteSignature,
+  });
+
+  Future<FrbVerifiedSdJwtReceipt> crateApiWalletCompleteVerifiedSdJwtReceipt({
+    required String sessionId,
+    required List<int> remoteSignature,
+    required String issuerSnapshotJson,
   });
 
   Future<FrbTokenResponse> crateApiWalletExchangeAuthCodeToken({
@@ -251,6 +245,23 @@ abstract class RustLibApi extends BaseApi {
 
   Future<FrbPresentationRequest> crateApiWalletParsePresentationRequest({
     required String requestUri,
+  });
+
+  Future<FrbPreparedSdJwtPresentation>
+  crateApiWalletPrepareVerifiedSdJwtPresentation({
+    required String requestUri,
+    required String approvedRequestDigest,
+    required String credential,
+    required String queryId,
+    required List<String> claimsToDisclose,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  });
+
+  Future<FrbPreparedSdJwtReceipt> crateApiWalletPrepareVerifiedSdJwtReceipt({
+    required String offerUri,
+    String? txCode,
+    required String holderPublicJwkJson,
   });
 
   Future<FrbCredentialResponse> crateApiWalletRequestCredential({
@@ -379,41 +390,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "check_issuer_constraints",
         argNames: ["policyJson", "issuerId", "trustProfileVerified"],
-      );
-
-  @override
-  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
-    required List<String> gestures,
-    required BigInt ttlSeconds,
-    required String signingSecret,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          var arg0 = cst_encode_list_String(gestures);
-          var arg1 = cst_encode_u_64(ttlSeconds);
-          var arg2 = cst_encode_String(signingSecret);
-          return wire.wire__crate__biometrics__create_liveness_challenge(
-            arg0,
-            arg1,
-            arg2,
-          );
-        },
-        codec: DcoCodec(
-          decodeSuccessData: dco_decode_frb_liveness_challenge,
-          decodeErrorData: dco_decode_AnyhowException,
-        ),
-        constMeta: kCrateBiometricsCreateLivenessChallengeConstMeta,
-        argValues: [gestures, ttlSeconds, signingSecret],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateBiometricsCreateLivenessChallengeConstMeta =>
-      const TaskConstMeta(
-        debugName: "create_liveness_challenge",
-        argNames: ["gestures", "ttlSeconds", "signingSecret"],
       );
 
   @override
@@ -1059,38 +1035,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  bool crateBiometricsVerifyLivenessChallenge({
-    required String nativePayload,
-    required String signingSecret,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          var arg0 = cst_encode_String(nativePayload);
-          var arg1 = cst_encode_String(signingSecret);
-          return wire.wire__crate__biometrics__verify_liveness_challenge(
-            arg0,
-            arg1,
-          );
-        },
-        codec: DcoCodec(
-          decodeSuccessData: dco_decode_bool,
-          decodeErrorData: dco_decode_AnyhowException,
-        ),
-        constMeta: kCrateBiometricsVerifyLivenessChallengeConstMeta,
-        argValues: [nativePayload, signingSecret],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateBiometricsVerifyLivenessChallengeConstMeta =>
-      const TaskConstMeta(
-        debugName: "verify_liveness_challenge",
-        argNames: ["nativePayload", "signingSecret"],
-      );
-
-  @override
   Future<TrustInfo> crateApiVerifyMdocTrustChain({
     required List<Uint8List> x5Chain,
   }) {
@@ -1270,42 +1214,74 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<String> crateApiWalletCreateProofJwt({
-    required String holderKid,
-    required String cNonce,
-    required String issuerUrl,
-    required String jwkJson,
+  Future<FrbPresentationResponse>
+  crateApiWalletCompleteVerifiedSdJwtPresentation({
+    required String sessionId,
+    required List<int> remoteSignature,
   }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
-          var arg0 = cst_encode_String(holderKid);
-          var arg1 = cst_encode_String(cNonce);
-          var arg2 = cst_encode_String(issuerUrl);
-          var arg3 = cst_encode_String(jwkJson);
-          return wire.wire__crate__api__wallet_create_proof_jwt(
-            port_,
-            arg0,
-            arg1,
-            arg2,
-            arg3,
-          );
+          var arg0 = cst_encode_String(sessionId);
+          var arg1 = cst_encode_list_prim_u_8_loose(remoteSignature);
+          return wire
+              .wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
+                port_,
+                arg0,
+                arg1,
+              );
         },
         codec: DcoCodec(
-          decodeSuccessData: dco_decode_String,
+          decodeSuccessData: dco_decode_frb_presentation_response,
           decodeErrorData: dco_decode_AnyhowException,
         ),
-        constMeta: kCrateApiWalletCreateProofJwtConstMeta,
-        argValues: [holderKid, cNonce, issuerUrl, jwkJson],
+        constMeta: kCrateApiWalletCompleteVerifiedSdJwtPresentationConstMeta,
+        argValues: [sessionId, remoteSignature],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWalletCreateProofJwtConstMeta =>
+  TaskConstMeta get kCrateApiWalletCompleteVerifiedSdJwtPresentationConstMeta =>
       const TaskConstMeta(
-        debugName: "wallet_create_proof_jwt",
-        argNames: ["holderKid", "cNonce", "issuerUrl", "jwkJson"],
+        debugName: "wallet_complete_verified_sd_jwt_presentation",
+        argNames: ["sessionId", "remoteSignature"],
+      );
+
+  @override
+  Future<FrbVerifiedSdJwtReceipt> crateApiWalletCompleteVerifiedSdJwtReceipt({
+    required String sessionId,
+    required List<int> remoteSignature,
+    required String issuerSnapshotJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(sessionId);
+          var arg1 = cst_encode_list_prim_u_8_loose(remoteSignature);
+          var arg2 = cst_encode_String(issuerSnapshotJson);
+          return wire.wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_verified_sd_jwt_receipt,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletCompleteVerifiedSdJwtReceiptConstMeta,
+        argValues: [sessionId, remoteSignature, issuerSnapshotJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletCompleteVerifiedSdJwtReceiptConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_complete_verified_sd_jwt_receipt",
+        argNames: ["sessionId", "remoteSignature", "issuerSnapshotJson"],
       );
 
   @override
@@ -1510,6 +1486,108 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "wallet_parse_presentation_request",
         argNames: ["requestUri"],
+      );
+
+  @override
+  Future<FrbPreparedSdJwtPresentation>
+  crateApiWalletPrepareVerifiedSdJwtPresentation({
+    required String requestUri,
+    required String approvedRequestDigest,
+    required String credential,
+    required String queryId,
+    required List<String> claimsToDisclose,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(requestUri);
+          var arg1 = cst_encode_String(approvedRequestDigest);
+          var arg2 = cst_encode_String(credential);
+          var arg3 = cst_encode_String(queryId);
+          var arg4 = cst_encode_list_String(claimsToDisclose);
+          var arg5 = cst_encode_String(issuerSnapshotJson);
+          var arg6 = cst_encode_String(holderPublicJwkJson);
+          return wire
+              .wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+                port_,
+                arg0,
+                arg1,
+                arg2,
+                arg3,
+                arg4,
+                arg5,
+                arg6,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_prepared_sd_jwt_presentation,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletPrepareVerifiedSdJwtPresentationConstMeta,
+        argValues: [
+          requestUri,
+          approvedRequestDigest,
+          credential,
+          queryId,
+          claimsToDisclose,
+          issuerSnapshotJson,
+          holderPublicJwkJson,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletPrepareVerifiedSdJwtPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_prepare_verified_sd_jwt_presentation",
+        argNames: [
+          "requestUri",
+          "approvedRequestDigest",
+          "credential",
+          "queryId",
+          "claimsToDisclose",
+          "issuerSnapshotJson",
+          "holderPublicJwkJson",
+        ],
+      );
+
+  @override
+  Future<FrbPreparedSdJwtReceipt> crateApiWalletPrepareVerifiedSdJwtReceipt({
+    required String offerUri,
+    String? txCode,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(offerUri);
+          var arg1 = cst_encode_opt_String(txCode);
+          var arg2 = cst_encode_String(holderPublicJwkJson);
+          return wire.wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+            port_,
+            arg0,
+            arg1,
+            arg2,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_prepared_sd_jwt_receipt,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletPrepareVerifiedSdJwtReceiptConstMeta,
+        argValues: [offerUri, txCode, holderPublicJwkJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletPrepareVerifiedSdJwtReceiptConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_prepare_verified_sd_jwt_receipt",
+        argNames: ["offerUri", "txCode", "holderPublicJwkJson"],
       );
 
   @override
@@ -2090,19 +2168,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw) {
+  FrbPreparedSdJwtPresentation dco_decode_frb_prepared_sd_jwt_presentation(
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 7)
-      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
-    return FrbLivenessChallenge(
-      challengeId: dco_decode_String(arr[0]),
-      nonce: dco_decode_String(arr[1]),
-      issuedAt: dco_decode_String(arr[2]),
-      expiresAt: dco_decode_String(arr[3]),
-      gestures: dco_decode_list_String(arr[4]),
-      signature: dco_decode_String(arr[5]),
-      nativePayload: dco_decode_String(arr[6]),
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return FrbPreparedSdJwtPresentation(
+      sessionId: dco_decode_String(arr[0]),
+      signingInput: dco_decode_list_prim_u_8_strict(arr[1]),
+    );
+  }
+
+  @protected
+  FrbPreparedSdJwtReceipt dco_decode_frb_prepared_sd_jwt_receipt(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return FrbPreparedSdJwtReceipt(
+      sessionId: dco_decode_String(arr[0]),
+      signingInput: dco_decode_list_prim_u_8_strict(arr[1]),
     );
   }
 
@@ -2124,15 +2211,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FrbPresentationRequest dco_decode_frb_presentation_request(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 6)
-      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    if (arr.length != 9)
+      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
     return FrbPresentationRequest(
       clientId: dco_decode_String(arr[0]),
       nonce: dco_decode_String(arr[1]),
       responseUri: dco_decode_String(arr[2]),
-      queryType: dco_decode_String(arr[3]),
-      presentationDefinitionJson: dco_decode_opt_String(arr[4]),
-      dcqlQueryJson: dco_decode_opt_String(arr[5]),
+      responseMode: dco_decode_opt_String(arr[3]),
+      state: dco_decode_opt_String(arr[4]),
+      requestDigest: dco_decode_String(arr[5]),
+      queryType: dco_decode_String(arr[6]),
+      presentationDefinitionJson: dco_decode_opt_String(arr[7]),
+      dcqlQueryJson: dco_decode_opt_String(arr[8]),
     );
   }
 
@@ -2190,6 +2280,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       tokenType: dco_decode_String(arr[1]),
       expiresIn: dco_decode_opt_box_autoadd_u_64(arr[2]),
       scope: dco_decode_opt_String(arr[3]),
+    );
+  }
+
+  @protected
+  FrbVerifiedSdJwtReceipt dco_decode_frb_verified_sd_jwt_receipt(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FrbVerifiedSdJwtReceipt(
+      credential: dco_decode_String(arr[0]),
+      issuer: dco_decode_String(arr[1]),
+      credentialType: dco_decode_String(arr[2]),
+      format: dco_decode_String(arr[3]),
     );
   }
 
@@ -2856,25 +2960,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
+  FrbPreparedSdJwtPresentation sse_decode_frb_prepared_sd_jwt_presentation(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_challengeId = sse_decode_String(deserializer);
-    var var_nonce = sse_decode_String(deserializer);
-    var var_issuedAt = sse_decode_String(deserializer);
-    var var_expiresAt = sse_decode_String(deserializer);
-    var var_gestures = sse_decode_list_String(deserializer);
-    var var_signature = sse_decode_String(deserializer);
-    var var_nativePayload = sse_decode_String(deserializer);
-    return FrbLivenessChallenge(
-      challengeId: var_challengeId,
-      nonce: var_nonce,
-      issuedAt: var_issuedAt,
-      expiresAt: var_expiresAt,
-      gestures: var_gestures,
-      signature: var_signature,
-      nativePayload: var_nativePayload,
+    var var_sessionId = sse_decode_String(deserializer);
+    var var_signingInput = sse_decode_list_prim_u_8_strict(deserializer);
+    return FrbPreparedSdJwtPresentation(
+      sessionId: var_sessionId,
+      signingInput: var_signingInput,
+    );
+  }
+
+  @protected
+  FrbPreparedSdJwtReceipt sse_decode_frb_prepared_sd_jwt_receipt(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_sessionId = sse_decode_String(deserializer);
+    var var_signingInput = sse_decode_list_prim_u_8_strict(deserializer);
+    return FrbPreparedSdJwtReceipt(
+      sessionId: var_sessionId,
+      signingInput: var_signingInput,
     );
   }
 
@@ -2899,6 +3006,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_clientId = sse_decode_String(deserializer);
     var var_nonce = sse_decode_String(deserializer);
     var var_responseUri = sse_decode_String(deserializer);
+    var var_responseMode = sse_decode_opt_String(deserializer);
+    var var_state = sse_decode_opt_String(deserializer);
+    var var_requestDigest = sse_decode_String(deserializer);
     var var_queryType = sse_decode_String(deserializer);
     var var_presentationDefinitionJson = sse_decode_opt_String(deserializer);
     var var_dcqlQueryJson = sse_decode_opt_String(deserializer);
@@ -2906,6 +3016,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       clientId: var_clientId,
       nonce: var_nonce,
       responseUri: var_responseUri,
+      responseMode: var_responseMode,
+      state: var_state,
+      requestDigest: var_requestDigest,
       queryType: var_queryType,
       presentationDefinitionJson: var_presentationDefinitionJson,
       dcqlQueryJson: var_dcqlQueryJson,
@@ -2975,6 +3088,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       tokenType: var_tokenType,
       expiresIn: var_expiresIn,
       scope: var_scope,
+    );
+  }
+
+  @protected
+  FrbVerifiedSdJwtReceipt sse_decode_frb_verified_sd_jwt_receipt(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_credential = sse_decode_String(deserializer);
+    var var_issuer = sse_decode_String(deserializer);
+    var var_credentialType = sse_decode_String(deserializer);
+    var var_format = sse_decode_String(deserializer);
+    return FrbVerifiedSdJwtReceipt(
+      credential: var_credential,
+      issuer: var_issuer,
+      credentialType: var_credentialType,
+      format: var_format,
     );
   }
 
@@ -3809,18 +3939,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_frb_liveness_challenge(
-    FrbLivenessChallenge self,
+  void sse_encode_frb_prepared_sd_jwt_presentation(
+    FrbPreparedSdJwtPresentation self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.challengeId, serializer);
-    sse_encode_String(self.nonce, serializer);
-    sse_encode_String(self.issuedAt, serializer);
-    sse_encode_String(self.expiresAt, serializer);
-    sse_encode_list_String(self.gestures, serializer);
-    sse_encode_String(self.signature, serializer);
-    sse_encode_String(self.nativePayload, serializer);
+    sse_encode_String(self.sessionId, serializer);
+    sse_encode_list_prim_u_8_strict(self.signingInput, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_prepared_sd_jwt_receipt(
+    FrbPreparedSdJwtReceipt self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.sessionId, serializer);
+    sse_encode_list_prim_u_8_strict(self.signingInput, serializer);
   }
 
   @protected
@@ -3842,6 +3977,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.clientId, serializer);
     sse_encode_String(self.nonce, serializer);
     sse_encode_String(self.responseUri, serializer);
+    sse_encode_opt_String(self.responseMode, serializer);
+    sse_encode_opt_String(self.state, serializer);
+    sse_encode_String(self.requestDigest, serializer);
     sse_encode_String(self.queryType, serializer);
     sse_encode_opt_String(self.presentationDefinitionJson, serializer);
     sse_encode_opt_String(self.dcqlQueryJson, serializer);
@@ -3894,6 +4032,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.tokenType, serializer);
     sse_encode_opt_box_autoadd_u_64(self.expiresIn, serializer);
     sse_encode_opt_String(self.scope, serializer);
+  }
+
+  @protected
+  void sse_encode_frb_verified_sd_jwt_receipt(
+    FrbVerifiedSdJwtReceipt self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.credential, serializer);
+    sse_encode_String(self.issuer, serializer);
+    sse_encode_String(self.credentialType, serializer);
+    sse_encode_String(self.format, serializer);
   }
 
   @protected

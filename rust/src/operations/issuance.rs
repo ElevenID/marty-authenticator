@@ -142,18 +142,6 @@ pub(crate) async fn wallet_exchange_auth_code_token(
     Ok(FrbTokenResponse::from(token))
 }
 
-pub(crate) fn wallet_create_proof_jwt(
-    holder_kid: String,
-    c_nonce: String,
-    issuer_url: String,
-    jwk_json: String,
-) -> anyhow::Result<String> {
-    let engine = marty_oid4vci::WalletEngine::new();
-    engine
-        .create_proof_jwt(&holder_kid, &c_nonce, &issuer_url, &jwk_json)
-        .map_err(|e| anyhow::anyhow!("Proof JWT creation error: {}", e))
-}
-
 pub(crate) async fn wallet_request_credential(
     credential_endpoint: String,
     access_token: String,

@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/models/document_verification_config.dart';
-import 'package:marty_authenticator/models/liveness_challenge.dart';
 import 'package:marty_authenticator/models/liveness_gesture_detector.dart';
-import 'package:marty_authenticator/rust/marty_bridge.dart/biometrics.dart';
 import 'package:marty_authenticator/rust/marty_bridge.dart/frb_generated.dart';
 import 'package:marty_authenticator/rust/marty_bridge.dart/status.dart';
 import 'package:marty_authenticator/services/status_list_service.dart';
@@ -13,9 +11,6 @@ class _MockRustApi implements RustLibApi {
   String? parsedStatusJson;
   String? evaluatedEntryJson;
   String? evaluatedCredentialJson;
-  List<String>? challengeGestures;
-  BigInt? challengeTtlSeconds;
-  String? challengeSigningSecret;
   String? evaluatedGesture;
   double? evaluatedSmile;
   double? evaluatedHeadX;
@@ -52,26 +47,6 @@ class _MockRustApi implements RustLibApi {
       index: BigInt.from(5),
       asserted: true,
       listSize: BigInt.from(131072),
-    );
-  }
-
-  @override
-  FrbLivenessChallenge crateBiometricsCreateLivenessChallenge({
-    required List<String> gestures,
-    required BigInt ttlSeconds,
-    required String signingSecret,
-  }) {
-    challengeGestures = gestures;
-    challengeTtlSeconds = ttlSeconds;
-    challengeSigningSecret = signingSecret;
-    return FrbLivenessChallenge(
-      challengeId: 'lv-rust-mock',
-      nonce: 'nonce-rust-mock',
-      issuedAt: '2026-08-15T09:00:00.000Z',
-      expiresAt: '2026-08-15T09:01:30.000Z',
-      gestures: gestures,
-      signature: 'native-signature',
-      nativePayload: '{"challenge_id":"lv-rust-mock"}',
     );
   }
 
@@ -120,29 +95,6 @@ void main() {
     expect(native.evaluatedEntryJson, entries.single.entryJson);
     expect(native.evaluatedCredentialJson, contains('encodedList'));
   });
-
-  test(
-    'liveness challenge adapter preserves native payload and u64 TTL',
-    () async {
-      final challenge = await LivenessChallenge.create(
-        gestures: const [LivenessGesture.smile, LivenessGesture.lookUp],
-        ttl: const Duration(seconds: 90),
-        signingSecret: 'test-signing-secret',
-      );
-
-      expect(native.challengeGestures, ['smile', 'lookUp']);
-      expect(native.challengeTtlSeconds, BigInt.from(90));
-      expect(native.challengeSigningSecret, 'test-signing-secret');
-      expect(challenge.challengeId, 'lv-rust-mock');
-      expect(challenge.nonce, 'nonce-rust-mock');
-      expect(challenge.gestures, [
-        LivenessGesture.smile,
-        LivenessGesture.lookUp,
-      ]);
-      expect(challenge.signature, 'native-signature');
-      expect(challenge.nativePayload, contains('lv-rust-mock'));
-    },
-  );
 
   test('gesture detector forwards measured values to Rust', () {
     final detected = LivenessGestureDetector.detects(

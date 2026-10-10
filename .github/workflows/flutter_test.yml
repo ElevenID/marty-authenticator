@@ -13,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Guard mobile and desktop custody sources
+        run: node scripts/audit_mobile_custody.mjs
+
       - name: Set up Java Development Kit
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
         with:
@@ -54,3 +57,11 @@ jobs:
 
       - name: Run Flutter tests
         run: flutter test --no-pub # Use --no-pub since pub get was already run/cached
+
+      - name: Run wallet view acceptance tests
+        run: flutter test --no-pub --dart-define=QR_CODE=TEST acceptance_test
+
+      - name: Build web release and audit public WASM artifact
+        run: |
+          flutter build web -t lib/main_document.dart --release --no-pub
+          node scripts/audit_public_wasm.mjs build/web

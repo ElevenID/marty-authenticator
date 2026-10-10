@@ -30,15 +30,13 @@ import '../utils/logger.dart';
 
 /// A serialisable record of a received verifiable credential.
 ///
-/// Credentials received via OID4VCI are stored here before being
-/// promoted to the richer [MDocCredential] / [VerifiableCredential]
-/// model when the UI reads them.
+/// Holds credential receipts returned by the verified Rust OID4VCI flow.
 class StoredCredential {
   final String id;
-  final String format; // e.g. "mso_mdoc", "vc+sd-jwt", "ldp_vc"
+  final String format; // verified OID4VCI format
   final String issuer; // credential_issuer URL
   final List<String> types;
-  final String rawJson; // full credential response body (JSON)
+  final String rawJson; // verified credential payload
   final DateTime issuedAt;
 
   const StoredCredential({
@@ -76,16 +74,15 @@ class StoredCredential {
 
 /// Persists received OID4VCI credentials to [FlutterSecureStorage].
 ///
-/// Credentials are keyed as `cred:{id}` with a JSON index stored at
-/// `cred:index` (a JSON array of IDs).
+/// Each verified receipt has one secure-storage entry. Enumeration derives
+/// from those entries, so a second index write cannot lose a receipt.
 ///
-/// This store acts as a staging area — the main credential repository
-/// reads from here and constructs typed domain objects.
+/// This is the wallet's source of verified credential receipts. It never
+/// stores holder private keys or unverified platform-channel imports.
 class WalletCredentialStore {
   WalletCredentialStore._();
 
-  static const _indexKey = 'marty:cred:index';
-  static const _prefix = 'marty:cred:';
+  static const _prefix = 'marty:wallet:receipt:';
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -96,18 +93,10 @@ class WalletCredentialStore {
   /// Persist [credential] to secure storage, overwriting any existing entry
   /// with the same [StoredCredential.id].
   static Future<void> store(StoredCredential credential) async {
-    // Write credential body
     await _storage.write(
       key: '$_prefix${credential.id}',
       value: jsonEncode(credential.toJson()),
     );
-
-    // Update index
-    final index = await _readIndex();
-    if (!index.contains(credential.id)) {
-      index.add(credential.id);
-      await _writeIndex(index);
-    }
 
     Logger.info(
       'Stored credential id=${credential.id} format=${credential.format}',
@@ -120,23 +109,28 @@ class WalletCredentialStore {
 
   /// Returns all stored credentials, ignoring any with parse errors.
   static Future<List<StoredCredential>> getAll() async {
-    final index = await _readIndex();
     final results = <StoredCredential>[];
-
-    for (final id in index) {
-      final raw = await _storage.read(key: '$_prefix$id');
-      if (raw == null) continue;
+    for (final entry in (await _storage.readAll()).entries) {
+      if (!entry.key.startsWith(_prefix)) continue;
+      final id = entry.key.substring(_prefix.length);
       try {
-        results.add(
-          StoredCredential.fromJson(jsonDecode(raw) as Map<String, dynamic>),
+        final credential = StoredCredential.fromJson(
+          jsonDecode(entry.value) as Map<String, dynamic>,
         );
+        if (credential.id != id) {
+          throw const FormatException('Receipt ID does not match storage key');
+        }
+        results.add(credential);
       } catch (e) {
         Logger.warning(
           'WalletCredentialStore: failed to parse credential $id: $e',
         );
       }
     }
-
+    results.sort((a, b) {
+      final byDate = a.issuedAt.compareTo(b.issuedAt);
+      return byDate != 0 ? byDate : a.id.compareTo(b.id);
+    });
     return results;
   }
 
@@ -145,7 +139,13 @@ class WalletCredentialStore {
     final raw = await _storage.read(key: '$_prefix$id');
     if (raw == null) return null;
     try {
-      return StoredCredential.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final credential = StoredCredential.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+      if (credential.id != id) {
+        throw const FormatException('Receipt ID does not match storage key');
+      }
+      return credential;
     } catch (e) {
       Logger.warning('WalletCredentialStore: parse error for $id: $e');
       return null;
@@ -159,34 +159,14 @@ class WalletCredentialStore {
   /// Delete a single credential.
   static Future<void> delete(String id) async {
     await _storage.delete(key: '$_prefix$id');
-    final index = await _readIndex();
-    index.remove(id);
-    await _writeIndex(index);
   }
 
   /// Delete all stored credentials.
   static Future<void> clear() async {
-    final index = await _readIndex();
-    for (final id in index) {
-      await _storage.delete(key: '$_prefix$id');
-    }
-    await _storage.delete(key: _indexKey);
-  }
-
-  // -------------------------------------------------------------------------
-  // Helpers
-  // -------------------------------------------------------------------------
-
-  static Future<List<String>> _readIndex() async {
-    final raw = await _storage.read(key: _indexKey);
-    if (raw == null) return [];
-    try {
-      return (jsonDecode(raw) as List<dynamic>).cast<String>();
-    } catch (_) {
-      return [];
+    for (final key in (await _storage.readAll()).keys.toList()) {
+      if (key.startsWith(_prefix)) {
+        await _storage.delete(key: key);
+      }
     }
   }
-
-  static Future<void> _writeIndex(List<String> index) =>
-      _storage.write(key: _indexKey, value: jsonEncode(index));
 }

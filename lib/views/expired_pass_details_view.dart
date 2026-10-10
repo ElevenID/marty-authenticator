@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card_data.dart';
 import '../providers/card_state_provider.dart';
-import 'pass_configuration_view.dart';
 import '../widgets/common/back_button.dart' as common;
 
 class ExpiredPassDetailsView extends ConsumerWidget {
@@ -24,17 +23,6 @@ class ExpiredPassDetailsView extends ConsumerWidget {
             icon: const Icon(Icons.share, color: Colors.blue),
             onPressed: () {
               // Share functionality
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.blue),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PassConfigurationView(),
-                ),
-              );
             },
           ),
         ],
@@ -111,9 +99,19 @@ class ExpiredPassDetailsView extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton(
-            onPressed: () {
-              ref.read(cardStateProvider.notifier).deleteCard(cardData);
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                await ref.read(cardStateProvider.notifier).deleteCard(cardData);
+                if (context.mounted) Navigator.pop(context);
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not delete this pass.'),
+                    ),
+                  );
+                }
+              }
             },
             child: const Text(
               'Delete',

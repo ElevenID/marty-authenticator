@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1019630657;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 518073499;
 
 // Section: executor
 
@@ -104,34 +104,6 @@ fn wire__crate__api__check_issuer_constraints_impl(
                     })(),
                 )
             }
-        },
-    )
-}
-fn wire__crate__biometrics__create_liveness_challenge_impl(
-    gestures: impl CstDecode<Vec<String>>,
-    ttl_seconds: impl CstDecode<u64>,
-    signing_secret: impl CstDecode<String>,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "create_liveness_challenge",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let api_gestures = gestures.cst_decode();
-            let api_ttl_seconds = ttl_seconds.cst_decode();
-            let api_signing_secret = signing_secret.cst_decode();
-            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::biometrics::create_liveness_challenge(
-                        api_gestures,
-                        api_ttl_seconds,
-                        api_signing_secret,
-                    )?;
-                    std::result::Result::Ok(output_ok)
-                })(),
-            )
         },
     )
 }
@@ -669,31 +641,6 @@ fn wire__crate__biometrics__verify_face_match_impl(
         },
     )
 }
-fn wire__crate__biometrics__verify_liveness_challenge_impl(
-    native_payload: impl CstDecode<String>,
-    signing_secret: impl CstDecode<String>,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::DcoCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "verify_liveness_challenge",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let api_native_payload = native_payload.cst_decode();
-            let api_signing_secret = signing_secret.cst_decode();
-            transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                (move || {
-                    let output_ok = crate::biometrics::verify_liveness_challenge(
-                        api_native_payload,
-                        api_signing_secret,
-                    )?;
-                    std::result::Result::Ok(output_ok)
-                })(),
-            )
-        },
-    )
-}
 fn wire__crate__api__verify_mdoc_trust_chain_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     x5chain: impl CstDecode<Vec<Vec<u8>>>,
@@ -826,35 +773,64 @@ fn wire__crate__api__wallet_build_auth_request_impl(
         },
     )
 }
-fn wire__crate__api__wallet_create_proof_jwt_impl(
+fn wire__crate__api__wallet_complete_verified_sd_jwt_presentation_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
-    holder_kid: impl CstDecode<String>,
-    c_nonce: impl CstDecode<String>,
-    issuer_url: impl CstDecode<String>,
-    jwk_json: impl CstDecode<String>,
+    session_id: impl CstDecode<String>,
+    remote_signature: impl CstDecode<Vec<u8>>,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "wallet_create_proof_jwt",
+            debug_name: "wallet_complete_verified_sd_jwt_presentation",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let api_holder_kid = holder_kid.cst_decode();
-            let api_c_nonce = c_nonce.cst_decode();
-            let api_issuer_url = issuer_url.cst_decode();
-            let api_jwk_json = jwk_json.cst_decode();
-            move |context| {
+            let api_session_id = session_id.cst_decode();
+            let api_remote_signature = remote_signature.cst_decode();
+            move |context| async move {
                 transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::wallet_create_proof_jwt(
-                            api_holder_kid,
-                            api_c_nonce,
-                            api_issuer_url,
-                            api_jwk_json,
-                        )?;
+                    (move || async move {
+                        let output_ok = crate::api::wallet_complete_verified_sd_jwt_presentation(
+                            api_session_id,
+                            api_remote_signature,
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_complete_verified_sd_jwt_receipt_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    session_id: impl CstDecode<String>,
+    remote_signature: impl CstDecode<Vec<u8>>,
+    issuer_snapshot_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_complete_verified_sd_jwt_receipt",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_session_id = session_id.cst_decode();
+            let api_remote_signature = remote_signature.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_complete_verified_sd_jwt_receipt(
+                            api_session_id,
+                            api_remote_signature,
+                            api_issuer_snapshot_json,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
                 )
             }
         },
@@ -1022,6 +998,84 @@ fn wire__crate__api__wallet_parse_presentation_request_impl(
                     (move || async move {
                         let output_ok =
                             crate::api::wallet_parse_presentation_request(api_request_uri).await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_prepare_verified_sd_jwt_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    request_uri: impl CstDecode<String>,
+    approved_request_digest: impl CstDecode<String>,
+    credential: impl CstDecode<String>,
+    query_id: impl CstDecode<String>,
+    claims_to_disclose: impl CstDecode<Vec<String>>,
+    issuer_snapshot_json: impl CstDecode<String>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_prepare_verified_sd_jwt_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_request_uri = request_uri.cst_decode();
+            let api_approved_request_digest = approved_request_digest.cst_decode();
+            let api_credential = credential.cst_decode();
+            let api_query_id = query_id.cst_decode();
+            let api_claims_to_disclose = claims_to_disclose.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_prepare_verified_sd_jwt_presentation(
+                            api_request_uri,
+                            api_approved_request_digest,
+                            api_credential,
+                            api_query_id,
+                            api_claims_to_disclose,
+                            api_issuer_snapshot_json,
+                            api_holder_public_jwk_json,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_prepare_verified_sd_jwt_receipt_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    offer_uri: impl CstDecode<String>,
+    tx_code: impl CstDecode<Option<String>>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_prepare_verified_sd_jwt_receipt",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_offer_uri = offer_uri.cst_decode();
+            let api_tx_code = tx_code.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_prepare_verified_sd_jwt_receipt(
+                            api_offer_uri,
+                            api_tx_code,
+                            api_holder_public_jwk_json,
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
                     })()
                     .await,
@@ -1567,24 +1621,26 @@ impl SseDecode for crate::api::FrbIssuerMetadata {
     }
 }
 
-impl SseDecode for crate::biometrics::FrbLivenessChallenge {
+impl SseDecode for crate::api::FrbPreparedSdJwtPresentation {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_challengeId = <String>::sse_decode(deserializer);
-        let mut var_nonce = <String>::sse_decode(deserializer);
-        let mut var_issuedAt = <String>::sse_decode(deserializer);
-        let mut var_expiresAt = <String>::sse_decode(deserializer);
-        let mut var_gestures = <Vec<String>>::sse_decode(deserializer);
-        let mut var_signature = <String>::sse_decode(deserializer);
-        let mut var_nativePayload = <String>::sse_decode(deserializer);
-        return crate::biometrics::FrbLivenessChallenge {
-            challenge_id: var_challengeId,
-            nonce: var_nonce,
-            issued_at: var_issuedAt,
-            expires_at: var_expiresAt,
-            gestures: var_gestures,
-            signature: var_signature,
-            native_payload: var_nativePayload,
+        let mut var_sessionId = <String>::sse_decode(deserializer);
+        let mut var_signingInput = <Vec<u8>>::sse_decode(deserializer);
+        return crate::api::FrbPreparedSdJwtPresentation {
+            session_id: var_sessionId,
+            signing_input: var_signingInput,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbPreparedSdJwtReceipt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_sessionId = <String>::sse_decode(deserializer);
+        let mut var_signingInput = <Vec<u8>>::sse_decode(deserializer);
+        return crate::api::FrbPreparedSdJwtReceipt {
+            session_id: var_sessionId,
+            signing_input: var_signingInput,
         };
     }
 }
@@ -1607,6 +1663,9 @@ impl SseDecode for crate::api::FrbPresentationRequest {
         let mut var_clientId = <String>::sse_decode(deserializer);
         let mut var_nonce = <String>::sse_decode(deserializer);
         let mut var_responseUri = <String>::sse_decode(deserializer);
+        let mut var_responseMode = <Option<String>>::sse_decode(deserializer);
+        let mut var_state = <Option<String>>::sse_decode(deserializer);
+        let mut var_requestDigest = <String>::sse_decode(deserializer);
         let mut var_queryType = <String>::sse_decode(deserializer);
         let mut var_presentationDefinitionJson = <Option<String>>::sse_decode(deserializer);
         let mut var_dcqlQueryJson = <Option<String>>::sse_decode(deserializer);
@@ -1614,6 +1673,9 @@ impl SseDecode for crate::api::FrbPresentationRequest {
             client_id: var_clientId,
             nonce: var_nonce,
             response_uri: var_responseUri,
+            response_mode: var_responseMode,
+            state: var_state,
+            request_digest: var_requestDigest,
             query_type: var_queryType,
             presentation_definition_json: var_presentationDefinitionJson,
             dcql_query_json: var_dcqlQueryJson,
@@ -1683,6 +1745,22 @@ impl SseDecode for crate::api::FrbTokenResponse {
             token_type: var_tokenType,
             expires_in: var_expiresIn,
             scope: var_scope,
+        };
+    }
+}
+
+impl SseDecode for crate::api::FrbVerifiedSdJwtReceipt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_credential = <String>::sse_decode(deserializer);
+        let mut var_issuer = <String>::sse_decode(deserializer);
+        let mut var_credentialType = <String>::sse_decode(deserializer);
+        let mut var_format = <String>::sse_decode(deserializer);
+        return crate::api::FrbVerifiedSdJwtReceipt {
+            credential: var_credential,
+            issuer: var_issuer,
+            credential_type: var_credentialType,
+            format: var_format,
         };
     }
 }
@@ -2464,28 +2542,44 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbIssuerMetadata>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::biometrics::FrbLivenessChallenge {
+impl flutter_rust_bridge::IntoDart for crate::api::FrbPreparedSdJwtPresentation {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
-            self.challenge_id.into_into_dart().into_dart(),
-            self.nonce.into_into_dart().into_dart(),
-            self.issued_at.into_into_dart().into_dart(),
-            self.expires_at.into_into_dart().into_dart(),
-            self.gestures.into_into_dart().into_dart(),
-            self.signature.into_into_dart().into_dart(),
-            self.native_payload.into_into_dart().into_dart(),
+            self.session_id.into_into_dart().into_dart(),
+            self.signing_input.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::biometrics::FrbLivenessChallenge
+    for crate::api::FrbPreparedSdJwtPresentation
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::biometrics::FrbLivenessChallenge>
-    for crate::biometrics::FrbLivenessChallenge
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbPreparedSdJwtPresentation>
+    for crate::api::FrbPreparedSdJwtPresentation
 {
-    fn into_into_dart(self) -> crate::biometrics::FrbLivenessChallenge {
+    fn into_into_dart(self) -> crate::api::FrbPreparedSdJwtPresentation {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbPreparedSdJwtReceipt {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.session_id.into_into_dart().into_dart(),
+            self.signing_input.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbPreparedSdJwtReceipt
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbPreparedSdJwtReceipt>
+    for crate::api::FrbPreparedSdJwtReceipt
+{
+    fn into_into_dart(self) -> crate::api::FrbPreparedSdJwtReceipt {
         self
     }
 }
@@ -2517,6 +2611,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::FrbPresentationRequest {
             self.client_id.into_into_dart().into_dart(),
             self.nonce.into_into_dart().into_dart(),
             self.response_uri.into_into_dart().into_dart(),
+            self.response_mode.into_into_dart().into_dart(),
+            self.state.into_into_dart().into_dart(),
+            self.request_digest.into_into_dart().into_dart(),
             self.query_type.into_into_dart().into_dart(),
             self.presentation_definition_json
                 .into_into_dart()
@@ -2621,6 +2718,29 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbTokenResponse>
     for crate::api::FrbTokenResponse
 {
     fn into_into_dart(self) -> crate::api::FrbTokenResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::FrbVerifiedSdJwtReceipt {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.credential.into_into_dart().into_dart(),
+            self.issuer.into_into_dart().into_dart(),
+            self.credential_type.into_into_dart().into_dart(),
+            self.format.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::FrbVerifiedSdJwtReceipt
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::FrbVerifiedSdJwtReceipt>
+    for crate::api::FrbVerifiedSdJwtReceipt
+{
+    fn into_into_dart(self) -> crate::api::FrbVerifiedSdJwtReceipt {
         self
     }
 }
@@ -3082,16 +3202,19 @@ impl SseEncode for crate::api::FrbIssuerMetadata {
     }
 }
 
-impl SseEncode for crate::biometrics::FrbLivenessChallenge {
+impl SseEncode for crate::api::FrbPreparedSdJwtPresentation {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.challenge_id, serializer);
-        <String>::sse_encode(self.nonce, serializer);
-        <String>::sse_encode(self.issued_at, serializer);
-        <String>::sse_encode(self.expires_at, serializer);
-        <Vec<String>>::sse_encode(self.gestures, serializer);
-        <String>::sse_encode(self.signature, serializer);
-        <String>::sse_encode(self.native_payload, serializer);
+        <String>::sse_encode(self.session_id, serializer);
+        <Vec<u8>>::sse_encode(self.signing_input, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbPreparedSdJwtReceipt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.session_id, serializer);
+        <Vec<u8>>::sse_encode(self.signing_input, serializer);
     }
 }
 
@@ -3109,6 +3232,9 @@ impl SseEncode for crate::api::FrbPresentationRequest {
         <String>::sse_encode(self.client_id, serializer);
         <String>::sse_encode(self.nonce, serializer);
         <String>::sse_encode(self.response_uri, serializer);
+        <Option<String>>::sse_encode(self.response_mode, serializer);
+        <Option<String>>::sse_encode(self.state, serializer);
+        <String>::sse_encode(self.request_digest, serializer);
         <String>::sse_encode(self.query_type, serializer);
         <Option<String>>::sse_encode(self.presentation_definition_json, serializer);
         <Option<String>>::sse_encode(self.dcql_query_json, serializer);
@@ -3153,6 +3279,16 @@ impl SseEncode for crate::api::FrbTokenResponse {
         <String>::sse_encode(self.token_type, serializer);
         <Option<u64>>::sse_encode(self.expires_in, serializer);
         <Option<String>>::sse_encode(self.scope, serializer);
+    }
+}
+
+impl SseEncode for crate::api::FrbVerifiedSdJwtReceipt {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.credential, serializer);
+        <String>::sse_encode(self.issuer, serializer);
+        <String>::sse_encode(self.credential_type, serializer);
+        <String>::sse_encode(self.format, serializer);
     }
 }
 
@@ -3793,17 +3929,23 @@ mod io {
             }
         }
     }
-    impl CstDecode<crate::biometrics::FrbLivenessChallenge> for wire_cst_frb_liveness_challenge {
+    impl CstDecode<crate::api::FrbPreparedSdJwtPresentation>
+        for wire_cst_frb_prepared_sd_jwt_presentation
+    {
         // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
-            crate::biometrics::FrbLivenessChallenge {
-                challenge_id: self.challenge_id.cst_decode(),
-                nonce: self.nonce.cst_decode(),
-                issued_at: self.issued_at.cst_decode(),
-                expires_at: self.expires_at.cst_decode(),
-                gestures: self.gestures.cst_decode(),
-                signature: self.signature.cst_decode(),
-                native_payload: self.native_payload.cst_decode(),
+        fn cst_decode(self) -> crate::api::FrbPreparedSdJwtPresentation {
+            crate::api::FrbPreparedSdJwtPresentation {
+                session_id: self.session_id.cst_decode(),
+                signing_input: self.signing_input.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPreparedSdJwtReceipt> for wire_cst_frb_prepared_sd_jwt_receipt {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPreparedSdJwtReceipt {
+            crate::api::FrbPreparedSdJwtReceipt {
+                session_id: self.session_id.cst_decode(),
+                signing_input: self.signing_input.cst_decode(),
             }
         }
     }
@@ -3825,6 +3967,9 @@ mod io {
                 client_id: self.client_id.cst_decode(),
                 nonce: self.nonce.cst_decode(),
                 response_uri: self.response_uri.cst_decode(),
+                response_mode: self.response_mode.cst_decode(),
+                state: self.state.cst_decode(),
+                request_digest: self.request_digest.cst_decode(),
                 query_type: self.query_type.cst_decode(),
                 presentation_definition_json: self.presentation_definition_json.cst_decode(),
                 dcql_query_json: self.dcql_query_json.cst_decode(),
@@ -3873,6 +4018,17 @@ mod io {
                 token_type: self.token_type.cst_decode(),
                 expires_in: self.expires_in.cst_decode(),
                 scope: self.scope.cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbVerifiedSdJwtReceipt> for wire_cst_frb_verified_sd_jwt_receipt {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbVerifiedSdJwtReceipt {
+            crate::api::FrbVerifiedSdJwtReceipt {
+                credential: self.credential.cst_decode(),
+                issuer: self.issuer.cst_decode(),
+                credential_type: self.credential_type.cst_decode(),
+                format: self.format.cst_decode(),
             }
         }
     }
@@ -4280,20 +4436,28 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
-    impl NewWithNullPtr for wire_cst_frb_liveness_challenge {
+    impl NewWithNullPtr for wire_cst_frb_prepared_sd_jwt_presentation {
         fn new_with_null_ptr() -> Self {
             Self {
-                challenge_id: core::ptr::null_mut(),
-                nonce: core::ptr::null_mut(),
-                issued_at: core::ptr::null_mut(),
-                expires_at: core::ptr::null_mut(),
-                gestures: core::ptr::null_mut(),
-                signature: core::ptr::null_mut(),
-                native_payload: core::ptr::null_mut(),
+                session_id: core::ptr::null_mut(),
+                signing_input: core::ptr::null_mut(),
             }
         }
     }
-    impl Default for wire_cst_frb_liveness_challenge {
+    impl Default for wire_cst_frb_prepared_sd_jwt_presentation {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_prepared_sd_jwt_receipt {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                session_id: core::ptr::null_mut(),
+                signing_input: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_prepared_sd_jwt_receipt {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -4317,6 +4481,9 @@ mod io {
                 client_id: core::ptr::null_mut(),
                 nonce: core::ptr::null_mut(),
                 response_uri: core::ptr::null_mut(),
+                response_mode: core::ptr::null_mut(),
+                state: core::ptr::null_mut(),
+                request_digest: core::ptr::null_mut(),
                 query_type: core::ptr::null_mut(),
                 presentation_definition_json: core::ptr::null_mut(),
                 dcql_query_json: core::ptr::null_mut(),
@@ -4385,6 +4552,21 @@ mod io {
         }
     }
     impl Default for wire_cst_frb_token_response {
+        fn default() -> Self {
+            Self::new_with_null_ptr()
+        }
+    }
+    impl NewWithNullPtr for wire_cst_frb_verified_sd_jwt_receipt {
+        fn new_with_null_ptr() -> Self {
+            Self {
+                credential: core::ptr::null_mut(),
+                issuer: core::ptr::null_mut(),
+                credential_type: core::ptr::null_mut(),
+                format: core::ptr::null_mut(),
+            }
+        }
+    }
+    impl Default for wire_cst_frb_verified_sd_jwt_receipt {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -4594,19 +4776,6 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__create_liveness_challenge(
-        gestures: *mut wire_cst_list_String,
-        ttl_seconds: u64,
-        signing_secret: *mut wire_cst_list_prim_u_8_strict,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__create_liveness_challenge_impl(
-            gestures,
-            ttl_seconds,
-            signing_secret,
-        )
-    }
-
-    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__create_selectable_credential(
         port_: i64,
         credential: *mut wire_cst_credential,
@@ -4808,14 +4977,6 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__biometrics__verify_liveness_challenge(
-        native_payload: *mut wire_cst_list_prim_u_8_strict,
-        signing_secret: *mut wire_cst_list_prim_u_8_strict,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
-    }
-
-    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__verify_mdoc_trust_chain(
         port_: i64,
         x5chain: *mut wire_cst_list_list_prim_u_8_strict,
@@ -4877,15 +5038,30 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_create_proof_jwt(
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
         port_: i64,
-        holder_kid: *mut wire_cst_list_prim_u_8_strict,
-        c_nonce: *mut wire_cst_list_prim_u_8_strict,
-        issuer_url: *mut wire_cst_list_prim_u_8_strict,
-        jwk_json: *mut wire_cst_list_prim_u_8_strict,
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        remote_signature: *mut wire_cst_list_prim_u_8_loose,
     ) {
-        wire__crate__api__wallet_create_proof_jwt_impl(
-            port_, holder_kid, c_nonce, issuer_url, jwk_json,
+        wire__crate__api__wallet_complete_verified_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            remote_signature,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+        port_: i64,
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        remote_signature: *mut wire_cst_list_prim_u_8_loose,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_complete_verified_sd_jwt_receipt_impl(
+            port_,
+            session_id,
+            remote_signature,
+            issuer_snapshot_json,
         )
     }
 
@@ -4953,6 +5129,44 @@ mod io {
         request_uri: *mut wire_cst_list_prim_u_8_strict,
     ) {
         wire__crate__api__wallet_parse_presentation_request_impl(port_, request_uri)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+        port_: i64,
+        request_uri: *mut wire_cst_list_prim_u_8_strict,
+        approved_request_digest: *mut wire_cst_list_prim_u_8_strict,
+        credential: *mut wire_cst_list_prim_u_8_strict,
+        query_id: *mut wire_cst_list_prim_u_8_strict,
+        claims_to_disclose: *mut wire_cst_list_String,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_prepare_verified_sd_jwt_presentation_impl(
+            port_,
+            request_uri,
+            approved_request_digest,
+            credential,
+            query_id,
+            claims_to_disclose,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+        port_: i64,
+        offer_uri: *mut wire_cst_list_prim_u_8_strict,
+        tx_code: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_prepare_verified_sd_jwt_receipt_impl(
+            port_,
+            offer_uri,
+            tx_code,
+            holder_public_jwk_json,
+        )
     }
 
     #[unsafe(no_mangle)]
@@ -5389,14 +5603,15 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
-    pub struct wire_cst_frb_liveness_challenge {
-        challenge_id: *mut wire_cst_list_prim_u_8_strict,
-        nonce: *mut wire_cst_list_prim_u_8_strict,
-        issued_at: *mut wire_cst_list_prim_u_8_strict,
-        expires_at: *mut wire_cst_list_prim_u_8_strict,
-        gestures: *mut wire_cst_list_String,
-        signature: *mut wire_cst_list_prim_u_8_strict,
-        native_payload: *mut wire_cst_list_prim_u_8_strict,
+    pub struct wire_cst_frb_prepared_sd_jwt_presentation {
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        signing_input: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_prepared_sd_jwt_receipt {
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        signing_input: *mut wire_cst_list_prim_u_8_strict,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -5410,6 +5625,9 @@ mod io {
         client_id: *mut wire_cst_list_prim_u_8_strict,
         nonce: *mut wire_cst_list_prim_u_8_strict,
         response_uri: *mut wire_cst_list_prim_u_8_strict,
+        response_mode: *mut wire_cst_list_prim_u_8_strict,
+        state: *mut wire_cst_list_prim_u_8_strict,
+        request_digest: *mut wire_cst_list_prim_u_8_strict,
         query_type: *mut wire_cst_list_prim_u_8_strict,
         presentation_definition_json: *mut wire_cst_list_prim_u_8_strict,
         dcql_query_json: *mut wire_cst_list_prim_u_8_strict,
@@ -5446,6 +5664,14 @@ mod io {
         token_type: *mut wire_cst_list_prim_u_8_strict,
         expires_in: *mut u64,
         scope: *mut wire_cst_list_prim_u_8_strict,
+    }
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_frb_verified_sd_jwt_receipt {
+        credential: *mut wire_cst_list_prim_u_8_strict,
+        issuer: *mut wire_cst_list_prim_u_8_strict,
+        credential_type: *mut wire_cst_list_prim_u_8_strict,
+        format: *mut wire_cst_list_prim_u_8_strict,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
@@ -5892,28 +6118,43 @@ mod web {
             }
         }
     }
-    impl CstDecode<crate::biometrics::FrbLivenessChallenge>
+    impl CstDecode<crate::api::FrbPreparedSdJwtPresentation>
         for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
     {
         // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> crate::biometrics::FrbLivenessChallenge {
+        fn cst_decode(self) -> crate::api::FrbPreparedSdJwtPresentation {
             let self_ = self
                 .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
                 .unwrap();
             assert_eq!(
                 self_.length(),
-                7,
-                "Expected 7 elements, got {}",
+                2,
+                "Expected 2 elements, got {}",
                 self_.length()
             );
-            crate::biometrics::FrbLivenessChallenge {
-                challenge_id: self_.get(0).cst_decode(),
-                nonce: self_.get(1).cst_decode(),
-                issued_at: self_.get(2).cst_decode(),
-                expires_at: self_.get(3).cst_decode(),
-                gestures: self_.get(4).cst_decode(),
-                signature: self_.get(5).cst_decode(),
-                native_payload: self_.get(6).cst_decode(),
+            crate::api::FrbPreparedSdJwtPresentation {
+                session_id: self_.get(0).cst_decode(),
+                signing_input: self_.get(1).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbPreparedSdJwtReceipt>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbPreparedSdJwtReceipt {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                2,
+                "Expected 2 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbPreparedSdJwtReceipt {
+                session_id: self_.get(0).cst_decode(),
+                signing_input: self_.get(1).cst_decode(),
             }
         }
     }
@@ -5947,17 +6188,20 @@ mod web {
                 .unwrap();
             assert_eq!(
                 self_.length(),
-                6,
-                "Expected 6 elements, got {}",
+                9,
+                "Expected 9 elements, got {}",
                 self_.length()
             );
             crate::api::FrbPresentationRequest {
                 client_id: self_.get(0).cst_decode(),
                 nonce: self_.get(1).cst_decode(),
                 response_uri: self_.get(2).cst_decode(),
-                query_type: self_.get(3).cst_decode(),
-                presentation_definition_json: self_.get(4).cst_decode(),
-                dcql_query_json: self_.get(5).cst_decode(),
+                response_mode: self_.get(3).cst_decode(),
+                state: self_.get(4).cst_decode(),
+                request_digest: self_.get(5).cst_decode(),
+                query_type: self_.get(6).cst_decode(),
+                presentation_definition_json: self_.get(7).cst_decode(),
+                dcql_query_json: self_.get(8).cst_decode(),
             }
         }
     }
@@ -6047,6 +6291,28 @@ mod web {
                 token_type: self_.get(1).cst_decode(),
                 expires_in: self_.get(2).cst_decode(),
                 scope: self_.get(3).cst_decode(),
+            }
+        }
+    }
+    impl CstDecode<crate::api::FrbVerifiedSdJwtReceipt>
+        for flutter_rust_bridge::for_generated::wasm_bindgen::JsValue
+    {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> crate::api::FrbVerifiedSdJwtReceipt {
+            let self_ = self
+                .dyn_into::<flutter_rust_bridge::for_generated::js_sys::Array>()
+                .unwrap();
+            assert_eq!(
+                self_.length(),
+                4,
+                "Expected 4 elements, got {}",
+                self_.length()
+            );
+            crate::api::FrbVerifiedSdJwtReceipt {
+                credential: self_.get(0).cst_decode(),
+                issuer: self_.get(1).cst_decode(),
+                credential_type: self_.get(2).cst_decode(),
+                format: self_.get(3).cst_decode(),
             }
         }
     }
@@ -6552,19 +6818,6 @@ mod web {
     }
 
     #[wasm_bindgen]
-    pub fn wire__crate__biometrics__create_liveness_challenge(
-        gestures: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
-        ttl_seconds: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
-        signing_secret: String,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__create_liveness_challenge_impl(
-            gestures,
-            ttl_seconds,
-            signing_secret,
-        )
-    }
-
-    #[wasm_bindgen]
     pub fn wire__crate__api__create_selectable_credential(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         credential: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
@@ -6766,14 +7019,6 @@ mod web {
     }
 
     #[wasm_bindgen]
-    pub fn wire__crate__biometrics__verify_liveness_challenge(
-        native_payload: String,
-        signing_secret: String,
-    ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartDco {
-        wire__crate__biometrics__verify_liveness_challenge_impl(native_payload, signing_secret)
-    }
-
-    #[wasm_bindgen]
     pub fn wire__crate__api__verify_mdoc_trust_chain(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         x5chain: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
@@ -6835,15 +7080,30 @@ mod web {
     }
 
     #[wasm_bindgen]
-    pub fn wire__crate__api__wallet_create_proof_jwt(
+    pub fn wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
         port_: flutter_rust_bridge::for_generated::MessagePort,
-        holder_kid: String,
-        c_nonce: String,
-        issuer_url: String,
-        jwk_json: String,
+        session_id: String,
+        remote_signature: Box<[u8]>,
     ) {
-        wire__crate__api__wallet_create_proof_jwt_impl(
-            port_, holder_kid, c_nonce, issuer_url, jwk_json,
+        wire__crate__api__wallet_complete_verified_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            remote_signature,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        session_id: String,
+        remote_signature: Box<[u8]>,
+        issuer_snapshot_json: String,
+    ) {
+        wire__crate__api__wallet_complete_verified_sd_jwt_receipt_impl(
+            port_,
+            session_id,
+            remote_signature,
+            issuer_snapshot_json,
         )
     }
 
@@ -6911,6 +7171,44 @@ mod web {
         request_uri: String,
     ) {
         wire__crate__api__wallet_parse_presentation_request_impl(port_, request_uri)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        request_uri: String,
+        approved_request_digest: String,
+        credential: String,
+        query_id: String,
+        claims_to_disclose: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        issuer_snapshot_json: String,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_prepare_verified_sd_jwt_presentation_impl(
+            port_,
+            request_uri,
+            approved_request_digest,
+            credential,
+            query_id,
+            claims_to_disclose,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        offer_uri: String,
+        tx_code: Option<String>,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_prepare_verified_sd_jwt_receipt_impl(
+            port_,
+            offer_uri,
+            tx_code,
+            holder_public_jwk_json,
+        )
     }
 
     #[wasm_bindgen]
