@@ -58,6 +58,9 @@ jobs:
       - name: Run Flutter tests
         run: flutter test --no-pub # Use --no-pub since pub get was already run/cached
 
+      - name: Run wallet view acceptance tests
+        run: flutter test --no-pub --dart-define=QR_CODE=TEST acceptance_test
+
       - name: Build web release and audit public WASM artifact
         run: |
           flutter build web -t lib/main_document.dart --release --no-pub
