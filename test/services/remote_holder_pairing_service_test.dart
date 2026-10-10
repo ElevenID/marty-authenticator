@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:marty_authenticator/services/remote_holder_pairing_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final code = base64UrlEncode(List<int>.filled(32, 10)).replaceAll('=', '');
   final bearer = base64UrlEncode(List<int>.filled(32, 11)).replaceAll('=', '');
   const pairingId = '11111111-2222-4333-8444-555555555555';
@@ -44,6 +46,68 @@ void main() {
         .add(const Duration(days: 1))
         .toIso8601String(),
   });
+
+  test(
+    'default secure storage keeps only opaque pairing and rotated tokens',
+    () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      const storage = FlutterSecureStorage();
+      String? replacement;
+      final service = RemoteHolderPairingService(
+        client: MockClient((request) async {
+          switch (request.url.path) {
+            case '/v1/devices/pair':
+              return http.Response(jsonEncode(response()), 200);
+            case '/v1/devices/pairing-ack':
+              return http.Response('{"confirmed":true}', 200);
+            case '/v1/devices/holder-credential-rotations':
+              replacement =
+                  (jsonDecode(request.body)
+                          as Map<String, dynamic>)['replacement_credential']
+                      as String;
+              expect(replacement, matches(RegExp(r'^[A-Za-z0-9_-]{43}$')));
+              expect(replacement, isNot(bearer));
+              return http.Response(
+                jsonEncode({
+                  'registration_id': 'registration-1',
+                  'credential_expires_at': DateTime.now()
+                      .toUtc()
+                      .add(const Duration(days: 2))
+                      .toIso8601String(),
+                }),
+                200,
+              );
+            default:
+              fail('Unexpected remote wallet request: ${request.url.path}');
+          }
+        }),
+      );
+      expect(
+        await service.pair(
+          apiOrigin: 'https://wallet.example/',
+          pairingCode: code,
+          platform: 'android',
+        ),
+        'device-1',
+      );
+      final paired = await storage.read(
+        key: RemoteHolderPairingService.storageKey,
+      );
+      expect(paired, isNotNull);
+      expect(paired, isNot(contains('private_key')));
+      expect(await service.renewIfDue(force: true), 'registration-1');
+      final renewed =
+          jsonDecode(
+                (await storage.read(
+                  key: RemoteHolderPairingService.storageKey,
+                ))!,
+              )
+              as Map<String, dynamic>;
+      expect(renewed['device_credential'], replacement);
+      expect(renewed.containsKey('pending_credential'), isFalse);
+      service.close();
+    },
+  );
 
   test(
     'redeems one remote ticket and securely stores only the expected envelope',

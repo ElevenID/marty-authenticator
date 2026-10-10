@@ -214,6 +214,92 @@ void main() {
     expect(bridge.receiptCompletions, 1);
   });
 
+  test(
+    'unrecognized native routes and malformed requests never reach signing',
+    () async {
+      FrbPresentationRequest request({
+        String digest = 'bound-request-digest',
+        String queryType = 'dcql_query',
+        String? dcql,
+        String? definition,
+      }) => FrbPresentationRequest(
+        clientId: 'https://verifier.example',
+        nonce: 'request-nonce',
+        responseUri: 'https://verifier.example/response',
+        requestDigest: digest,
+        queryType: queryType,
+        dcqlQueryJson: dcql,
+        presentationDefinitionJson: definition,
+      );
+
+      final bridge = _Bridge();
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        _Holder.new,
+      );
+      final cases = [
+        (route: 'unknown', parsed: null),
+        (route: 'oid4vp', parsed: request(digest: '')),
+        (route: 'oid4vp', parsed: request(dcql: '{}')),
+        (route: 'oid4vp', parsed: request(queryType: 'unknown')),
+        (
+          route: 'oid4vp',
+          parsed: request(
+            queryType: 'presentation_definition',
+            definition: '{}',
+          ),
+        ),
+        (
+          route: 'oid4vp',
+          parsed: request(
+            queryType: 'presentation_definition',
+            definition: jsonEncode({
+              'input_descriptors': [{}],
+            }),
+          ),
+        ),
+        (
+          route: 'oid4vp',
+          parsed: request(
+            queryType: 'presentation_definition',
+            definition: jsonEncode({
+              'input_descriptors': [
+                {
+                  'id': 'identity-query',
+                  'format': {'unsupported': {}},
+                },
+              ],
+            }),
+          ),
+        ),
+        (
+          route: 'oid4vp',
+          parsed: request(
+            queryType: 'presentation_definition',
+            definition: jsonEncode({
+              'input_descriptors': [
+                {'id': 'identity-query'},
+              ],
+            }),
+          ),
+        ),
+        (route: 'oid4vp', parsed: null),
+      ];
+      for (final input in cases) {
+        bridge.presentationRoute = input.route;
+        bridge.requestOverride = input.parsed;
+        await expectLater(
+          service.initiateOID4VPRequestSDK(
+            presentationRequest: 'openid4vp://approved',
+          ),
+          throwsStateError,
+        );
+      }
+      expect(bridge.presentationPreparations, 0);
+      expect(bridge.presentationCompletions, 0);
+    },
+  );
+
   test('unsupported mDoc route stops before presentation parsing', () async {
     final bridge = _Bridge()..presentationRoute = 'mdoc';
     final holders = <_Holder>[];
@@ -304,8 +390,19 @@ void main() {
     expect(bridge.presentationPreparations, 0);
 
     final fourth = await initiate();
+    await expectLater(
+      service.completeOID4VPRequestSDK(
+        sessionId: fourth.sessionId,
+        selectedCredentialId: 'stored-identity',
+        selectedFields: const ['unbound/given_name'],
+      ),
+      throwsStateError,
+    );
+    expect(bridge.presentationPreparations, 0);
+
+    final fifth = await initiate();
     final result = await service.completeOID4VPRequestSDK(
-      sessionId: fourth.sessionId,
+      sessionId: fifth.sessionId,
       selectedCredentialId: 'stored-identity',
       selectedFields: const ['credential/given_name'],
     );
@@ -315,6 +412,54 @@ void main() {
     });
     expect(bridge.presentationPreparations, 1);
     expect(bridge.presentationCompletions, 1);
+  });
+
+  test('bounded approval sessions evict the oldest unused request', () async {
+    await WalletCredentialStore.store(
+      StoredCredential(
+        id: 'stored-identity',
+        format: 'dc+sd-jwt',
+        issuer: 'https://issuer.example',
+        types: const ['ExampleIdentity'],
+        rawJson: 'header.payload.signature~',
+        issuedAt: DateTime.utc(2026, 10, 9),
+      ),
+    );
+    final bridge = _Bridge();
+    final service = SpruceIdPlatformServiceExtended.withDependencies(
+      bridge,
+      _Holder.new,
+    );
+    final sessions = <String>[];
+    for (var index = 0; index < 17; index++) {
+      try {
+        await service.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://approved',
+        );
+        fail('Credential selection should be required');
+      } on UserSelectionRequiredException catch (selection) {
+        sessions.add(selection.sessionId);
+      }
+    }
+    expect(sessions.toSet(), hasLength(17));
+    await expectLater(
+      service.completeOID4VPRequestSDK(
+        sessionId: sessions.first,
+        selectedCredentialId: 'stored-identity',
+        selectedFields: const ['credential/given_name'],
+      ),
+      throwsStateError,
+    );
+    expect(bridge.presentationPreparations, 0);
+    expect(
+      await service.completeOID4VPRequestSDK(
+        sessionId: sessions.last,
+        selectedCredentialId: 'stored-identity',
+        selectedFields: const ['credential/given_name'],
+      ),
+      {'ok': true, 'redirect_uri': 'https://verifier.example/done'},
+    );
+    expect(bridge.presentationPreparations, 1);
   });
 
   test(

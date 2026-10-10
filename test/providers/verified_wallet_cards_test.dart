@@ -23,6 +23,64 @@ void main() {
       );
 
   test(
+    'empty and malformed layouts cannot create or hide wallet cards',
+    () async {
+      final empty = CardStateNotifier();
+      addTearDown(empty.dispose);
+      await empty.refreshCards();
+      expect(empty.state, isEmpty);
+
+      await storeReceipt('verified', 'https://issuer.example');
+      await const FlutterSecureStorage().write(
+        key: 'card_groups_data',
+        value: '{"version":1,"groups":"forged","expired_ids":[]}',
+      );
+      final reloaded = CardStateNotifier();
+      addTearDown(reloaded.dispose);
+      await reloaded.loadCards();
+      expect(reloaded.state.single.cards.single.id, 'verified');
+    },
+  );
+
+  test(
+    'receipt card kinds are display metadata and deletion checks provenance',
+    () async {
+      for (final (id, type) in [
+        ('driver', 'mso_mdoc'),
+        ('identity', 'ExampleIdentity'),
+        ('jwt', 'dc+sd-jwt'),
+      ]) {
+        await WalletCredentialStore.store(
+          StoredCredential(
+            id: id,
+            format: 'dc+sd-jwt',
+            issuer: 'https://issuer.example',
+            types: [type],
+            rawJson: 'verified-receipt-$id',
+            issuedAt: DateTime.utc(2026, 10, 9),
+          ),
+        );
+      }
+      final notifier = CardStateNotifier();
+      addTearDown(notifier.dispose);
+      await notifier.loadCards();
+      final cards = {
+        for (final card in notifier.state.single.cards) card.id: card,
+      };
+      expect(cards['driver']!.title, "Driver's License");
+      expect(cards['identity']!.title, 'Digital ID');
+      expect(cards['jwt']!.title, 'Verifiable Credential');
+      await expectLater(
+        notifier.deleteCard(
+          cards['driver']!.copyWith(rawData: {'_source': 'forged'}),
+        ),
+        throwsStateError,
+      );
+      expect(await WalletCredentialStore.getById('driver'), isNotNull);
+    },
+  );
+
+  test(
     'deleting one verified receipt preserves another card with the same title',
     () async {
       for (final id in ['first', 'second']) {
