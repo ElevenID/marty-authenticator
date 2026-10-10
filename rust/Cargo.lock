@@ -3910,7 +3910,7 @@ dependencies = [
 [[package]]
 name = "marty-biometrics"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -3929,7 +3929,7 @@ dependencies = [
 [[package]]
 name = "marty-canonical-digest"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "serde_json",
  "sha2 0.10.9",
@@ -3938,7 +3938,7 @@ dependencies = [
 [[package]]
 name = "marty-crypto"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -3980,7 +3980,7 @@ dependencies = [
 [[package]]
 name = "marty-iso18013"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4007,7 +4007,7 @@ dependencies = [
 [[package]]
 name = "marty-oid4vci"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -4042,7 +4042,7 @@ dependencies = [
 [[package]]
 name = "marty-secure-storage"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
@@ -4066,7 +4066,7 @@ dependencies = [
 [[package]]
 name = "marty-status"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "base64 0.22.1",
  "flate2",
@@ -4078,7 +4078,7 @@ dependencies = [
 [[package]]
 name = "marty-sync"
 version = "0.1.4"
-source = "git+https://github.com/ElevenID/marty-verifier?rev=1817638#181763848cbab28d8d968cde903df84565fddb5b"
+source = "git+https://github.com/ElevenID/marty-verifier?rev=e42dd8d#e42dd8de813f66837021c737b1ebce85e3c9b77a"
 dependencies = [
  "base64 0.22.1",
  "blake3",
@@ -4101,7 +4101,7 @@ dependencies = [
 [[package]]
 name = "marty-types"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "chrono",
  "serde",
@@ -4112,7 +4112,7 @@ dependencies = [
 [[package]]
 name = "marty-verification"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -4174,7 +4174,7 @@ dependencies = [
 [[package]]
 name = "marty-zkp"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/marty-core?rev=bd6e4cc#bd6e4cc9a7e86d11aec53194899e074289f7b681"
+source = "git+https://github.com/ElevenID/marty-core?rev=7f276a4#7f276a427b28ecc43fb2941b60a3884a731401e0"
 dependencies = [
  "bindgen",
  "cc",
