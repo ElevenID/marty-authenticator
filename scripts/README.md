@@ -20,7 +20,7 @@ This directory contains various utility scripts for the project.
 
 ### Setup Scripts
 
-- **`setup-precommit.sh`** - Sets up comprehensive pre-commit hooks for the project
+- **`setup-precommit.sh`** - Validates and installs the single root pre-commit configuration
 
 ## Usage
 
@@ -41,3 +41,6 @@ Run scripts from the project root:
 - All scripts should be run from the project root directory
 - Some scripts may require specific dependencies to be installed
 - Check individual script content for specific requirements and usage instructions
+
+See [development checks](../docs/development-checks.md) and
+[unfinished Python issuer integration](../docs/python-issuer-integration.md).

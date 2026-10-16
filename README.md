@@ -19,11 +19,10 @@ The pi-authenticator can also be configured to support PUSH authentication witho
 
 # Development
 
+For native wallet integration owners and adapter guidance, see
+[SpruceID integration](docs/spruceid-integration.md).
+
 We use the [Flutter](https://flutter.dev/) framework for developing our application. This enables us to use a single code base for both Android and iOS, for development itself we use [Android Studio](https://developer.android.com/studio) with the official [Flutter plugin](https://github.com/flutter/flutter-intellij).
-
-## TODO - Cleanup Notes
-
-- **`local_plugins/` directory**: Contains legacy migration plugin (`pi-authenticator-legacy`) that is not currently used. Can be removed if no migration from older native app versions is needed. Keeping as reference for now.
 
 The app can be built for Android by running `flutter build apk [--release | --debug]` at the root of the project. Building an iOS IPA requires Apple tooling and signing credentials.
 For testing purposes the application can be run in release mode by running `flutter run --release`.
@@ -78,3 +77,6 @@ The second file that must be translated is `pi-authenticator/res/guide/GUIDE_en.
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only).
+
+Developer tooling: [checks and setup](docs/development-checks.md).
+The retired Python prototype's [unfinished issuer integration requirements](docs/python-issuer-integration.md) remain open.

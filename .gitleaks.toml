@@ -1,13 +1,50 @@
-# Gitleaks configuration file
-# https://github.com/gitleaks/gitleaks
+title = "Authenticator secret scanning"
 
-title = "Gitleaks Configuration"
+# Use the scanner's maintained rules without a retired detect-secrets baseline.
+# https://github.com/gitleaks/gitleaks#configuration
+[extend]
+useDefault = true
 
-[allowlist]
-  description = "Allowlist for false positives"
+# Public method names and abbreviated documentation URLs are not credentials.
+[[allowlists]]
+description = "Public credential-offer method aliases"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['android/app/src/main/kotlin/it/netknights/piauthenticator/handlers/SpruceIdHandlerRefactored\.kt$']
+regexTarget = "line"
+regexes = ['"handleOID4VCOffer", "handleOID4VCOfferRefactored" -> handleCredentialOfferAsync']
 
-  # Exclude detect-secrets baseline file - it contains hashed secrets (not real secrets)
-  paths = [
-    '''\.precommit/\.secrets\.baseline''',
-    '''\.secrets\.baseline''',
-  ]
+[[allowlists]]
+description = "Abbreviated deep-link example"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['docs/DEEP_LINKING_QUICK_REFERENCE\.md$']
+regexTarget = "line"
+regexes = ['openid-credential-offer://\?credential_offer=eyJ0eXAiOiJKV1Q\.\.\.']
+
+[[allowlists]]
+description = "Public holder DIDs, including inside decoded JWT fixture payloads"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['test/fixtures/(qr_code_fixtures|spruce_credentials_fixtures|oid4vc_conformance_fixtures)\.dart$']
+regexTarget = "match"
+regexes = ['key:z6Mk[A-Za-z0-9]+']
+
+[[allowlists]]
+description = "Published example code and literal test token"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['test/fixtures/oid4vc_conformance_fixtures\.dart$']
+regexTarget = "line"
+regexes = [
+  "const String kPreAuthCode = 'SplxlOBeZQQYbYS6WxSbIA';",
+  '"access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9\.dGVzdA\.dGVzdA",'
+]
+
+[[allowlists]]
+description = "Parser-only fixture credentials with all-zero signatures"
+targetRules = ["jwt"]
+condition = "AND"
+paths = ['test/fixtures/oid4vc_conformance_fixtures\.dart$']
+regexTarget = "line"
+regexes = ['"eyJ[A-Za-z0-9_.-]+\.A{80,}"']
