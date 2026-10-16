@@ -3,7 +3,6 @@
 
 # Generated Flutter files - these have required LLDB interface signatures
 ios/Flutter/ephemeral/flutter_lldb_helper.py:*
-local_plugins/pi-authenticator-legacy/example/ios/Flutter/ephemeral/flutter_lldb_helper.py:*
 
 # Plugin files with unused imports/variables for future development
 docker/plugins/custom-tokens/demotoken.py:to_bytes

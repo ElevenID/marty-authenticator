@@ -48,7 +48,6 @@ repos:
         exclude: |
           (?x)(
               ^tests/.*$|
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )
@@ -61,14 +60,12 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
         exclude: |
           (?x)(
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )
       - id: ruff-format
         exclude: |
           (?x)(
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )
@@ -81,7 +78,6 @@ repos:
         args: ["--profile", "black", "--line-length", "88"]
         exclude: |
           (?x)(
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )
@@ -95,7 +91,6 @@ repos:
         exclude: |
           (?x)(
               ^tests/.*$|
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )
@@ -108,7 +103,6 @@ repos:
         exclude: |
           (?x)(
               ^tests/.*$|
-              ^local_plugins/.*\.py$|
               .*ephemeral.*|
               .*flutter_lldb_helper\.py$
           )

@@ -8,7 +8,6 @@ WORKDIR /app
 # Copy pubspec files and local dependencies first for layer caching
 COPY pubspec.yaml pubspec.lock ./
 COPY local_wasm_overrides/ ./local_wasm_overrides/
-COPY local_plugins/ ./local_plugins/
 
 # Get dependencies
 RUN flutter pub get
