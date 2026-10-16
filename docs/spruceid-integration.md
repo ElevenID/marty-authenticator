@@ -27,8 +27,22 @@ SDK APIs. Historical progress reports and their SDK-version-specific examples
 are available in Git history; their compilation claims do not qualify the
 current Android or iOS build.
 
-The standalone iOS `SignerAdapter.swift` and `HttpClientWrapper.swift` files are
-unintegrated examples: they are absent from the Runner Sources build phase.
-The compiled handlers above own the current implementations. Consolidating those
-adapters remains unfinished work and needs explicit Xcode target integration,
-SDK compatibility and positive/negative device tests before any ownership claim.
+## Unfinished iOS adapter consolidation
+
+The standalone `W3CMethodHandlerRefactored.swift`, `SignerAdapter.swift` and
+`HttpClientWrapper.swift` examples were never in the Runner Sources build phase
+and are now retired (recoverable at Authenticator checkpoint `19bef442`). The
+compiled handlers above continue to own the app's behavior.
+
+The alternate design intended SDK-backed DID creation, holder VC signing and
+presentation, OID4VCI offers, OID4VP 18013-7 requests, a key-manager signer adapter
+and a bounded async HTTP client. Those remain feature/design requirements;
+removing uncompiled examples does not declare them delivered. The prototypes
+fabricated a DID from a UUID, left SDK calls as placeholders and returned an
+unchanged credential with detached hex instead of proving signed output.
+
+Consolidation needs explicit Xcode target integration and SDK compatibility;
+canonical DID/JWK and signed credential/presentation outputs; token/request
+validation and holder binding; bounded HTTP errors/timeouts and cancellation;
+and positive/negative end-to-end device tests through the compiled channel.
+Do not infer feature parity from an example compiling outside the app target.
