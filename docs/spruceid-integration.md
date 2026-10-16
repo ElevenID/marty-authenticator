@@ -11,8 +11,8 @@ credential exchange, presentations, and credential storage.
 - [Android handler](../android/app/src/main/kotlin/it/netknights/piauthenticator/handlers/SpruceIdHandlerRefactored.kt).
 - [Android presentation signer](../android/app/src/main/kotlin/it/netknights/piauthenticator/handlers/PresentationSignerAdapter.kt).
 - [iOS channel handler](../ios/Runner/SpruceID/SpruceIdChannelHandler.swift).
-- [iOS signer](../ios/Runner/SpruceID/SignerAdapter.swift) and
-  [HTTP adapter](../ios/Runner/SpruceID/HttpClientWrapper.swift).
+- Target-owned iOS [W3C handler](../ios/Runner/SpruceID/W3CMethodHandler.swift)
+  and [mDoc handler](../ios/Runner/SpruceID/MdocMethodHandler.swift).
 
 ## Integration guidance
 
@@ -26,3 +26,9 @@ Consult the dependency declarations and source owners above for the installed
 SDK APIs. Historical progress reports and their SDK-version-specific examples
 are available in Git history; their compilation claims do not qualify the
 current Android or iOS build.
+
+The standalone iOS `SignerAdapter.swift` and `HttpClientWrapper.swift` files are
+unintegrated examples: they are absent from the Runner Sources build phase.
+The compiled handlers above own the current implementations. Consolidating those
+adapters remains unfinished work and needs explicit Xcode target integration,
+SDK compatibility and positive/negative device tests before any ownership claim.
