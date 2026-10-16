@@ -19,6 +19,9 @@ The pi-authenticator can also be configured to support PUSH authentication witho
 
 # Development
 
+For native wallet integration owners and adapter guidance, see
+[SpruceID integration](docs/spruceid-integration.md).
+
 We use the [Flutter](https://flutter.dev/) framework for developing our application. This enables us to use a single code base for both Android and iOS, for development itself we use [Android Studio](https://developer.android.com/studio) with the official [Flutter plugin](https://github.com/flutter/flutter-intellij).
 
 ## TODO - Cleanup Notes
