@@ -77,3 +77,6 @@ The second file that must be translated is `pi-authenticator/res/guide/GUIDE_en.
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only).
+
+Developer tooling: [checks and setup](docs/development-checks.md).
+The retired Python prototype's [unfinished issuer integration requirements](docs/python-issuer-integration.md) remain open.
