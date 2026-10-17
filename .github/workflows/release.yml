@@ -23,7 +23,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
         with:
           distribution: zulu
           java-version: "21"
@@ -61,7 +61,7 @@ jobs:
           mkdir release-assets
           cp build/app/outputs/flutter-apk/*-release.apk release-assets/
           cp build/app/outputs/bundle/netknightsRelease/*.aab release-assets/
-      - uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26
+      - uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c
         with:
           path: .
           format: spdx-json
@@ -100,7 +100,7 @@ jobs:
             --prefix="marty-authenticator-${version}/" \
             --output="release-assets/marty-authenticator-${version}-source.tar.gz" \
             HEAD
-      - uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26
+      - uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c
         with:
           path: .
           format: spdx-json
