@@ -956,3 +956,11 @@ temp_main.js
 /_codex-worktrees/
 /worktrees/
 /reports/generated/
+
+# Browser-session evidence, not app assets or regression fixtures.
+/.playwright-mcp/
+/app-after-credential.png
+/app-before-credential.png
+/credential-page.png
+/true-identity-page.png
+/trueidentity-page.png

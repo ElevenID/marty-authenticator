@@ -46,3 +46,9 @@ canonical DID/JWK and signed credential/presentation outputs; token/request
 validation and holder binding; bounded HTTP errors/timeouts and cancellation;
 and positive/negative end-to-end device tests through the compiled channel.
 Do not infer feature parity from an example compiling outside the app target.
+
+The uncompiled `AppDelegate.swift.original` backup is also retired. Its inline
+placeholder PKI, mdoc, JWT, wallet and fabricated DID handlers are not an
+alternative startup owner. Keep SDK qualification and positive/negative device
+tests with the compiled `AppDelegate.swift` and its separate method handlers;
+removing the backup does not establish that unfinished SDK operations work.
