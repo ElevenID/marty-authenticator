@@ -21,8 +21,9 @@ not a Python application dependency.
 
 The retired `scripts/run_driver.sh` invoked `flutter driver` against
 `test_driver/run_all.dart`, which is absent. There is no tracked `test_driver/`
-or `integration_test/` suite. The existing `test/` suite and platform build
-checks remain; their success does not establish device integration coverage.
+or `integration_test/` suite. The existing `test/` suite, including protocol
+tests under `test/integration/`, and platform build checks remain; their success
+does not establish device integration coverage.
 
 Before claiming that coverage, provide an executable device/emulator suite,
 document its Android/iOS setup and exact commands, and exercise real application
