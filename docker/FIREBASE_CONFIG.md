@@ -1,109 +1,40 @@
-# Push Notification Configuration
+# Push configuration ownership and unfinished requirements
 
-This directory contains the Docker configuration for the Marty Authenticator, including push notification integration.
+The local Compose file starts only the code-server workspace. It does not
+configure a Marty push backend or load Firebase settings into the Flutter app.
+Copying `docker/.env.example` and restarting that container does not establish
+mobile FCM or browser SSE delivery. The former `setup-firebase-project.sh`
+instructions referenced an absent script.
 
-## Push Notification Options
+The template retains historical project, sender, storage, Android, iOS and web
+configuration fields, plus a server-side configuration-file path. Current
+Compose and Dart sources do not consume those environment names. iOS project
+metadata still contains Firebase references; neither those references nor this
+template prove a configured notification integration. No platform metadata,
+configuration value or existing app behavior is removed by this correction.
 
-The Marty Authenticator supports multiple push notification methods:
+## Retained push requirements
 
-1. **SSE (Server-Sent Events)** - Real-time push for web development and testing
-2. **Polling** - Fallback when SSE/FCM is unavailable
-3. **FCM (Firebase Cloud Messaging)** - Production mobile push notifications
+Select an explicit Rust backend and app adapter, then qualify:
 
-## Web Development with SSE
+- authenticated SSE delivery for browser development, reconnection and bounded
+  network failures, without requiring a Firebase emulator;
+- a documented polling fallback, interval configuration and behavior when SSE or
+  FCM is unavailable;
+- native Android/iOS FCM registration, permissions, token refresh and revocation,
+  foreground/background delivery and app lifecycle behavior;
+- explicit project and platform application/sender identifiers, storage/auth
+  settings where required, and controlled server-side credential delivery;
+- endpoint and transport selection rather than assuming `USE_SSE_PUSH`,
+  `POLL_INTERVAL_MS` or `MARTY_API_URL` are automatically wired into this template;
+- consented OTP/PUSH and enrollment flows against the selected backend, including
+  rejection, expired/invalid credentials and disconnected clients;
+- isolated positive/negative delivery tests through the real app and backend.
 
-For web development and testing, SSE provides real-time push notifications without Firebase:
+Keep developer credentials outside Git and separate from production secret
+provisioning. Choosing a supported SDK and configuration owner is unfinished;
+these requirements do not declare FCM, polling or SSE feature parity.
 
-```bash
-# Start the development stack
-cd docker
-docker-compose up -d
-
-# Run the Flutter web app
-flutter run -d chrome
-```
-
-The Flutter app automatically uses SSE on web when `USE_SSE_PUSH=true` (default).
-
-## Mobile Development with FCM
-
-For mobile app development with Firebase push notifications:
-
-1. **Copy the environment template:**
-
-   ```bash
-   cp docker/.env.example docker/.env
-   ```
-
-2. **Add your Firebase credentials to `docker/.env`:**
-   - Get your Firebase configuration from the [Firebase Console](https://console.firebase.google.com)
-   - Update the values in `docker/.env` with your actual credentials
-
-3. **Start the containers:**
-
-   ```bash
-   cd docker
-   docker-compose up -d
-   ```
-
-4. **Run the mobile app:**
-   ```bash
-   flutter run -d <device-id>
-   ```
-
-## Environment Variables
-
-### Push Configuration
-
-- `USE_SSE_PUSH` - Enable SSE for web push (default: `true`)
-- `POLL_INTERVAL_MS` - Polling interval in milliseconds (default: `5000`)
-- `MARTY_API_URL` - Marty backend API URL
-
-### Firebase Configuration (Mobile Only)
-
-- `FIREBASE_PROJECT_ID` - Your Firebase project ID
-- `FIREBASE_API_KEY` - Android API key
-- `FIREBASE_APP_ID` - Android app ID
-- `FIREBASE_MESSAGING_SENDER_ID` - FCM sender ID
-- `FIREBASE_STORAGE_BUCKET` - Firebase storage bucket
-
-### iOS Configuration
-
-- `FIREBASE_IOS_API_KEY` - iOS API key
-- `FIREBASE_IOS_APP_ID` - iOS app ID
-- `FIREBASE_IOS_CLIENT_ID` - iOS client ID
-- `FIREBASE_IOS_BUNDLE_ID` - iOS bundle identifier
-
-### Web Configuration
-
-- `FIREBASE_WEB_API_KEY` - Web API key
-- `FIREBASE_WEB_APP_ID` - Web app ID
-- `FIREBASE_AUTH_DOMAIN` - Firebase auth domain
-
-## Security Notes
-
-⚠️ **IMPORTANT**: The `docker/.env` file contains sensitive credentials and is automatically ignored by git. Never commit this file to version control.
-
-- Always use `docker/.env.example` as a reference
-- Each developer should create their own `docker/.env` file
-- For production, use proper secrets management (e.g., Docker secrets, Kubernetes secrets, AWS Secrets Manager)
-
-## Troubleshooting
-
-### Environment variables not loading
-
-- Ensure `docker/.env` exists (copy from `.env.example`)
-- Verify the file is in the `docker/` directory
-- Restart containers: `docker-compose down && docker-compose up -d`
-
-### Firebase connection errors
-
-- Verify your Firebase credentials are correct
-- Check that your Firebase project has FCM enabled
-- Ensure the app is configured in the Firebase Console
-
-## Additional Resources
-
-- Firebase Console: https://console.firebase.google.com
-- Setup guide: `docker/setup-firebase-project.sh`
-- Docker documentation: `docker/DEVELOPMENT_NETWORK.md`
+See [Docker ownership](README.md) for the actual local workspace and
+[development checks](../docs/development-checks.md) for the missing browser test
+entrypoint and device integration acceptance requirements.
