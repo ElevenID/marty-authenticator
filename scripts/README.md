@@ -12,7 +12,10 @@ This directory contains various utility scripts for the project.
 ### Testing Scripts
 
 - **`create_coverage_report.sh`** - Runs Flutter tests from the checkout root and generates HTML coverage only after they pass; failures from either tool return nonzero
-- **`run_driver.sh`** - Runs Flutter integration/driver tests
+
+The old `run_driver.sh` targeted the missing `test_driver/run_all.dart` file.
+It is retired; device integration coverage remains unfinished as described in
+[development checks](../docs/development-checks.md).
 
 ### Setup Scripts
 

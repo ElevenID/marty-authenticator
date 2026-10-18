@@ -39,9 +39,10 @@ Building a version of the app prior to `v4.0.0` requires an old version of flutt
 
 # Tests
 
-Tests are located under `app/test`. These can be run from within Android Studio, if the necessary plugins are installed or directly by running `flutter test` at the root of the project. For additional information please view the official [Flutter documentation](https://flutter.dev/docs/testing).
+Tests are located under `test`. These can be run from within Android Studio, if the necessary plugins are installed or directly by running `flutter test` at the root of the project. For additional information please view the official [Flutter documentation](https://flutter.dev/docs/testing).
 
-Integrations tests can be run by executing the shell script `run_driver.sh` directly.
+Device integration testing remains unfinished; see the
+[development checks and coverage requirements](docs/development-checks.md).
 
 # Contribution
 
