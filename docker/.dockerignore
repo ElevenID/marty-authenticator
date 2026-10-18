@@ -38,9 +38,8 @@ README.md
 DEMO_README.md
 *.md
 
-# Scripts (but allow entrypoint.sh for privacyIDEA)
+# Scripts
 *.sh
-!entrypoint.sh
 
 # Test files
 test/

@@ -7,7 +7,9 @@ This directory contains various utility scripts for the project.
 ### Build & Development Scripts
 
 - **`update_serialization.sh`** - Updates code generation for serialization (JSON, etc.)
-- **`plugin-dev.sh`** - Development utilities for plugin management
+
+The retired privacyIDEA plugin helper is documented with the current
+[code-server workspace and unfinished plugin requirements](../docker/README.md).
 
 ### Testing Scripts
 
