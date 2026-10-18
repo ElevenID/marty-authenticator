@@ -35,3 +35,17 @@ accounts and fixtures and preserve any failed-run diagnostics outside Git.
 The separate web-test launchers have cross-repository E2E consumers. Their
 ownership and missing application entrypoint need separate qualification;
 retiring the orphan driver command does not establish or replace that harness.
+
+Both web launchers share `scripts/run-web-test.sh`: the development entry point
+uses Flutter Chrome, and `scripts/serve-web-test.sh` builds then serves web output.
+They retain `MARTY_API_URL`, `WEB_PORT`, `HEALTH_TIMEOUT` and the serving mode's
+`SKIP_BUILD=true` option. Both reject the missing `lib/mains/main_web_test.dart`
+before contacting a backend; skipping a build also requires that entrypoint and
+`build/web/index.html`. Cached output alone cannot qualify the absent test app.
+
+Restoring web coverage needs an explicit supported browser-wallet implementation
+and a test bridge for the retained UI/Integration consumers: readiness, device
+registration and QR/deep-link input, push handling, credential storage/selection,
+and consented OID4VCI/OID4VP exchanges. Preserve the current Rust and platform
+adapter boundaries. Choose and qualify that bridge before changing the E2E
+protocol or treating the launch scripts and Docker recipes as working coverage.

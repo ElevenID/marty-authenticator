@@ -1,1 +1,3 @@
 scripts/create_coverage_report.sh text eol=lf
+scripts/run-web-test.sh text eol=lf
+scripts/serve-web-test.sh text eol=lf
