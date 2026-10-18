@@ -964,3 +964,6 @@ temp_main.js
 /credential-page.png
 /true-identity-page.png
 /trueidentity-page.png
+
+# Local Flutter coverage and rendered reports
+/coverage/
