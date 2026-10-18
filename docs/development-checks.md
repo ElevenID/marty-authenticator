@@ -49,3 +49,12 @@ registration and QR/deep-link input, push handling, credential storage/selection
 and consented OID4VCI/OID4VP exchanges. Preserve the current Rust and platform
 adapter boundaries. Choose and qualify that bridge before changing the E2E
 protocol or treating the launch scripts and Docker recipes as working coverage.
+
+The uncalled `docker/Dockerfile.flutter.dev` recipe is retired; it also targeted
+the missing entrypoint. Its distinct development requirements remain: an
+explicit local API URL, test mode, SSE push instead of a Firebase emulator,
+SPA routing, CanvasKit asset serving, and deliberate CORS and security headers.
+Qualify those behaviors through the retained `docker/Dockerfile.flutter.web.test`
+owner after the browser entrypoint and bridge exist. That recipe is not a
+qualified equivalent today. The production `docker/Dockerfile.flutter` remains
+separate and unchanged.
