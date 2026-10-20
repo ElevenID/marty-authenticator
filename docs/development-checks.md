@@ -58,3 +58,14 @@ Qualify those behaviors through the retained `docker/Dockerfile.flutter.web.test
 owner after the browser entrypoint and bridge exist. That recipe is not a
 qualified equivalent today. The production `docker/Dockerfile.flutter` remains
 separate and unchanged.
+
+## Optional onboarding animation assets
+
+The five unreferenced Lottie JSON files formerly in `res/lottie/` are retired.
+The current app has no Lottie renderer dependency or Flutter asset declaration
+for them, so they were not packaged or displayed. Secure-onboarding, security
+cloud/shield, completion-smile and GitHub-brand animation concepts remain
+optional design intent, not implemented flows removed by this cleanup. Any
+future animation needs an owned/licensed asset, a declared Flutter asset and
+renderer dependency, accessible reduced-motion behavior and a UI test of the
+actual consuming screen. Existing onboarding screens and branding are unchanged.
