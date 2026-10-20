@@ -6,7 +6,10 @@ The retired Integration Python generator is no longer an update dependency.
 Core owns native verification; Verifier owns its offline adapter vectors.
 
 The wallet's final presentation request uses DCQL/entity_id; the legacy request
-retains Presentation Exchange/redirect_uri coverage. Both stay. Final/draft
+retains Presentation Exchange with entity_id and a direct-post response_uri.
+Both stay. The retired producer used the older redirect_uri client-id scheme;
+that unconsumed vector did not establish wallet validation support for the
+scheme. Any future compatibility claim needs an explicit behavior gate. Final/draft
 SD-JWT metadata, inline/reference offers, OAuth/token/nonce handling and the
 JWT-VC/SD-JWT response cases and the mDoc response fixture also stay. The latter
 has no current behavior-test consumer and awaits a wallet behavior gate; retaining
