@@ -58,3 +58,42 @@ Qualify those behaviors through the retained `docker/Dockerfile.flutter.web.test
 owner after the browser entrypoint and bridge exist. That recipe is not a
 qualified equivalent today. The production `docker/Dockerfile.flutter` remains
 separate and unchanged.
+
+## Optional onboarding animation assets
+
+The five unreferenced Lottie JSON files formerly in `res/lottie/` are retired.
+The current app has no Lottie renderer dependency or Flutter asset declaration
+for them, so they were not packaged or displayed. Secure-onboarding, security
+cloud/shield, completion-smile and GitHub-brand animation concepts remain
+optional design intent, not implemented flows removed by this cleanup. Any
+future animation needs an owned/licensed asset, a declared Flutter asset and
+renderer dependency, accessible reduced-motion behavior and a UI test of the
+actual consuming screen. Existing onboarding screens and branding are unchanged.
+
+## Browser storage replacement remains open
+
+The local `flutter_secure_storage_web` override is actively consumed by
+`WalletCredentialStore` and card state. It stores base64-encoded values in
+SharedPreferences; base64 is not encryption. Its original claim that upstream
+requires `dart:html` is obsolete: the upstream
+[2.x changelog](https://pub.dev/packages/flutter_secure_storage_web/changelog)
+records migration to `web` and JS interop, and 2.1.1 is available. Upstream
+requires a secure browser context and uses a different WebCrypto storage format.
+
+Removing the override by changing the dependency alone would leave existing
+credential bodies/indexes and card state unreadable. The replacement tracked
+in [issue 11](https://github.com/ElevenID/marty-authenticator/issues/11) needs
+an explicit browser storage/security policy and a qualified, resumable migration:
+read the old namespaced records, validate data, verify successful writes and
+readback in the new store before removing old entries, and preserve originals
+on interruption or failure. Qualify Unicode/malformed values, option/database
+namespace isolation, partial failures, repeat runs, logout/delete semantics,
+credential/index consistency and secure-context failures. Do not broaden
+`deleteAll` to unrelated preferences or silently fall back to plaintext.
+
+Use real browser JS/WASM builds and storage tests through the current app
+consumers. Native Android/iOS storage must remain unchanged. This cleanup
+retains the open feature and data migration; it does not declare browser
+credential storage secure or validate removal of the override. Signing custody
+and the other worker's KMS hardening scope are separate from this stored-data
+migration.
