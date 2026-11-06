@@ -15,7 +15,9 @@ bool isRetiredOpenBadge(Object? value) {
     if (parts.length != 3) return false;
     try {
       return isRetiredOpenBadge(
-        jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1])))),
+        jsonDecode(
+          utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+        ),
       );
     } on FormatException {
       return false;
@@ -30,12 +32,18 @@ bool isRetiredOpenBadge(Object? value) {
   }
 
   bool legacyContext(String context) =>
-      context.contains('openbadges/v2') ||
-      context.contains('/ob/v2p0/');
+      context.contains('openbadges/v2') || context.contains('/ob/v2p0/');
+
+  bool legacyType(String type) {
+    final normalized = type
+        .replaceAll(RegExp('[^A-Za-z0-9]'), '')
+        .toLowerCase();
+    return normalized == 'assertion' || normalized == 'openbadgev2';
+  }
 
   if (containsMarker(value['@context'], legacyContext) ||
       containsMarker(value['context'], legacyContext) ||
-      containsMarker(value['type'], (type) => type == 'Assertion')) {
+      containsMarker(value['type'], legacyType)) {
     return true;
   }
   return const [
