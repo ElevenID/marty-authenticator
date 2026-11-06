@@ -143,15 +143,16 @@ pub(crate) async fn wallet_exchange_auth_code_token(
 }
 
 pub(crate) fn wallet_create_proof_jwt(
-    holder_kid: String,
-    c_nonce: String,
-    issuer_url: String,
-    jwk_json: String,
+    _holder_kid: String,
+    _c_nonce: String,
+    _issuer_url: String,
+    _jwk_json: String,
 ) -> anyhow::Result<String> {
-    let engine = marty_oid4vci::WalletEngine::new();
-    engine
-        .create_proof_jwt(&holder_kid, &c_nonce, &issuer_url, &jwk_json)
-        .map_err(|e| anyhow::anyhow!("Proof JWT creation error: {}", e))
+    // Keep the existing bridge ABI fail-closed. Current Core prepares a proof
+    // for an opaque platform signer and no longer accepts holder private keys.
+    Err(anyhow::anyhow!(
+        "Raw-JWK holder proof signing is retired; use an opaque platform signer with Core proof preparation and completion"
+    ))
 }
 
 pub(crate) async fn wallet_request_credential(
@@ -186,6 +187,26 @@ mod tests {
     use super::*;
     use serde_json::{json, Value};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    #[test]
+    fn retired_raw_jwk_proof_adapter_rejects_before_key_processing() {
+        for jwk in [
+            "not JSON",
+            r#"{"kty":"EC","crv":"P-256","d":"must-not-be-read"}"#,
+        ] {
+            let error = wallet_create_proof_jwt(
+                "did:example:holder#key".into(),
+                "nonce".into(),
+                "https://issuer.example".into(),
+                jwk.into(),
+            )
+            .unwrap_err();
+            assert!(error
+                .to_string()
+                .contains("Raw-JWK holder proof signing is retired"));
+            assert!(error.to_string().contains("opaque platform signer"));
+        }
+    }
 
     fn run(future: impl std::future::Future<Output = ()>) {
         tokio::runtime::Builder::new_current_thread()
