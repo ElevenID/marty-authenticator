@@ -8,6 +8,12 @@ It also supports scanning qr codes that match the [Google Authenticator Key URI]
 **✨ New: Deep Linking & OID4VC Support**
 The app now supports comprehensive deep linking for seamless token imports and verifiable credential workflows. This includes support for OpenID for Verifiable Credentials (OID4VC) credential offers and presentation requests. See [Deep Linking Documentation](./DEEP_LINKING.md) for details.
 
+Open Badges support requires **Open Badges 3.0**. The wallet no longer presents
+OB2 assertions as verifiable credentials or exposes OB2 issuance/verification
+adapters. Ask the issuer to reissue legacy badges as OB3; changing their type or
+context does not migrate their signatures. Stored legacy records are preserved
+but excluded from the supported credential list with a reissuance notice.
+
 The App is best used with the [privacyIDEA Authentication Server](https://github.com/privacyidea/privacyidea), and runs on both Android and iOS.
 The pi-authenticator can also be configured to support PUSH authentication without Firebase.
 

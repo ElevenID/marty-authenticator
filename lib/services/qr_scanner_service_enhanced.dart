@@ -33,6 +33,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
 import '../utils/logger.dart';
+import '../utils/open_badges.dart';
 import 'spruce_sdk_services.dart';
 
 /// Enhanced QR scanner service provider
@@ -235,6 +236,7 @@ class QRScannerServiceEnhanced {
     final matchingCredentials = <MatchingCredential>[];
 
     for (final credential in allCredentials) {
+      if (isRetiredOpenBadge(credential)) continue;
       final credentialSubject =
           credential['credentialSubject'] as Map<String, dynamic>? ?? {};
       final availableAttributes = credentialSubject.keys.toList();

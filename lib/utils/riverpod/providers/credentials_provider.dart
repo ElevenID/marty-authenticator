@@ -23,6 +23,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../interfaces/spruce_interfaces.dart';
 import '../../logger.dart';
+import '../../open_badges.dart';
 import '../../../services/spruce_client_extended.dart';
 import '../../../model/promotional_credential.dart';
 import '../../../models/credentials.dart';
@@ -256,10 +257,16 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
 
       List<VerifiableCredential> verifiableCredentials = [];
       List<MDocCredential> mDocCredentials = [];
+      var hasRetiredBadge = false;
 
       // Parse and categorize credentials from wallet
       for (final credData in walletCredentials) {
         try {
+          if (isRetiredOpenBadge(credData)) {
+            hasRetiredBadge = true;
+            Logger.warning(retiredOpenBadgesMessage);
+            continue;
+          }
           if (_isVerifiableCredential(credData)) {
             final vc = _parseVerifiableCredential(credData);
             if (vc != null) {
@@ -294,11 +301,12 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
         'CredentialsNotifier: Final credential counts - VC: ${verifiableCredentials.length}, mDoc: ${mDocCredentials.length}',
       );
 
-      state = state.copyWith(
+      state = CredentialsState(
         verifiableCredentials: verifiableCredentials,
         mDocCredentials: mDocCredentials,
         promotionalCredentials: DefaultPromotionalCredentials.all,
         isLoading: false,
+        error: hasRetiredBadge ? retiredOpenBadgesMessage : null,
       );
     } catch (e) {
       // If wallet fails, fall back to sample credentials
@@ -318,7 +326,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
 
   /// Check if credential data represents a W3C Verifiable Credential
   bool _isVerifiableCredential(Map<String, dynamic> credData) {
-    if (_isOpenBadgeV2(credData) || _isOpenBadgeV3(credData)) {
+    if (_isOpenBadgeV3(credData)) {
       return true;
     }
 
@@ -390,13 +398,6 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
     return false;
   }
 
-  bool _isOpenBadgeV2(Map<String, dynamic> credData) {
-    final type = credData['type'];
-    final hasBadge = credData.containsKey('badge');
-    return _contextContains(credData, 'openbadges/v2') ||
-        (type == 'Assertion' && hasBadge);
-  }
-
   bool _isOpenBadgeV3(Map<String, dynamic> credData) {
     if (_contextContains(credData, 'openbadges/v3') ||
         _contextContains(credData, 'ob/v3p0/context.json')) {
@@ -417,69 +418,10 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
   Map<String, dynamic> _normalizeOpenBadgeCredential(
     Map<String, dynamic> credData,
   ) {
-    if (_isOpenBadgeV2(credData)) {
-      return _normalizeOpenBadgeV2(credData);
-    }
     if (_isOpenBadgeV3(credData)) {
       return _normalizeOpenBadgeV3(credData);
     }
     return credData;
-  }
-
-  Map<String, dynamic> _normalizeOpenBadgeV2(Map<String, dynamic> credData) {
-    final normalized = Map<String, dynamic>.from(credData);
-
-    Map<String, dynamic> badge = {};
-    final badgeValue = credData['badge'];
-    if (badgeValue is Map) {
-      badge = Map<String, dynamic>.from(badgeValue);
-    } else if (badgeValue is String) {
-      badge = {'id': badgeValue};
-    }
-
-    final issuerValue = badge['issuer'] ?? credData['issuer'];
-    final issuer = _parseIssuer(issuerValue);
-
-    final recipientValue = credData['recipient'];
-    final recipient = recipientValue is Map
-        ? Map<String, dynamic>.from(recipientValue)
-        : <String, dynamic>{};
-    final recipientName =
-        recipient['name']?.toString() ?? recipient['identity']?.toString();
-
-    final subject = Map<String, dynamic>.from(
-      normalized['credentialSubject'] ?? {},
-    );
-    subject['name'] =
-        subject['name']?.toString() ?? recipientName ?? badge['name'];
-    subject['recipient'] = recipient;
-    if (badge.isNotEmpty) {
-      subject['badge_id'] = badge['id'];
-      subject['badge_name'] = badge['name'];
-      subject['badge_description'] = badge['description'];
-    }
-
-    normalized['id'] = normalized['id'] ?? badge['id'];
-    normalized['type'] = ['OpenBadgeCredential', 'VerifiableCredential'];
-    normalized['issuer'] = issuer;
-    normalized['credentialSubject'] = subject;
-    normalized['issuanceDate'] =
-        normalized['issuedOn'] ?? normalized['issuanceDate'];
-    normalized['expirationDate'] =
-        normalized['expires'] ?? normalized['expirationDate'];
-
-    if (normalized['proof'] == null) {
-      if (normalized['signature'] != null) {
-        normalized['proof'] = {
-          'type': 'OpenBadgeSignature',
-          'signature': normalized['signature'],
-        };
-      } else if (normalized['verification'] != null) {
-        normalized['proof'] = normalized['verification'];
-      }
-    }
-
-    return normalized;
   }
 
   Map<String, dynamic> _normalizeOpenBadgeV3(Map<String, dynamic> credData) {
@@ -548,7 +490,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
   /// Parse credential types from various formats
   List<String> _parseCredentialTypes(dynamic typeData) {
     if (typeData is String) return [typeData];
-    if (typeData is List) return typeData.cast<String>();
+    if (typeData is List) return List<String>.from(typeData);
     return ['VerifiableCredential'];
   }
 
