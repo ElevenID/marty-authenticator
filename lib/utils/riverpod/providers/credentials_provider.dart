@@ -490,7 +490,7 @@ class CredentialsNotifier extends StateNotifier<CredentialsState> {
   /// Parse credential types from various formats
   List<String> _parseCredentialTypes(dynamic typeData) {
     if (typeData is String) return [typeData];
-    if (typeData is List) return typeData.cast<String>();
+    if (typeData is List) return List<String>.from(typeData);
     return ['VerifiableCredential'];
   }
 

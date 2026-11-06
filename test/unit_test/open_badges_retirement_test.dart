@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/interfaces/spruce_interfaces.dart';
 import 'package:marty_authenticator/utils/open_badges.dart';
 import 'package:marty_authenticator/utils/riverpod/providers/credentials_provider.dart';
 import 'package:marty_authenticator/utils/riverpod/providers/spruce_providers.dart';
+import 'package:marty_authenticator/widgets/spruce_credential_selection_widget.dart';
 
 const ob2 = <String, dynamic>{
   'id': 'urn:badge:retired',
@@ -118,6 +120,40 @@ void main() {
       expect(current.types, contains('OpenBadgeCredential'));
       expect(current.credentialSubject['badge_name'], 'Current badge');
       expect(current.proof, isNull);
+      expect(ob3['type'], ['VerifiableCredential', 'OpenBadgeCredential']);
+    },
+  );
+
+  testWidgets(
+    'presentation selection excludes legacy records with matching claims',
+    (tester) async {
+      var selectedIds = <String>[];
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SpruceCredentialSelectionWidget(
+                availableCredentials: [
+                  {
+                    ...ob2,
+                    'credentialSubject': {'id': 'did:example:legacy'},
+                  },
+                  ob3,
+                ],
+                requestedAttributes: const ['id'],
+                onSelectionChanged: (credentials, disclosure) {
+                  selectedIds = credentials
+                      .map((credential) => credential.id)
+                      .toList();
+                },
+                onPresentationCreate: (credentials, disclosure) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(selectedIds, ['urn:badge:current']);
     },
   );
 }

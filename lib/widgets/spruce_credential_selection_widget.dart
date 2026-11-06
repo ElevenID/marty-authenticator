@@ -32,6 +32,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../utils/logger.dart';
+import '../utils/open_badges.dart';
 import '../models/selectable_credential.dart';
 
 /// Advanced credential selection widget
@@ -87,42 +88,50 @@ class _SpruceCredentialSelectionWidgetState
     });
 
     try {
-      _credentials = widget.availableCredentials.map((credential) {
-        final claims = Map<String, dynamic>.from(
-          credential['credentialSubject'] ?? {},
-        );
-        final attributeSelections = <String, bool>{};
+      _credentials = widget.availableCredentials
+          .where((credential) => !isRetiredOpenBadge(credential))
+          .map((credential) {
+            final claims = Map<String, dynamic>.from(
+              credential['credentialSubject'] ?? {},
+            );
+            final attributeSelections = <String, bool>{};
 
-        // Initialize attribute selections based on request
-        for (final attribute in claims.keys) {
-          final isRequired = widget.requestedAttributes.contains(attribute);
-          attributeSelections[attribute] = isRequired;
-        }
+            // Initialize attribute selections based on request
+            for (final attribute in claims.keys) {
+              final isRequired = widget.requestedAttributes.contains(attribute);
+              attributeSelections[attribute] = isRequired;
+            }
 
-        // Determine required vs optional attributes
-        final requiredAttributes = claims.keys
-            .where((attr) => widget.requestedAttributes.contains(attr))
-            .toList();
-        final optionalAttributes = claims.keys
-            .where((attr) => !widget.requestedAttributes.contains(attr))
-            .toList();
+            // Determine required vs optional attributes
+            final requiredAttributes = claims.keys
+                .where((attr) => widget.requestedAttributes.contains(attr))
+                .toList();
+            final optionalAttributes = claims.keys
+                .where((attr) => !widget.requestedAttributes.contains(attr))
+                .toList();
 
-        return SelectableCredential(
-          id: credential['id'] ?? '',
-          name:
-              credential['name'] ??
-              credential['type']?.toString() ??
-              'Unknown Credential',
-          type: credential['type']?.toString() ?? '',
-          issuer: credential['issuer'] ?? 'Unknown Issuer',
-          claims: claims,
-          attributeSelections: attributeSelections,
-          isSelected: requiredAttributes.isNotEmpty,
-          privacyLevel: _calculatePrivacyLevel(attributeSelections),
-          requiredAttributes: requiredAttributes,
-          optionalAttributes: optionalAttributes,
-        );
-      }).toList();
+            return SelectableCredential(
+              id: credential['id'] ?? '',
+              name:
+                  credential['name'] ??
+                  credential['type']?.toString() ??
+                  'Unknown Credential',
+              type: credential['type']?.toString() ?? '',
+              issuer: credential['issuer'] ?? 'Unknown Issuer',
+              claims: claims,
+              attributeSelections: attributeSelections,
+              isSelected: requiredAttributes.isNotEmpty,
+              privacyLevel: _calculatePrivacyLevel(attributeSelections),
+              requiredAttributes: requiredAttributes,
+              optionalAttributes: optionalAttributes,
+            );
+          })
+          .toList();
+
+      if (_credentials.isEmpty &&
+          widget.availableCredentials.any(isRetiredOpenBadge)) {
+        _error = retiredOpenBadgesMessage;
+      }
 
       _updatePrivacyAssessment();
       _notifySelectionChanged();
