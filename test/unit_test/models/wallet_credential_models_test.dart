@@ -28,9 +28,9 @@ VerifiableCredential _vc({
   'issuer': issuer,
   'credentialSubject': subject,
   'issuanceDate': '2026-01-01T00:00:00.000Z',
-  if (expires != null) 'expirationDate': expires,
+  'expirationDate': ?expires,
   if (signed) 'proof': {'type': 'DataIntegrityProof', 'proofValue': 'fixture'},
-  if (status != null) 'credentialStatus': status,
+  'credentialStatus': ?status,
 });
 
 MDocCredential _mdoc({
@@ -473,7 +473,7 @@ void main() {
       expect(dismissed.isActive, isFalse);
       expect(dismissed, original);
       expect(dismissed.hashCode, original.hashCode);
-      expect(original == 'welcome', isFalse);
+      expect(original == Object(), isFalse);
       expect(original.copyWith(id: 'other'), isNot(original));
       final updated = original.copyWith(
         title: 'Updated',
