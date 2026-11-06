@@ -130,8 +130,8 @@ void main() {
             _credential('one', claims: {'id': 'holder'}),
           ],
           requestedAttributes: const ['id'],
-          onSelectionChanged: (_, __) {},
-          onPresentationCreate: (_, __) async {
+          onSelectionChanged: (_, _) {},
+          onPresentationCreate: (_, _) async {
             calls++;
             throw StateError('verifier unavailable');
           },
@@ -169,7 +169,7 @@ void main() {
               availableCredentials: credentials,
               requestedAttributes: requested,
               onSelectionChanged: (value, _) => selected = value,
-              onPresentationCreate: (_, __) {},
+              onPresentationCreate: (_, _) {},
             ),
           ),
         );
@@ -235,7 +235,7 @@ void main() {
               availableCredentials: records,
               requestedAttributes: requested,
               onSelectionChanged: (value, _) => selected = value,
-              onPresentationCreate: (_, __) {},
+              onPresentationCreate: (_, _) {},
             ),
           ),
         );
@@ -283,8 +283,8 @@ void main() {
                               _credential('one', claims: {}),
                             ],
                             requestedAttributes: const [],
-                            onSelectionChanged: (_, __) {},
-                            onPresentationCreate: (_, __) => created = true,
+                            onSelectionChanged: (_, _) {},
+                            onPresentationCreate: (_, _) => created = true,
                           ),
                         ),
                       ),
