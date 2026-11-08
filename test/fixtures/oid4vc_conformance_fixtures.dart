@@ -1,13 +1,13 @@
 /// OID4VCI / OID4VP conformance test fixture constants.
 ///
-/// All strings here are copies of the files in:
-///   marty-integration-tests/tests/integration/fixtures/conformance/
+/// Wallet-owned wire vectors. See README.md for ownership and update rules.
+/// These are independently maintained protocol cases, not generated copies.
 ///
 /// Consumed by:
 ///   - test/integration/oid4vci_conformance_test.dart
 ///   - test/integration/oid4vp_conformance_test.dart
 ///
-/// Run `generate_fixtures.py` to regenerate the source files if anything drifts.
+/// Update the relevant wallet behavior case and its vector together.
 library;
 
 // ── Issuer Metadata ───────────────────────────────────────────────────────────
@@ -299,14 +299,14 @@ const String kPresentationSubmissionJson = r'''
 
 // ── Shared test constants ─────────────────────────────────────────────────────
 
-/// Verifier identifier — matches `VERIFIER_ID` in generate_fixtures.py and
-/// the Rust test constant.
+/// Verifier identifier used by these wallet-owned request vectors.
+/// Shared identifier retained by the wallet protocol tests.
 const String kVerifierId = 'https://verifier.example.com';
 
-/// Nonce embedded in kPresentationRequestJson and the vp_token_jwt.txt fixture.
+/// Nonce embedded in the wallet presentation request vectors.
 const String kNonce = 'n-0S6_WzA2Mj';
 
-/// Holder DID derived from HOLDER_KEY_SEED (bytes 0x01..0x20).
+/// Synthetic holder identity used by the wallet protocol tests.
 const String kHolderDid =
     'did:key:z6MkneMkZqwqRiU5mJzSG3kDwzt9P8C59N4NGTfBLfSGE7c7';
 

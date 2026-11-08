@@ -10,8 +10,8 @@ dependencies:
     decision: upgrade
     advisories: []
     tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/25
-    review-after: 2026-10-23
-    rationale: Rechecked 2026-10-09 against the upstream changelog and this app's Android configuration. Version 13 requires compileSdk 37, while the app and hosted build remain on 36. Retain 12.0.3 until the SDK and permission behavior migration can be validated together.
+    review-after: 2026-11-15
+    rationale: Rechecked 2026-10-16 against the upstream 13.0.2 changelog and Google's repository2-3.xml. Android 37.0 is now published, but this application still compiles against SDK 36. Version 13 requires SDK 37 and changes Android permanentlyDenied handling to a request-driven flow. Retain 12.0.3 until the platform upgrade and permission behavior migration are validated together in issue 25.
   - package: flutter_secure_storage_web
     ecosystem: pub
     owner: ElevenID
@@ -22,5 +22,5 @@ dependencies:
     decision: replace
     advisories: []
     tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/11
-    review-after: 2026-10-18
-    rationale: Remove the local WASM compatibility override when the upstream package meets the application contract.
+    review-after: 2026-11-20
+    rationale: Re-reviewed 2026-11-06 against upstream commit 10126973316682dd1bae779d86a91a501359b11b (flutter_secure_storage_web pubspec, changelog and implementation) and this branch's pubspec.lock and consumers. Upstream remains 2.1.1 and uses modern web/JS interop with secure-context WebCrypto; the original dart:html rationale is obsolete. The resolved graph still selects the local override, and WalletCredentialStore and card state still consume its namespaced SharedPreferences/base64 format, which is not encrypted and is incompatible with upstream encrypted records. The Open Badges retirement does not remove this dependency. Issue 11 remains open; preserve existing records until a reviewed migration qualifies successful and failed writes, readback, rollback, namespace isolation and logout/deletion, as specified in docs/development-checks.md. This review does not qualify browser storage security or change its implementation.

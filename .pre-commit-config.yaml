@@ -1,4 +1,4 @@
-# Comprehensive pre-commit configuration for Flutter/Dart + Python project
+# Pre-commit checks for the Flutter app and shared repository files
 # See https://pre-commit.com for more information
 repos:
   # General file checks
@@ -28,101 +28,12 @@ repos:
       # Disable branch protection for development workflow
       # - id: no-commit-to-branch
       #   args: [--branch, main, --branch, master]
-      - id: requirements-txt-fixer
-        files: requirements.*\.txt$
-      - id: check-docstring-first
 
   # Security - Gitleaks (comprehensive secret scanning)
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.29.0
     hooks:
       - id: gitleaks
-
-  # Security - Semgrep (SAST) - disabled due to Python 3.14 compatibility issues
-  # - repo: https://github.com/returntocorp/semgrep
-  #   rev: v1.45.0
-  #   hooks:
-  #     - id: semgrep
-  #       args: ['--config', 'auto', '--error']
-  #       stages: [pre-commit]
-
-  # Security - Python vulnerabilities (disabled - repository issue)
-  # - repo: https://github.com/pyupio/safety
-  #   rev: '2.3.5'
-  #   hooks:
-  #     - id: safety
-  #       args: [--json]
-
-  # Security - Bandit
-  - repo: https://github.com/PyCQA/bandit
-    rev: "1.8.6"
-    hooks:
-      - id: bandit
-        args: ["-c", "pyproject.toml"]
-        additional_dependencies: ["bandit[toml]"]
-
-  # Python - Ruff (linting and formatting)
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
-    hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-        types_or: [python, pyi]
-        exclude: ^(docker/|lib/services/)
-      - id: ruff-format
-        types_or: [python, pyi]
-
-  # Python formatting and import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
-    hooks:
-      - id: isort
-        args: [--profile, black, --line-length, "88"]
-        types_or: [python, pyi]
-
-  # Python - Type checking
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
-    hooks:
-      - id: mypy
-        args: [--ignore-missing-imports, --warn-unused-configs]
-        types_or: [python, pyi]
-        exclude: ^(docker/|lib/services/)
-
-  # Python - Dead code detection (disabled for development)
-  # - repo: https://github.com/jendrikseipp/vulture
-  #   rev: v2.14
-  #   hooks:
-  #     - id: vulture
-  #       args: ['--min-confidence', '95']
-  #       exclude: '(flutter_lldb_helper\.py|^plugins/)'
-  #       types_or: [python, pyi]
-
-  # Python - Code complexity
-  - repo: https://github.com/yunojuno/pre-commit-xenon
-    rev: v0.1
-    hooks:
-      - id: xenon
-        args:
-          ["--max-absolute", "B", "--max-modules", "B", "--max-average", "A"]
-
-  # Python - Docstring linting (disabled for development)
-  # - repo: https://github.com/PyCQA/pydocstyle
-  #   rev: 6.3.0
-  #   hooks:
-  #     - id: pydocstyle
-  #       args: ['--convention=google']
-  #       exclude: '.*/flutter_lldb_helper\.py$'
-  #       additional_dependencies: [toml]
-  #       types_or: [python, pyi]
-
-  # Markdown linting (disabled for development docs)
-  # - repo: https://github.com/igorshubovych/markdownlint-cli
-  #   rev: v0.45.0
-  #   hooks:
-  #     - id: markdownlint
-  #       args: ['--fix']
-  #       types: [markdown]
 
   # Markdown link checking
   - repo: https://github.com/tcort/markdown-link-check
@@ -365,8 +276,7 @@ repos:
             .*\.freezed\.dart|
             .*\.pb\.dart|
             .*\.pbenum\.dart|
-            .*\.pbgrpc\.dart|
-            \.secrets\.baseline
+            .*\.pbgrpc\.dart
           )$
 
 # Configuration for tools
@@ -379,5 +289,5 @@ ci:
   autoupdate_branch: ""
   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: [gitleaks, semgrep] # Skip heavy tools in CI
+  skip: [gitleaks] # Skip heavy tools in CI
   submodules: false

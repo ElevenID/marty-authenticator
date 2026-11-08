@@ -44,7 +44,7 @@ pub(crate) fn zk_prove_from_presentation_definition(
             issuer_pky: issuer_pky.clone(),
             transcript: session_nonce.clone(),
             attributes: vec![attr],
-            now: chrono::Utc::now().to_rfc3339(),
+            now: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
             doc_type: doc_type.clone(),
         };
         let circuit = marty_zkp::Circuit::generate(input.attributes.len())
@@ -79,7 +79,7 @@ pub(crate) fn zk_prove(
         issuer_pky,
         transcript: session_nonce,
         attributes: vec![attr],
-        now: chrono::Utc::now().to_rfc3339(),
+        now: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
         doc_type,
     };
     let circuit = marty_zkp::Circuit::generate(input.attributes.len())

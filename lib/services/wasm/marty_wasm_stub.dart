@@ -34,18 +34,6 @@ class MartyWasm {
     throw UnsupportedError('WASM not available on this platform');
   }
 
-  Future<Map<String, dynamic>> issueOpenBadgeV2({
-    required Map<String, dynamic> request,
-  }) async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
-  Future<Map<String, dynamic>> verifyOpenBadgeV2({
-    required Map<String, dynamic> request,
-  }) async {
-    throw UnsupportedError('WASM not available on this platform');
-  }
-
   Future<Map<String, dynamic>> issueOpenBadgeV3({
     required Map<String, dynamic> request,
   }) async {

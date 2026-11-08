@@ -100,3 +100,6 @@ jobs:
       # Build the Android APK (Debug)
       - name: Build Android APK (Debug)
         run: flutter build apk -t "lib/main_document.dart" --debug --flavor netknights
+
+      - name: Build internal Android flavor (Debug)
+        run: flutter build apk -t "lib/main_document.dart" --debug --flavor netknights_debug

@@ -21,7 +21,6 @@ COPY pubspec.yaml pubspec.lock ./
 
 # Copy local path dependencies before pub get
 COPY local_wasm_overrides/ ./local_wasm_overrides/
-COPY local_plugins/ ./local_plugins/
 
 # Get dependencies — cache ~/.pub-cache on the host so re-builds skip network downloads
 RUN --mount=type=cache,target=/root/.pub-cache \

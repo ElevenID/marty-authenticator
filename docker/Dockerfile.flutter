@@ -10,7 +10,6 @@ COPY pubspec.yaml pubspec.lock ./
 
 # Copy local path dependencies before pub get
 COPY local_wasm_overrides/ ./local_wasm_overrides/
-COPY local_plugins/ ./local_plugins/
 
 # Get dependencies
 RUN flutter pub get

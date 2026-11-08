@@ -64,18 +64,6 @@ class MartyWasm {
           )
           as Map<String, dynamic>;
 
-  Future<Map<String, dynamic>> issueOpenBadgeV2({
-    required Map<String, dynamic> request,
-  }) async => throw UnsupportedError(
-    'Open Badges issuance is not exported by the current marty-rs WASM build',
-  );
-
-  Future<Map<String, dynamic>> verifyOpenBadgeV2({
-    required Map<String, dynamic> request,
-  }) async => throw UnsupportedError(
-    'Open Badges verification is not exported by the current marty-rs WASM build',
-  );
-
   Future<Map<String, dynamic>> issueOpenBadgeV3({
     required Map<String, dynamic> request,
   }) async => throw UnsupportedError(

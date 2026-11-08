@@ -36,6 +36,7 @@ import '../services/spruce_sdk_services.dart';
 import '../widgets/spruce_credential_selection_widget.dart';
 import '../widgets/selective_disclosure_sheet.dart';
 import '../utils/logger.dart';
+import '../utils/open_badges.dart';
 
 /// Main credential selection view
 class CredentialSelectionView extends ConsumerStatefulWidget {
@@ -88,6 +89,15 @@ class _CredentialSelectionViewState
       // Filter credentials that match the request
       _availableCredentials = _filterRelevantCredentials(credentials);
 
+      if (_availableCredentials.isEmpty &&
+          credentials.any(isRetiredOpenBadge)) {
+        setState(() {
+          _error = retiredOpenBadgesMessage;
+          _isLoading = false;
+        });
+        return;
+      }
+
       // Perform security assessment
       await _performSecurityAssessment();
 
@@ -108,6 +118,7 @@ class _CredentialSelectionViewState
   ) {
     // Filter credentials based on requested attributes and compatibility
     return credentials.where((credential) {
+      if (isRetiredOpenBadge(credential)) return false;
       final claims =
           credential['credentialSubject'] as Map<String, dynamic>? ?? {};
 

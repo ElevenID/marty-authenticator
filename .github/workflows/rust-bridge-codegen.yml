@@ -19,6 +19,8 @@ on:
       - "lib/services/spruce_platform_service_extended.dart"
       - "lib/views/credential_selection_view.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
+      - ".github/scripts/private-forks.py"
+      - ".github/scripts/test_private_forks.py"
   pull_request:
     paths:
       - "rust/src/**"
@@ -33,6 +35,8 @@ on:
       - "lib/services/spruce_platform_service_extended.dart"
       - "lib/views/credential_selection_view.dart"
       - ".github/workflows/rust-bridge-codegen.yml"
+      - ".github/scripts/private-forks.py"
+      - ".github/scripts/test_private_forks.py"
 
 permissions:
   contents: read
@@ -64,6 +68,28 @@ jobs:
 
       - name: Install pinned bridge generator
         run: cargo install flutter_rust_bridge_codegen --version 2.13.0 --locked
+
+      - name: Set up Python for private dependency checks
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Test private dependency access boundaries
+        run: python .github/scripts/test_private_forks.py
+
+      - name: Require trusted private fork access
+        if: vars.PRIVATE_FORKS_ENABLED == 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: python .github/scripts/private-forks.py check
+
+      - name: Fetch locked private fork dependencies
+        if: vars.PRIVATE_FORKS_ENABLED == 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        env:
+          PRIVATE_FORKS_READ_TOKEN: ${{ secrets.PRIVATE_FORKS_READ_TOKEN }}
+        run: python .github/scripts/private-forks.py fetch --manifest-path rust/Cargo.toml
 
       - name: Generate bridge surfaces
         run: flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml

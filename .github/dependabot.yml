@@ -1,6 +1,14 @@
 version: 2
+registries:
+  elevenid-private-forks:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{secrets.PRIVATE_FORKS_DEPENDABOT_TOKEN}}
 updates:
   - package-ecosystem: cargo
+    registries:
+      - elevenid-private-forks
     directory: /rust
     schedule:
       interval: weekly
@@ -13,13 +21,6 @@ updates:
       interval: weekly
     groups:
       pub-dependencies:
-        patterns: ["*"]
-  - package-ecosystem: pip
-    directory: /
-    schedule:
-      interval: weekly
-    groups:
-      pip-dependencies:
         patterns: ["*"]
   - package-ecosystem: npm
     directory: /
