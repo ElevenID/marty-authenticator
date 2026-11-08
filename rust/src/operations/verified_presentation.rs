@@ -1,14 +1,16 @@
 //! One-use, verified SD-JWT presentation sessions. Only the exact JWS input
 //! crosses to the paired remote signer; issuer and holder keys stay public.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Mutex, OnceLock};
 
 use anyhow::{bail, ensure, Context};
 use chrono::{DateTime, Utc};
+use marty_oid4vci::types::SigningAlgorithm;
 use marty_oid4vci::{
     jose, ParsedPresentationRequest, PreparedSdJwtPresentation, PresentationRequestQueryType,
-    PresentationResponse, WalletEngine,
+    PresentationResponse, ResolvedSdJwtIssuerKey, SdJwtIssuerKeyResolver, TrustedSdJwtIssuerKeys,
+    WalletEngine,
 };
 use sha2::{Digest, Sha256};
 
@@ -52,7 +54,20 @@ pub(crate) fn request_digest(request: &ParsedPresentationRequest) -> anyhow::Res
     Ok(format!("{:x}", Sha256::digest(bytes)))
 }
 
-fn validate_request(request: &ParsedPresentationRequest, query_id: &str) -> anyhow::Result<()> {
+fn simple_claim_name(claim: &str) -> bool {
+    let mut bytes = claim.bytes();
+    !claim.is_empty()
+        && claim.len() <= 256
+        && bytes
+            .next()
+            .is_some_and(|byte| byte.is_ascii_alphabetic() || byte == b'_')
+        && bytes.all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+}
+
+fn validate_request(
+    request: &ParsedPresentationRequest,
+    query_id: &str,
+) -> anyhow::Result<Vec<String>> {
     ensure!(
         !request.client_id.trim().is_empty() && !request.nonce.trim().is_empty(),
         "presentation challenge is invalid"
@@ -73,7 +88,7 @@ fn validate_request(request: &ParsedPresentationRequest, query_id: &str) -> anyh
             && response_uri.fragment().is_none(),
         "presentation response URI is invalid"
     );
-    match request.query_type {
+    let claims = match request.query_type {
         PresentationRequestQueryType::DcqlQuery => {
             let query = request
                 .dcql_query
@@ -97,6 +112,11 @@ fn validate_request(request: &ParsedPresentationRequest, query_id: &str) -> anyh
                     .all(|claim| claim.path.len() == 1 && !claim.path[0].is_empty()),
                 "DCQL claim path is unsupported"
             );
+            credential
+                .claims
+                .iter()
+                .map(|claim| claim.path[0].clone())
+                .collect::<Vec<_>>()
         }
         PresentationRequestQueryType::PresentationDefinition => {
             let definition = request
@@ -114,11 +134,8 @@ fn validate_request(request: &ParsedPresentationRequest, query_id: &str) -> anyh
             );
             if let Some(formats) = &descriptor.format {
                 ensure!(
-                    formats.iter().any(|(format, requirement)| {
+                    formats.keys().any(|format| {
                         matches!(format.as_str(), "dc+sd-jwt" | "vc+sd-jwt" | "sd_jwt_vc")
-                            && requirement.alg.as_ref().is_none_or(|algorithms| {
-                                algorithms.iter().any(|alg| alg == "ES256")
-                            })
                     }),
                     "selected descriptor does not accept SD-JWT"
                 );
@@ -133,9 +150,108 @@ fn validate_request(request: &ParsedPresentationRequest, query_id: &str) -> anyh
                 }),
                 "presentation field constraint is unsupported"
             );
+            descriptor
+                .constraints
+                .fields
+                .iter()
+                .map(|field| field.path[0][2..].to_string())
+                .collect::<Vec<_>>()
+        }
+    };
+    ensure!(
+        claims.len() <= 64
+            && claims.iter().all(|claim| simple_claim_name(claim))
+            && claims.iter().collect::<HashSet<_>>().len() == claims.len(),
+        "presentation request claims are unsupported or duplicated"
+    );
+    Ok(claims)
+}
+
+fn validate_disclosures(
+    request: &ParsedPresentationRequest,
+    query_id: &str,
+    selected: &[String],
+) -> anyhow::Result<()> {
+    let requested = validate_request(request, query_id)?;
+    let requested: HashSet<_> = requested.iter().collect();
+    let selected_set: HashSet<_> = selected.iter().collect();
+    ensure!(
+        selected.len() <= 64 && selected_set.len() == selected.len() && selected_set == requested,
+        "selected disclosure does not match the approved request"
+    );
+    Ok(())
+}
+
+fn approved_issuer_algorithms(
+    request: &ParsedPresentationRequest,
+    verified_format: &str,
+) -> anyhow::Result<Option<Vec<String>>> {
+    // Called only after validate_request and issuer/holder verification. The
+    // requested DCQL format must equal the authenticated protected `typ`.
+    match request.query_type {
+        PresentationRequestQueryType::DcqlQuery => {
+            let credential = &request
+                .dcql_query
+                .as_ref()
+                .context("DCQL query is absent")?
+                .credentials[0];
+            ensure!(
+                credential.format == verified_format,
+                "verified credential format does not match the approved request"
+            );
+            Ok(None)
+        }
+        PresentationRequestQueryType::PresentationDefinition => {
+            let descriptor = &request
+                .presentation_definition
+                .as_ref()
+                .context("presentation definition is absent")?
+                .input_descriptors[0];
+            let Some(formats) = &descriptor.format else {
+                return Ok(None);
+            };
+            // An explicit exact-format rule takes precedence. The legacy
+            // sd_jwt_vc alias may accept either supported SD-JWT typ only when
+            // no exact-format rule exists; another format's alg list cannot
+            // authorize this credential.
+            let requirement = formats
+                .get(verified_format)
+                .or_else(|| formats.get("sd_jwt_vc"))
+                .context("verified credential format does not match the approved request")?;
+            if let Some(algorithms) = &requirement.alg {
+                ensure!(
+                    !algorithms.is_empty() && algorithms.len() <= 16,
+                    "approved issuer algorithm list is unsupported"
+                );
+            }
+            Ok(requirement.alg.clone())
         }
     }
-    Ok(())
+}
+
+struct PresentationIssuerKeys<'a> {
+    trusted: &'a TrustedSdJwtIssuerKeys,
+    approved_algorithms: Option<Vec<String>>,
+}
+
+impl SdJwtIssuerKeyResolver for PresentationIssuerKeys<'_> {
+    fn resolve(
+        &self,
+        issuer: &str,
+        key_id: Option<&str>,
+        algorithm: SigningAlgorithm,
+    ) -> marty_oid4vci::Oid4vciResult<ResolvedSdJwtIssuerKey> {
+        if self.approved_algorithms.as_ref().is_some_and(|algorithms| {
+            !algorithms
+                .iter()
+                .any(|allowed| allowed == algorithm.as_str())
+        }) {
+            return Err(marty_oid4vci::Oid4vciError::InvalidRequest(
+                "credential issuer algorithm does not match the approved request".into(),
+            ));
+        }
+        self.trusted.resolve(issuer, key_id, algorithm)
+    }
 }
 
 pub(crate) async fn prepare(selection: Selection) -> anyhow::Result<PreparedSelection> {
@@ -174,15 +290,25 @@ fn prepare_for_request(
         selection.approved_request_digest == request_digest(&request)?,
         "presentation request changed after approval"
     );
-    validate_request(&request, &selection.query_id)?;
+    validate_disclosures(&request, &selection.query_id, &selection.claims_to_disclose)?;
     let trusted = resolver_from_snapshot(&selection.issuer_snapshot_json, Utc::now())?;
-    let prepared = WalletEngine::new().prepare_verified_sd_jwt_presentation(
+    let engine = WalletEngine::new();
+    let verified = engine.verify_received_sd_jwt_credential(
+        &selection.credential,
+        &selection.holder_public_jwk_json,
+        &trusted.resolver,
+    )?;
+    let request_keys = PresentationIssuerKeys {
+        trusted: &trusted.resolver,
+        approved_algorithms: approved_issuer_algorithms(&request, &verified.format)?,
+    };
+    let prepared = engine.prepare_verified_sd_jwt_presentation(
         &selection.credential,
         &selection.claims_to_disclose,
         &request.nonce,
         &request.client_id,
         &selection.holder_public_jwk_json,
-        &trusted.resolver,
+        &request_keys,
     )?;
     let signing_input = prepared.signing_input().to_vec();
     ensure!(
@@ -262,7 +388,7 @@ pub(crate) async fn complete(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use marty_oid4vci::{DcqlCredentialQuery, DcqlQuery};
+    use marty_oid4vci::{DcqlClaimQuery, DcqlCredentialQuery, DcqlQuery};
     use serde_json::json;
 
     fn dcql_request() -> ParsedPresentationRequest {
@@ -277,7 +403,7 @@ mod tests {
             dcql_query: Some(DcqlQuery {
                 credentials: vec![DcqlCredentialQuery {
                     id: "member".into(),
-                    format: "dc+sd-jwt".into(),
+                    format: "vc+sd-jwt".into(),
                     meta: None,
                     claims: vec![],
                 }],
@@ -302,8 +428,104 @@ mod tests {
         assert!(validate_request(&request, "member").is_err());
     }
 
+    fn request_for_claims(names: &[&str]) -> ParsedPresentationRequest {
+        let mut request = dcql_request();
+        request.dcql_query.as_mut().unwrap().credentials[0].claims = names
+            .iter()
+            .enumerate()
+            .map(|(index, name)| DcqlClaimQuery {
+                id: format!("claim_{index}"),
+                path: vec![(*name).into()],
+            })
+            .collect();
+        request
+    }
+
     #[test]
-    fn signed_public_vector_prepares_exact_input_and_bad_signature_consumes_session() {
+    fn rust_enforces_exact_requested_disclosures() {
+        let request = request_for_claims(&["email", "role"]);
+        assert!(validate_disclosures(&request, "member", &["role".into(), "email".into()]).is_ok());
+        for selected in [
+            vec![],
+            vec!["email".into()],
+            vec!["email".into(), "role".into(), "address".into()],
+            vec!["email".into(), "email".into(), "role".into()],
+        ] {
+            assert!(validate_disclosures(&request, "member", &selected).is_err());
+        }
+        assert!(validate_disclosures(&dcql_request(), "member", &[]).is_ok());
+        assert!(validate_disclosures(&dcql_request(), "member", &["email".into()]).is_err());
+    }
+
+    #[test]
+    fn rejects_duplicate_or_unsupported_requested_claims() {
+        for names in [
+            vec!["email", "email"],
+            vec!["address.street"],
+            vec!["*"],
+            vec![""],
+            vec!["0email"],
+        ] {
+            assert!(validate_request(&request_for_claims(&names), "member").is_err());
+        }
+        let names = (0..65)
+            .map(|index| format!("claim_{index}"))
+            .collect::<Vec<_>>();
+        let names = names.iter().map(String::as_str).collect::<Vec<_>>();
+        assert!(validate_request(&request_for_claims(&names), "member").is_err());
+    }
+
+    #[test]
+    fn disclosure_bypass_fails_before_issuer_trust_or_signing_input() {
+        let request = request_for_claims(&["email"]);
+        for claims_to_disclose in [vec![], vec!["email".into(), "address".into()]] {
+            let selection = Selection {
+                request_uri: "openid4vp://unused".into(),
+                approved_request_digest: request_digest(&request).unwrap(),
+                credential: "not-inspected".into(),
+                query_id: "member".into(),
+                claims_to_disclose,
+                issuer_snapshot_json: "not-inspected".into(),
+                holder_public_jwk_json: "not-inspected".into(),
+            };
+            let error = prepare_for_request(selection, request.clone())
+                .err()
+                .unwrap();
+            assert!(error.to_string().contains("selected disclosure"));
+        }
+    }
+
+    #[test]
+    fn legacy_presentation_exchange_paths_have_the_same_rust_approval_checks() {
+        let mut request = dcql_request();
+        request.query_type = PresentationRequestQueryType::PresentationDefinition;
+        request.dcql_query = None;
+        request.presentation_definition = Some(
+            serde_json::from_value(json!({
+                "id": "legacy-definition",
+                "input_descriptors": [{
+                    "id": "member",
+                    "constraints": {"fields": [{"path": ["$.email"]}]}
+                }]
+            }))
+            .unwrap(),
+        );
+        assert!(validate_disclosures(&request, "member", &["email".into()]).is_ok());
+        assert!(validate_disclosures(&request, "member", &["address".into()]).is_err());
+        for path in ["$.", "$.address.street", "$.email[0]", "$.*", "$..email"] {
+            request
+                .presentation_definition
+                .as_mut()
+                .unwrap()
+                .input_descriptors[0]
+                .constraints
+                .fields[0]
+                .path = vec![path.into()];
+            assert!(validate_request(&request, "member").is_err());
+        }
+    }
+
+    fn signed_selection(request: &ParsedPresentationRequest) -> Selection {
         let vector: serde_json::Value =
             serde_json::from_str(include_str!("fixtures/remote_sd_jwt_wallet_public.json"))
                 .unwrap();
@@ -323,16 +545,21 @@ mod tests {
                 "public_jwk": issuer_jwk
             }]
         });
-        let selected = Selection {
+        Selection {
             request_uri: "openid4vp://unused".into(),
-            approved_request_digest: request_digest(&dcql_request()).unwrap(),
+            approved_request_digest: request_digest(request).unwrap(),
             credential: vector["credential"].as_str().unwrap().into(),
             query_id: "member".into(),
             claims_to_disclose: vec!["email".into()],
             issuer_snapshot_json: snapshot.to_string(),
             holder_public_jwk_json: vector["holder_public_jwk"].to_string(),
-        };
-        let prepared = prepare_for_request(selected, dcql_request()).unwrap();
+        }
+    }
+
+    #[test]
+    fn signed_public_vector_prepares_exact_input_and_bad_signature_consumes_session() {
+        let request = request_for_claims(&["email"]);
+        let prepared = prepare_for_request(signed_selection(&request), request).unwrap();
         assert!(!prepared.signing_input.is_empty());
         let runtime = tokio::runtime::Builder::new_current_thread()
             .build()
@@ -343,5 +570,60 @@ mod tests {
         assert!(runtime
             .block_on(complete(&prepared.session_id, &[0; 64]))
             .is_err());
+    }
+
+    #[test]
+    fn authenticated_sd_jwt_type_must_equal_the_approved_dcql_format() {
+        let mut request = request_for_claims(&["email"]);
+        // The signed fixture's protected typ is vc+sd-jwt. A valid signature
+        // and holder binding cannot satisfy an approved dc+sd-jwt request.
+        request.dcql_query.as_mut().unwrap().credentials[0].format = "dc+sd-jwt".into();
+        let error = prepare_for_request(signed_selection(&request), request)
+            .err()
+            .unwrap();
+        assert!(error.to_string().contains("verified credential format"));
+    }
+
+    #[test]
+    fn presentation_exchange_binds_the_matching_format_and_issuer_algorithm() {
+        for (formats, accepted) in [
+            (json!({"vc+sd-jwt": {"alg": ["ES256"]}}), true),
+            (json!({"sd_jwt_vc": {"alg": ["ES256"]}}), true),
+            (json!({"dc+sd-jwt": {"alg": ["ES256"]}}), false),
+            (json!({"vc+sd-jwt": {"alg": ["EdDSA"]}}), false),
+            (json!({"vc+sd-jwt": {"alg": []}}), false),
+            (
+                json!({
+                    "vc+sd-jwt": {"alg": ["EdDSA"]},
+                    "dc+sd-jwt": {"alg": ["ES256"]},
+                    "sd_jwt_vc": {"alg": ["ES256"]}
+                }),
+                false,
+            ),
+        ] {
+            let mut request = request_for_claims(&["email"]);
+            request.query_type = PresentationRequestQueryType::PresentationDefinition;
+            request.dcql_query = None;
+            request.presentation_definition = Some(
+                serde_json::from_value(json!({
+                    "id": "legacy-definition",
+                    "input_descriptors": [{
+                        "id": "member", "format": formats,
+                        "constraints": {"fields": [{"path": ["$.email"]}]}
+                    }]
+                }))
+                .unwrap(),
+            );
+            let result = prepare_for_request(signed_selection(&request), request);
+            if accepted {
+                let session = result.expect("matching signed format and issuer algorithm");
+                pending().lock().unwrap().remove(&session.session_id);
+            } else {
+                assert!(
+                    result.is_err(),
+                    "incompatible format or algorithm must be rejected"
+                );
+            }
+        }
     }
 }

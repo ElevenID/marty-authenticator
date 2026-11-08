@@ -4,6 +4,35 @@ import 'package:marty_authenticator/services/qr_scanner_service_enhanced.dart';
 
 void main() {
   test(
+    'offer approval forwards the frozen native snapshot, not its source URI',
+    () async {
+      const source =
+          'openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffer';
+      const frozen =
+          'openid-credential-offer://?credential_offer=%7B%22approved%22%3Atrue%7D';
+      final service = QRScannerServiceEnhanced(
+        parseNativeQr: ({required rawData}) async {
+          expect(rawData, source);
+          return const FrbWalletQrInput(
+            kind: 'credential_offer',
+            normalized: frozen,
+            parsedContentJson:
+                '{"offer_uri":"$frozen","credential_issuer":"https://issuer.example","credential_configuration_ids":["ExampleIdentity"]}',
+            requiresExternalProvider: false,
+          );
+        },
+      );
+      final result = await service.processQRCode(source);
+      expect(result.isSuccess, isTrue);
+      final parsed = result.enrichedResult!.validatedResult.parsedData;
+      final preview = CredentialOfferPreview.fromParsed(parsed);
+      expect(preview.offerUri, frozen);
+      expect(preview.offerUri, isNot(source));
+      expect(parsed.rawData, frozen);
+    },
+  );
+
+  test(
     'Rust-parsed offer remains a review request, not a compatibility claim',
     () async {
       const offerUri = 'openid-credential-offer://approved';

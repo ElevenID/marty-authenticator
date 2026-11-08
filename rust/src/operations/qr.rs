@@ -89,6 +89,32 @@ pub(crate) fn wallet_normalize_credential_offer(input: String) -> anyhow::Result
         .map_err(|error| anyhow::anyhow!("Credential offer normalization error: {}", error))
 }
 
+fn reviewed_credential_offer(
+    offer: &marty_oid4vci::types::CredentialOffer,
+) -> anyhow::Result<FrbWalletQrInput> {
+    // Freeze the fetched offer at review time. Returning its reference URI
+    // would allow a second fetch after approval to replace the issuer,
+    // configuration, or grant that the user reviewed.
+    let json = serde_json::to_string(offer)?;
+    let normalized = marty_oid4vci::normalize_credential_offer_uri(&json)?;
+    anyhow::ensure!(
+        normalized.len() <= super::verified_issuance::MAX_OFFER_BYTES,
+        "credential offer exceeds the supported review size"
+    );
+    let parsed_content_json = serde_json::json!({
+        "offer_uri": normalized,
+        "credential_issuer": offer.credential_issuer,
+        "credential_configuration_ids": offer.credential_configuration_ids,
+    })
+    .to_string();
+    Ok(FrbWalletQrInput {
+        kind: "credential_offer".to_string(),
+        normalized,
+        parsed_content_json,
+        requires_external_provider: false,
+    })
+}
+
 pub(crate) async fn wallet_validate_qr_input(
     raw_data: String,
 ) -> anyhow::Result<Option<FrbWalletQrInput>> {
@@ -127,18 +153,7 @@ pub(crate) async fn wallet_validate_qr_input(
                 .parse_credential_offer(&classified.normalized)
                 .await
                 .map_err(|error| anyhow::anyhow!("Credential offer validation error: {}", error))?;
-            let parsed_content_json = serde_json::json!({
-                "offer_uri": classified.normalized,
-                "credential_issuer": offer.credential_issuer,
-                "credential_configuration_ids": offer.credential_configuration_ids,
-            })
-            .to_string();
-            Ok(Some(FrbWalletQrInput {
-                kind: "credential_offer".to_string(),
-                normalized: classified.normalized,
-                parsed_content_json,
-                requires_external_provider: false,
-            }))
+            reviewed_credential_offer(&offer).map(Some)
         }
         WalletInputKind::PresentationRequest => {
             let engine = marty_oid4vci::WalletEngine::new();
@@ -178,6 +193,97 @@ pub(crate) async fn wallet_validate_qr_input(
                 requires_external_provider: false,
             }))
         }
+    }
+}
+
+#[cfg(test)]
+mod offer_review_tests {
+    use super::*;
+    use marty_oid4vci::{types::CredentialOffer, WalletEngine};
+    use serde_json::json;
+
+    fn offer() -> CredentialOffer {
+        serde_json::from_value(json!({
+            "credential_issuer": "https://approved.example",
+            "credential_configuration_ids": ["approved-config"],
+            "grants": {
+                "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
+                    "pre-authorized_code": "approved-code",
+                    "tx_code": {"input_mode": "numeric", "length": 6}
+                }
+            }
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn frozen_offer_preserves_reviewed_issuer_configuration_and_grant_without_refetch() {
+        let mut fetched_offer = offer();
+        let review = reviewed_credential_offer(&fetched_offer).unwrap();
+        // Model a mutable reference being replaced after its initial fetch.
+        fetched_offer.credential_issuer = "https://replacement.example".into();
+        fetched_offer.credential_configuration_ids = vec!["replacement-config".into()];
+        fetched_offer
+            .grants
+            .pre_authorized_code
+            .as_mut()
+            .unwrap()
+            .pre_authorized_code = "replacement-code".into();
+        let content: serde_json::Value = serde_json::from_str(&review.parsed_content_json).unwrap();
+        assert_eq!(content["offer_uri"], review.normalized);
+        assert_eq!(content["credential_issuer"], "https://approved.example");
+        assert_eq!(
+            content["credential_configuration_ids"],
+            json!(["approved-config"])
+        );
+        let envelope = url::Url::parse(&review.normalized).unwrap();
+        assert!(envelope
+            .query_pairs()
+            .all(|(name, _)| name == "credential_offer"));
+
+        // This runtime has no network driver. Parsing the accepted offer must
+        // use the frozen inline body, with no network available for a refetch.
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let accepted = runtime
+            .block_on(WalletEngine::new().parse_credential_offer(&review.normalized))
+            .unwrap();
+        assert_eq!(
+            serde_json::to_value(accepted).unwrap(),
+            serde_json::to_value(offer()).unwrap()
+        );
+        assert_ne!(
+            content["credential_issuer"],
+            fetched_offer.credential_issuer
+        );
+    }
+
+    #[test]
+    fn qr_offer_path_returns_the_same_bounded_inline_snapshot_for_acceptance() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let review = runtime
+            .block_on(wallet_validate_qr_input(
+                serde_json::to_string(&offer()).unwrap(),
+            ))
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            review.normalized,
+            reviewed_credential_offer(&offer()).unwrap().normalized
+        );
+        assert!(!review.requires_external_provider);
+
+        let mut oversized = offer();
+        oversized
+            .grants
+            .pre_authorized_code
+            .as_mut()
+            .unwrap()
+            .pre_authorized_code = "x".repeat(super::super::verified_issuance::MAX_OFFER_BYTES);
+        assert!(reviewed_credential_offer(&oversized).is_err());
     }
 }
 

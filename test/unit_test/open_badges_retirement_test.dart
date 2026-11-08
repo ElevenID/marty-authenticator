@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:marty_authenticator/interfaces/spruce_interfaces.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:marty_authenticator/services/spruce_platform_service.dart';
+import 'package:marty_authenticator/services/spruce_platform_service_web.dart';
+import 'package:marty_authenticator/services/wallet_credential_store.dart';
 import 'package:marty_authenticator/utils/open_badges.dart';
-import 'package:marty_authenticator/utils/riverpod/providers/credentials_provider.dart';
-import 'package:marty_authenticator/utils/riverpod/providers/spruce_providers.dart';
 import 'package:marty_authenticator/widgets/spruce_credential_selection_widget.dart';
 
 const ob2 = <String, dynamic>{
@@ -29,19 +30,9 @@ const ob3 = <String, dynamic>{
   },
 };
 
-class _Wallet implements ISpruceIdWalletManager {
-  final List<Map<String, dynamic>> credentials;
-  _Wallet(this.credentials);
-
-  @override
-  Future<List<Map<String, dynamic>>> getAllCredentials() async => credentials;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
 
   test(
     'retired raw, mixed and wrapped badges are rejected before generic VCs',
@@ -97,29 +88,21 @@ void main() {
   });
 
   test(
-    'wallet preserves OB3 and refuses to relabel legacy assertions',
+    'legacy storage cannot promote either raw badge format into a verified receipt',
     () async {
-      final container = ProviderContainer(
-        overrides: [
-          spruceIdWalletManagerProvider.overrideWithValue(_Wallet([ob2, ob3])),
-        ],
-      );
-      addTearDown(container.dispose);
-      container.read(credentialsProvider);
-      await Future<void>.delayed(Duration.zero);
-      final state = container.read(credentialsProvider);
-      expect(state.isLoading, isFalse);
-      expect(state.error, retiredOpenBadgesMessage);
-      expect(
-        state.verifiableCredentials.where((vc) => vc.id == ob2['id']),
-        isEmpty,
-      );
-      final current = state.verifiableCredentials.singleWhere(
-        (vc) => vc.id == ob3['id'],
-      );
-      expect(current.types, contains('OpenBadgeCredential'));
-      expect(current.credentialSubject['badge_name'], 'Current badge');
-      expect(current.proof, isNull);
+      for (final platform in [
+        SpruceIdPlatformService.protected(),
+        SpruceIdPlatformServiceWeb(),
+      ]) {
+        for (final raw in [ob2, ob3]) {
+          await expectLater(
+            platform.storeCredential(raw),
+            throwsA(isA<UnsupportedError>()),
+          );
+        }
+      }
+      expect(await WalletCredentialStore.getAll(), isEmpty);
+      expect(ob2['type'], 'Assertion');
       expect(ob3['type'], ['VerifiableCredential', 'OpenBadgeCredential']);
     },
   );

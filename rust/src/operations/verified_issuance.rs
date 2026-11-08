@@ -8,7 +8,7 @@ use std::sync::{Mutex, OnceLock};
 
 use anyhow::{ensure, Context};
 use chrono::{DateTime, Duration, Utc};
-use marty_oid4vci::types::SigningAlgorithm;
+use marty_oid4vci::types::{CredentialResponse, SigningAlgorithm};
 use marty_oid4vci::wallet::PreparedHolderProof;
 use marty_oid4vci::WalletEngine;
 use serde_json::Value;
@@ -16,7 +16,7 @@ use serde_json::Value;
 use super::issuer_trust::resolver_from_snapshot;
 
 const MAX_PENDING: usize = 16;
-const MAX_OFFER_BYTES: usize = 8192;
+pub(super) const MAX_OFFER_BYTES: usize = 8192;
 const MAX_CREDENTIAL_BYTES: usize = 1024 * 1024;
 
 pub(crate) struct PreparedReceipt {
@@ -241,17 +241,12 @@ fn supported_configuration(configuration: &Value) -> anyhow::Result<(&str, &str)
         algorithms.iter().any(|alg| alg.as_str() == Some("ES256")),
         "issuer does not advertise ES256 holder proofs"
     );
-    if let Some(attestation) = proof.get("key_attestations_required") {
-        let required = attestation
-            .as_object()
-            .context("key attestation requirements are invalid")?;
-        ensure!(
-            required
-                .values()
-                .all(|value| value.as_array().is_some_and(Vec::is_empty)),
-            "issuer requires an unsupported key attestation"
-        );
-    }
+    // Presence requires an attestation even when the object is empty. This
+    // wallet can prove possession of its paired key, but cannot attest it.
+    ensure!(
+        proof.get("key_attestations_required").is_none(),
+        "issuer requires an unsupported key attestation"
+    );
     Ok((format, vct))
 }
 
@@ -277,32 +272,57 @@ pub(crate) async fn complete(
         )
         .await
         .map_err(|_| anyhow::anyhow!("issuer credential request failed"))?;
+    verify_receipt(
+        &response,
+        &session.expected_vct,
+        &session.expected_format,
+        &session.holder_public_jwk_json,
+        issuer_snapshot_json,
+    )
+}
+
+// OID4VCI 1.0 uses an array of credential objects even for one issued
+// credential. Retain the older singular response only when it is unambiguous.
+// Neither a batch nor deferred issuance is part of this wallet path.
+fn single_credential(response: &CredentialResponse) -> anyhow::Result<&str> {
     ensure!(
         response.transaction_id.is_none(),
         "deferred issuance is unsupported"
     );
-    ensure!(
-        response.credentials.is_none(),
-        "batch issuance is unsupported"
-    );
-    let credential = response
-        .credential
-        .as_ref()
-        .and_then(Value::as_str)
+    let value = match (&response.credential, &response.credentials) {
+        (Some(credential), None) => credential,
+        (None, Some(credentials)) if credentials.len() == 1 => credentials[0]
+            .as_object()
+            .and_then(|entry| entry.get("credential"))
+            .context("issuer did not return one credential object")?,
+        _ => anyhow::bail!("issuer did not return exactly one unambiguous credential"),
+    };
+    value
+        .as_str()
         .filter(|value| !value.is_empty() && value.len() <= MAX_CREDENTIAL_BYTES)
-        .context("issuer did not return one bounded SD-JWT")?;
+        .context("issuer did not return one bounded SD-JWT")
+}
+
+fn verify_receipt(
+    response: &CredentialResponse,
+    expected_vct: &str,
+    expected_format: &str,
+    holder_public_jwk_json: &str,
+    issuer_snapshot_json: &str,
+) -> anyhow::Result<VerifiedReceipt> {
+    let credential = single_credential(response)?;
     let trusted = resolver_from_snapshot(issuer_snapshot_json, Utc::now())?;
-    let verified = engine.verify_received_sd_jwt_credential(
+    let verified = WalletEngine::new().verify_received_sd_jwt_credential(
         credential,
-        &session.holder_public_jwk_json,
+        holder_public_jwk_json,
         &trusted.resolver,
     )?;
     ensure!(
-        verified.credential_type == session.expected_vct,
+        verified.credential_type == expected_vct,
         "issued credential type does not match the selected configuration"
     );
     ensure!(
-        verified.format == session.expected_format,
+        verified.format == expected_format,
         "issued credential format does not match the selected configuration"
     );
     Ok(VerifiedReceipt {
@@ -319,6 +339,91 @@ mod tests {
     use serde_json::json;
 
     #[test]
+    fn accepts_one_final_credential_object_or_one_legacy_credential() {
+        for value in [
+            json!({"credentials": [{"credential": "issued~token~"}]}),
+            json!({"credential": "issued~token~"}),
+        ] {
+            let response = serde_json::from_value(value).unwrap();
+            assert_eq!(single_credential(&response).unwrap(), "issued~token~");
+        }
+    }
+
+    #[test]
+    fn rejects_ambiguous_batch_deferred_and_malformed_credential_responses() {
+        for value in [
+            json!({}),
+            json!({"credentials": []}),
+            json!({"credentials": [{"credential": "one"}, {"credential": "two"}]}),
+            json!({"credential": "one", "credentials": [{"credential": "one"}]}),
+            json!({"transaction_id": "deferred", "credentials": [{"credential": "one"}]}),
+            json!({"credentials": ["unwrapped-token"]}),
+            json!({"credentials": [{}]}),
+            json!({"credentials": [{"credential": 42}]}),
+            json!({"credentials": [{"credential": ""}]}),
+            json!({"credential": {"unverified": true}}),
+            json!({"credential": "x".repeat(MAX_CREDENTIAL_BYTES + 1)}),
+        ] {
+            let response = serde_json::from_value(value).unwrap();
+            assert!(single_credential(&response).is_err());
+        }
+    }
+
+    #[test]
+    fn final_response_is_verified_against_governed_trust_and_selected_configuration() {
+        let fixture: Value =
+            serde_json::from_str(include_str!("fixtures/remote_sd_jwt_wallet_public.json"))
+                .unwrap();
+        let now = Utc::now();
+        let mut issuer_jwk = fixture["issuer_public_jwk"].clone();
+        issuer_jwk["kid"] = fixture["issuer_key_id"].clone();
+        issuer_jwk["alg"] = json!("ES256");
+        let snapshot = json!({
+            "organization_id": "org-1",
+            "trust_profile_id": "11111111-2222-4333-8444-555555555555",
+            "generated_at": now,
+            "expires_at": now + Duration::seconds(30),
+            "issuer_keys": [{
+                "issuer": fixture["issuer"],
+                "key_id": fixture["issuer_key_id"],
+                "algorithm": "ES256",
+                "public_jwk": issuer_jwk
+            }]
+        })
+        .to_string();
+        let holder = fixture["holder_public_jwk"].to_string();
+        let response: CredentialResponse = serde_json::from_value(json!({
+            "credentials": [{"credential": fixture["credential"]}]
+        }))
+        .unwrap();
+        let verify = |vct, format| verify_receipt(&response, vct, format, &holder, &snapshot);
+        let issuer = fixture["issuer"].as_str().unwrap();
+        let verified = verify("VerifiedWalletCredential", "vc+sd-jwt").unwrap();
+        assert_eq!(verified.credential, fixture["credential"].as_str().unwrap());
+        assert_eq!(verified.issuer, issuer);
+        // Issuer identity is authenticated through the governed resolver.
+        // The OID4VCI service URL need not equal a credential's DID issuer
+        // (OID4VCI 1.0 section 14.4); do not invent that equality here.
+        for (vct, format, expected_error) in [
+            ("OtherCredential", "vc+sd-jwt", "type"),
+            ("VerifiedWalletCredential", "dc+sd-jwt", "format"),
+        ] {
+            let error = verify(vct, format).err().unwrap();
+            assert!(error.to_string().contains(expected_error));
+        }
+        let mut other_issuer: Value = serde_json::from_str(&snapshot).unwrap();
+        other_issuer["issuer_keys"][0]["issuer"] = json!("did:web:other.example");
+        assert!(verify_receipt(
+            &response,
+            "VerifiedWalletCredential",
+            "vc+sd-jwt",
+            &holder,
+            &other_issuer.to_string(),
+        )
+        .is_err());
+    }
+
+    #[test]
     fn configuration_must_name_a_sd_jwt_type() {
         assert!(supported_configuration(&json!({"format": "dc+sd-jwt"})).is_err());
         let supported = json!({
@@ -326,15 +431,23 @@ mod tests {
             "vct": "example",
             "cryptographic_binding_methods_supported": ["jwk"],
             "proof_types_supported": {"jwt": {
-                "proof_signing_alg_values_supported": ["ES256"],
-                "key_attestations_required": {}
+                "proof_signing_alg_values_supported": ["ES256"]
             }}
         });
         assert!(supported_configuration(&supported).is_ok());
-        let mut unsupported = supported;
-        unsupported["proof_types_supported"]["jwt"]["key_attestations_required"] =
-            json!({"key_storage": ["iso_18045"]});
-        assert!(supported_configuration(&unsupported).is_err());
+        for requirement in [
+            json!({}),
+            json!({"key_storage": []}),
+            json!({"key_storage": ["iso_18045"]}),
+            json!([]),
+            json!(false),
+            Value::Null,
+        ] {
+            let mut unsupported = supported.clone();
+            unsupported["proof_types_supported"]["jwt"]["key_attestations_required"] = requirement;
+            let error = supported_configuration(&unsupported).unwrap_err();
+            assert!(error.to_string().contains("unsupported key attestation"));
+        }
     }
 
     #[test]

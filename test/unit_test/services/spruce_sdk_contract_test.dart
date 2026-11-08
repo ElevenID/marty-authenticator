@@ -1,799 +1,300 @@
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:marty_authenticator/rust/marty_bridge.dart/api.dart';
-import 'package:marty_authenticator/rust/marty_bridge.dart/frb_generated.dart';
+import 'package:marty_authenticator/interfaces/spruce_interfaces_extended.dart';
 import 'package:marty_authenticator/services/spruce_client_extended.dart';
-import 'package:marty_authenticator/services/spruce_platform_service.dart';
 import 'package:marty_authenticator/services/spruce_platform_service_extended.dart';
+import 'package:marty_authenticator/services/verified_wallet_bridge.dart';
 import 'package:marty_authenticator/utils/spruce_channels.dart';
 
-const _credential = <String, dynamic>{
-  'id': 'urn:credential:ob3',
-  'type': ['VerifiableCredential', 'OpenBadgeCredential'],
+const _receipt = <String, dynamic>{
+  'id': 'verified-receipt',
+  'format': 'dc+sd-jwt',
+  'issuer': 'https://issuer.test',
 };
-const _result = <String, dynamic>{'status': 'complete', 'id': 'result'};
-const _sdk = 'spruce_id_sdk';
-const _monitor = 'spruce_id_credential_monitor';
 
-class _WalletApi implements RustLibApi {
-  String route = 'oid4vp';
-  String? offer;
-  String? request;
-  String? contextJson;
+class _BoundWalletPlatform implements ISpruceIdPlatformServiceExtended {
+  bool initialized = false;
+  Map<String, dynamic>? received;
   Object? rejection;
+  final selection = UserSelectionRequiredException(
+    sessionId: 'selection-session',
+    matches: const [
+      {'id': 'verified-receipt'},
+    ],
+    requestDetails: const {'verifier': 'https://verifier.test'},
+  );
 
   @override
-  Future<String> crateApiWalletNormalizeCredentialOffer({
-    required String input,
-  }) async {
-    offer = input;
+  bool get isInitialized => initialized;
+
+  @override
+  Future<void> initializeW3C() async {
     if (rejection != null) throw rejection!;
-    return '{"credential_offer_uri":"https://issuer.test/offer"}';
+    initialized = true;
   }
 
   @override
-  Future<String> crateApiWalletRoutePresentationRequest({
-    required String input,
+  Future<Map<String, dynamic>> handleOID4VCOfferSDK({
+    required String credentialOffer,
+    String? pin,
   }) async {
-    request = input;
+    received = {'offer': credentialOffer, 'pin': pin};
     if (rejection != null) throw rejection!;
-    return route;
+    return _receipt;
   }
 
   @override
-  Future<FrbPresentationBindingContext>
-  crateApiWalletValidatePresentationContext({
-    required String requestJson,
+  Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
+    required String presentationRequest,
   }) async {
-    contextJson = requestJson;
+    received = {'request': presentationRequest};
     if (rejection != null) throw rejection!;
-    return const FrbPresentationBindingContext(
-      challenge: 'validated-nonce',
-      domain: 'https://verifier.test',
-    );
+    throw selection;
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeOID4VPRequestSDK({
+    required String sessionId,
+    required String selectedCredentialId,
+    List<String>? selectedFields,
+  }) async {
+    received = {
+      'session': sessionId,
+      'credential': selectedCredentialId,
+      'fields': selectedFields,
+    };
+    if (rejection != null) throw rejection!;
+    return {'ok': true, 'redirect_uri': 'https://verifier.test/done'};
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _SdkOperation {
-  final String name;
-  final String channel;
-  final String method;
-  final Map<String, dynamic> arguments;
-  final Future<dynamic> Function(SpruceIdPlatformServiceExtended) invoke;
-  final dynamic result;
-
-  const _SdkOperation(
-    this.name,
-    this.channel,
-    this.method,
-    this.arguments,
-    this.invoke, {
-    this.result = _result,
-  });
+class _UnusedBridge implements VerifiedWalletBridge {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw StateError('Unsupported SDK operation reached the Rust bridge');
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final messenger =
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-  final native = _WalletApi();
-  final service = SpruceIdPlatformServiceExtended();
-  final calls = <(String, MethodCall)>[];
-  dynamic response;
-  PlatformException? failure;
-  const channels = [
-    SpruceIdChannels.w3c,
-    SpruceIdChannels.jwt,
-    SpruceIdChannels.mdoc,
-    SpruceIdChannels.wallet,
-    _sdk,
-    _monitor,
-  ];
 
-  setUpAll(() => RustLib.initMock(api: native));
-  tearDownAll(RustLib.dispose);
-  setUp(() {
-    native.route = 'oid4vp';
-    native.offer = null;
-    native.request = null;
-    native.contextJson = null;
-    native.rejection = null;
-    calls.clear();
-    response = _result;
-    failure = null;
-    for (final channel in channels) {
-      messenger.setMockMethodCallHandler(MethodChannel(channel), (call) async {
-        calls.add((channel, call));
-        if (failure != null) throw failure!;
-        return response;
-      });
-    }
-  });
-  tearDown(() {
-    for (final channel in channels) {
-      messenger.setMockMethodCallHandler(MethodChannel(channel), null);
-    }
-  });
-
-  final operations = <_SdkOperation>[
-    _SdkOperation(
-      'credential offer',
-      SpruceIdChannels.w3c,
-      'handleOID4VCOfferRefactored',
-      {
-        'offer': '{"credential_offer_uri":"https://issuer.test/offer"}',
-        'pin': '1234',
-        'keyId': 'holder-key',
-      },
-      (s) => SpruceIdClientExtended(s).handleOID4VCOfferSDK(
-        credentialOffer: 'openid-credential-offer://raw',
+  test('client preserves the approved offer and transaction code', () async {
+    final platform = _BoundWalletPlatform();
+    final client = SpruceIdClientExtended(platform);
+    expect(
+      await client.handleOID4VCOfferSDK(
+        credentialOffer: 'openid-credential-offer://approved',
         pin: '1234',
-        keyId: 'holder-key',
       ),
-    ),
-    _SdkOperation(
-      'OID4VP selected credential request',
-      SpruceIdChannels.w3c,
-      'handleOID4VPRequestRefactored',
-      {
-        'request': 'openid4vp://request',
-        'selectedCredentials': [_credential],
-        'disclosureOptions': ['achievement'],
-        'keyId': 'default-key',
-      },
-      (s) => SpruceIdClientExtended(s).handleOID4VPRequestSDK(
-        presentationRequest: 'openid4vp://request',
-        selectedCredentials: [_credential],
-        disclosureOptions: ['achievement'],
-      ),
-    ),
-    _SdkOperation(
-      'bound presentation',
-      SpruceIdChannels.w3c,
-      'createPresentationRefactored',
-      {
-        'credentials': [_credential],
-        'challenge': 'nonce',
-        'domain': 'https://verifier.test',
-        'selectiveDisclosure': {
-          'urn:credential:ob3': ['achievement'],
-        },
-        'keyId': 'holder-key',
-      },
-      (s) => SpruceIdClientExtended(s).createPresentationSDK(
-        credentials: [_credential],
-        challenge: 'nonce',
-        domain: 'https://verifier.test',
-        selectiveDisclosure: {
-          'urn:credential:ob3': ['achievement'],
-        },
-        keyId: 'holder-key',
-      ),
-    ),
-    _SdkOperation(
-      'holder initialization defaults',
-      _sdk,
-      'initializeHolderSDK',
-      {'keyId': 'default-key', 'config': <String, dynamic>{}},
-      (s) => SpruceIdClientExtended(s).initializeHolderSDK(),
-    ),
-    _SdkOperation(
-      'holder presentation defaults',
-      _sdk,
-      'createVerifiablePresentationSDK',
-      {
-        'credentials': [_credential],
-        'challenge': 'nonce',
-        'domain': '',
-        'selectiveDisclosure': <String, dynamic>{},
-        'presentationFormat': 'jwt_vp',
-        'keyId': 'default-key',
-      },
-      (s) => SpruceIdClientExtended(s).createVerifiablePresentationSDK(
-        credentials: [_credential],
-        challenge: 'nonce',
-      ),
-    ),
-    _SdkOperation(
-      'holder presentation custom binding',
-      _sdk,
-      'createVerifiablePresentationSDK',
-      {
-        'credentials': [_credential],
-        'challenge': 'nonce',
-        'domain': 'https://verifier.test',
-        'selectiveDisclosure': {
-          'urn:credential:ob3': ['achievement'],
-        },
-        'presentationFormat': 'ldp_vp',
-        'keyId': 'holder-key',
-      },
-      (s) => SpruceIdClientExtended(s).createVerifiablePresentationSDK(
-        credentials: [_credential],
-        challenge: 'nonce',
-        domain: 'https://verifier.test',
-        selectiveDisclosure: {
-          'urn:credential:ob3': ['achievement'],
-        },
-        presentationFormat: 'ldp_vp',
-        keyId: 'holder-key',
-      ),
-    ),
-    _SdkOperation(
-      'presentation signing',
-      _sdk,
-      'signPresentationSDK',
-      {
-        'presentation': {'id': 'vp-7'},
-        'keyId': 'holder-key',
-        'verificationMethod': 'did:key:z#z',
-        'proofPurpose': 'authentication',
-      },
-      (s) => SpruceIdClientExtended(s).signPresentationSDK(
-        presentation: {'id': 'vp-7'},
-        keyId: 'holder-key',
-        verificationMethod: 'did:key:z#z',
-      ),
-    ),
-    _SdkOperation(
-      'credential batch',
-      _sdk,
-      'batchProcessCredentialsSDK',
-      {
-        'operations': [
-          {'verify': _credential},
-        ],
-        'keyId': 'default-key',
-      },
-      (s) => SpruceIdClientExtended(s).batchProcessCredentialsSDK(
-        operations: [
-          {'verify': _credential},
-        ],
-      ),
-      result: <Map<String, dynamic>>[],
-    ),
-    _SdkOperation(
-      'credential capabilities',
-      _sdk,
-      'getCredentialCapabilitiesSDK',
-      {'credentialId': 'urn:credential:ob3'},
-      (s) => SpruceIdClientExtended(
-        s,
-      ).getCredentialCapabilitiesSDK('urn:credential:ob3'),
-    ),
-    _SdkOperation(
-      'credential validation',
-      _sdk,
-      'validateCredentialSDK',
-      {
-        'credential': _credential,
-        'schemaId': 'schema-7',
-        'policies': ['issuer-trust'],
-      },
-      (s) => SpruceIdClientExtended(s).validateCredentialSDK(
-        credential: _credential,
-        schemaId: 'schema-7',
-        policies: ['issuer-trust'],
-      ),
-    ),
-    _SdkOperation(
-      'hardware key generation',
-      _sdk,
-      'generateSecureKeySDK',
-      {
-        'algorithm': 'Ed25519',
-        'useHardwareModule': true,
-        'keyPolicies': <String, dynamic>{},
-      },
-      (s) => SpruceIdClientExtended(s).generateSecureKeySDK(),
-    ),
-    _SdkOperation(
-      'key operation',
-      _sdk,
-      'performCryptoOperationSDK',
-      {
-        'operation': 'sign',
-        'keyId': 'holder-key',
-        'payload': {'bytes': 'base64'},
-        'options': {'purpose': 'proof'},
-      },
-      (s) => SpruceIdClientExtended(s).performCryptoOperationSDK(
-        operation: 'sign',
-        keyId: 'holder-key',
-        payload: {'bytes': 'base64'},
-        options: {'purpose': 'proof'},
-      ),
-    ),
-    _SdkOperation(
-      'secure peer channel',
-      _sdk,
-      'establishSecureChannelSDK',
-      {
-        'peerDid': 'did:example:peer',
-        'keyId': 'default-key',
-        'channelOptions': <String, dynamic>{},
-      },
-      (s) => SpruceIdClientExtended(
-        s,
-      ).establishSecureChannelSDK(peerDid: 'did:example:peer'),
-    ),
-    _SdkOperation(
-      'advanced SD-JWT creation',
-      SpruceIdChannels.jwt,
-      'createAdvancedSdJwtSDK',
-      {
-        'issuer': 'https://issuer.test',
-        'claims': {'age': 25},
-        'disclosureTree': {'age': true},
-        'alwaysDisclose': ['iss'],
-        'keyId': 'default-key',
-      },
-      (s) => s.createAdvancedSdJwtSDK(
-        issuer: 'https://issuer.test',
-        claims: {'age': 25},
-        disclosureTree: {'age': true},
-        alwaysDisclose: ['iss'],
-      ),
-    ),
-    _SdkOperation(
-      'SD-JWT presentation',
-      SpruceIdChannels.jwt,
-      'presentSdJwtSDK',
-      {
-        'sdJwt': 'signed.jwt~disclosure~',
-        'disclosureRequest': {'age': true},
-        'challenge': 'nonce',
-        'keyId': 'default-key',
-      },
-      (s) => s.presentSdJwtSDK(
-        sdJwt: 'signed.jwt~disclosure~',
-        disclosureRequest: {'age': true},
-        challenge: 'nonce',
-      ),
-    ),
-    _SdkOperation(
-      'SD-JWT presentation verification',
-      SpruceIdChannels.jwt,
-      'verifySdJwtPresentationSDK',
-      {
-        'presentation': 'signed.vp',
-        'requiredClaims': ['age'],
-        'policies': <String>[],
-      },
-      (s) => s.verifySdJwtPresentationSDK(
-        presentation: 'signed.vp',
-        requiredClaims: ['age'],
-      ),
-    ),
-    _SdkOperation(
-      'mobile document initialization',
-      SpruceIdChannels.mdoc,
-      'initializeMdocSDK',
-      {
-        'mdocData': {'docType': 'org.iso.18013.5.1.mDL'},
-        'enableProximityDetection': true,
-        'deviceConfig': <String, dynamic>{},
-      },
-      (s) =>
-          s.initializeMdocSDK(mdocData: {'docType': 'org.iso.18013.5.1.mDL'}),
-    ),
-    _SdkOperation(
-      'mobile document OID4VP',
-      SpruceIdChannels.mdoc,
-      'createMdocResponse',
-      {'requestUrl': 'openid4vp://mdoc-request'},
-      (s) =>
-          s.handleMdocOid4vpRequestSDK(requestUrl: 'openid4vp://mdoc-request'),
-    ),
-    _SdkOperation(
-      'mobile document selective presentation',
-      SpruceIdChannels.mdoc,
-      'createMdocPresentationSDK',
-      {
-        'docType': 'org.iso.18013.5.1.mDL',
-        'requestedAttributes': ['age_over_18'],
-        'ageVerificationOptions': {'minimumAge': 18},
-        'hiddenAttributes': ['birth_date'],
-        'keyId': 'default-key',
-      },
-      (s) => s.createMdocPresentationSDK(
-        docType: 'org.iso.18013.5.1.mDL',
-        requestedAttributes: ['age_over_18'],
-        ageVerificationOptions: {'minimumAge': 18},
-        hiddenAttributes: ['birth_date'],
-      ),
-    ),
-    _SdkOperation(
-      'mobile document session',
-      SpruceIdChannels.mdoc,
-      'establishMdocSessionSDK',
-      {
-        'sessionRequest': {'nonce': 'session-nonce'},
-        'keyId': 'default-key',
-        'securityOptions': <String, dynamic>{},
-      },
-      (s) =>
-          s.establishMdocSessionSDK(sessionRequest: {'nonce': 'session-nonce'}),
-    ),
-    _SdkOperation(
-      'refresh one credential',
-      SpruceIdChannels.wallet,
-      'refreshCredentialSDK',
-      {
-        'credentialId': 'urn:credential:ob3',
-        'keyId': 'default-key',
-        'refreshOptions': <String, dynamic>{},
-      },
-      (s) => s.refreshCredentialSDK(credentialId: 'urn:credential:ob3'),
-    ),
-    _SdkOperation(
-      'encrypted backup',
-      SpruceIdChannels.wallet,
-      'backupCredentialsSDK',
-      {
-        'credentialIds': ['urn:credential:ob3'],
-        'backupPassphrase': 'test-only-passphrase',
-        'backupOptions': <String, dynamic>{},
-      },
-      (s) => s.backupCredentialsSDK(
-        credentialIds: ['urn:credential:ob3'],
-        backupPassphrase: 'test-only-passphrase',
-      ),
-    ),
-    _SdkOperation(
-      'restore backup',
-      SpruceIdChannels.wallet,
-      'restoreCredentialsSDK',
-      {
-        'backupData': 'encrypted-backup',
-        'backupPassphrase': 'test-only-passphrase',
-        'restoreOptions': <String, dynamic>{},
-      },
-      (s) => s.restoreCredentialsSDK(
-        backupData: 'encrypted-backup',
-        backupPassphrase: 'test-only-passphrase',
-      ),
-    ),
-    _SdkOperation(
-      'credential sync',
-      SpruceIdChannels.wallet,
-      'syncCredentialsSDK',
-      {
-        'syncEndpoint': 'https://wallet.test/sync',
-        'syncToken': 'test-only-token',
-        'syncOptions': {'direction': 'pull'},
-      },
-      (s) => SpruceIdClientExtended(s).syncCredentialsSDK(
-        syncEndpoint: 'https://wallet.test/sync',
-        syncToken: 'test-only-token',
-        syncOptions: {'direction': 'pull'},
-      ),
-    ),
-    _SdkOperation(
-      'credential export',
-      SpruceIdChannels.wallet,
-      'exportCredentialsSDK',
-      {
-        'credentialIds': ['urn:credential:ob3'],
-        'exportFormat': 'json',
-        'exportOptions': <String, dynamic>{},
-      },
-      (s) => SpruceIdClientExtended(s).exportCredentialsSDK(
-        credentialIds: ['urn:credential:ob3'],
-        exportFormat: 'json',
-      ),
-    ),
-    _SdkOperation(
-      'credential import',
-      SpruceIdChannels.wallet,
-      'importCredentialsSDK',
-      {
-        'credentialData': '{"id":"ob3"}',
-        'expectedFormat': 'json',
-        'importOptions': <String, dynamic>{},
-      },
-      (s) => SpruceIdClientExtended(s).importCredentialsSDK(
-        credentialData: '{"id":"ob3"}',
-        expectedFormat: 'json',
-      ),
-    ),
-  ];
-
-  for (final operation in operations) {
-    test('${operation.name} preserves native arguments and result', () async {
-      response = operation.result;
-      expect(await operation.invoke(service), operation.result);
-      expect(calls, hasLength(1));
-      expect(calls.single.$1, operation.channel);
-      expect(calls.single.$2.method, operation.method);
-      expect(calls.single.$2.arguments, operation.arguments);
-    });
-    test('${operation.name} propagates native failure details', () async {
-      failure = PlatformException(
-        code: 'CONSENT_REQUIRED',
-        message: 'Unlock wallet',
-        details: {'retryable': true},
-      );
-      await expectLater(
-        operation.invoke(service),
-        throwsA(
-          isA<SpruceIdException>()
-              .having((e) => e.code, 'code', 'CONSENT_REQUIRED')
-              .having((e) => e.message, 'message', contains('Unlock wallet'))
-              .having((e) => e.details, 'details', {'retryable': true}),
-        ),
-      );
-    });
-  }
-
-  test(
-    'request routing uses the Rust decision and passes raw request once',
-    () async {
-      final client = SpruceIdClientExtended(service);
-      for (final route in ['oid4vp', 'mdoc']) {
-        native.route = route;
-        calls.clear();
-        expect(
-          await client.initiateOID4VPRequestSDK(
-            presentationRequest: 'request-payload',
-          ),
-          _result,
-        );
-        expect(native.request, 'request-payload');
-        expect(
-          calls.single.$1,
-          route == 'mdoc' ? SpruceIdChannels.mdoc : SpruceIdChannels.w3c,
-        );
-        expect(calls.single.$2.arguments, {
-          'request': 'request-payload',
-          'requestUrl': 'request-payload',
-        });
-      }
-      native.route = 'unsupported';
-      calls.clear();
-      await expectLater(
-        client.initiateOID4VPRequestSDK(presentationRequest: 'request-payload'),
-        throwsStateError,
-      );
-      expect(calls, isEmpty);
-      native.route = 'oid4vp';
-      failure = PlatformException(
-        code: 'VERIFIER_DENIED',
-        message: 'Untrusted verifier',
-      );
-      await expectLater(
-        client.initiateOID4VPRequestSDK(presentationRequest: 'request-payload'),
-        throwsA(isA<SpruceIdException>()),
-      );
-    },
-  );
-
-  test(
-    'selection-required response carries session and verifier details',
-    () async {
-      response = {
-        'status': 'user_selection_required',
-        'sessionId': 'session-7',
-        'matches': <Map<String, dynamic>>[],
-        'verifier': 'Example verifier',
-        'purpose': 'Age check',
-      };
-      await expectLater(
-        service.initiateOID4VPRequestSDK(presentationRequest: 'request'),
-        throwsA(
-          isA<UserSelectionRequiredException>()
-              .having((e) => e.sessionId, 'session', 'session-7')
-              .having((e) => e.matches, 'matches', isEmpty)
-              .having((e) => e.requestDetails, 'details', {
-                'verifier': 'Example verifier',
-                'purpose': 'Age check',
-              })
-              .having((e) => e.toString(), 'display', contains('session-7')),
-        ),
-      );
-    },
-  );
-
-  test(
-    'OID4VP completion passes selected fields and uses mdoc fallback only after failure',
-    () async {
-      final client = SpruceIdClientExtended(service);
-      expect(
-        await client.completeOID4VPRequestSDK(
-          sessionId: 'session-7',
-          selectedCredentialId: 'urn:credential:ob3',
-          selectedFields: ['achievement'],
-        ),
-        _result,
-      );
-      expect(calls.single.$1, SpruceIdChannels.w3c);
-      expect(calls.single.$2.arguments, {
-        'sessionId': 'session-7',
-        'selectedCredentialId': 'urn:credential:ob3',
-        'selectedFields': ['achievement'],
-      });
-      calls.clear();
-      messenger.setMockMethodCallHandler(
-        const MethodChannel(SpruceIdChannels.w3c),
-        (call) async {
-          calls.add((SpruceIdChannels.w3c, call));
-          throw PlatformException(code: 'NOT_W3C_SESSION');
-        },
-      );
-      expect(
-        await client.completeOID4VPRequestSDK(
-          sessionId: 'mdoc-session',
-          selectedCredentialId: 'mdl',
-        ),
-        _result,
-      );
-      expect(calls.map((call) => call.$1), [
-        SpruceIdChannels.w3c,
-        SpruceIdChannels.mdoc,
-      ]);
-      expect(calls.last.$2.arguments, {
-        'sessionId': 'mdoc-session',
-        'selectedCredentialId': 'mdl',
-        'selectedFields': null,
-      });
-      failure = PlatformException(
-        code: 'SESSION_EXPIRED',
-        message: 'Start again',
-      );
-      await expectLater(
-        client.completeOID4VPRequestSDK(
-          sessionId: 'expired',
-          selectedCredentialId: 'mdl',
-        ),
-        throwsA(
-          isA<SpruceIdException>().having(
-            (e) => e.code,
-            'code',
-            'SESSION_EXPIRED',
-          ),
-        ),
-      );
-    },
-  );
-
-  test(
-    'advanced presentation uses validated binding and rejects before native signing',
-    () async {
-      final client = SpruceIdClientExtended(service);
-      final request = {
-        'nonce': 'original-nonce',
-        'client_id': 'https://verifier.test',
-      };
-      expect(
-        await client.createAdvancedPresentation(
-          credentials: [_credential],
-          presentationRequest: request,
-          selectiveDisclosure: {
-            'urn:credential:ob3': ['achievement'],
-          },
-        ),
-        _result,
-      );
-      expect(jsonDecode(native.contextJson!), request);
-      expect(calls.single.$2.arguments['challenge'], 'validated-nonce');
-      expect(calls.single.$2.arguments['domain'], 'https://verifier.test');
-      native.rejection = StateError('Invalid presentation binding');
-      calls.clear();
-      await expectLater(
-        client.createAdvancedPresentation(
-          credentials: [_credential],
-          presentationRequest: {},
-          selectiveDisclosure: {},
-        ),
-        throwsStateError,
-      );
-      expect(calls, isEmpty);
-      await expectLater(
-        client.handleOID4VCFlow(credentialOffer: 'invalid-offer'),
-        throwsStateError,
-      );
-      expect(native.offer, 'invalid-offer');
-      expect(calls, isEmpty);
-    },
-  );
-
-  test(
-    'client initialization options and convenience methods keep SDK boundaries',
-    () async {
-      final client = SpruceIdClientExtended(service);
-      await client.initializeSDK(config: {'storage': 'secure'});
-      expect(calls.map((call) => call.$2.method), [
-        'initialize',
-        'initializeHolderSDK',
-      ]);
-      expect(calls.last.$2.arguments['config'], {'storage': 'secure'});
-      calls.clear();
-      await client.initializeSDK(enableAdvancedFeatures: false);
-      expect(calls.single.$2.method, 'initialize');
-      calls.clear();
-      await client.handleOID4VCFlow(credentialOffer: 'raw-offer', pin: '5678');
-      expect(native.offer, 'raw-offer');
-      expect(calls.single.$2.arguments['pin'], '5678');
-      calls.clear();
-      expect(await client.getCredentialMetadata('urn:credential:ob3'), _result);
-      expect(calls.single.$2.arguments, {'credentialId': 'urn:credential:ob3'});
-      await client.enableCredentialMonitoring();
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      expect(
-        container.read(spruceIdPlatformServiceExtendedProvider),
-        same(service),
-      );
-      expect(
-        container.read(spruceIdClientExtendedProvider),
-        isA<SpruceIdClientExtended>(),
-      );
-    },
-  );
-
-  test(
-    'credential monitoring forwards events, reports errors and closes',
-    () async {
-      final stream = await service.monitorCredentialStatusSDK(
-        'urn:credential:ob3',
-      );
-      final assertion = expectLater(
-        stream,
-        emitsInOrder([
-          {'id': 'urn:credential:ob3', 'revoked': true},
-          emitsError(
-            isA<SpruceIdException>().having(
-              (e) => e.code,
-              'code',
-              'MONITOR_ERROR',
-            ),
-          ),
-          emitsDone,
-        ]),
-      );
-      await Future<void>.delayed(Duration.zero);
-      expect(calls.first.$2.method, 'startCredentialMonitoring');
-      expect(calls.first.$2.arguments, {'credentialId': 'urn:credential:ob3'});
-      expect(calls.last.$2.method, 'listen');
-      const codec = StandardMethodCodec();
-      await messenger.handlePlatformMessage(
-        _monitor,
-        codec.encodeSuccessEnvelope({
-          'id': 'urn:credential:ob3',
-          'revoked': true,
-        }),
-        (_) {},
-      );
-      await messenger.handlePlatformMessage(
-        _monitor,
-        codec.encodeErrorEnvelope(code: 'OFFLINE', message: 'Disconnected'),
-        (_) {},
-      );
-      await messenger.handlePlatformMessage(_monitor, null, (_) {});
-      await assertion;
-    },
-  );
-
-  test('monitor setup failure is emitted to the subscriber', () async {
-    failure = PlatformException(code: 'NOT_READY');
-    final stream = await service.monitorCredentialStatusSDK(
-      'urn:credential:ob3',
+      _receipt,
     );
-    await expectLater(
-      stream,
-      emitsError(
-        isA<SpruceIdException>().having(
-          (e) => e.code,
-          'code',
-          'MONITOR_SETUP_ERROR',
-        ),
+    expect(platform.received, {
+      'offer': 'openid-credential-offer://approved',
+      'pin': '1234',
+    });
+    expect(
+      await client.handleOID4VCFlow(
+        credentialOffer: 'openid-credential-offer://second',
       ),
+      _receipt,
     );
+    expect(platform.received, {
+      'offer': 'openid-credential-offer://second',
+      'pin': null,
+    });
   });
+
+  test(
+    'client preserves the selection session and explicit disclosure approval',
+    () async {
+      final platform = _BoundWalletPlatform();
+      final client = SpruceIdClientExtended(platform);
+      await expectLater(
+        client.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://request',
+        ),
+        throwsA(same(platform.selection)),
+      );
+      expect(platform.received, {'request': 'openid4vp://request'});
+      expect(
+        await client.completeOID4VPRequestSDK(
+          sessionId: platform.selection.sessionId,
+          selectedCredentialId: 'verified-receipt',
+          selectedFields: ['credential/given_name'],
+        ),
+        {'ok': true, 'redirect_uri': 'https://verifier.test/done'},
+      );
+      expect(platform.received, {
+        'session': 'selection-session',
+        'credential': 'verified-receipt',
+        'fields': ['credential/given_name'],
+      });
+    },
+  );
+
+  test(
+    'rejected receipt and presentation errors reach the caller unchanged',
+    () async {
+      final platform = _BoundWalletPlatform();
+      final client = SpruceIdClientExtended(platform);
+      final failure = StateError('Remote proof was rejected');
+      platform.rejection = failure;
+      for (final invoke in <Future<dynamic> Function()>[
+        () => client.handleOID4VCOfferSDK(
+          credentialOffer: 'openid-credential-offer://approved',
+        ),
+        () => client.initiateOID4VPRequestSDK(
+          presentationRequest: 'openid4vp://request',
+        ),
+        () => client.completeOID4VPRequestSDK(
+          sessionId: 'selection-session',
+          selectedCredentialId: 'verified-receipt',
+          selectedFields: ['credential/given_name'],
+        ),
+      ]) {
+        await expectLater(invoke(), throwsA(same(failure)));
+      }
+    },
+  );
+
+  test(
+    'client provider uses its injected platform without choosing a local key',
+    () async {
+      final platform = _BoundWalletPlatform();
+      final container = ProviderContainer(
+        overrides: [
+          spruceIdPlatformServiceExtendedProvider.overrideWithValue(platform),
+        ],
+      );
+      addTearDown(container.dispose);
+      final client = container.read(spruceIdClientExtendedProvider);
+      await client.initializeSDK(enableAdvancedFeatures: false);
+      expect(platform.isInitialized, isTrue);
+      expect(
+        await client.handleOID4VCOfferSDK(
+          credentialOffer: 'openid-credential-offer://approved',
+        ),
+        _receipt,
+      );
+      await expectLater(
+        client.initializeSDK(config: {'keyId': 'caller-selected-key'}),
+        throwsA(isA<UnsupportedError>()),
+      );
+    },
+  );
+
+  // These operations still have interface methods for callers to receive an
+  // explicit unsupported result. A successful native-channel stub must not
+  // turn an unimplemented custody or verification path into success.
+  final unsupported =
+      <String, Future<dynamic> Function(SpruceIdPlatformServiceExtended)>{
+        'credential batch': (s) =>
+            SpruceIdClientExtended(s).batchProcessCredentialsSDK(
+              operations: [
+                {
+                  'verify': {'id': 'credential'},
+                },
+              ],
+            ),
+        'credential capabilities': (s) => SpruceIdClientExtended(
+          s,
+        ).getCredentialCapabilitiesSDK('credential'),
+        'credential validation': (s) =>
+            SpruceIdClientExtended(s).validateCredentialSDK(
+              credential: {'id': 'credential'},
+              schemaId: 'schema',
+              policies: ['issuer-trust'],
+            ),
+        'advanced SD-JWT creation': (s) => s.createAdvancedSdJwtSDK(
+          issuer: 'https://issuer.test',
+          claims: {'age': 25},
+          disclosureTree: {'age': true},
+        ),
+        'unbound SD-JWT presentation': (s) => s.presentSdJwtSDK(
+          sdJwt: 'signed.jwt~disclosure~',
+          disclosureRequest: {'age': true},
+          challenge: 'nonce',
+        ),
+        'SD-JWT presentation verification': (s) => s.verifySdJwtPresentationSDK(
+          presentation: 'signed.vp',
+          requiredClaims: ['age'],
+        ),
+        'mobile document initialization': (s) =>
+            s.initializeMdocSDK(mdocData: {'docType': 'org.iso.18013.5.1.mDL'}),
+        'mobile document OID4VP': (s) =>
+            s.handleMdocOid4vpRequestSDK(requestUrl: 'openid4vp://request'),
+        'mobile document presentation': (s) => s.createMdocPresentationSDK(
+          docType: 'org.iso.18013.5.1.mDL',
+          requestedAttributes: ['age_over_18'],
+          hiddenAttributes: ['birth_date'],
+        ),
+        'mobile document session': (s) =>
+            s.establishMdocSessionSDK(sessionRequest: {'nonce': 'nonce'}),
+        'credential monitoring': (s) =>
+            s.monitorCredentialStatusSDK('credential'),
+        'credential refresh': (s) =>
+            s.refreshCredentialSDK(credentialId: 'credential'),
+        'credential backup': (s) =>
+            s.backupCredentialsSDK(backupPassphrase: 'unused'),
+        'credential restore': (s) => s.restoreCredentialsSDK(
+          backupData: 'unverified',
+          backupPassphrase: 'unused',
+        ),
+        'credential sync': (s) => SpruceIdClientExtended(
+          s,
+        ).syncCredentialsSDK(syncEndpoint: 'https://sync.test'),
+        'credential export': (s) =>
+            SpruceIdClientExtended(s).exportCredentialsSDK(
+              credentialIds: ['credential'],
+              exportFormat: 'json',
+            ),
+        'credential import': (s) => SpruceIdClientExtended(
+          s,
+        ).importCredentialsSDK(credentialData: 'unverified'),
+      };
+  for (final entry in unsupported.entries) {
+    test(
+      '${entry.key} rejects before Rust, signer or native-channel dispatch',
+      () async {
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        final calls = <MethodCall>[];
+        const channels = [
+          SpruceIdChannels.w3c,
+          SpruceIdChannels.jwt,
+          SpruceIdChannels.mdoc,
+          SpruceIdChannels.wallet,
+          'spruce_id_sdk',
+          'spruce_id_credential_monitor',
+        ];
+        for (final channel in channels) {
+          messenger.setMockMethodCallHandler(MethodChannel(channel), (
+            call,
+          ) async {
+            calls.add(call);
+            return {'ok': true};
+          });
+        }
+        addTearDown(() {
+          for (final channel in channels) {
+            messenger.setMockMethodCallHandler(MethodChannel(channel), null);
+          }
+        });
+        final service = SpruceIdPlatformServiceExtended.withDependencies(
+          _UnusedBridge(),
+          () => throw StateError(
+            'Unsupported SDK operation requested holder custody',
+          ),
+        );
+        await expectLater(
+          entry.value(service),
+          throwsA(isA<UnsupportedError>()),
+        );
+        expect(calls, isEmpty);
+      },
+    );
+  }
 }

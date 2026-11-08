@@ -58,32 +58,22 @@ pub(crate) async fn wallet_build_and_submit_presentation(
 }
 
 pub(crate) async fn wallet_build_and_submit_zk_presentation(
-    response_uri: String,
-    presentation_definition_json: String,
-    credentials_json: String,
-    zk_proofs: Vec<FrbZkProofEntry>,
+    _response_uri: String,
+    _presentation_definition_json: String,
+    _credentials_json: String,
+    _zk_proofs: Vec<FrbZkProofEntry>,
 ) -> anyhow::Result<FrbPresentationResponse> {
-    use marty_oid4vci::verifier::PresentationDefinition;
-    let definition: PresentationDefinition = serde_json::from_str(&presentation_definition_json)
-        .map_err(|e| anyhow::anyhow!("Invalid presentation_definition_json: {}", e))?;
-    let credentials: std::collections::HashMap<String, String> =
-        serde_json::from_str(&credentials_json)
-            .map_err(|e| anyhow::anyhow!("Invalid credentials_json: {}", e))?;
-    let proofs: Vec<marty_oid4vci::ZkProofEntry> = zk_proofs.into_iter().map(Into::into).collect();
-    let engine = marty_oid4vci::WalletEngine::new();
-    let (vp_token, submission) = engine
-        .build_zk_presentation(&definition, credentials, proofs)
-        .map_err(|e| anyhow::anyhow!("ZK presentation build error: {}", e))?;
-    let resp = engine
-        .submit_presentation(&response_uri, &vp_token, &submission)
-        .await
-        .map_err(|e| anyhow::anyhow!("ZK presentation submission error: {}", e))?;
-    Ok(FrbPresentationResponse::from(resp))
+    // Retain the generated ABI, but this legacy endpoint has no approved
+    // request, challenge, issuer trust or paired remote-signature context.
+    // A caller-supplied proof cannot authorize a network submission.
+    Err(anyhow::anyhow!(
+        "REMOTE_KMS_REQUIRED: verified remote ZK presentation is not available"
+    ))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::wallet_build_and_submit_presentation;
+    use super::{wallet_build_and_submit_presentation, wallet_build_and_submit_zk_presentation};
 
     #[test]
     fn retired_presentation_entry_point_rejects_without_submitting() {
@@ -98,5 +88,24 @@ mod tests {
         ));
         let error = result.expect_err("unverified presentation must be rejected");
         assert!(error.to_string().contains("REMOTE_KMS_REQUIRED"));
+    }
+
+    #[test]
+    fn retired_zk_entry_point_rejects_before_parsing_or_submitting() {
+        // A runtime without networking is intentional: rejection must not
+        // inspect caller payloads, build a presentation, or open a connection.
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .expect("test runtime");
+        for payload in ["not-json", "{}"] {
+            let result = runtime.block_on(wallet_build_and_submit_zk_presentation(
+                "https://verifier.invalid/submit".into(),
+                payload.into(),
+                payload.into(),
+                vec![],
+            ));
+            let error = result.expect_err("unverified ZK presentation must be rejected");
+            assert!(error.to_string().contains("REMOTE_KMS_REQUIRED"));
+        }
     }
 }

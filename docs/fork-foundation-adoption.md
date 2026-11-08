@@ -30,13 +30,14 @@ are the custody-safe removal of local signing and upstream's validated
 - Signed USB trust-package JSON preservation through parsing, typed schema
   conversion and storage readback in the shared synchronization stack.
 
-These source updates do not change the Flutter bridge API or generate new Dart
-bindings. Credential-display parsing continues to decode claims; that operation
-does not authenticate issuer authority. The existing presentation wrapper still
-uses Core's legacy presentation builder. Integrating the verified holder
-preparation API with remote key custody remains the separately reviewed wallet
-integration work in Authenticator PR 57. No new protocol profile, holder-key
-fallback, cryptosuite or transport is enabled by this dependency adoption.
+The foundation adoption in PR 83 did not change the Flutter bridge API or
+generate new Dart bindings. Credential-display parsing continues to decode
+claims; that operation does not authenticate issuer authority. PR 57 now
+integrates that graph into the verified holder preparation and remote-key
+custody path; see [verified wallet integration](verified-wallet-integration.md)
+for its current scope and remaining qualification gates. No new protocol
+profile, holder-key fallback, cryptosuite or transport was enabled by the
+dependency adoption alone.
 
 ## Qualification
 

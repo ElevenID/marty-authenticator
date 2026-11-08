@@ -248,8 +248,17 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
                   return false;
                 }
                 final algorithms = requirement['alg'];
+                // These describe the issuer signature. The paired holder
+                // still signs with ES256; Rust verifies the selected issuer
+                // algorithm against this format's exact requirement.
                 return algorithms == null ||
-                    (algorithms is List && algorithms.contains('ES256'));
+                    (algorithms is List &&
+                        algorithms.isNotEmpty &&
+                        algorithms.length <= 16 &&
+                        algorithms.every((algorithm) => algorithm is String) &&
+                        algorithms.any(
+                          const {'ES256', 'ES384', 'EdDSA', 'RS256'}.contains,
+                        ));
               }))) {
         throw StateError('Presentation descriptor format is unsupported');
       }

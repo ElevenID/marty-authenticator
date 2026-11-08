@@ -462,78 +462,80 @@ void main() {
     expect(bridge.presentationPreparations, 1);
   });
 
-  test(
-    'presentation definition binds approved fields to remote signing',
-    () async {
-      await WalletCredentialStore.store(
-        StoredCredential(
-          id: 'stored-identity',
-          format: 'dc+sd-jwt',
-          issuer: 'https://issuer.example',
-          types: const ['ExampleIdentity'],
-          rawJson: 'header.payload.signature~',
-          issuedAt: DateTime.utc(2026, 10, 9),
-        ),
-      );
-      final bridge = _Bridge()
-        ..expectedQueryId = 'definition-identity'
-        ..requestOverride = FrbPresentationRequest(
-          clientId: 'https://verifier.example',
-          nonce: 'request-nonce',
-          responseUri: 'https://verifier.example/response',
-          requestDigest: 'bound-request-digest',
-          queryType: 'presentation_definition',
-          presentationDefinitionJson: jsonEncode({
-            'purpose': 'Prove identity',
-            'input_descriptors': [
-              {
-                'id': 'definition-identity',
-                'format': {
-                  'dc+sd-jwt': {
-                    'alg': ['ES256'],
+  for (final issuerAlgorithm in ['ES256', 'ES384', 'EdDSA', 'RS256']) {
+    test(
+      'presentation definition with $issuerAlgorithm issuer binds approved fields',
+      () async {
+        await WalletCredentialStore.store(
+          StoredCredential(
+            id: 'stored-identity',
+            format: 'dc+sd-jwt',
+            issuer: 'https://issuer.example',
+            types: const ['ExampleIdentity'],
+            rawJson: 'header.payload.signature~',
+            issuedAt: DateTime.utc(2026, 10, 9),
+          ),
+        );
+        final bridge = _Bridge()
+          ..expectedQueryId = 'definition-identity'
+          ..requestOverride = FrbPresentationRequest(
+            clientId: 'https://verifier.example',
+            nonce: 'request-nonce',
+            responseUri: 'https://verifier.example/response',
+            requestDigest: 'bound-request-digest',
+            queryType: 'presentation_definition',
+            presentationDefinitionJson: jsonEncode({
+              'purpose': 'Prove identity',
+              'input_descriptors': [
+                {
+                  'id': 'definition-identity',
+                  'format': {
+                    'dc+sd-jwt': {
+                      'alg': [issuerAlgorithm],
+                    },
+                  },
+                  'constraints': {
+                    'fields': [
+                      {
+                        'path': [r'$.given_name'],
+                      },
+                    ],
                   },
                 },
-                'constraints': {
-                  'fields': [
-                    {
-                      'path': [r'$.given_name'],
-                    },
-                  ],
-                },
-              },
-            ],
-          }),
+              ],
+            }),
+          );
+        final service = SpruceIdPlatformServiceExtended.withDependencies(
+          bridge,
+          _Holder.new,
         );
-      final service = SpruceIdPlatformServiceExtended.withDependencies(
-        bridge,
-        _Holder.new,
-      );
 
-      late UserSelectionRequiredException selection;
-      try {
-        await service.initiateOID4VPRequestSDK(
-          presentationRequest: 'openid4vp://approved',
+        late UserSelectionRequiredException selection;
+        try {
+          await service.initiateOID4VPRequestSDK(
+            presentationRequest: 'openid4vp://approved',
+          );
+          fail('Credential selection should be required');
+        } on UserSelectionRequiredException catch (error) {
+          selection = error;
+        }
+        expect(selection.requestDetails['purpose'], 'Prove identity');
+        expect(selection.matches.single['requestedFields'], {
+          'credential': ['given_name'],
+        });
+        expect(
+          await service.completeOID4VPRequestSDK(
+            sessionId: selection.sessionId,
+            selectedCredentialId: 'stored-identity',
+            selectedFields: const ['credential/given_name'],
+          ),
+          {'ok': true, 'redirect_uri': 'https://verifier.example/done'},
         );
-        fail('Credential selection should be required');
-      } on UserSelectionRequiredException catch (error) {
-        selection = error;
-      }
-      expect(selection.requestDetails['purpose'], 'Prove identity');
-      expect(selection.matches.single['requestedFields'], {
-        'credential': ['given_name'],
-      });
-      expect(
-        await service.completeOID4VPRequestSDK(
-          sessionId: selection.sessionId,
-          selectedCredentialId: 'stored-identity',
-          selectedFields: const ['credential/given_name'],
-        ),
-        {'ok': true, 'redirect_uri': 'https://verifier.example/done'},
-      );
-      expect(bridge.presentationPreparations, 1);
-      expect(bridge.presentationCompletions, 1);
-    },
-  );
+        expect(bridge.presentationPreparations, 1);
+        expect(bridge.presentationCompletions, 1);
+      },
+    );
+  }
 
   test(
     'unsupported presentation definitions stop before remote signing',
