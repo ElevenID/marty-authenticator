@@ -195,7 +195,8 @@ void main() {
         final service = _StatusService();
         expect(credential.supportsRevocation, isTrue);
         expect(credential.supportsSuspension, isFalse);
-        expect(credential.getStatusWithRevocation(), CredentialStatus.valid);
+        expect(credential.getStatusWithRevocation(), CredentialStatus.unknown);
+        expect(credential.isValid, isFalse);
         final first = await credential.checkStatus(service);
         expect(await credential.checkStatus(service), same(first));
         expect(service.checks, 1);
@@ -210,11 +211,18 @@ void main() {
         credential.clearStatusCache();
         await credential.checkStatus(service);
         expect(service.checks, 2);
-        expect(credential.getStatusWithRevocation(), CredentialStatus.valid);
+        expect(
+          credential.getStatusWithRevocation(),
+          CredentialStatus.suspended,
+        );
+        expect(credential.status, CredentialStatus.suspended);
+        expect(credential.isValid, isFalse);
         service.result = StatusCheckResult.failure('offline');
         credential.clearStatusCache();
         expect((await credential.checkStatus(service)).success, isFalse);
-        expect(credential.getStatusWithRevocation(), CredentialStatus.valid);
+        expect(credential.getStatusWithRevocation(), CredentialStatus.unknown);
+        expect(credential.status, CredentialStatus.unknown);
+        expect(credential.isValid, isFalse);
         expect(await _vc().checkRevocationStatus(service), isNull);
         expect(await _vc().checkSuspensionStatus(service), isNull);
         expect(
@@ -238,6 +246,59 @@ void main() {
         );
       },
     );
+  });
+
+  group('status authority and freshness', () {
+    test('old or future-dated results are not renewed by caching', () async {
+      for (final checkedAt in [
+        DateTime.now().subtract(const Duration(minutes: 6)),
+        DateTime.now().add(const Duration(minutes: 1)),
+      ]) {
+        final credential = _vc(status: {'statusPurpose': 'revocation'});
+        final service = _StatusService()
+          ..result = StatusCheckResult(
+            success: true,
+            isRevoked: false,
+            checkedAt: checkedAt,
+          );
+        await credential.checkStatus(service);
+        expect(credential.status, CredentialStatus.unknown);
+        expect(credential.isValid, isFalse);
+        await credential.checkStatus(service);
+        expect(service.checks, 2, reason: 'stale evidence must not be reused');
+      }
+    });
+
+    test('incomplete successful results do not imply a clear status', () async {
+      final credential = _vc(
+        status: [
+          {'statusPurpose': 'revocation'},
+          {'statusPurpose': 'suspension'},
+        ],
+      );
+      final service = _StatusService()
+        ..result = StatusCheckResult.success(isRevoked: false);
+      await credential.checkStatus(service);
+      expect(credential.status, CredentialStatus.unknown);
+      service.result = StatusCheckResult.success(
+        isRevoked: false,
+        isSuspended: false,
+      );
+      credential.clearStatusCache();
+      await credential.checkStatus(service);
+      expect(credential.status, CredentialStatus.valid);
+    });
+
+    test('unavailable authority remains unknown and can be retried', () async {
+      final credential = _vc(status: {'statusPurpose': 'revocation'});
+      final service = _StatusService()
+        ..result = StatusCheckResult.failure('STATUS_AUTHORITY_UNAVAILABLE');
+      await credential.checkStatus(service);
+      expect(credential.status, CredentialStatus.unknown);
+      expect(credential.isValid, isFalse);
+      await credential.checkStatus(service);
+      expect(service.checks, 2);
+    });
   });
 
   group('mobile documents', () {

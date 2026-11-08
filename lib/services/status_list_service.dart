@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  */
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -120,19 +122,27 @@ class RustStatusListNativeAdapter implements StatusListNativeAdapter {
   }
 }
 
-/// Fetches and caches status-list credentials while Rust owns all protocol
-/// parsing, bounded decoding, validation, and status decisions.
+/// Bounded HTTPS transport for untrusted status-list bytes. Rust owns protocol
+/// validation and authority decisions; cache hits are evaluated again by Rust.
+/// The current raw native API returns STATUS_AUTHORITY_UNAVAILABLE until a
+/// governed native status-authority resolver is available.
 class StatusListService {
   final http.Client _httpClient;
   final StatusListNativeAdapter _native;
+  final DateTime Function() _now;
   final Map<String, _CachedStatusList> _cache = {};
 
   static const Duration cacheDuration = Duration(minutes: 5);
+  static const Duration requestTimeout = Duration(seconds: 15);
+  static const int maxStatusListBytes = 2 * 1024 * 1024;
+  static const int maxCachedStatusLists = 32;
 
   StatusListService({
     http.Client? httpClient,
     this._native = const RustStatusListNativeAdapter(),
-  }) : _httpClient = httpClient ?? http.Client();
+    DateTime Function()? now,
+  }) : _httpClient = httpClient ?? http.Client(),
+       _now = now ?? DateTime.now;
 
   Future<StatusCheckResult> checkCredentialStatus(
     Object? credentialStatus,
@@ -143,6 +153,9 @@ class StatusListService {
 
     try {
       final entries = await _native.parseEntries(jsonEncode(credentialStatus));
+      if (entries.isEmpty) {
+        throw StateError('Rust returned no status entries');
+      }
       bool? isRevoked;
       bool? isSuspended;
 
@@ -152,10 +165,13 @@ class StatusListService {
           entry.entryJson,
           credentialJson,
         );
+        if (decision.purpose != entry.purpose) {
+          throw StateError('Rust returned a mismatched status purpose');
+        }
         if (decision.purpose == 'revocation') {
-          isRevoked = decision.asserted;
+          isRevoked = (isRevoked ?? false) || decision.asserted;
         } else if (decision.purpose == 'suspension') {
-          isSuspended = decision.asserted;
+          isSuspended = (isSuspended ?? false) || decision.asserted;
         } else {
           throw StateError('Rust returned an unsupported status purpose');
         }
@@ -178,27 +194,74 @@ class StatusListService {
 
   Future<String> _getStatusListCredential(String url) async {
     final cached = _cache[url];
-    if (cached != null && !cached.isExpired) {
+    if (cached != null && cached.isUsableAt(_now())) {
       return cached.credentialJson;
     }
 
-    final response = await _httpClient.get(
-      Uri.parse(url),
-      headers: {'Accept': 'application/vc+ld+json, application/json'},
-    );
+    final uri = Uri.parse(url);
+    if (uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasFragment) {
+      throw const FormatException('Status-list transport requires HTTPS');
+    }
+    final abort = Completer<void>();
+    final request =
+        http.AbortableRequest('GET', uri, abortTrigger: abort.future)
+          ..followRedirects = false
+          ..headers['Accept'] = 'application/vc+ld+json, application/json';
+    final response = await _httpClient
+        .send(request)
+        .timeout(
+          requestTimeout,
+          onTimeout: () {
+            abort.complete();
+            throw TimeoutException(
+              'Status-list response headers timed out',
+              requestTimeout,
+            );
+          },
+        );
     if (response.statusCode != 200) {
+      await response.stream.listen(null).cancel();
       throw StateError('Status-list endpoint returned ${response.statusCode}');
     }
-    final decoded = jsonDecode(response.body);
-    if (decoded is! Map<String, dynamic>) {
+    if ((response.contentLength ?? 0) > maxStatusListBytes) {
+      await response.stream.listen(null).cancel();
       throw const FormatException(
-        'Status-list credential must be a JSON object',
+        'Status-list response exceeds the byte limit',
       );
     }
-    final credentialJson = jsonEncode(decoded);
+    final bytes = BytesBuilder(copy: false);
+    final chunks = StreamIterator(response.stream);
+    try {
+      await (() async {
+        while (await chunks.moveNext()) {
+          final chunk = chunks.current;
+          if (bytes.length + chunk.length > maxStatusListBytes) {
+            throw const FormatException(
+              'Status-list response exceeds the byte limit',
+            );
+          }
+          bytes.add(chunk);
+        }
+      })().timeout(requestTimeout);
+    } finally {
+      // The absolute body deadline also stops slow trickles. Cancel the source
+      // on timeout or overflow instead of leaving it running in the background.
+      await chunks.cancel();
+      abort.complete();
+    }
+    // Preserve the fetched bytes; JSON and proof handling belong to Rust.
+    final credentialJson = utf8.decode(bytes.takeBytes());
+    final fetchedAt = _now();
+    if (!_cache.containsKey(url) && _cache.length >= maxCachedStatusLists) {
+      _cache.remove(_cache.keys.first);
+    }
     _cache[url] = _CachedStatusList(
       credentialJson: credentialJson,
-      expiresAt: DateTime.now().add(cacheDuration),
+      fetchedAt: fetchedAt,
+      expiresAt: fetchedAt.add(cacheDuration),
     );
     return credentialJson;
   }
@@ -213,11 +276,17 @@ class StatusListService {
 
 class _CachedStatusList {
   final String credentialJson;
+  final DateTime fetchedAt;
   final DateTime expiresAt;
 
-  _CachedStatusList({required this.credentialJson, required this.expiresAt});
+  _CachedStatusList({
+    required this.credentialJson,
+    required this.fetchedAt,
+    required this.expiresAt,
+  });
 
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
+  bool isUsableAt(DateTime now) =>
+      !now.isBefore(fetchedAt) && now.isBefore(expiresAt);
 }
 
 final statusListServiceProvider = Provider<StatusListService>((ref) {

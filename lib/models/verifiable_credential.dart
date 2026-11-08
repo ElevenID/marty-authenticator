@@ -29,9 +29,15 @@ class CachedStatusCheck {
 
   const CachedStatusCheck({required this.result, required this.cachedAt});
 
-  /// Status checks are valid for 5 minutes (matching server cache TTL)
-  bool get isExpired =>
-      DateTime.now().difference(cachedAt) > const Duration(minutes: 5);
+  /// Local caching cannot renew an old or future-dated verification result.
+  bool get isExpired {
+    final now = DateTime.now();
+    return !result.success ||
+        now.isBefore(cachedAt) ||
+        now.isBefore(result.checkedAt) ||
+        !now.isBefore(cachedAt.add(StatusListService.cacheDuration)) ||
+        !now.isBefore(result.checkedAt.add(StatusListService.cacheDuration));
+  }
 }
 
 /// W3C Verifiable Credential model.
@@ -179,14 +185,10 @@ class VerifiableCredential implements Credential {
   }
 
   @override
-  bool get isValid => proof != null && !isExpired;
+  bool get isValid => status == CredentialStatus.valid;
 
   @override
-  CredentialStatus get status {
-    if (isExpired) return CredentialStatus.expired;
-    if (!isValid) return CredentialStatus.invalid;
-    return CredentialStatus.valid;
-  }
+  CredentialStatus get status => getStatusWithRevocation();
 
   @override
   Map<String, dynamic> get claims => credentialSubject;
@@ -272,20 +274,23 @@ class VerifiableCredential implements Credential {
 
   /// Get the current status including revocation/suspension check
   ///
-  /// If a cached status check indicates revocation, returns [CredentialStatus.revoked].
-  /// If suspended, could return a suspended status (if added to enum).
+  /// A credential with status entries remains unknown until every required
+  /// purpose has a fresh successful native decision. Failed or stale checks
+  /// never restore a revoked or suspended credential to a valid display state.
   CredentialStatus getStatusWithRevocation() {
     if (isExpired) return CredentialStatus.expired;
-    if (!isValid) return CredentialStatus.invalid;
+    if (proof == null) return CredentialStatus.invalid;
+    if (!hasStatusEntry) return CredentialStatus.valid;
 
-    // Check cached status for revocation
-    if (_cachedStatusCheck != null &&
-        !_cachedStatusCheck!.isExpired &&
-        _cachedStatusCheck!.result.success) {
-      if (_cachedStatusCheck!.result.isRevoked == true) {
-        return CredentialStatus.revoked;
-      }
-      // Note: Could add CredentialStatus.suspended if needed
+    final cached = _cachedStatusCheck;
+    if (cached == null || cached.isExpired) return CredentialStatus.unknown;
+    final result = cached.result;
+    if (result.isRevoked == true) return CredentialStatus.revoked;
+    if (result.isSuspended == true) return CredentialStatus.suspended;
+    if ((!supportsRevocation && !supportsSuspension) ||
+        (supportsRevocation && result.isRevoked == null) ||
+        (supportsSuspension && result.isSuspended == null)) {
+      return CredentialStatus.unknown;
     }
 
     return CredentialStatus.valid;
