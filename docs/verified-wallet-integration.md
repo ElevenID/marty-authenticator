@@ -63,6 +63,8 @@ An algorithm accepted for another format cannot authorize the selected one.
 The digest binds the fields retained in Core's parsed request, including the
 nonce, audience, response destination, state and supported query. It does not
 authenticate the request sender or preserve fields the parser omits. The
+digest recursively sorts object keys so independently parsed HashMaps do not
+cause spurious approval mismatches; array order and values remain bound. The
 session retains that parsed request and is consumed before remote signature
 verification and submission, including failure paths. The exact remote signature
 must verify under the paired public holder key.
@@ -84,7 +86,7 @@ tests. OB2 rejection and OB3 selection remain covered.
 
 The full validation record is maintained in PR 57. The integration has passed
 the private dependency reader tests (11), custody source guard, native Rust tests
-(57), Flutter analysis, complete Flutter tests (276 passed, four existing SIOPv2
+(58), Flutter analysis, complete Flutter tests (276 passed, four existing SIOPv2
 skips), wallet acceptance tests (3), and a standard JavaScript release web build.
 After the independent review fixes, the two affected Flutter suites also pass
 (18 tests) and analysis remains clean. Regression tests cover the frozen QR
@@ -93,16 +95,18 @@ response verification, optional disclosures and retired raw presentation
 endpoints. Native tests use the locked dependency graph and the matching genuine
 ONNX Runtime 1.24.2 CPU library through ort-sys's supported dynamic-link settings.
 
-`rust/src/api.rs` and generated FRB Rust/Dart files remain unchanged from the
-original PR 57 head. The public web artifact hash/export/health/offer audit passes
+The pinned FRB 2.13.0 generator completed successfully. `rust/src/api.rs` and
+generated FRB Rust/Dart/C files remain unchanged from the original PR 57 head.
+The public web artifact hash/export/health/offer audit passes
 against the checked-in artifacts; those artifacts still identify Credentials
 `fef8da1` and Core `d41d87c`. That result does not establish regeneration against
 the new fork graph. The successful JavaScript web build does not qualify the
 optional Flutter WASM build, which reports an FRB JS-interop incompatibility.
 
-Two independent source reviews are required before publishing this continuation.
-Review findings are fixed in source or tracked below as explicit activation gates;
-the PR records the completed review dispositions.
+Two independent source reviews passed for this draft continuation. Their findings
+resulted in the attestation, offer snapshot, format/algorithm, retired ZK endpoint,
+and deterministic request-digest corrections. The PR records the review
+dispositions; the remaining activation gates are explicit below.
 
 ## External acceptance gates
 

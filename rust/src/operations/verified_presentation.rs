@@ -49,7 +49,11 @@ fn pending() -> &'static Mutex<HashMap<String, PendingSelection>> {
 }
 
 pub(crate) fn request_digest(request: &ParsedPresentationRequest) -> anyhow::Result<String> {
-    let canonical = serde_json::to_value(request)?;
+    let mut canonical = serde_json::to_value(request)?;
+    // The resolved serde_json graph enables preserve_order, while PEX formats
+    // use HashMap. Independent parses must not bind random map iteration order.
+    // Sort every object recursively; array order and parsed values stay bound.
+    canonical.sort_all_objects();
     let bytes = serde_json::to_vec(&canonical)?;
     Ok(format!("{:x}", Sha256::digest(bytes)))
 }
@@ -426,6 +430,65 @@ mod tests {
         assert_ne!(approved, request_digest(&request).unwrap());
         request.response_uri = "http://verifier.example/response".into();
         assert!(validate_request(&request, "member").is_err());
+    }
+
+    #[test]
+    fn approved_digest_is_stable_across_reparsed_and_reordered_objects() {
+        let mut request = dcql_request();
+        request.query_type = PresentationRequestQueryType::PresentationDefinition;
+        request.dcql_query = None;
+        request.presentation_definition = Some(
+            serde_json::from_value(json!({
+                "id": "legacy-definition",
+                "input_descriptors": [{
+                    "id": "member",
+                    "format": {
+                        "vc+sd-jwt": {"alg": ["ES256", "ES384"]},
+                        "sd_jwt_vc": {"alg": ["EdDSA"]}
+                    },
+                    "constraints": {"fields": [{"path": ["$.email"]}]}
+                }]
+            }))
+            .unwrap(),
+        );
+        let approved = request_digest(&request).unwrap();
+        let serialized = serde_json::to_string(&request).unwrap();
+        // Each independent deserialization creates a newly seeded PEX HashMap.
+        for _ in 0..128 {
+            let reparsed = serde_json::from_str(&serialized).unwrap();
+            assert_eq!(approved, request_digest(&reparsed).unwrap());
+        }
+        let mut reordered = serde_json::to_value(&request).unwrap();
+        reordered["presentation_definition"]["input_descriptors"][0]["format"] = json!({
+            "sd_jwt_vc": {"alg": ["EdDSA"]},
+            "vc+sd-jwt": {"alg": ["ES256", "ES384"]}
+        });
+        let reordered = serde_json::from_value(reordered).unwrap();
+        assert_eq!(approved, request_digest(&reordered).unwrap());
+
+        let mut changed = request.clone();
+        changed.nonce = "different-nonce".into();
+        assert_ne!(approved, request_digest(&changed).unwrap());
+        changed = request.clone();
+        changed.state = Some("different-state".into());
+        assert_ne!(approved, request_digest(&changed).unwrap());
+        changed = request;
+        changed
+            .presentation_definition
+            .as_mut()
+            .unwrap()
+            .input_descriptors[0]
+            .format
+            .as_mut()
+            .unwrap()
+            .get_mut("vc+sd-jwt")
+            .unwrap()
+            .alg = Some(vec!["ES384".into(), "ES256".into()]);
+        assert_ne!(
+            approved,
+            request_digest(&changed).unwrap(),
+            "array order stays bound"
+        );
     }
 
     fn request_for_claims(names: &[&str]) -> ParsedPresentationRequest {
