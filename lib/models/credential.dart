@@ -75,6 +75,9 @@ enum CredentialStatus {
   /// Credential has been revoked
   revoked,
 
+  /// Credential is currently suspended
+  suspended,
+
   /// Credential status is unknown (not yet verified)
   unknown,
 }
