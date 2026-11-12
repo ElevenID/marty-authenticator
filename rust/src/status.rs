@@ -1,15 +1,19 @@
-//! Strict W3C Bitstring Status List decisions for the mobile bridge.
+//! Status-list transport parsing for the mobile bridge.
 //!
-//! HTTP retrieval and caching remain Dart responsibilities. Parsing, bounded
-//! decoding, purpose matching, and the status bit decision live in Rust.
+//! Raw fetched JSON cannot establish a status authority. The legacy evaluation
+//! entry point remains ABI-compatible but fails closed until a native governed
+//! resolver can supply authenticated issuer/key and freshness evidence to Core.
 
 use flutter_rust_bridge::frb;
-use marty_status::BitstringStatusList;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use url::Url;
 
 const MAX_STATUS_ENTRIES: usize = 32;
+const MAX_ENTRY_JSON_BYTES: usize = 256 * 1024;
+const MAX_STATUS_CREDENTIAL_JSON_BYTES: usize = 2 * 1024 * 1024;
+const MAX_IRI_CHARS: usize = 4096;
+const STATUS_AUTHORITY_UNAVAILABLE: &str = "STATUS_AUTHORITY_UNAVAILABLE";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[frb(dart_metadata=("freezed"))]
@@ -31,6 +35,7 @@ pub struct FrbStatusDecision {
 }
 
 pub fn parse_status_entries(credential_status_json: String) -> anyhow::Result<Vec<FrbStatusEntry>> {
+    check_document_size(&credential_status_json, MAX_ENTRY_JSON_BYTES)?;
     let value: Value = serde_json::from_str(&credential_status_json)?;
     let entries = match &value {
         Value::Array(entries) => entries.iter().collect::<Vec<_>>(),
@@ -43,51 +48,26 @@ pub fn parse_status_entries(credential_status_json: String) -> anyhow::Result<Ve
     entries.into_iter().map(parse_entry).collect()
 }
 
+// Compatibility entry point for callers that only have raw network data.
+//
+// A proof-shaped object, HTTPS response, or decoded zero bit is not verified
+// status. This API has no trusted issuer/key resolver or authenticated freshness
+// context, so it must never produce a successful decision. Activation requires
+// a separate native authority-bound API using Core's verification contracts.
 pub fn evaluate_bitstring_status(
     entry_json: String,
     status_list_credential_json: String,
 ) -> anyhow::Result<FrbStatusDecision> {
+    check_document_size(&entry_json, MAX_ENTRY_JSON_BYTES)?;
+    check_document_size(
+        &status_list_credential_json,
+        MAX_STATUS_CREDENTIAL_JSON_BYTES,
+    )?;
     let entry_value: Value = serde_json::from_str(&entry_json)?;
-    let entry = parse_entry(&entry_value)?;
-    let credential: Value = serde_json::from_str(&status_list_credential_json)?;
-    let object = credential
-        .as_object()
-        .ok_or_else(|| anyhow::anyhow!("status-list credential must be an object"))?;
-
-    let credential_id = required_string(object.get("id"), "status-list credential id")?;
-    if credential_id != entry.list_url {
-        anyhow::bail!("status-list credential id does not match statusListCredential");
-    }
-    if !has_type(object.get("type"), "BitstringStatusListCredential") {
-        anyhow::bail!("status-list credential type must include BitstringStatusListCredential");
-    }
-    if !has_nonempty_proof(object.get("proof")) {
-        anyhow::bail!("status-list credential must carry a proof");
-    }
-
-    let subject = object
-        .get("credentialSubject")
-        .and_then(Value::as_object)
-        .ok_or_else(|| anyhow::anyhow!("status-list credentialSubject must be an object"))?;
-    if !has_type(subject.get("type"), "BitstringStatusList") {
-        anyhow::bail!("status-list credentialSubject type must be BitstringStatusList");
-    }
-    let purpose = required_string(subject.get("statusPurpose"), "status-list purpose")?;
-    if purpose != entry.purpose {
-        anyhow::bail!("status-list purpose does not match credential status entry");
-    }
-    let encoded = required_string(subject.get("encodedList"), "encodedList")?;
-    let list = BitstringStatusList::from_base64url_bounded(encoded)?;
-    let index =
-        usize::try_from(entry.index).map_err(|_| anyhow::anyhow!("status index is too large"))?;
-    let asserted = list.get(index)?;
-
-    Ok(FrbStatusDecision {
-        purpose: entry.purpose,
-        index: entry.index,
-        asserted,
-        list_size: u64::try_from(list.len()).unwrap_or(u64::MAX),
-    })
+    parse_entry(&entry_value)?;
+    anyhow::bail!(
+        "{STATUS_AUTHORITY_UNAVAILABLE}: status requires native issuer/key authorization, proof verification, and freshness evidence"
+    )
 }
 
 fn parse_entry(value: &Value) -> anyhow::Result<FrbStatusEntry> {
@@ -105,8 +85,15 @@ fn parse_entry(value: &Value) -> anyhow::Result<FrbStatusEntry> {
     }
     let list_url = required_string(object.get("statusListCredential"), "statusListCredential")?;
     let parsed_url = Url::parse(list_url)?;
-    if !matches!(parsed_url.scheme(), "https" | "http") {
-        anyhow::bail!("statusListCredential must use HTTP or HTTPS");
+    if parsed_url.scheme() != "https"
+        || parsed_url.host_str().is_none()
+        || !parsed_url.username().is_empty()
+        || parsed_url.password().is_some()
+        || parsed_url.fragment().is_some()
+    {
+        anyhow::bail!(
+            "statusListCredential must be an absolute HTTPS URL without user information or a fragment"
+        );
     }
     let index = parse_index(object.get("statusListIndex"))?;
 
@@ -136,28 +123,20 @@ fn parse_index(value: Option<&Value>) -> anyhow::Result<u64> {
 fn required_string<'a>(value: Option<&'a Value>, name: &str) -> anyhow::Result<&'a str> {
     value
         .and_then(Value::as_str)
-        .filter(|value| !value.is_empty() && value.trim() == *value)
-        .ok_or_else(|| anyhow::anyhow!("{name} must be a non-empty string"))
+        .filter(|value| {
+            !value.is_empty()
+                && value.trim() == *value
+                && value.chars().count() <= MAX_IRI_CHARS
+                && !value.chars().any(char::is_control)
+        })
+        .ok_or_else(|| anyhow::anyhow!("{name} must be a bounded non-empty string"))
 }
 
-fn has_type(value: Option<&Value>, expected: &str) -> bool {
-    match value {
-        Some(Value::String(value)) => value == expected,
-        Some(Value::Array(values)) => values.iter().any(|value| value.as_str() == Some(expected)),
-        _ => false,
+fn check_document_size(value: &str, maximum: usize) -> anyhow::Result<()> {
+    if value.len() > maximum {
+        anyhow::bail!("status document exceeds the supported byte limit");
     }
-}
-
-fn has_nonempty_proof(value: Option<&Value>) -> bool {
-    match value {
-        Some(Value::Object(proof)) => !proof.is_empty(),
-        Some(Value::Array(proofs)) => proofs.iter().any(|proof| {
-            proof
-                .as_object()
-                .is_some_and(|proof_object| !proof_object.is_empty())
-        }),
-        _ => false,
-    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -172,18 +151,63 @@ mod tests {
     }
 
     #[test]
-    fn language_neutral_status_vectors_match_expected_decisions() {
+    fn raw_status_vectors_never_establish_authority() {
         for vector in fixture()["vectors"].as_array().unwrap() {
             let result = evaluate_bitstring_status(
                 vector["entry"].to_string(),
                 vector["status_list_credential"].to_string(),
             );
-            if let Some(expected) = vector.get("asserted").and_then(Value::as_bool) {
-                assert_eq!(result.unwrap().asserted, expected, "{}", vector["id"]);
-            } else {
-                assert!(result.is_err(), "{} must fail closed", vector["id"]);
+            let error = result.expect_err("raw status bytes cannot produce a verified decision");
+            assert!(
+                error.to_string().contains(STATUS_AUTHORITY_UNAVAILABLE),
+                "{}: {error}",
+                vector["id"]
+            );
+        }
+    }
+
+    #[test]
+    fn arbitrary_proofs_and_mutated_bits_cannot_produce_success() {
+        let fixture = fixture();
+        let vector = &fixture["vectors"][0];
+        let mut credential = vector["status_list_credential"].clone();
+        for proof in [
+            serde_json::json!({"anything": true}),
+            serde_json::json!([{"proofValue": "not-a-signature"}]),
+            Value::Null,
+        ] {
+            credential["proof"] = proof;
+            for encoded in ["", "uAAAA", "attacker-controlled-bitstring"] {
+                credential["credentialSubject"]["encodedList"] = encoded.into();
+                let error =
+                    evaluate_bitstring_status(vector["entry"].to_string(), credential.to_string())
+                        .expect_err("unverified bytes must remain unknown");
+                assert!(error.to_string().contains(STATUS_AUTHORITY_UNAVAILABLE));
             }
         }
+    }
+
+    #[test]
+    fn transport_entries_require_bounded_https_urls() {
+        let mut entry = fixture()["vectors"][0]["entry"].clone();
+        for url in [
+            "http://issuer.example/status/1",
+            "https://user:password@issuer.example/status/1",
+            "https://issuer.example/status/1#fragment",
+            "file:///status/1",
+        ] {
+            entry["statusListCredential"] = url.into();
+            assert!(parse_status_entries(entry.to_string()).is_err(), "{url}");
+        }
+        entry["statusListCredential"] =
+            format!("https://issuer.example/{}", "x".repeat(MAX_IRI_CHARS)).into();
+        assert!(parse_status_entries(entry.to_string()).is_err());
+        assert!(parse_status_entries(" ".repeat(MAX_ENTRY_JSON_BYTES + 1)).is_err());
+        assert!(evaluate_bitstring_status(
+            fixture()["vectors"][0]["entry"].to_string(),
+            " ".repeat(MAX_STATUS_CREDENTIAL_JSON_BYTES + 1),
+        )
+        .is_err());
     }
 
     #[test]
