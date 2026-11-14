@@ -2,6 +2,17 @@
 
 OTP Authenticator App for privacyIDEA Authentication Server
 
+## Repository navigation
+
+| Area | Location |
+| --- | --- |
+| Guides and project notes | [Documentation index](docs/README.md) |
+| Flutter application | [lib/](lib/) |
+| Native Rust integration | [rust/](rust/) |
+| Tests and current coverage requirements | [test/](test/) · [Development checks](docs/development-checks.md) |
+| Platform projects | [android/](android/) · [ios/](ios/) · [macos/](macos/) · [web/](web/) |
+| Developer tooling and workspace | [scripts/](scripts/) · [Docker development ownership](docker/README.md) |
+
 The pi-authenticator currently support HOTP and TOTP (30 and 60 seconds) and also privacyIDEA's PUSH authentication. Supported hashing algorithms are SHA-1, SHA-256 and SHA-512.
 It also supports scanning qr codes that match the [Google Authenticator Key URI](https://github.com/google/google-authenticator/wiki/Key-Uri-Format) format.
 
