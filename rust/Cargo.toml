@@ -18,7 +18,7 @@ marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "11
 # Wallet holders generate presentation proofs; Core defaults to verification only.
 marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "11655e38c2dbf69bfa5bc3c873f80c5fad628723", default-features = false, features = ["prover"] }
 
-# OID4VCI/VP wallet (holder) — no issuer or verifier features
+# OID4VCI/VP wallet (holder) — no issuer feature; wallet enables verifier support.
 marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "11655e38c2dbf69bfa5bc3c873f80c5fad628723", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "11655e38c2dbf69bfa5bc3c873f80c5fad628723" }
 
@@ -43,6 +43,7 @@ anyhow = "1.0"
 # Utilities
 uuid = { version = "1.0", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
+sha2 = "0.10"
 url = "2.5"
 
 # SD-JWT parsing

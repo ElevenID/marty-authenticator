@@ -123,7 +123,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FrbIssuerMetadata dco_decode_frb_issuer_metadata(dynamic raw);
 
   @protected
-  FrbLivenessChallenge dco_decode_frb_liveness_challenge(dynamic raw);
+  FrbPreparedSdJwtPresentation dco_decode_frb_prepared_sd_jwt_presentation(
+    dynamic raw,
+  );
+
+  @protected
+  FrbPreparedSdJwtReceipt dco_decode_frb_prepared_sd_jwt_receipt(dynamic raw);
 
   @protected
   FrbPresentationBindingContext dco_decode_frb_presentation_binding_context(
@@ -144,6 +149,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbTokenResponse dco_decode_frb_token_response(dynamic raw);
+
+  @protected
+  FrbVerifiedSdJwtReceipt dco_decode_frb_verified_sd_jwt_receipt(dynamic raw);
 
   @protected
   FrbWalletQrInput dco_decode_frb_wallet_qr_input(dynamic raw);
@@ -375,7 +383,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  FrbLivenessChallenge sse_decode_frb_liveness_challenge(
+  FrbPreparedSdJwtPresentation sse_decode_frb_prepared_sd_jwt_presentation(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  FrbPreparedSdJwtReceipt sse_decode_frb_prepared_sd_jwt_receipt(
     SseDeserializer deserializer,
   );
 
@@ -404,6 +417,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FrbTokenResponse sse_decode_frb_token_response(SseDeserializer deserializer);
+
+  @protected
+  FrbVerifiedSdJwtReceipt sse_decode_frb_verified_sd_jwt_receipt(
+    SseDeserializer deserializer,
+  );
 
   @protected
   FrbWalletQrInput sse_decode_frb_wallet_qr_input(SseDeserializer deserializer);
@@ -759,16 +777,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
-  JSAny cst_encode_frb_liveness_challenge(FrbLivenessChallenge raw) {
+  JSAny cst_encode_frb_prepared_sd_jwt_presentation(
+    FrbPreparedSdJwtPresentation raw,
+  ) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return [
-      cst_encode_String(raw.challengeId),
-      cst_encode_String(raw.nonce),
-      cst_encode_String(raw.issuedAt),
-      cst_encode_String(raw.expiresAt),
-      cst_encode_list_String(raw.gestures),
-      cst_encode_String(raw.signature),
-      cst_encode_String(raw.nativePayload),
+      cst_encode_String(raw.sessionId),
+      cst_encode_list_prim_u_8_strict(raw.signingInput),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_prepared_sd_jwt_receipt(FrbPreparedSdJwtReceipt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.sessionId),
+      cst_encode_list_prim_u_8_strict(raw.signingInput),
     ].jsify()!;
   }
 
@@ -790,6 +814,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_String(raw.clientId),
       cst_encode_String(raw.nonce),
       cst_encode_String(raw.responseUri),
+      cst_encode_opt_String(raw.responseMode),
+      cst_encode_opt_String(raw.state),
+      cst_encode_String(raw.requestDigest),
       cst_encode_String(raw.queryType),
       cst_encode_opt_String(raw.presentationDefinitionJson),
       cst_encode_opt_String(raw.dcqlQueryJson),
@@ -838,6 +865,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       cst_encode_String(raw.tokenType),
       cst_encode_opt_box_autoadd_u_64(raw.expiresIn),
       cst_encode_opt_String(raw.scope),
+    ].jsify()!;
+  }
+
+  @protected
+  JSAny cst_encode_frb_verified_sd_jwt_receipt(FrbVerifiedSdJwtReceipt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return [
+      cst_encode_String(raw.credential),
+      cst_encode_String(raw.issuer),
+      cst_encode_String(raw.credentialType),
+      cst_encode_String(raw.format),
     ].jsify()!;
   }
 
@@ -1298,8 +1336,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_frb_liveness_challenge(
-    FrbLivenessChallenge self,
+  void sse_encode_frb_prepared_sd_jwt_presentation(
+    FrbPreparedSdJwtPresentation self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_prepared_sd_jwt_receipt(
+    FrbPreparedSdJwtReceipt self,
     SseSerializer serializer,
   );
 
@@ -1336,6 +1380,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_frb_token_response(
     FrbTokenResponse self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_frb_verified_sd_jwt_receipt(
+    FrbVerifiedSdJwtReceipt self,
     SseSerializer serializer,
   );
 
@@ -1539,17 +1589,6 @@ class RustLibWire implements BaseWire {
     trust_profile_verified,
   );
 
-  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__create_liveness_challenge(
-    JSAny gestures,
-    JSAny ttl_seconds,
-    String signing_secret,
-  ) => wasmModule.wire__crate__biometrics__create_liveness_challenge(
-    gestures,
-    ttl_seconds,
-    signing_secret,
-  );
-
   void wire__crate__api__create_selectable_credential(
     NativePortType port_,
     JSAny credential,
@@ -1717,15 +1756,6 @@ class RustLibWire implements BaseWire {
     models_dir,
   );
 
-  JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__verify_liveness_challenge(
-    String native_payload,
-    String signing_secret,
-  ) => wasmModule.wire__crate__biometrics__verify_liveness_challenge(
-    native_payload,
-    signing_secret,
-  );
-
   void wire__crate__api__verify_mdoc_trust_chain(
     NativePortType port_,
     JSAny x5chain,
@@ -1775,18 +1805,27 @@ class RustLibWire implements BaseWire {
     issuer_state,
   );
 
-  void wire__crate__api__wallet_create_proof_jwt(
+  void wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
     NativePortType port_,
-    String holder_kid,
-    String c_nonce,
-    String issuer_url,
-    String jwk_json,
-  ) => wasmModule.wire__crate__api__wallet_create_proof_jwt(
+    String session_id,
+    JSAny remote_signature,
+  ) =>
+      wasmModule.wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
+        port_,
+        session_id,
+        remote_signature,
+      );
+
+  void wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String session_id,
+    JSAny remote_signature,
+    String issuer_snapshot_json,
+  ) => wasmModule.wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
     port_,
-    holder_kid,
-    c_nonce,
-    issuer_url,
-    jwk_json,
+    session_id,
+    remote_signature,
+    issuer_snapshot_json,
   );
 
   void wire__crate__api__wallet_exchange_auth_code_token(
@@ -1847,6 +1886,38 @@ class RustLibWire implements BaseWire {
   ) => wasmModule.wire__crate__api__wallet_parse_presentation_request(
     port_,
     request_uri,
+  );
+
+  void wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+    NativePortType port_,
+    String request_uri,
+    String approved_request_digest,
+    String credential,
+    String query_id,
+    JSAny claims_to_disclose,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+    port_,
+    request_uri,
+    approved_request_digest,
+    credential,
+    query_id,
+    claims_to_disclose,
+    issuer_snapshot_json,
+    holder_public_jwk_json,
+  );
+
+  void wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String offer_uri,
+    String? tx_code,
+    String holder_public_jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+    port_,
+    offer_uri,
+    tx_code,
+    holder_public_jwk_json,
   );
 
   void wire__crate__api__wallet_request_credential(
@@ -1963,13 +2034,6 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String policy_json,
     String issuer_id,
     bool trust_profile_verified,
-  );
-
-  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__create_liveness_challenge(
-    JSAny gestures,
-    JSAny ttl_seconds,
-    String signing_secret,
   );
 
   external void wire__crate__api__create_selectable_credential(
@@ -2091,12 +2155,6 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String? models_dir,
   );
 
-  external JSAny? /* flutter_rust_bridge::for_generated::WireSyncRust2DartDco */
-  wire__crate__biometrics__verify_liveness_challenge(
-    String native_payload,
-    String signing_secret,
-  );
-
   external void wire__crate__api__verify_mdoc_trust_chain(
     NativePortType port_,
     JSAny x5chain,
@@ -2127,12 +2185,17 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String? issuer_state,
   );
 
-  external void wire__crate__api__wallet_create_proof_jwt(
+  external void wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
     NativePortType port_,
-    String holder_kid,
-    String c_nonce,
-    String issuer_url,
-    String jwk_json,
+    String session_id,
+    JSAny remote_signature,
+  );
+
+  external void wire__crate__api__wallet_complete_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String session_id,
+    JSAny remote_signature,
+    String issuer_snapshot_json,
   );
 
   external void wire__crate__api__wallet_exchange_auth_code_token(
@@ -2169,6 +2232,24 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
   external void wire__crate__api__wallet_parse_presentation_request(
     NativePortType port_,
     String request_uri,
+  );
+
+  external void wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
+    NativePortType port_,
+    String request_uri,
+    String approved_request_digest,
+    String credential,
+    String query_id,
+    JSAny claims_to_disclose,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  );
+
+  external void wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String offer_uri,
+    String? tx_code,
+    String holder_public_jwk_json,
   );
 
   external void wire__crate__api__wallet_request_credential(

@@ -5,22 +5,9 @@
 
 import Foundation
 import Flutter
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
-/// Handler for SpruceID platform channels with advanced SDK integration
+/// Routes platform channels to implemented operations or explicit errors.
 class SpruceIdChannelHandler: NSObject {
-  // Core crypto and storage
-  private var keyManager: KeyManager?
-  private var storageManager: StorageManager?
-
-  // Advanced SDK components
-  private var credentialPack: CredentialPack?
-  private var contextMap: [String: Any] = [:]
-
-  // Pending requests for split flow
-  static var pendingMdocRequests: [String: Any] = [:]
-
   static func register(with binaryMessenger: FlutterBinaryMessenger) {
     let handler = SpruceIdChannelHandler()
 
@@ -45,19 +32,4 @@ class SpruceIdChannelHandler: NSObject {
     walletChannel.setMethodCallHandler(handler.handleWalletMethodCall)
   }
 
-  internal func initializeSpruceId() {
-    keyManager = KeyManager()
-    storageManager = StorageManager(appGroupId: nil)
-
-    // Initialize basic SDK components that actually exist
-    credentialPack = CredentialPack()
-
-    // Set up default context map for JSON-LD contexts
-    contextMap = [
-      "https://www.w3.org/2018/credentials/v1": "https://www.w3.org/2018/credentials/v1",
-      "https://w3id.org/security/suites/ed25519-2018/v1": "https://w3id.org/security/suites/ed25519-2018/v1"
-    ]
-
-    print("SpruceID: Initialized with SDK features - CredentialPack and protocol support")
-  }
 }

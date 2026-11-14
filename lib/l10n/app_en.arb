@@ -398,9 +398,6 @@
   "@errorMailBody": {
     "description": "Message for email body"
   },
-  "@errorMissingPrivateKey": {
-    "description": "Error message when the private key is missing."
-  },
   "@errorMissingPublicKey": {
     "description": "Error message when the public key is missing."
   },
@@ -1769,7 +1766,6 @@
   "errorLogEmpty": "The error log is empty.",
   "errorLogTitle": "Error log",
   "errorMailBody": "The error log file is attached.\nYou can replace this text with additional information about the error.",
-  "errorMissingPrivateKey": "Private key is missing",
   "errorMissingPublicKey": "Public key is missing",
   "errorRollOutFailed": "Rolling out token {name} failed.",
   "errorRollOutNoConnectionToServer": "Rolling out token {name} failed, the server could not be reached.",

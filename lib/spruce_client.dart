@@ -25,43 +25,10 @@ class SpruceIdClient implements ISpruceIdClient {
   }
 
   @override
-  Future<String> createDid({String method = 'key'}) async {
-    final result = await _platformService.createDid(method: method);
-    return result['did'] as String;
-  }
-
-  @override
-  Future<Map<String, dynamic>> signCredential(
-    Map<String, dynamic> credential,
-  ) async {
-    return await _platformService.signVerifiableCredential(credential);
-  }
-
-  @override
   Future<Map<String, dynamic>> verifyCredential(
     Map<String, dynamic> credential,
   ) async {
     return await _platformService.verifyVerifiableCredential(credential);
-  }
-
-  @override
-  Future<Map<String, dynamic>> createMdocResponse({
-    required List<String> requestedAttributes,
-    List<String>? hiddenAttributes,
-  }) async {
-    return await _platformService.createMdocResponse(
-      requestedAttributes,
-      hiddenAttributes ?? [],
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> createSdJwtPresentation({
-    required String issuer,
-    required Map<String, dynamic> claims,
-    required List<String> discloseKeys,
-  }) async {
-    return await _platformService.createSdJwt(issuer, claims, discloseKeys);
   }
 
   @override
@@ -94,47 +61,6 @@ class SpruceIdMdocManager implements ISpruceIdMdocManager {
     required int minimumAge,
   }) async {
     return await _platformService.presentForAgeVerification(minimumAge);
-  }
-
-  @override
-  Future<Map<String, dynamic>> presentForIdVerification({
-    required List<String> requestedAttributes,
-    List<String>? hiddenAttributes,
-  }) async {
-    return await _platformService.createMdocResponse(
-      requestedAttributes,
-      hiddenAttributes ?? [],
-    );
-  }
-}
-
-/// SpruceID SD-JWT Manager for Selective Disclosure
-class SpruceIdSdJwtManager implements ISpruceIdSdJwtManager {
-  final ISpruceIdPlatformService _platformService;
-
-  SpruceIdSdJwtManager([ISpruceIdPlatformService? platformService])
-    : _platformService = platformService ?? SpruceIdPlatformService();
-
-  @override
-  Future<Map<String, dynamic>> createSdJwt({
-    required String issuer,
-    required Map<String, dynamic> claims,
-    required List<String> selectivelyDisclosableClaims,
-  }) async {
-    return await _platformService.createSdJwt(
-      issuer,
-      claims,
-      selectivelyDisclosableClaims,
-    );
-  }
-
-  @override
-  Future<Map<String, dynamic>> present({
-    required String issuer,
-    required Map<String, dynamic> claims,
-    required List<String> discloseClaims,
-  }) async {
-    return await _platformService.createSdJwt(issuer, claims, discloseClaims);
   }
 }
 

@@ -89,11 +89,40 @@ pub(crate) fn wallet_normalize_credential_offer(input: String) -> anyhow::Result
         .map_err(|error| anyhow::anyhow!("Credential offer normalization error: {}", error))
 }
 
+fn reviewed_credential_offer(
+    offer: &marty_oid4vci::types::CredentialOffer,
+) -> anyhow::Result<FrbWalletQrInput> {
+    // Freeze the fetched offer at review time. Returning its reference URI
+    // would allow a second fetch after approval to replace the issuer,
+    // configuration, or grant that the user reviewed.
+    let json = serde_json::to_string(offer)?;
+    let normalized = marty_oid4vci::normalize_credential_offer_uri(&json)?;
+    anyhow::ensure!(
+        normalized.len() <= super::verified_issuance::MAX_OFFER_BYTES,
+        "credential offer exceeds the supported review size"
+    );
+    let parsed_content_json = serde_json::json!({
+        "offer_uri": normalized,
+        "credential_issuer": offer.credential_issuer,
+        "credential_configuration_ids": offer.credential_configuration_ids,
+    })
+    .to_string();
+    Ok(FrbWalletQrInput {
+        kind: "credential_offer".to_string(),
+        normalized,
+        parsed_content_json,
+        requires_external_provider: false,
+    })
+}
+
 pub(crate) async fn wallet_validate_qr_input(
     raw_data: String,
 ) -> anyhow::Result<Option<FrbWalletQrInput>> {
     use marty_oid4vci::WalletInputKind;
 
+    if let Some(pairing) = parse_remote_pairing_qr(&raw_data)? {
+        return Ok(Some(pairing));
+    }
     if let Some(push_registration) = parse_push_registration_qr(&raw_data)? {
         return Ok(Some(push_registration));
     }
@@ -124,18 +153,7 @@ pub(crate) async fn wallet_validate_qr_input(
                 .parse_credential_offer(&classified.normalized)
                 .await
                 .map_err(|error| anyhow::anyhow!("Credential offer validation error: {}", error))?;
-            let parsed_content_json = serde_json::json!({
-                "offer_uri": classified.normalized,
-                "credential_issuer": offer.credential_issuer,
-                "credential_configuration_ids": offer.credential_configuration_ids,
-            })
-            .to_string();
-            Ok(Some(FrbWalletQrInput {
-                kind: "credential_offer".to_string(),
-                normalized: classified.normalized,
-                parsed_content_json,
-                requires_external_provider: false,
-            }))
+            reviewed_credential_offer(&offer).map(Some)
         }
         WalletInputKind::PresentationRequest => {
             let engine = marty_oid4vci::WalletEngine::new();
@@ -176,6 +194,165 @@ pub(crate) async fn wallet_validate_qr_input(
             }))
         }
     }
+}
+
+#[cfg(test)]
+mod offer_review_tests {
+    use super::*;
+    use marty_oid4vci::{types::CredentialOffer, WalletEngine};
+    use serde_json::json;
+
+    fn offer() -> CredentialOffer {
+        serde_json::from_value(json!({
+            "credential_issuer": "https://approved.example",
+            "credential_configuration_ids": ["approved-config"],
+            "grants": {
+                "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
+                    "pre-authorized_code": "approved-code",
+                    "tx_code": {"input_mode": "numeric", "length": 6}
+                }
+            }
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn frozen_offer_preserves_reviewed_issuer_configuration_and_grant_without_refetch() {
+        let mut fetched_offer = offer();
+        let review = reviewed_credential_offer(&fetched_offer).unwrap();
+        // Model a mutable reference being replaced after its initial fetch.
+        fetched_offer.credential_issuer = "https://replacement.example".into();
+        fetched_offer.credential_configuration_ids = vec!["replacement-config".into()];
+        fetched_offer
+            .grants
+            .pre_authorized_code
+            .as_mut()
+            .unwrap()
+            .pre_authorized_code = "replacement-code".into();
+        let content: serde_json::Value = serde_json::from_str(&review.parsed_content_json).unwrap();
+        assert_eq!(content["offer_uri"], review.normalized);
+        assert_eq!(content["credential_issuer"], "https://approved.example");
+        assert_eq!(
+            content["credential_configuration_ids"],
+            json!(["approved-config"])
+        );
+        let envelope = url::Url::parse(&review.normalized).unwrap();
+        assert!(envelope
+            .query_pairs()
+            .all(|(name, _)| name == "credential_offer"));
+
+        // This runtime has no network driver. Parsing the accepted offer must
+        // use the frozen inline body, with no network available for a refetch.
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let accepted = runtime
+            .block_on(WalletEngine::new().parse_credential_offer(&review.normalized))
+            .unwrap();
+        assert_eq!(
+            serde_json::to_value(accepted).unwrap(),
+            serde_json::to_value(offer()).unwrap()
+        );
+        assert_ne!(
+            content["credential_issuer"],
+            fetched_offer.credential_issuer
+        );
+    }
+
+    #[test]
+    fn qr_offer_path_returns_the_same_bounded_inline_snapshot_for_acceptance() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let review = runtime
+            .block_on(wallet_validate_qr_input(
+                serde_json::to_string(&offer()).unwrap(),
+            ))
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            review.normalized,
+            reviewed_credential_offer(&offer()).unwrap().normalized
+        );
+        assert!(!review.requires_external_provider);
+
+        let mut oversized = offer();
+        oversized
+            .grants
+            .pre_authorized_code
+            .as_mut()
+            .unwrap()
+            .pre_authorized_code = "x".repeat(super::super::verified_issuance::MAX_OFFER_BYTES);
+        assert!(reviewed_credential_offer(&oversized).is_err());
+    }
+}
+
+fn parse_remote_pairing_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrInput>> {
+    let parsed = match url::Url::parse(raw_data) {
+        Ok(parsed) => parsed,
+        Err(error) if raw_data.starts_with("marty:") => {
+            return Err(anyhow::anyhow!("Wallet pairing URI is invalid: {error}"));
+        }
+        Err(_) => return Ok(None),
+    };
+    if parsed.scheme() != "marty" || parsed.host_str() != Some("pair") {
+        return Ok(None);
+    }
+    if parsed.path() != ""
+        || !parsed.username().is_empty()
+        || parsed.password().is_some()
+        || parsed.fragment().is_some()
+    {
+        return Err(anyhow::anyhow!(
+            "Wallet pairing URI has unsupported components"
+        ));
+    }
+    let mut code = None;
+    let mut api = None;
+    for (key, value) in parsed.query_pairs() {
+        match key.as_ref() {
+            "code" if code.is_none() => code = Some(value.into_owned()),
+            "api" if api.is_none() => api = Some(value.into_owned()),
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Wallet pairing URI has unsupported or duplicate parameters"
+                ))
+            }
+        }
+    }
+    let code = code.ok_or_else(|| anyhow::anyhow!("Wallet pairing code is missing"))?;
+    if code.len() != 43
+        || !code
+            .bytes()
+            .all(|value| value.is_ascii_alphanumeric() || value == b'-' || value == b'_')
+    {
+        return Err(anyhow::anyhow!("Wallet pairing code is invalid"));
+    }
+    let origin = api.ok_or_else(|| anyhow::anyhow!("Wallet pairing API origin is missing"))?;
+    let origin = url::Url::parse(&origin)
+        .map_err(|_| anyhow::anyhow!("Wallet pairing API origin is invalid"))?;
+    if origin.scheme() != "https"
+        || origin.host_str().is_none()
+        || !origin.username().is_empty()
+        || origin.password().is_some()
+        || origin.path() != "/"
+        || origin.query().is_some()
+        || origin.fragment().is_some()
+    {
+        return Err(anyhow::anyhow!(
+            "Wallet pairing requires a bare HTTPS API origin"
+        ));
+    }
+    Ok(Some(FrbWalletQrInput {
+        kind: "remote_pairing".into(),
+        normalized: parsed.to_string(),
+        parsed_content_json: serde_json::json!({
+            "pairing_code": code,
+            "api_origin": origin.as_str(),
+        })
+        .to_string(),
+        requires_external_provider: false,
+    }))
 }
 
 fn parse_push_registration_qr(raw_data: &str) -> anyhow::Result<Option<FrbWalletQrInput>> {

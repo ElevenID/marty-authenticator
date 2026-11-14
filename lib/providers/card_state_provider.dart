@@ -1,18 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/card_data.dart';
-import '../interfaces/spruce_interfaces.dart';
-import '../services/spruce_platform_service.dart';
 import '../services/wallet_credential_store.dart';
 import '../utils/logger.dart';
 
 final cardStateProvider =
     StateNotifierProvider<CardStateNotifier, List<CardGroup>>((ref) {
-      final spruceService = ref.watch(spruceIdPlatformServiceProvider);
-      return CardStateNotifier(spruceService);
+      return CardStateNotifier();
     });
 
 final activeCardGroupsProvider = Provider<List<CardGroup>>((ref) {
@@ -42,46 +40,31 @@ final expiredCardsProvider = Provider<List<CardData>>((ref) {
 final draggingCardProvider = StateProvider<CardData?>((ref) => null);
 
 class CardStateNotifier extends StateNotifier<List<CardGroup>> {
-  final ISpruceIdPlatformService _spruceService;
-
-  CardStateNotifier(this._spruceService) : super([]) {
+  CardStateNotifier() : super([]) {
     loadCards();
   }
 
   final _storage = const FlutterSecureStorage();
   static const _storageKey = 'card_groups_data';
+  Future<void> _lastWrite = Future.value();
 
-  /// Loads all credentials from both the Spruce SDK channel and the
-  /// OID4VCI [WalletCredentialStore], then groups them by issuer.
+  /// Loads verified OID4VCI receipts from [WalletCredentialStore] and
+  /// groups them by issuer.
   Future<void> loadCards() async {
     Logger.debug('DEBUG: loadCards called');
     final List<CardData> allCards = [];
 
-    // 1. Load from Spruce SDK native channel (legacy / third-party wallets).
-    try {
-      final credentials = await _spruceService.getStoredCredentials();
-      Logger.debug(
-        'DEBUG: Loaded ${credentials.length} credentials from Spruce channel',
-      );
-      allCards.addAll(credentials.map(_mapCredentialToCardData));
-    } catch (e) {
-      Logger.error('Error loading credentials from SpruceID: $e');
-    }
-
-    // 2. Load OID4VCI-issued credentials from WalletCredentialStore.
     try {
       final stored = await WalletCredentialStore.getAll();
       Logger.debug(
         'DEBUG: Loaded ${stored.length} credentials from WalletCredentialStore',
       );
-      final existingIds = allCards.map((c) => c.id).whereType<String>().toSet();
       for (final cred in stored) {
-        if (!existingIds.contains(cred.id)) {
-          allCards.add(_mapStoredCredentialToCardData(cred));
-        }
+        allCards.add(_mapStoredCredentialToCardData(cred));
       }
     } catch (e) {
       Logger.error('Error loading credentials from WalletCredentialStore: $e');
+      return;
     }
 
     if (allCards.isEmpty) {
@@ -97,72 +80,17 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
       groupedCards.putIfAbsent(issuer, () => []).add(card);
     }
 
-    state = groupedCards.entries
+    final groups = groupedCards.entries
         .map((e) => CardGroup(title: e.key, cards: e.value))
         .toList();
+    state = await _restoreLayout(groups);
     Logger.debug(
       'DEBUG: CardStateNotifier state updated with ${state.length} groups',
     );
   }
 
-  /// Refreshes the wallet card list from all credential sources.
+  /// Refreshes the wallet card list from verified receipts.
   Future<void> refreshCards() => loadCards();
-
-  CardData _mapCredentialToCardData(Map<String, dynamic> credential) {
-    // Extract fields
-    final id = credential['id'] as String?;
-    final type = credential['type'] as String? ?? 'Unknown';
-    final issuer = credential['issuer'] as String? ?? 'Unknown Issuer';
-    final data = credential['data'] as Map<String, dynamic>? ?? {};
-
-    // Check expiration
-    bool isExpired = credential['isExpired'] as bool? ?? false;
-    if (!isExpired && credential.containsKey('expirationDate')) {
-      try {
-        final expiry = DateTime.parse(credential['expirationDate'] as String);
-        isExpired = expiry.isBefore(DateTime.now());
-      } catch (e) {
-        // If we can't parse the date, assume not expired
-        isExpired = false;
-      }
-    }
-
-    // Determine UI properties based on type
-    String title = type;
-    IconData icon = Icons.credit_card;
-    Color color = Colors.blue;
-    List<Color> gradient = [Colors.blue, Colors.blueAccent];
-
-    if (type.contains('DriverLicense') || type.contains('mDL')) {
-      title = "Driver's License";
-      icon = Icons.drive_eta;
-      color = Colors.deepPurple;
-      gradient = [Colors.deepPurple, Colors.purpleAccent];
-    } else if (type.contains('VerifiableId')) {
-      title = "Digital ID";
-      icon = Icons.perm_identity;
-      color = Colors.teal;
-      gradient = [Colors.teal, Colors.tealAccent];
-    }
-
-    // For now, expose all data as both metadata and privateData
-    // In a real app, we would filter this based on the schema
-
-    return CardData(
-      title: title,
-      subtitle: issuer,
-      icon: icon,
-      color: color,
-      gradient: gradient,
-      id: id,
-      type: type,
-      issuer: issuer,
-      isExpired: isExpired,
-      rawData: data,
-      metadata: data,
-      privateData: data,
-    );
-  }
 
   /// Maps a [StoredCredential] (OID4VCI-received) to [CardData] for display.
   CardData _mapStoredCredentialToCardData(StoredCredential cred) {
@@ -215,50 +143,104 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
     );
   }
 
-  Future<void> saveCards() async {
-    final data = jsonEncode(state.map((group) => group.toMap()).toList());
-    await _storage.write(key: _storageKey, value: data);
+  Future<List<CardGroup>> _restoreLayout(List<CardGroup> groups) async {
+    try {
+      final raw = await _storage.read(key: _storageKey);
+      if (raw == null) return groups;
+      if (raw.length > 64 * 1024) {
+        throw const FormatException('Layout is too large');
+      }
+      final layout = jsonDecode(raw);
+      if (layout is! Map<String, dynamic> ||
+          layout['version'] != 1 ||
+          layout['groups'] is! List ||
+          layout['expired_ids'] is! List) {
+        throw const FormatException('Wallet layout is invalid');
+      }
+      final expired = (layout['expired_ids'] as List).cast<String>().toSet();
+      final current = {for (final group in groups) group.title: group};
+      final restored = <CardGroup>[];
+      for (final item in layout['groups'] as List) {
+        if (item is! Map<String, dynamic> ||
+            item['title'] is! String ||
+            item['ids'] is! List) {
+          throw const FormatException('Wallet group layout is invalid');
+        }
+        final group = current.remove(item['title']);
+        if (group == null) continue;
+        final byId = {for (final card in group.cards) card.id: card};
+        final cards = <CardData>[];
+        for (final id in (item['ids'] as List).cast<String>()) {
+          final card = byId.remove(id);
+          if (card != null) cards.add(card);
+        }
+        cards.addAll(byId.values);
+        restored.add(group.copyWith(cards: cards));
+      }
+      restored.addAll(current.values);
+      return restored
+          .map(
+            (group) => group.copyWith(
+              cards: group.cards
+                  .map(
+                    (card) =>
+                        card.copyWith(isExpired: expired.contains(card.id)),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList();
+    } catch (error) {
+      Logger.warning('Ignoring invalid wallet card layout: $error');
+      return groups;
+    }
+  }
+
+  Future<void> saveCards() {
+    final data = jsonEncode({
+      'version': 1,
+      'groups': [
+        for (final group in state)
+          {
+            'title': group.title,
+            'ids': group.cards
+                .map((card) => card.id)
+                .whereType<String>()
+                .toList(),
+          },
+      ],
+      'expired_ids': [
+        for (final card in state.expand((group) => group.cards))
+          if (card.isExpired && card.id != null) card.id,
+      ],
+    });
+    final write = _lastWrite.then(
+      (_) => _storage.write(key: _storageKey, value: data),
+    );
+    _lastWrite = write.catchError((Object error) {
+      Logger.error('Failed to save wallet card layout: $error');
+    });
+    return write;
   }
 
   void reorderCard(CardData card, int newGroupIndex, int newIndex) {
-    List<CardGroup> newGroups = [];
-
-    // 1. Remove card from its current position
-    for (var group in state) {
-      // Check if this group contains the card (by title/properties since we don't have ID)
-      // Assuming card object reference might be different if reloaded, but here we pass the object.
-      // Ideally we should match by ID. Since we don't have ID, we rely on object equality or title.
-      // CardData uses default equality (props) if it extends Equatable, but it doesn't.
-      // So it uses identity. If the passed 'card' is from the current state, it works.
-      if (group.cards.contains(card)) {
-        final newCards = List<CardData>.from(group.cards)..remove(card);
-        newGroups.add(group.copyWith(cards: newCards));
-      } else {
-        newGroups.add(group);
-      }
+    final id = card.id;
+    if (id == null || newGroupIndex < 0 || newGroupIndex >= state.length) {
+      return;
     }
+    final group = state[newGroupIndex];
+    final oldIndex = group.cards.indexWhere((candidate) => candidate.id == id);
+    if (oldIndex < 0) return;
 
-    // 2. Insert card at new position
-    if (newGroupIndex >= 0 && newGroupIndex < newGroups.length) {
-      final targetGroup = newGroups[newGroupIndex];
-      final newCards = List<CardData>.from(targetGroup.cards);
-
-      // Clamp index
-      final insertIndex = newIndex.clamp(0, newCards.length);
-      newCards.insert(insertIndex, card);
-
-      newGroups[newGroupIndex] = targetGroup.copyWith(cards: newCards);
-    }
-
-    // 3. Update sort orders
-    newGroups = newGroups.map((group) {
-      final updatedCards = group.cards.asMap().entries.map((entry) {
-        return entry.value.copyWith(sortOrder: entry.key);
-      }).toList();
-      return group.copyWith(cards: updatedCards);
-    }).toList();
-
-    state = newGroups;
+    final cards = List<CardData>.from(group.cards)..removeAt(oldIndex);
+    cards.insert(newIndex.clamp(0, cards.length), group.cards[oldIndex]);
+    final ordered = [
+      for (final (index, value) in cards.indexed)
+        value.copyWith(sortOrder: index),
+    ];
+    final groups = List<CardGroup>.from(state);
+    groups[newGroupIndex] = group.copyWith(cards: ordered);
+    state = groups;
     saveCards();
   }
 
@@ -280,11 +262,12 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
   }
 
   void toggleCardExpired(CardData card) {
+    final id = card.id;
+    if (id == null) return;
     List<CardGroup> newGroups = [];
     for (var group in state) {
       final newCards = group.cards.map((c) {
-        if (c.title == card.title) {
-          // Using title as ID for now
+        if (c.id == id) {
           return c.copyWith(isExpired: !c.isExpired);
         }
         return c;
@@ -296,22 +279,22 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
   }
 
   Future<void> deleteCard(CardData card) async {
+    final id = card.id;
+    if (id == null || card.rawData?['_source'] != 'wallet_credential_store') {
+      throw StateError('Only verified wallet credentials can be deleted');
+    }
+    await WalletCredentialStore.delete(id);
     List<CardGroup> newGroups = [];
     for (var group in state) {
       final newCards = List<CardData>.from(group.cards);
-      newCards.removeWhere((c) => c.title == card.title);
+      newCards.removeWhere((c) => c.id == id);
       newGroups.add(group.copyWith(cards: newCards));
     }
     state = newGroups;
-    saveCards();
-    // Also remove from WalletCredentialStore if issued via OID4VCI.
-    if (card.rawData?['_source'] == 'wallet_credential_store' &&
-        card.id != null) {
-      try {
-        await WalletCredentialStore.delete(card.id!);
-      } catch (e) {
-        Logger.error('Failed to delete OID4VCI credential from store: $e');
-      }
+    try {
+      await saveCards();
+    } catch (_) {
+      // The verified receipt is already deleted; layout is only a preference.
     }
   }
 }

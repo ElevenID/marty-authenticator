@@ -398,9 +398,6 @@
   "@errorMailBody": {
     "description": "Message for email body"
   },
-  "@errorMissingPrivateKey": {
-    "description": "Error message when the private key is missing."
-  },
   "@errorMissingPublicKey": {
     "description": "Error message when the public key is missing."
   },
@@ -1769,7 +1766,6 @@
   "errorLogEmpty": "Le journal des erreurs est vide",
   "errorLogTitle": "Journal d'erreur",
   "errorMailBody": "Le fichier journal des erreurs est joint.\nVous pouvez remplacer ce texte par des informations supplémentaires sur l'erreur.",
-  "errorMissingPrivateKey": "Clé privée manquante",
   "errorMissingPublicKey": "Clé publique manquante",
   "errorRollOutFailed": "Le déploiement du jeton {name} a échoué.",
   "errorRollOutNoConnectionToServer": "El despliegue del token {name} ha fallado, no se ha podido acceder al servidor.",

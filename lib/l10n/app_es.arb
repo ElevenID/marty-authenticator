@@ -398,9 +398,6 @@
   "@errorMailBody": {
     "description": "Message for email body"
   },
-  "@errorMissingPrivateKey": {
-    "description": "Error message when the private key is missing."
-  },
   "@errorMissingPublicKey": {
     "description": "Error message when the public key is missing."
   },
@@ -1769,7 +1766,6 @@
   "errorLogEmpty": "El registro de errores está vacío",
   "errorLogTitle": "Registro de errores",
   "errorMailBody": "Se adjunta el archivo de registro de errores.\nPuede sustituir este texto por información adicional sobre el error.",
-  "errorMissingPrivateKey": "Falta la clave privada",
   "errorMissingPublicKey": "Falta la clave pública",
   "errorRollOutFailed": "Error en la extracción de el token {name}.",
   "errorRollOutNoConnectionToServer": "El despliegue del token {name} ha fallado, no se ha podido acceder al servidor.",

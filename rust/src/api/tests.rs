@@ -309,6 +309,26 @@ async fn wallet_qr_validation_parses_push_registration_in_rust() {
 }
 
 #[tokio::test]
+async fn wallet_qr_validation_accepts_only_scoped_remote_pairing() {
+    let code = "A".repeat(43);
+    let uri = format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2F");
+    let validated = wallet_validate_qr_input(uri).await.unwrap().unwrap();
+    assert_eq!(validated.kind, "remote_pairing");
+    let content: serde_json::Value = serde_json::from_str(&validated.parsed_content_json).unwrap();
+    assert_eq!(content["pairing_code"], code);
+    assert_eq!(content["api_origin"], "https://wallet.example/");
+    for invalid in [
+        format!("marty://pair?code={code}&api=http%3A%2F%2Fwallet.example%2F"),
+        format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2Fpath"),
+        format!("marty://pair?code={code}&code={code}&api=https%3A%2F%2Fwallet.example%2F"),
+        format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2F&user=alice"),
+        "marty://pair?code=short&api=https%3A%2F%2Fwallet.example%2F".into(),
+    ] {
+        assert!(wallet_validate_qr_input(invalid).await.is_err());
+    }
+}
+
+#[tokio::test]
 async fn wallet_qr_validation_rejects_malformed_push_registration() {
     for malformed in [
         "marty://push-register?org=acme&api=http%3A%2F%2Fapi.example&token=secret&user=alice",

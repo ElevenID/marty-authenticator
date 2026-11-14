@@ -13,6 +13,7 @@ class ExpiredPassesView extends ConsumerStatefulWidget {
 
 class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   bool isEditMode = false;
+  bool isDeleting = false;
   Set<String> selectedCards = {};
 
   @override
@@ -42,12 +43,14 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              setState(() {
-                isEditMode = !isEditMode;
-                selectedCards.clear();
-              });
-            },
+            onPressed: isDeleting
+                ? null
+                : () {
+                    setState(() {
+                      isEditMode = !isEditMode;
+                      selectedCards.clear();
+                    });
+                  },
             child: Text(
               isEditMode ? 'Cancel' : 'Edit',
               style: const TextStyle(color: Colors.blue, fontSize: 16),
@@ -74,7 +77,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: _deleteSelected,
+                    onPressed: isDeleting ? null : _deleteSelected,
                     child: const Text(
                       'Delete',
                       style: TextStyle(color: Colors.red, fontSize: 16),
@@ -85,7 +88,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
                     style: const TextStyle(color: Colors.white),
                   ),
                   TextButton(
-                    onPressed: _unhideSelected,
+                    onPressed: isDeleting ? null : _unhideSelected,
                     child: const Text(
                       'Unhide',
                       style: TextStyle(color: Colors.blue, fontSize: 16),
@@ -100,7 +103,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   }
 
   Widget _buildExpiredCardItem(CardData card) {
-    final isSelected = selectedCards.contains(card.title);
+    final isSelected = selectedCards.contains(card.id);
 
     return ListTile(
       leading: isEditMode
@@ -147,36 +150,63 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   }
 
   void _toggleSelection(CardData card) {
+    if (isDeleting) return;
+    final id = card.id;
+    if (id == null) return;
     setState(() {
-      if (selectedCards.contains(card.title)) {
-        selectedCards.remove(card.title);
+      if (selectedCards.contains(id)) {
+        selectedCards.remove(id);
       } else {
-        selectedCards.add(card.title);
+        selectedCards.add(id);
       }
     });
   }
 
   void _toggleSelectAll() {
+    if (isDeleting) return;
     final expiredCards = ref.read(expiredCardsProvider);
     setState(() {
       if (selectedCards.length == expiredCards.length) {
         selectedCards.clear();
       } else {
-        selectedCards = expiredCards.map((c) => c.title).toSet();
+        selectedCards = expiredCards
+            .map((c) => c.id)
+            .whereType<String>()
+            .toSet();
       }
     });
   }
 
-  void _deleteSelected() {
+  Future<void> _deleteSelected() async {
     final expiredCards = ref.read(expiredCardsProvider);
     final cardsToDelete = expiredCards
-        .where((c) => selectedCards.contains(c.title))
+        .where((c) => selectedCards.contains(c.id))
         .toList();
 
-    for (var card in cardsToDelete) {
-      ref.read(cardStateProvider.notifier).deleteCard(card);
+    setState(() => isDeleting = true);
+    try {
+      for (final card in cardsToDelete) {
+        await ref.read(cardStateProvider.notifier).deleteCard(card);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        isDeleting = false;
+        selectedCards.retainAll(
+          ref
+              .read(expiredCardsProvider)
+              .map((card) => card.id)
+              .whereType<String>(),
+        );
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not delete the selected pass.')),
+      );
+      return;
     }
+    if (!mounted) return;
     setState(() {
+      isDeleting = false;
       selectedCards.clear();
       isEditMode = false;
     });
@@ -185,7 +215,7 @@ class _ExpiredPassesViewState extends ConsumerState<ExpiredPassesView> {
   void _unhideSelected() {
     final expiredCards = ref.read(expiredCardsProvider);
     final cardsToUnhide = expiredCards
-        .where((c) => selectedCards.contains(c.title))
+        .where((c) => selectedCards.contains(c.id))
         .toList();
 
     for (var card in cardsToUnhide) {
