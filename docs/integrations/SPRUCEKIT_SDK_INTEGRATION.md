@@ -88,16 +88,15 @@ This document describes the comprehensive integration of SpruceID SDK into the p
 
 #### 7. QRScannerServiceEnhanced (`lib/services/qr_scanner_service_enhanced.dart`)
 
-- **Purpose**: Comprehensive QR processing with SDK validation
-- **Lines**: 800+
-- **Key Features**:
-  - Multi-format QR processing (JSON, URL, OpenID, DIDComm)
-  - Real-time SDK validation and enrichment
-  - Advanced credential matching during scan
-  - Privacy analysis integration
-  - Performance optimization with preloading
-  - Background processing capabilities
-  - Comprehensive error handling and fallbacks
+The current scanner parses supported protocols through the Rust wallet parser
+and retains credential matching and review actions. Parsing does not establish
+issuer/verifier trust or credential compatibility. Unknown compatibility does
+not trigger automatic offer handling; the user can explicitly review the offer
+and the native acceptance path performs its own checks.
+
+The former preloading, verifier caching, presentation-template, and trust-score
+facades have been retired. They did not perform those operations or establish
+trust. QR processing no longer reports fabricated optimization results.
 
 #### 8. BackgroundSyncService (`lib/services/background_sync_service.dart`)
 

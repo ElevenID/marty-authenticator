@@ -223,7 +223,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     }
     // Auto-process credential offers if fully compatible
     else if (qrType == QRType.credentialOffer &&
-        _isFullyCompatibleOffer(enrichedResult)) {
+        enrichedResult.canAutoHandleOffer) {
       await _handleCredentialOffer(enrichedResult);
     }
   }
@@ -297,13 +297,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     if (shouldAccept == true) {
       await _acceptCredentialOffer(enrichedResult);
     }
-  }
-
-  bool _isFullyCompatibleOffer(EnrichedQRResult enrichedResult) {
-    final compatibility = enrichedResult.credentialCompatibility;
-    if (compatibility == null) return false;
-
-    return compatibility.every((c) => c.isSupported);
   }
 
   Future<void> _acceptCredentialOffer(EnrichedQRResult enrichedResult) async {
@@ -579,7 +572,9 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                securityLevel.name.toUpperCase(),
+                securityLevel == SecurityLevel.unknown
+                    ? 'TRUST NOT EVALUATED'
+                    : securityLevel.name.toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
@@ -629,6 +624,19 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
               final supportedCount = compatibilityResults
                   .where((c) => c.isSupported)
                   .length;
+              final hasUnknownCompatibility =
+                  compatibilityResults.isEmpty ||
+                  compatibilityResults.any(
+                    (credential) =>
+                        credential.supportLevel == CompatibilityLevel.unknown,
+                  );
+
+              if (hasUnknownCompatibility) {
+                return const Text(
+                  'Credential compatibility has not been evaluated',
+                  style: TextStyle(color: Colors.white70),
+                );
+              }
 
               return Text(
                 '$supportedCount of ${compatibilityResults.length} credential${compatibilityResults.length == 1 ? '' : 's'} supported',
@@ -695,8 +703,13 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   Widget _buildCredentialOfferDialog(EnrichedQRResult enrichedResult) {
     final offerContent =
         enrichedResult.validatedResult.parsedData.parsedContent!;
-    final issuer = offerContent['issuer'] as Map<String, dynamic>?;
-    final credentials = offerContent['credentials'] as List? ?? [];
+    final issuer = offerContent['credential_issuer'] ?? offerContent['issuer'];
+    final issuerName = issuer is String
+        ? issuer
+        : issuer is Map && issuer['name'] is String
+        ? issuer['name'] as String
+        : 'Unknown issuer';
+    final credentials = enrichedResult.credentialCompatibility ?? [];
 
     return AlertDialog(
       title: const Row(
@@ -711,7 +724,12 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${issuer?['name'] ?? 'Unknown issuer'} is offering:'),
+            Text('$issuerName is offering:'),
+            if (!enrichedResult.canAutoHandleOffer)
+              const Text(
+                'Credential compatibility has not been evaluated. '
+                'The wallet will check the offer when you accept.',
+              ),
             const SizedBox(height: 16),
             ...credentials
                 .take(3)
@@ -719,11 +737,11 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                   (cred) => ListTile(
                     dense: true,
                     leading: const Icon(
-                      Icons.verified,
-                      color: Colors.green,
+                      Icons.card_membership,
+                      color: Colors.grey,
                       size: 20,
                     ),
-                    title: Text(cred['type'] ?? 'Unknown credential'),
+                    title: Text(cred.credentialType),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -814,7 +832,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       case QRType.presentationRequest:
         return 'Share';
       case QRType.credentialOffer:
-        return 'Accept';
+        return 'Review Offer';
       default:
         return 'Process';
     }

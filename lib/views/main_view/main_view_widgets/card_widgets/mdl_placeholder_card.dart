@@ -23,7 +23,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/document_verification_config.dart';
 import '../../../../providers/verification_state_provider.dart';
 import '../../../document_verification/document_scanning_view.dart';
-import '../../../mdl_presentation_view.dart';
 
 /// Placeholder card for mobile Driver's License (mDL)
 /// Similar to Apple Cash card in Apple Wallet - shows promotional content when no mDL is issued
@@ -34,111 +33,98 @@ class MdlPlaceholderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(verificationStateProvider);
 
-    // For debug purposes, we allow tapping the card to test presentation even if not issued
-    // In production, this would be hidden or only shown when issued.
-    /*
     if (status == VerificationStatus.issued) {
       return const SizedBox.shrink();
     }
-    */
 
     final isPending = status == VerificationStatus.pendingApproval;
-    return GestureDetector(
-      onTap: () {
-        // Navigate to presentation view for testing
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MdlPresentationView()),
-        );
-      },
-      child: Container(
-        height: 220.0,
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Center(
-          child: Container(
-            height: 220.0,
-            width: 380.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              color: Colors.deepPurple,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: InkWell(
-              onTap: isPending
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DocumentScanningView(
-                            config: DocumentVerificationConfig.driverLicense,
+    return Container(
+      height: 220.0,
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Center(
+        child: Container(
+          height: 220.0,
+          width: 380.0,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
+            color: Colors.deepPurple,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: isPending
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DocumentScanningView(
+                          config: DocumentVerificationConfig.driverLicense,
+                        ),
+                      ),
+                    );
+                  },
+            borderRadius: BorderRadius.circular(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.credit_card,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Mobile Driver\'s License',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
-                    },
-              borderRadius: BorderRadius.circular(16.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          isPending
+                              ? 'Waiting for approval...'
+                              : 'Add your driver\'s license to Wallet',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => _showCardMenu(context, ref),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
                       child: const Icon(
-                        Icons.credit_card,
+                        Icons.more_horiz,
                         color: Colors.white,
-                        size: 30,
+                        size: 20,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Mobile Driver\'s License',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            isPending
-                                ? 'Waiting for approval...'
-                                : 'Add your driver\'s license to Wallet',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _showCardMenu(context, ref),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        child: const Icon(
-                          Icons.more_horiz,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
