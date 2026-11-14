@@ -11,9 +11,11 @@ The [root README](../README.md) remains the entry point for supported app scope,
 
 ## Integrations
 
-- [Deep linking](../DEEP_LINKING.md)
+- [Integration guide index and scope](integrations/README.md)
+- [Deep-link quick reference](integrations/DEEP_LINKING_QUICK_REFERENCE.md)
+- [Deep linking](integrations/DEEP_LINKING.md)
 - [Native SpruceID integration ownership](spruceid-integration.md)
-- [SpruceKit SDK integration notes](../SPRUCEKIT_SDK_INTEGRATION.md)
+- [SpruceKit SDK integration notes](integrations/SPRUCEKIT_SDK_INTEGRATION.md)
 - [Unfinished Python issuer integration requirements](python-issuer-integration.md)
 
 ## UI reference and project notes
@@ -25,6 +27,6 @@ These implementation and demo notes are retained for context. Their historical t
 
 ## File-placement conventions
 
-Put development guidance in `docs/development/`, implementation references in `docs/reference/`, and project/history notes in `docs/project/`. Link important documents from this index instead of adding another root-level README variant. Commands and plain code paths in the moved guides are still relative to the repository root unless explicitly stated otherwise.
+Put integration guidance in `docs/integrations/`, development guidance in `docs/development/`, implementation references in `docs/reference/`, and project/history notes in `docs/project/`. Link important documents from this index instead of adding another root-level README variant. Commands and plain code paths in the moved guides are still relative to the repository root unless explicitly stated otherwise.
 
-Keep `README.md`, `LICENSE`, `PRIVACY.md`, `CHANGELOG.md`, Flutter manifests, platform directories, Rust configuration, and tool-discovered files at their supported paths. Deep-linking and SDK integration guides remain at their established paths in this first pass. No app, native bridge, build, signing, or deployment changes are part of this organization work.
+Keep `README.md`, `LICENSE`, `PRIVACY.md`, `CHANGELOG.md`, Flutter manifests, platform directories, Rust configuration, and tool-discovered files at their supported paths. Deep-linking and SDK notes are grouped in `docs/integrations/`; current native ownership guidance remains at `docs/spruceid-integration.md`. No app, native bridge, build, signing, or deployment changes are part of this organization work.

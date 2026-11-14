@@ -17,7 +17,7 @@ The pi-authenticator currently support HOTP and TOTP (30 and 60 seconds) and als
 It also supports scanning qr codes that match the [Google Authenticator Key URI](https://github.com/google/google-authenticator/wiki/Key-Uri-Format) format.
 
 **✨ New: Deep Linking & OID4VC Support**
-The app now supports comprehensive deep linking for seamless token imports and verifiable credential workflows. This includes support for OpenID for Verifiable Credentials (OID4VC) credential offers and presentation requests. See [Deep Linking Documentation](./DEEP_LINKING.md) for details.
+The app now supports comprehensive deep linking for seamless token imports and verifiable credential workflows. This includes support for OpenID for Verifiable Credentials (OID4VC) credential offers and presentation requests. See [Deep Linking Documentation](docs/integrations/DEEP_LINKING.md) for details.
 
 Open Badges support requires **Open Badges 3.0**. The wallet no longer presents
 OB2 assertions as verifiable credentials or exposes OB2 issuance/verification
