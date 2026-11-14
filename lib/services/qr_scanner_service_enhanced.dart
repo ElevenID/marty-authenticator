@@ -24,11 +24,8 @@
 // - Advanced QR code processing with SDK integration
 // - Credential offer/request parsing and validation
 // - Automatic credential matching for presentation requests
-// - Performance optimization for SDK operations
-// - Background processing for complex credential workflows
 
 import 'dart:convert';
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../rust/marty_bridge.dart/api.dart' as rust_api;
@@ -43,9 +40,6 @@ final qrScannerServiceEnhancedProvider = Provider<QRScannerServiceEnhanced>((
   return QRScannerServiceEnhanced(
     spruceClientExtended: ref.read(spruceIdClientExtendedProvider),
     walletManagerExtended: ref.read(spruceIdWalletManagerExtendedProvider),
-    // credentialManagerExtended: ref.read(
-    //   spruceIdCredentialManagerExtendedProvider,
-    // ),
   );
 });
 
@@ -53,15 +47,12 @@ final qrScannerServiceEnhancedProvider = Provider<QRScannerServiceEnhanced>((
 class QRScannerServiceEnhanced {
   final ISpruceIdClientExtended _spruceClient;
   final ISpruceIdWalletManagerExtended _walletManager;
-  // final SpruceIdCredentialManagerExtended _credentialManager;
 
   QRScannerServiceEnhanced({
     required ISpruceIdClientExtended spruceClientExtended,
     required ISpruceIdWalletManagerExtended walletManagerExtended,
-    // required SpruceIdCredentialManagerExtended credentialManagerExtended,
   }) : _spruceClient = spruceClientExtended,
        _walletManager = walletManagerExtended;
-  // _credentialManager = credentialManagerExtended;
 
   /// Process scanned QR code with SDK-enhanced capabilities
   Future<ProcessedQRResult> processQRCode(String rawData) async {
@@ -87,10 +78,7 @@ class QRScannerServiceEnhanced {
       // Step 3: Enrich with credential matching if applicable
       final enrichedResult = await _enrichWithCredentialData(validationResult);
 
-      // Step 4: Optimize for presentation workflow
-      final optimizedResult = await _optimizeForWorkflow(enrichedResult);
-
-      return optimizedResult;
+      return ProcessedQRResult.success(enrichedResult: enrichedResult);
     } catch (e) {
       Logger.error(
         'QR code processing failed',
@@ -160,9 +148,8 @@ class QRScannerServiceEnhanced {
         parsedData: parsedData,
         isValid: true,
         validationErrors: const [],
-        securityLevel: requiresExternalProvider
-            ? SecurityLevel.medium
-            : SecurityLevel.high,
+        // Parsing a protocol does not authenticate the issuer or verifier.
+        securityLevel: SecurityLevel.unknown,
         recommendedActions: requiresExternalProvider
             ? const ['Continue with the required external provider adapter']
             : const [],
@@ -305,7 +292,7 @@ class QRScannerServiceEnhanced {
     final compatibilityResults = <CredentialCompatibility>[];
 
     for (final credentialDef in credentials) {
-      final compatibility = await _analyzeCredentialCompatibility(
+      final compatibility = _describeCredentialCompatibility(
         credentialDef as Map<String, dynamic>,
       );
       compatibilityResults.add(compatibility);
@@ -360,7 +347,6 @@ class QRScannerServiceEnhanced {
         requestedAttributes,
         optionalAttributes,
       ),
-      verifierTrustScore: await _calculateVerifierTrustScore(requestContent),
     );
   }
 
@@ -486,80 +472,22 @@ class QRScannerServiceEnhanced {
     return opportunities;
   }
 
-  /// Calculate verifier trust score
-  Future<double> _calculateVerifierTrustScore(
-    Map<String, dynamic> requestContent,
-  ) async {
-    // This would integrate with a trust registry in production
-    final verifier = requestContent['verifier'] as Map<String, dynamic>?;
-
-    if (verifier == null) return 0.5; // Unknown verifier
-
-    final did = verifier['did'] as String?;
-    final name = verifier['name'] as String?;
-
-    // Check against known verifiers
-    if (did != null) {
-      try {
-        // final trustData = await _spruceClient.getVerifierTrustDataSDK(did);
-        final trustData = {
-          'isTrusted': true,
-          'verifierName': 'Unknown Verifier',
-        };
-        return (trustData['trust_score'] as double?) ?? 0.5;
-      } catch (e) {
-        Logger.warning('Failed to get verifier trust data', error: e);
-      }
-    }
-
-    // Basic heuristics
-    if (name?.toLowerCase().contains('government') == true ||
-        name?.toLowerCase().contains('official') == true) {
-      return 0.8; // Higher trust for government entities
-    }
-
-    return 0.5; // Default neutral trust
-  }
-
-  /// Analyze credential compatibility for offers
-  Future<CredentialCompatibility> _analyzeCredentialCompatibility(
+  /// Describe an offered credential without claiming unsupported analysis.
+  /// Native acceptance still validates the user's explicitly reviewed offer.
+  CredentialCompatibility _describeCredentialCompatibility(
     Map<String, dynamic> credentialDef,
-  ) async {
-    try {
-      // final compatibility = await _spruceClient
-      //     .analyzeCredentialCompatibilitySDK(credentialDef);
-      final compatibility = {'supported': true, 'support_level': 'full'};
-
-      return CredentialCompatibility(
-        credentialType: credentialDef['type'] as String? ?? 'Unknown',
-        format: credentialDef['format'] as String? ?? 'jwt_vc',
-        isSupported: compatibility['supported'] as bool? ?? false,
-        supportLevel: CompatibilityLevel.fromString(
-          compatibility['support_level'] as String? ?? 'unknown',
-        ),
-        requiredCapabilities:
-            (compatibility['required_capabilities'] as List?)?.cast<String>() ??
-            [],
-        availableCapabilities:
-            (compatibility['available_capabilities'] as List?)
-                ?.cast<String>() ??
-            [],
-        missingCapabilities:
-            (compatibility['missing_capabilities'] as List?)?.cast<String>() ??
-            [],
-      );
-    } catch (e) {
-      Logger.warning('Failed to analyze credential compatibility', error: e);
-      return CredentialCompatibility(
-        credentialType: credentialDef['type'] as String? ?? 'Unknown',
-        format: credentialDef['format'] as String? ?? 'jwt_vc',
-        isSupported: true, // Default to supported
-        supportLevel: CompatibilityLevel.basic,
-        requiredCapabilities: [],
-        availableCapabilities: [],
-        missingCapabilities: [],
-      );
-    }
+  ) {
+    final type = credentialDef['type'];
+    final format = credentialDef['format'];
+    return CredentialCompatibility(
+      credentialType: type is String ? type : 'Unknown',
+      format: format is String ? format : 'Unknown',
+      isSupported: false,
+      supportLevel: CompatibilityLevel.unknown,
+      requiredCapabilities: const [],
+      availableCapabilities: const [],
+      missingCapabilities: const ['Credential compatibility evaluation'],
+    );
   }
 
   /// Generate available actions for presentation requests
@@ -635,9 +563,21 @@ class QRScannerServiceEnhanced {
     final actions = <QRAction>[];
 
     final supportedCredentials = compatibilityResults
-        .where((c) => c.isSupported)
+        .where(
+          (credential) =>
+              credential.isSupported &&
+              credential.supportLevel != CompatibilityLevel.unknown &&
+              credential.supportLevel != CompatibilityLevel.unsupported,
+        )
+        .length;
+    final unknownCredentials = compatibilityResults
+        .where(
+          (credential) => credential.supportLevel == CompatibilityLevel.unknown,
+        )
         .length;
     final totalCredentials = compatibilityResults.length;
+    final unsupportedCredentials =
+        totalCredentials - supportedCredentials - unknownCredentials;
 
     if (supportedCredentials > 0) {
       actions.add(
@@ -657,19 +597,34 @@ class QRScannerServiceEnhanced {
       );
     }
 
-    if (supportedCredentials < totalCredentials) {
+    if (unknownCredentials > 0) {
+      actions.add(
+        QRAction(
+          id: 'review_compatibility',
+          title: 'Review Credential Offer',
+          description: 'Credential compatibility has not been evaluated',
+          type: ActionType.information,
+          priority: ActionPriority.medium,
+          requiresUserConsent: true,
+          metadata: {
+            'unknown_count': unknownCredentials,
+            'total_count': totalCredentials,
+          },
+        ),
+      );
+    }
+
+    if (unsupportedCredentials > 0) {
       actions.add(
         QRAction(
           id: 'partial_support_warning',
-          title: 'Partial Compatibility',
+          title: 'Unsupported Credentials',
           description:
-              '${totalCredentials - supportedCredentials} credential${totalCredentials - supportedCredentials == 1 ? '' : 's'} not fully supported',
+              '$unsupportedCredentials credential${unsupportedCredentials == 1 ? '' : 's'} not supported',
           type: ActionType.warning,
           priority: ActionPriority.medium,
           requiresUserConsent: false,
-          metadata: {
-            'unsupported_count': totalCredentials - supportedCredentials,
-          },
+          metadata: {'unsupported_count': unsupportedCredentials},
         ),
       );
     }
@@ -687,147 +642,6 @@ class QRScannerServiceEnhanced {
     );
 
     return actions;
-  }
-
-  /// Optimize result for specific workflow patterns
-  Future<ProcessedQRResult> _optimizeForWorkflow(
-    EnrichedQRResult enrichedResult,
-  ) async {
-    try {
-      // Apply workflow-specific optimizations
-      final optimizations = <String, dynamic>{};
-
-      // Preload credential data for presentation workflows
-      if (enrichedResult.validatedResult.parsedData.type ==
-          QRType.presentationRequest) {
-        optimizations['preloaded_credentials'] = await _preloadCredentialData(
-          enrichedResult.matchingCredentials,
-        );
-      }
-
-      // Cache frequently used verifier data
-      if (enrichedResult.privacyAnalysis != null) {
-        optimizations['cached_verifier_data'] = await _cacheVerifierData(
-          enrichedResult.validatedResult.parsedData.parsedContent!,
-        );
-      }
-
-      // Pre-generate presentation templates
-      if (enrichedResult.matchingCredentials.isNotEmpty) {
-        optimizations['presentation_templates'] =
-            await _generatePresentationTemplates(
-              enrichedResult.matchingCredentials,
-            );
-      }
-
-      return ProcessedQRResult.success(
-        enrichedResult: enrichedResult,
-        processingMetadata: {
-          'processing_time_ms': DateTime.now().millisecondsSinceEpoch,
-          'optimization_applied': optimizations.keys.toList(),
-          'performance_hints': _generatePerformanceHints(enrichedResult),
-        },
-        optimizations: optimizations,
-      );
-    } catch (e) {
-      Logger.error('Failed to optimize workflow', error: e);
-      return ProcessedQRResult.success(
-        enrichedResult: enrichedResult,
-        processingMetadata: {'optimization_failed': true},
-        optimizations: {},
-      );
-    }
-  }
-
-  /// Preload credential data for faster access
-  Future<Map<String, dynamic>> _preloadCredentialData(
-    List<MatchingCredential> credentials,
-  ) async {
-    final preloadedData = <String, dynamic>{};
-
-    for (final cred in credentials.take(3)) {
-      // Preload top 3 matches
-      try {
-        // final fullCredential = await _walletManager.getCredentialById(
-        //   cred.credentialId,
-        // );
-        final fullCredential = {'id': cred.credentialId};
-        preloadedData[cred.credentialId] = fullCredential;
-      } catch (e) {
-        Logger.warning(
-          'Failed to preload credential ${cred.credentialId}',
-          error: e,
-        );
-      }
-    }
-
-    return preloadedData;
-  }
-
-  /// Cache verifier data for performance
-  Future<Map<String, dynamic>> _cacheVerifierData(
-    Map<String, dynamic> requestContent,
-  ) async {
-    final verifier = requestContent['verifier'] as Map<String, dynamic>?;
-    if (verifier == null) return {};
-
-    // Cache verifier logo, trust data, etc.
-    return {
-      'verifier_name': verifier['name'],
-      'verifier_did': verifier['did'],
-      'cached_at': DateTime.now().millisecondsSinceEpoch,
-    };
-  }
-
-  /// Pre-generate presentation templates
-  Future<List<Map<String, dynamic>>> _generatePresentationTemplates(
-    List<MatchingCredential> credentials,
-  ) async {
-    final templates = <Map<String, dynamic>>[];
-
-    for (final cred in credentials.take(2)) {
-      // Generate templates for top matches
-      try {
-        // final template = await _spruceClient.generatePresentationTemplateSDK(
-        //   credentialId: cred.credentialId,
-        //   attributes: cred.matchingAttributes,
-        // );
-        final template = {'template': 'mock'};
-        templates.add(template);
-      } catch (e) {
-        Logger.warning(
-          'Failed to generate presentation template for ${cred.credentialId}',
-          error: e,
-        );
-      }
-    }
-
-    return templates;
-  }
-
-  /// Generate performance optimization hints
-  List<String> _generatePerformanceHints(EnrichedQRResult result) {
-    final hints = <String>[];
-
-    if (result.matchingCredentials.length > 5) {
-      hints.add(
-        'Many matching credentials found - consider credential filtering',
-      );
-    }
-
-    if (result.availableActions.length > 10) {
-      hints.add('Many available actions - consider action prioritization');
-    }
-
-    final highSecurityCredentials = result.matchingCredentials
-        .where((c) => c.securityLevel == SecurityLevel.high)
-        .length;
-
-    if (highSecurityCredentials > 0) {
-      hints.add('Hardware-backed credentials available for enhanced security');
-    }
-
-    return hints;
   }
 }
 
@@ -957,14 +771,12 @@ class PrivacyAnalysis {
   final Map<String, double> attributeRisks;
   final List<String> recommendations;
   final List<String> dataMinimizationOpportunities;
-  final double verifierTrustScore;
 
   const PrivacyAnalysis({
     required this.overallRiskLevel,
     required this.attributeRisks,
     required this.recommendations,
     required this.dataMinimizationOpportunities,
-    required this.verifierTrustScore,
   });
 }
 
@@ -1025,6 +837,22 @@ class EnrichedQRResult {
     this.privacyAnalysis,
     this.credentialCompatibility,
   });
+
+  /// Automatic handling requires positive, nonempty compatibility evidence.
+  /// Unknown offers remain available through the explicit review action.
+  bool get canAutoHandleOffer {
+    final compatibility = credentialCompatibility;
+    return validatedResult.isValid &&
+        validatedResult.parsedData.type == QRType.credentialOffer &&
+        compatibility != null &&
+        compatibility.isNotEmpty &&
+        compatibility.every(
+          (credential) =>
+              credential.isSupported &&
+              credential.supportLevel != CompatibilityLevel.unknown &&
+              credential.supportLevel != CompatibilityLevel.unsupported,
+        );
+  }
 }
 
 /// Final processed QR result
@@ -1032,28 +860,17 @@ class ProcessedQRResult {
   final bool isSuccess;
   final String? errorMessage;
   final EnrichedQRResult? enrichedResult;
-  final Map<String, dynamic>? processingMetadata;
-  final Map<String, dynamic>? optimizations;
 
   const ProcessedQRResult._({
     required this.isSuccess,
     this.errorMessage,
     this.enrichedResult,
-    this.processingMetadata,
-    this.optimizations,
   });
 
   factory ProcessedQRResult.success({
     required EnrichedQRResult enrichedResult,
-    Map<String, dynamic>? processingMetadata,
-    Map<String, dynamic>? optimizations,
   }) {
-    return ProcessedQRResult._(
-      isSuccess: true,
-      enrichedResult: enrichedResult,
-      processingMetadata: processingMetadata,
-      optimizations: optimizations,
-    );
+    return ProcessedQRResult._(isSuccess: true, enrichedResult: enrichedResult);
   }
 
   factory ProcessedQRResult.error(String errorMessage) {

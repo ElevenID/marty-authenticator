@@ -25,6 +25,13 @@ adapters. Ask the issuer to reissue legacy badges as OB3; changing their type or
 context does not migrate their signatures. Stored legacy records are preserved
 but excluded from the supported credential list with a reissuance notice.
 
+Nearby mDL presentation is currently unavailable. The enrollment card does not
+start a mock BLE exchange. Issuer-trust checks in the Flutter bridge report
+unavailability until an authoritative IACA trust-anchor provider is configured;
+an empty registry is not a credential trust verdict. QR parsing alone does not
+establish issuer trust or credential compatibility. Offers with unknown
+compatibility remain available for explicit review and native acceptance.
+
 The App is best used with the [privacyIDEA Authentication Server](https://github.com/privacyidea/privacyidea), and runs on both Android and iOS.
 The pi-authenticator can also be configured to support PUSH authentication without Firebase.
 
