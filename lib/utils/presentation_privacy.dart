@@ -2,6 +2,14 @@
 bool requestsSensitivePresentationFields(Iterable<String> fields) {
   const sensitive = {
     'ssn',
+    'driverlicense',
+    'creditcard',
+    'biometricdata',
+    'medicalrecords',
+    'phonenumber',
+    'address',
+    'email',
+    'idnumber',
     'socialsecuritynumber',
     'nationalid',
     'nationalidentificationnumber',
@@ -20,6 +28,6 @@ bool requestsSensitivePresentationFields(Iterable<String> fields) {
         .last
         .toLowerCase()
         .replaceAll(RegExp('[^a-z0-9]'), '');
-    return sensitive.contains(name);
+    return sensitive.any(name.contains);
   });
 }

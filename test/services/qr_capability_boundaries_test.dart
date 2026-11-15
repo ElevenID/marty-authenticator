@@ -161,6 +161,15 @@ void main() {
 
   for (final name in [
     'SSN',
+    'driver_license',
+    'credit_card',
+    'biometric_data',
+    'medical_records',
+    'holder_ssn',
+    'phone_number',
+    'address',
+    'email',
+    'id_number',
     'social_security_number',
     'bank_account',
     'passport_number',
