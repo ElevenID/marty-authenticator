@@ -1,0 +1,37 @@
+diff --git a/src/licenses.ts b/src/licenses.ts
+index 108d7bd..c19c85c 100644
+--- a/src/licenses.ts
++++ b/src/licenses.ts
+@@ -61 +61,2 @@ export async function getInvalidLicenseChanges(
+-    const license = change.license
++    const license =
++      change.license === null ? null : spdx.normalizeLicenseCase(change.license)
+diff --git a/src/spdx.ts b/src/spdx.ts
+index 370fc5f..6f9109f 100644
+--- a/src/spdx.ts
++++ b/src/spdx.ts
+@@ -3,0 +4 @@ import parse from 'spdx-expression-parse'
++import {canonicalIdentifiers} from './spdx-license-case-data'
+@@ -66,0 +68,22 @@ export function cleanInvalidSPDX(spdxExpr: string): string {
++
++const caseSensitiveOperators = new Set(['AND', 'OR', 'WITH'])
++
++// SPDX 2.3.1 D.2 makes identifiers case-insensitive; operators remain exact.
++// Unknown/custom identifiers and special values are deliberately untouched.
++export function normalizeLicenseCase(expression: string): string {
++  const tokens = expression.match(/[A-Za-z0-9_.-]+/g) ?? []
++  // The upstream parsers disagree on operator case. Preserve the whole input
++  // in that case, so repairing identifiers cannot create a new acceptance.
++  if (
++    tokens.some(token => {
++      const uppercase = token.toUpperCase()
++      return caseSensitiveOperators.has(uppercase) && token !== uppercase
++    })
++  ) {
++    return expression
++  }
++  return expression.replace(
++    /[A-Za-z0-9_.-]+/g,
++    token => canonicalIdentifiers.get(token.toLowerCase()) ?? token
++  )
++}

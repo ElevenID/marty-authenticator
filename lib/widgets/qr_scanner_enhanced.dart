@@ -650,8 +650,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
                   (credentialId) => ListTile(
                     dense: true,
                     leading: const Icon(
-                      Icons.verified,
-                      color: Colors.green,
+                      Icons.card_membership,
+                      color: Colors.grey,
                       size: 20,
                     ),
                     title: Text(credentialId),

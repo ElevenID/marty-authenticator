@@ -114,9 +114,8 @@ PR 57 must remain draft until the following are addressed and qualified:
 
 - **Authenticated verifier and destination.** Core's request-object path decodes
   a JWT payload without verifying its signature. Consent currently displays the
-  raw `client_id`, while the actual HTTPS `response_uri` can differ. W04 must
-  implement the supported request/client authentication profile and show and
-  bind the actual recipient. A digest of parsed fields is not that authentication.
+  raw `client_id` and the actual HTTPS `response_uri` separately; those identifiers can differ. W04 must
+  implement the supported request/client authentication profile and bind the authenticated recipient. A digest of parsed fields is not that authentication.
 - **Complete request semantics.** Fields such as `client_id_scheme` and
   `transaction_data` are not retained in the parsed request. Unsupported security
   semantics must be rejected or implemented before external conformance claims.
@@ -140,3 +139,11 @@ handling belong to W04; this change does not advertise full Final conformance.
 
 References: [OpenID4VCI 1.0 sections 8.3, 12.2.4 and 14.4](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html)
 and [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html).
+
+## November 15 current-main reconciliation
+
+Reconciles main `1a396a0641ad3996c543fc782de97ca2d7546e93` without rewriting retained feature history. Main's dependency updates, native status boundary, retired proximity placeholder and dependency-reader guards remain. QR merge conflicts preserve native classification, explicit offer review and the separation between parsed content and verified receipt selection; scanned compatibility fields cannot trigger automatic acceptance or establish trust. Main's advisory QR test cases are ported to these current APIs. Sensitive-field warnings now appear in the actual presentation consent view, which also displays the exact response URI. That URI remains request-supplied until W04 authenticates it.
+
+Validation on the combined source: locked Flutter dependencies restored with Flutter 3.44.6 / Dart 3.12.2; analysis reports no issues; 84 affected Flutter tests pass; full Flutter suite reports 334 passes and four existing SIOPv2 skips. These exercise mocked bridge/platform contracts and widgets. They do not execute the native Rust/KMS bridge, regenerate artifacts, install a device wallet or establish interoperable protocol acceptance. Current Core main and the UI-pinned Core revision also lack incoming request-object authentication; a pin change alone cannot close that prerequisite.
+
+Authentication/raw security semantics, verified always-shared claim projection, issuance service/configuration-to-issuer governance, native issuer/KMS integration and all installed/artifact/external acceptance gates above remain open. No production behavior is activated by this draft source checkpoint.

@@ -2,17 +2,35 @@
 
 OTP Authenticator App for privacyIDEA Authentication Server
 
+## Repository navigation
+
+| Area | Location |
+| --- | --- |
+| Guides and project notes | [Documentation index](docs/README.md) |
+| Flutter application | [lib/](lib/) |
+| Native Rust integration | [rust/](rust/) |
+| Tests and current coverage requirements | [test/](test/) · [Development checks](docs/development-checks.md) |
+| Platform projects | [android/](android/) · [ios/](ios/) · [macos/](macos/) · [web/](web/) |
+| Developer tooling and workspace | [scripts/](scripts/) · [Docker development ownership](docker/README.md) |
+
 The pi-authenticator currently support HOTP and TOTP (30 and 60 seconds) and also privacyIDEA's PUSH authentication. Supported hashing algorithms are SHA-1, SHA-256 and SHA-512.
 It also supports scanning qr codes that match the [Google Authenticator Key URI](https://github.com/google/google-authenticator/wiki/Key-Uri-Format) format.
 
 **✨ New: Deep Linking & OID4VC Support**
-The app now supports comprehensive deep linking for seamless token imports and verifiable credential workflows. This includes support for OpenID for Verifiable Credentials (OID4VC) credential offers and presentation requests. See [Deep Linking Documentation](./DEEP_LINKING.md) for details.
+The app now supports comprehensive deep linking for seamless token imports and verifiable credential workflows. This includes support for OpenID for Verifiable Credentials (OID4VC) credential offers and presentation requests. See [Deep Linking Documentation](docs/integrations/DEEP_LINKING.md) for details.
 
 Open Badges support requires **Open Badges 3.0**. The wallet no longer presents
 OB2 assertions as verifiable credentials or exposes OB2 issuance/verification
 adapters. Ask the issuer to reissue legacy badges as OB3; changing their type or
 context does not migrate their signatures. Stored legacy records are preserved
 but excluded from the supported credential list with a reissuance notice.
+
+Nearby mDL presentation is currently unavailable. The enrollment card does not
+start a mock BLE exchange. Issuer-trust checks in the Flutter bridge report
+unavailability until an authoritative IACA trust-anchor provider is configured;
+an empty registry is not a credential trust verdict. QR parsing alone does not
+establish issuer trust or credential compatibility. Offers with unknown
+compatibility remain available for explicit review and native acceptance.
 
 The App is best used with the [privacyIDEA Authentication Server](https://github.com/privacyidea/privacyidea), and runs on both Android and iOS.
 The pi-authenticator can also be configured to support PUSH authentication without Firebase.

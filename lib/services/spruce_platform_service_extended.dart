@@ -348,7 +348,11 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     throw UserSelectionRequiredException(
       sessionId: sessionId,
       matches: matches,
-      requestDetails: {'verifier': request.clientId, 'purpose': purpose},
+      requestDetails: {
+        'verifier': request.clientId,
+        'recipient': request.responseUri,
+        'purpose': purpose,
+      },
     );
   }
 

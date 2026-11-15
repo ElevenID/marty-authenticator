@@ -290,7 +290,7 @@ dependencies = [
  "nom",
  "num-traits",
  "rusticata-macros",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "time",
 ]
 
@@ -947,7 +947,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "smol_str",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -974,7 +974,7 @@ dependencies = [
  "serde_with",
  "smol_str",
  "stacker",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "unicode-security",
 ]
 
@@ -1554,7 +1554,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ccc2776f0c61eca1ca32528f85548abd1a4be8fb53d1b21c013e4f18da1e7090"
 dependencies = [
  "data-encoding",
- "syn 2.0.119",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -1600,7 +1600,7 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10d60334b3b2e7c9d91ef8150abfb6fa4c1c39ebbcf4a81c2e346aad939fee3e"
 dependencies = [
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1695,7 +1695,7 @@ dependencies = [
 [[package]]
 name = "did-ethr"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "hex",
  "iref",
@@ -1704,13 +1704,13 @@ dependencies = [
  "ssi-dids-core",
  "ssi-jwk",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "did-ion"
 version = "0.6.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "iref",
@@ -1724,13 +1724,13 @@ dependencies = [
  "ssi-jwk",
  "ssi-jws",
  "ssi-verification-methods",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "did-jwk"
 version = "0.4.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "iref",
@@ -1742,13 +1742,13 @@ dependencies = [
  "ssi-jwk",
  "ssi-verification-methods",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "did-method-key"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "bs58 0.4.0",
  "iref",
@@ -1761,13 +1761,13 @@ dependencies = [
  "ssi-jwk",
  "ssi-multicodec",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "did-pkh"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "bech32",
@@ -1781,13 +1781,13 @@ dependencies = [
  "ssi-dids-core",
  "ssi-jwk",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "did-tz"
 version = "0.5.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "bs58 0.4.0",
@@ -1802,20 +1802,20 @@ dependencies = [
  "ssi-jwk",
  "ssi-jws",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "url",
 ]
 
 [[package]]
 name = "did-web"
 version = "0.5.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "http",
  "iref",
  "reqwest 0.13.4",
  "ssi-dids-core",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1898,7 +1898,7 @@ checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 [[package]]
 name = "ecdsa"
 version = "0.17.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "crypto-bigint",
  "der 0.8.3",
@@ -3352,7 +3352,7 @@ dependencies = [
  "jni-sys",
  "log",
  "simd_cesu8",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "walkdir",
  "windows-link",
 ]
@@ -3765,7 +3765,7 @@ dependencies = [
  "percent-encoding",
  "rustls",
  "rustls-native-certs",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tokio-rustls",
  "tokio-stream",
@@ -4044,7 +4044,7 @@ dependencies = [
  "sha2 0.10.9",
  "ssi-claims",
  "ssi-sd-jwt",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "url",
  "uuid",
@@ -4064,7 +4064,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
 ]
@@ -4117,7 +4117,7 @@ dependencies = [
  "sha2 0.10.9",
  "shake",
  "spki 0.7.3",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "x25519-dalek",
  "x509-cert",
  "x509-ocsp",
@@ -4144,7 +4144,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "uuid",
@@ -4178,7 +4178,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "ssi-jwk",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "url",
@@ -4204,7 +4204,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "uuid",
@@ -4221,7 +4221,7 @@ dependencies = [
  "flate2",
  "serde",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -4242,7 +4242,7 @@ dependencies = [
  "ryu-js",
  "serde",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "x509-cert",
@@ -4311,7 +4311,7 @@ dependencies = [
  "ssi-jwk",
  "ssi-jws",
  "ssi-verification-methods",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "time",
  "tokio",
  "tracing",
@@ -4346,7 +4346,7 @@ dependencies = [
  "libc",
  "marty-types",
  "serde",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "zeroize",
 ]
 
@@ -5374,7 +5374,7 @@ dependencies = [
  "rustc-hash",
  "rustls",
  "socket2",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "web-time",
@@ -5397,7 +5397,7 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "slab",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "tinyvec",
  "tracing",
  "web-time",
@@ -5555,7 +5555,7 @@ checksum = "a4e608c6638b9c18977b00b475ac1f28d14e84b27d8d42f70e0bf1e3dec127ac"
 dependencies = [
  "getrandom 0.2.17",
  "libredox",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -5734,7 +5734,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c51c9ae4df8a7fba42103df5c621fa3c37eccf3a3c650879e90fc48b11cc192c"
 dependencies = [
  "hashbrown 0.16.1",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -5790,9 +5790,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.1.4"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+checksum = "e5e76742e5294153d4dde1207dbec5bdd81eef6fabdc0d2118babadabfd858aa"
 dependencies = [
  "bitflags 2.13.1",
  "errno",
@@ -5803,9 +5803,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.42"
+version = "0.23.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c54fcab019b409d04215d3a17cb438fd7fbf192ee61461f20f4fe18704bc138"
+checksum = "48e13bd8c0e9365c43cfa5c9e8f9ad49d3c8444926c9aac819e0e4dc503c8fdf"
 dependencies = [
  "aws-lc-rs",
  "log",
@@ -5868,9 +5868,9 @@ checksum = "f87165f0995f63a9fbeea62b64d10b4d9d8e78ec6d7d51fb2125fda7bb36788f"
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.13"
+version = "0.103.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61c429a8649f110dddef65e2a5ad240f747e85f7758a6bccc7e5777bd33f756e"
+checksum = "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281"
 dependencies = [
  "aws-lc-rs",
  "ring",
@@ -5968,7 +5968,7 @@ dependencies = [
  "serde_json",
  "sha2 0.11.1",
  "strum 0.28.0",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -6107,10 +6107,11 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.151"
+version = "1.0.154"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
+checksum = "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
 dependencies = [
+ "foldhash",
  "indexmap 2.14.0",
  "itoa",
  "memchr",
@@ -6403,7 +6404,7 @@ checksum = "0d585997b0ac10be3c5ee635f1bab02d512760d14b7c468801ac8a01d9ae5f1d"
 dependencies = [
  "num-bigint",
  "num-traits",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "time",
 ]
 
@@ -6513,7 +6514,7 @@ dependencies = [
 [[package]]
 name = "ssi-caips"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "bs58 0.4.0",
  "linked-data",
@@ -6526,7 +6527,7 @@ dependencies = [
 [[package]]
 name = "ssi-claims"
 version = "0.7.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "educe 0.4.23",
  "iref",
@@ -6552,13 +6553,13 @@ dependencies = [
  "ssi-vc",
  "ssi-vc-jose-cose",
  "ssi-verification-methods",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-claims-core"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "chrono",
  "educe 0.4.23",
@@ -6567,42 +6568,42 @@ dependencies = [
  "ssi-crypto",
  "ssi-eip712",
  "ssi-json-ld",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-contexts"
 version = "0.1.10"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[package]]
 name = "ssi-core"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "pin-project",
  "serde",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-cose"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "ciborium",
  "coset",
  "serde",
  "ssi-claims-core",
  "ssi-crypto",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-crypto"
 version = "0.2.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "bs58 0.4.0",
@@ -6619,13 +6620,13 @@ dependencies = [
  "serde",
  "sha2 0.10.9",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-data-integrity"
 version = "0.4.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "chrono",
  "iref",
@@ -6647,14 +6648,15 @@ dependencies = [
  "ssi-rdf",
  "ssi-security",
  "ssi-verification-methods",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-data-integrity-core"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
+ "base64 0.22.1",
  "chrono",
  "contextual",
  "derivative",
@@ -6681,14 +6683,14 @@ dependencies = [
  "ssi-security",
  "ssi-verification-methods",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "xsd-types",
 ]
 
 [[package]]
 name = "ssi-data-integrity-suites"
 version = "0.4.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -6730,14 +6732,14 @@ dependencies = [
  "ssi-security",
  "ssi-verification-methods",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "xsd-types",
 ]
 
 [[package]]
 name = "ssi-di-sd-primitives"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "digest 0.10.7",
@@ -6752,14 +6754,14 @@ dependencies = [
  "ssi-core",
  "ssi-json-ld",
  "ssi-rdf",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "uuid",
 ]
 
 [[package]]
 name = "ssi-dids"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "did-ethr",
  "did-ion",
@@ -6770,13 +6772,13 @@ dependencies = [
  "did-web",
  "ssi-dids-core",
  "ssi-jwk",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-dids-core"
 version = "0.3.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "iref",
@@ -6794,13 +6796,13 @@ dependencies = [
  "ssi-jws",
  "ssi-verification-methods-core",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-eip712"
 version = "0.1.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "hex",
  "indexmap 2.14.0",
@@ -6812,13 +6814,13 @@ dependencies = [
  "serde",
  "serde_jcs",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-json-ld"
 version = "0.3.3"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "combination",
  "iref",
@@ -6830,13 +6832,13 @@ dependencies = [
  "ssi-contexts",
  "ssi-rdf",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-jwk"
 version = "0.4.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "blake2b_simd",
@@ -6865,7 +6867,7 @@ dependencies = [
 [[package]]
 name = "ssi-jws"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "blake2",
@@ -6888,7 +6890,7 @@ dependencies = [
 [[package]]
 name = "ssi-jwt"
 version = "0.6.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "chrono",
@@ -6910,21 +6912,21 @@ dependencies = [
 [[package]]
 name = "ssi-multicodec"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "csv",
  "ed25519-dalek",
  "k256",
  "p256",
  "p384",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "unsigned-varint",
 ]
 
 [[package]]
 name = "ssi-rdf"
 version = "0.1.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "combination",
  "indexmap 2.14.0",
@@ -6938,7 +6940,7 @@ dependencies = [
 [[package]]
 name = "ssi-sd-jwt"
 version = "0.6.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "indexmap 2.14.0",
@@ -6951,13 +6953,13 @@ dependencies = [
  "ssi-jwk",
  "ssi-jws",
  "ssi-jwt",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-security"
 version = "0.1.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "iref",
  "linked-data",
@@ -6970,7 +6972,7 @@ dependencies = [
 [[package]]
 name = "ssi-vc"
 version = "0.9.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "bitvec 0.20.4",
@@ -6993,14 +6995,14 @@ dependencies = [
  "ssi-rdf",
  "ssi-verification-methods",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "xsd-types",
 ]
 
 [[package]]
 name = "ssi-vc-jose-cose"
 version = "0.7.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "base64 0.22.1",
  "ciborium",
@@ -7013,14 +7015,14 @@ dependencies = [
  "ssi-jwt",
  "ssi-sd-jwt",
  "ssi-vc",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "xsd-types",
 ]
 
 [[package]]
 name = "ssi-verification-methods"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "async-trait",
  "derivative",
@@ -7047,13 +7049,13 @@ dependencies = [
  "ssi-security",
  "ssi-verification-methods-core",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ssi-verification-methods-core"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 dependencies = [
  "bs58 0.4.0",
  "educe 0.4.23",
@@ -7071,7 +7073,7 @@ dependencies = [
  "ssi-jwk",
  "ssi-jws",
  "static-iref",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -7326,11 +7328,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.20"
+version = "2.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f"
+checksum = "09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e"
 dependencies = [
- "thiserror-impl 2.0.20",
+ "thiserror-impl 2.0.21",
 ]
 
 [[package]]
@@ -7346,9 +7348,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.20"
+version = "2.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc04cd3e1236dd4a98afca4569f2deb3f120e5422a4023be2cb683f8486292af"
+checksum = "fe5197923287db20a58125f0bc85c062f7f2c892de97b18c356f9efb14b28524"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7920,9 +7922,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.25.0"
+version = "1.29.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f053576934f05a761a402421fbbe3d425d9366f75f978806a037b3ca481abecc"
+checksum = "bed99139f7dac9b5cfe5f17be4d66dc7079a34dee1d74bcc77217119240e267c"
 dependencies = [
  "atomic 0.6.1",
  "getrandom 0.4.3",
@@ -8412,7 +8414,7 @@ dependencies = [
  "nom",
  "oid-registry",
  "rusticata-macros",
- "thiserror 2.0.20",
+ "thiserror 2.0.21",
  "time",
 ]
 
@@ -8701,39 +8703,39 @@ dependencies = [
 [[patch.unused]]
 name = "ssi"
 version = "0.16.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-bbs"
 version = "0.2.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-did-test"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-ssh"
 version = "0.3.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-status"
 version = "0.8.1"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-tzkey"
 version = "0.4.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-ucan"
 version = "0.5.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
 
 [[patch.unused]]
 name = "ssi-zcap-ld"
 version = "0.8.0"
-source = "git+https://github.com/ElevenID/ssi-elevenid?rev=63a9bcce3daf6f45d1e38e43cf687738bb02cb53#63a9bcce3daf6f45d1e38e43cf687738bb02cb53"
+source = "git+https://github.com/ElevenID/ssi-elevenid?rev=8b546ef5dbcd6e806ec1c26a0c05296515798429#8b546ef5dbcd6e806ec1c26a0c05296515798429"
