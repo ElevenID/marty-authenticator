@@ -221,6 +221,68 @@ Future<void> main() async {
           }
         }
         await _readConsumers();
+      } else if (mode == 'encrypted-recovery') {
+        final suffix = '.$_receipt${_ids.first}';
+        final keys = <String>[
+          for (var i = 0; i < web.window.localStorage.length; i++)
+            web.window.localStorage.key(i)!,
+        ];
+        final record = keys.singleWhere(
+          (v) => v.startsWith('marty.storage.v1.') && v.endsWith(suffix),
+        );
+        final master = record.substring(0, record.length - suffix.length);
+        final ciphertext = web.window.localStorage.getItem(record)!;
+        final encryptionKey = web.window.localStorage.getItem(master)!;
+        final container = ProviderContainer();
+        try {
+          for (final damage in ['ciphertext', 'missing-key', 'corrupt-key']) {
+            try {
+              if (damage == 'ciphertext') {
+                web.window.localStorage.setItem(
+                  record,
+                  'synthetic-corrupt-ciphertext',
+                );
+              } else if (damage == 'missing-key') {
+                web.window.localStorage.removeItem(master);
+              } else {
+                web.window.localStorage.setItem(
+                  master,
+                  'synthetic-corrupt-key',
+                );
+              }
+              var refused = false;
+              try {
+                await WalletCredentialStore.getAll();
+              } on StateError {
+                refused = true;
+              }
+              require(refused);
+              await container.read(cardStateProvider.notifier).refreshCards();
+              require(container.read(walletStorageUnavailableProvider));
+              if (damage == 'missing-key') {
+                require(web.window.localStorage.getItem(master) == null);
+              }
+              if (damage == 'corrupt-key') {
+                require(
+                  web.window.localStorage.getItem(master) ==
+                      'synthetic-corrupt-key',
+                );
+              }
+              if (damage != 'ciphertext') {
+                require(web.window.localStorage.getItem(record) == ciphertext);
+              }
+            } finally {
+              // Restore only this nonce-admitted synthetic fixture's own bytes.
+              web.window.localStorage.setItem(record, ciphertext);
+              web.window.localStorage.setItem(master, encryptionKey);
+            }
+            await container.read(cardStateProvider.notifier).refreshCards();
+            require(!container.read(walletStorageUnavailableProvider));
+            require((await WalletCredentialStore.getAll()).length == 2);
+          }
+        } finally {
+          container.dispose();
+        }
       } else if (mode == 'delete') {
         await WalletCredentialStore.clear();
         require((await WalletCredentialStore.getAll()).isEmpty);

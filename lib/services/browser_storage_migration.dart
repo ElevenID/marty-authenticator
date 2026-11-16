@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'browser_storage_environment.dart' as environment;
+import 'browser_storage_inventory.dart';
 
 typedef BrowserStorageLock =
     Future<T> Function<T>(String, Future<T> Function());
@@ -15,6 +16,13 @@ void configureBrowserSecureStorage() {
   if (!kIsWeb ||
       FlutterSecureStoragePlatform.instance is MigratingBrowserStorage) {
     return;
+  }
+  if (!environment.browserStorageBackendSupported(
+    FlutterSecureStoragePlatform.instance,
+  )) {
+    throw UnsupportedError(
+      'The reviewed browser storage backend is unavailable',
+    );
   }
   FlutterSecureStoragePlatform.instance = MigratingBrowserStorage(
     FlutterSecureStoragePlatform.instance,
@@ -29,12 +37,16 @@ class MigratingBrowserStorage extends FlutterSecureStoragePlatform {
     this.backend, {
     Future<SharedPreferences> Function()? preferences,
     BrowserStorageLock? withLock,
+    Future<BrowserStorageInventory> Function(Map<String, String>)? inventory,
   }) : _preferences = preferences ?? SharedPreferences.getInstance,
-       _withLock = withLock ?? environment.withBrowserStorageLock;
+       _withLock = withLock ?? environment.withBrowserStorageLock,
+       _inventory = inventory ?? environment.browserStorageInventory;
 
   final FlutterSecureStoragePlatform backend;
   final Future<SharedPreferences> Function() _preferences;
   final BrowserStorageLock _withLock;
+  final Future<BrowserStorageInventory> Function(Map<String, String>)
+  _inventory;
   final Map<String, Future<void>> _tails = {};
   static const _receipt = 'marty:wallet:receipt:';
   static const _pairing = 'marty:remote-holder-enrollment';
@@ -70,6 +82,7 @@ class MigratingBrowserStorage extends FlutterSecureStoragePlatform {
         '${target['publicKey']}:${options['useSessionStorage'] == 'true'}';
     final result = (_tails[lock] ?? Future<void>.value()).then(
       (_) => _withLock(lock, () async {
+        await _checkEncryptedRecords(target);
         await _migrate(options, target);
         return action(target);
       }),
@@ -82,6 +95,29 @@ class MigratingBrowserStorage extends FlutterSecureStoragePlatform {
     return result.whenComplete(() {
       if (identical(_tails[lock], tail)) _tails.remove(lock);
     });
+  }
+
+  Future<void> _checkEncryptedRecords(Map<String, String> target) async {
+    final inventory = await _inventory(target);
+    if (inventory.keys.length > 1024 ||
+        (inventory.keys.isNotEmpty && !inventory.keyPresent)) {
+      // Upstream read can initialize a new key if it is missing. Never do that
+      // while old ciphertext exists; preserve it for recovery instead.
+      throw StateError('Encrypted browser storage preserved for recovery');
+    }
+    for (final key in inventory.keys) {
+      String? value;
+      try {
+        value = await backend.read(key: key, options: target);
+      } catch (_) {
+        throw StateError('Encrypted browser storage could not be opened');
+      }
+      // Upstream2.1.1 returns null on decrypt failure and readAll omits it.
+      // Existing ciphertext must never silently disappear from the wallet.
+      if (value == null) {
+        throw StateError('Encrypted browser storage could not be opened');
+      }
+    }
   }
 
   Future<void> _migrate(

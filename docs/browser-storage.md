@@ -23,6 +23,13 @@ storage operations before reading or modifying records. Lock acquisition has a
 30-second deadline; an operation already holding the lock is not detached by a
 timeout while its data transitions are still in flight.
 
+Before any backend operation, the wrapper inventories the exact encrypted
+namespace. Existing ciphertext without its encryption key refuses access before
+upstream can initialize a replacement key. Every existing ciphertext entry must
+decrypt successfully: upstream's null-on-error/skip-on-readAll behavior is
+converted into an explicit recovery error, preserving bytes and preventing an
+apparently empty wallet. Invalid ciphertext or keys are never reset automatically.
+
 Only recognized receipt, layout and pairing records from the old exact database
 namespace are migrated. The adapter bounds record count and size, requires
 canonical base64 and valid UTF-8/JSON, checks receipt ID consistency and layout
@@ -67,7 +74,7 @@ python scripts/serve_browser_storage_acceptance.py --root /tmp/marty-storage-js
 
 The server prints its fresh origin and nonce. Navigate sequentially to that
 origin with `?phase=<phase>&nonce=<printed-nonce>` for `seed`, `migrate`, `reload`,
-`namespaces`, `malformed` and `delete`. Each page must report `passed` through
+`namespaces`, `malformed`, `encrypted-recovery` and `delete`. Each page must report `passed` through
 `document.documentElement.getAttribute('data-marty-storage-result')`. Repeat on
 a new port for WASM, checking resource evidence for `main.dart.mjs` and
 `main.dart.wasm` with no `main.dart.js` fallback. An actual insecure-origin check

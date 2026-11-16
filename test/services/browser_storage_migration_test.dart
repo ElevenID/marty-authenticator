@@ -8,6 +8,7 @@ import 'package:marty_authenticator/providers/card_state_provider.dart';
 import 'package:marty_authenticator/views/main_view/document_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:marty_authenticator/services/browser_storage_migration.dart';
+import 'package:marty_authenticator/services/browser_storage_inventory.dart';
 
 const options = <String, String>{
   'dbName': 'FlutterEncryptedStorage',
@@ -38,6 +39,8 @@ class Storage extends FlutterSecureStoragePlatform {
   int? failWrite;
   bool wrongReadback = false;
   bool unavailable = false;
+  bool missingKey = false;
+  int reads = 0;
   Future<void> Function()? onRead;
   String name(String key, Map<String, String> options) =>
       '${options['publicKey']}:${options['useSessionStorage']}:$key';
@@ -57,6 +60,7 @@ class Storage extends FlutterSecureStoragePlatform {
     required String key,
     required Map<String, String> options,
   }) async {
+    reads++;
     await onRead?.call();
     return wrongReadback ? null : values[name(key, options)];
   }
@@ -98,7 +102,17 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     backend = Storage();
-    storage = MigratingBrowserStorage(backend, withLock: unlocked);
+    storage = MigratingBrowserStorage(
+      backend,
+      withLock: unlocked,
+      inventory: (target) async => BrowserStorageInventory(
+        keys: backend.values.keys
+            .where((key) => key.startsWith(backend.name('', target)))
+            .map((key) => key.substring(backend.name('', target).length))
+            .toList(),
+        keyPresent: !backend.missingKey,
+      ),
+    );
   });
 
   test(
@@ -404,6 +418,57 @@ void main() {
       FlutterSecureStoragePlatform.instance = previous;
     }
   });
+  test(
+    'missing encryption key blocks reads, writes and deletes before backend access',
+    () async {
+      await storage.write(
+        key: '${receiptPrefix}a',
+        value: receipt('a'),
+        options: options,
+      );
+      final original = Map<String, String>.of(backend.values);
+      backend.missingKey = true;
+      final reads = backend.reads;
+      await expectLater(storage.readAll(options: options), throwsStateError);
+      await expectLater(
+        storage.write(
+          key: '${receiptPrefix}a',
+          value: 'replacement',
+          options: options,
+        ),
+        throwsStateError,
+      );
+      await expectLater(storage.deleteAll(options: options), throwsStateError);
+      expect(backend.values, original);
+      expect(backend.reads, reads);
+      expect(backend.writes, 1);
+      backend.missingKey = false;
+      expect(
+        await storage.read(key: '${receiptPrefix}a', options: options),
+        receipt('a'),
+      );
+    },
+  );
+  test(
+    'silent upstream decrypt failure becomes an explicit preserved-data error',
+    () async {
+      await storage.write(
+        key: '${receiptPrefix}a',
+        value: receipt('a'),
+        options: options,
+      );
+      final original = Map<String, String>.of(backend.values);
+      backend.wrongReadback = true;
+      await expectLater(storage.readAll(options: options), throwsStateError);
+      expect(backend.values, original);
+      expect(backend.writes, 1);
+      backend.wrongReadback = false;
+      expect(
+        (await storage.readAll(options: options)).values.single,
+        receipt('a'),
+      );
+    },
+  );
 }
 
 Future<T> denied<T>(String _, Future<T> Function() action) =>
