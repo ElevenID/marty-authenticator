@@ -8,7 +8,11 @@ SSI fork; the dedicated linked-data revision remains separate. The former
 registry SSI graph and standalone SSI-JWT patch are removed from the lockfile.
 
 The exact revisions are recorded in `rust/Cargo.toml` and `rust/Cargo.lock`.
-They coordinate with Core PR 414, SD-JWT PR 44, isomdl PR 38, and Verifier PR 180.
+The original foundation coordinated Core PR 414, SD-JWT PR 44, isomdl PR 38 and
+Verifier PR 180. Retained PR 57 now pins accepted Core
+`8e06ee93b44aca4cb956cef5c2b74642620c736e` (Core #440) and Verifier
+`117289db9b19bb21acbe992c4a58d4877a004ae9` (Verifier #196), with its graph and
+behavior requalified separately from that historical foundation.
 Existing wallet, native biometrics and ZK prover feature selections are retained.
 
 The retired standalone SSI-JWT patch removed an unused `serde_with` 2.x

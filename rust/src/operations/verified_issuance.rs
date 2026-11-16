@@ -7,6 +7,10 @@
 #[path = "verified_issuance_native_tests.rs"]
 mod native_tests;
 
+#[cfg(test)]
+#[path = "joined_device_receipt_native_tests.rs"]
+mod joined_device_tests;
+
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 
