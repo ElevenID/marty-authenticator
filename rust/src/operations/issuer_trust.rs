@@ -33,6 +33,27 @@ struct IssuerKey {
     public_jwk: Value,
 }
 
+fn contains_private_material(value: &Value) -> bool {
+    match value {
+        Value::Array(values) => values.iter().any(contains_private_material),
+        Value::Object(values) => values.iter().any(|(key, value)| {
+            let normalized: String = key
+                .to_lowercase()
+                .chars()
+                .filter(char::is_ascii_alphanumeric)
+                .collect();
+            matches!(
+                normalized.as_str(),
+                "d" | "p" | "q" | "dp" | "dq" | "qi" | "oth" | "k"
+            ) || normalized.contains("private")
+                || normalized.contains("secret")
+                || normalized.contains("seed")
+                || contains_private_material(value)
+        }),
+        _ => false,
+    }
+}
+
 pub(crate) fn resolver_from_snapshot(
     json: &str,
     now: DateTime<Utc>,
@@ -40,6 +61,13 @@ pub(crate) fn resolver_from_snapshot(
     anyhow::ensure!(
         json.len() <= MAX_SNAPSHOT_BYTES,
         "issuer trust snapshot is too large"
+    );
+    // Validate the original transport bytes before any Value can discard
+    // repeated members, including escaped names in nested public JWKs.
+    let original = marty_crypto::strict_json::parse_unique_json(json.as_bytes())?;
+    anyhow::ensure!(
+        !contains_private_material(&original),
+        "issuer trust snapshot contains private key material"
     );
     let snapshot: Snapshot = serde_json::from_str(json)?;
     anyhow::ensure!(
@@ -143,5 +171,52 @@ mod tests {
         let key = value["issuer_keys"][0].clone();
         value["issuer_keys"].as_array_mut().unwrap().push(key);
         assert!(resolver_from_snapshot(&value.to_string(), now).is_err());
+    }
+
+    #[test]
+    fn rejects_original_duplicate_snapshot_members_at_every_depth() {
+        let now = Utc::now();
+        let original = snapshot(now).to_string();
+        for (needle, replacement) in [
+            (
+                "\"organization_id\":",
+                "\"organization_id\":\"different\",\"organization_id\":",
+            ),
+            (
+                "\"issuer\":",
+                "\"issuer\":\"did:web:other.example\",\"issuer\":",
+            ),
+            ("\"kty\":", "\"kty\":\"RSA\",\"\\u006bty\":"),
+        ] {
+            let ambiguous = original.replacen(needle, replacement, 1);
+            assert_ne!(ambiguous, original);
+            // These would retain the valid last member with ordinary decoding.
+            let decoded: Value = serde_json::from_str(&ambiguous).unwrap();
+            assert_eq!(decoded, snapshot(now));
+            assert!(resolver_from_snapshot(&ambiguous, now).is_err());
+        }
+    }
+
+    #[test]
+    fn rejects_nested_and_normalized_private_custody_fields_without_echoing_them() {
+        let now = Utc::now();
+        for name in [
+            "d",
+            "D",
+            "Private-Key",
+            "s_e_c_r_e_t",
+            "seedPhrase",
+            "oth",
+            "k",
+        ] {
+            let mut value = snapshot(now);
+            value["issuer_keys"][0]["public_jwk"]["extension"] =
+                json!({"nested":[{name:"sensitive-test-sentinel"}]});
+            let error = resolver_from_snapshot(&value.to_string(), now)
+                .err()
+                .unwrap();
+            assert!(error.to_string().contains("private key material"));
+            assert!(!error.to_string().contains("sensitive-test-sentinel"));
+        }
     }
 }

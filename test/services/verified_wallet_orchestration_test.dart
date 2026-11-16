@@ -9,6 +9,10 @@ import 'package:marty_authenticator/services/spruce_platform_service_extended.da
 import 'package:marty_authenticator/services/verified_wallet_bridge.dart';
 import 'package:marty_authenticator/services/wallet_credential_store.dart';
 
+// Preserve transport spelling; decoding/re-encoding before native validation
+// would discard this duplicate member rather than let native reject it.
+const _originalIssuerEvidence = ' { "issuer_keys": [], "issuer_keys": [] } ';
+
 class _Holder extends RemoteHolderPairingService {
   bool closed = false;
   int signatures = 0;
@@ -29,9 +33,7 @@ class _Holder extends RemoteHolderPairingService {
   }
 
   @override
-  Future<Map<String, dynamic>> fetchIssuerKeys() async => const {
-    'issuer_keys': [],
-  };
+  Future<String> fetchIssuerKeysJson() async => _originalIssuerEvidence;
 
   @override
   Future<List<int>> signInput({
@@ -78,7 +80,7 @@ class _Bridge implements VerifiedWalletBridge {
       throw StateError('Untrusted stored credential');
     }
     expect(credential, 'header.payload.signature~');
-    expect(jsonDecode(issuerSnapshotJson), contains('issuer_keys'));
+    expect(issuerSnapshotJson, _originalIssuerEvidence);
     expect(jsonDecode(holderPublicJwkJson), containsPair('kty', 'EC'));
     if (rejectReview) throw StateError('Native credential verification failed');
     if (reviewResponseOverride != null) return reviewResponseOverride!;
@@ -122,7 +124,7 @@ class _Bridge implements VerifiedWalletBridge {
     receiptCompletions++;
     expect(sessionId, 'receipt-session');
     expect(remoteSignature, [4, 5, 6]);
-    expect(jsonDecode(issuerSnapshotJson), contains('issuer_keys'));
+    expect(issuerSnapshotJson, _originalIssuerEvidence);
     if (rejectReceipt) throw StateError('Rust rejected the receipt');
     return const FrbVerifiedSdJwtReceipt(
       credential: 'header.payload.signature~',
@@ -183,7 +185,7 @@ class _Bridge implements VerifiedWalletBridge {
     expect(credential, 'header.payload.signature~');
     expect(queryId, expectedQueryId);
     expect(claimsToDisclose, expectedClaims);
-    expect(jsonDecode(issuerSnapshotJson), contains('issuer_keys'));
+    expect(issuerSnapshotJson, _originalIssuerEvidence);
     expect(jsonDecode(holderPublicJwkJson), containsPair('kty', 'EC'));
     return FrbPreparedSdJwtPresentation(
       sessionId: 'presentation-session',

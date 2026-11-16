@@ -482,12 +482,32 @@ class RemoteHolderPairingService {
         clientId.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
       throw const FormatException('Wallet verifier client ID is invalid');
     }
+    return _fetchAuthorityJson(
+      path: '/v1/devices/wallet-verifier-authority',
+      query: {'client_id': clientId},
+      limit: 64 * 1024,
+    );
+  }
+
+  /// Retain original issuer evidence until native unique-member and semantic
+  /// validation. The legacy decoded API is not suitable for that boundary.
+  Future<String> fetchIssuerKeysJson() => _fetchAuthorityJson(
+    path: '/v1/devices/wallet-issuer-keys',
+    query: const {},
+    limit: 256 * 1024,
+  );
+
+  Future<String> _fetchAuthorityJson({
+    required String path,
+    required Map<String, String> query,
+    required int limit,
+  }) async {
     final paired = await _currentConfirmedBearer();
     final request = http.Request(
       'GET',
       paired.origin
-          .resolve('/v1/devices/wallet-verifier-authority')
-          .replace(queryParameters: {'client_id': clientId}),
+          .resolve(path)
+          .replace(queryParameters: query.isEmpty ? null : query),
     )..followRedirects = false;
     request.headers['authorization'] = 'Bearer ${paired.bearer}';
     request.headers['accept'] = 'application/json';
@@ -495,7 +515,7 @@ class RemoteHolderPairingService {
         .send(request)
         .timeout(const Duration(seconds: 45));
     if (response.statusCode != 200) {
-      throw StateError('Wallet verifier trust is unavailable');
+      throw StateError('Wallet trust is unavailable');
     }
     final mediaType = response.headers['content-type']
         ?.split(';')
@@ -503,15 +523,13 @@ class RemoteHolderPairingService {
         .trim()
         .toLowerCase();
     if (mediaType != 'application/json') {
-      throw const FormatException(
-        'Wallet verifier trust media type is invalid',
-      );
+      throw const FormatException('Wallet trust media type is invalid');
     }
-    final json = await _readBoundedUtf8(response, 64 * 1024);
+    final json = await _readBoundedUtf8(response, limit);
     // A concurrent pairing replacement/renewal must invalidate this response.
     final current = await _currentConfirmedBearer();
     if (current.origin != paired.origin || current.bearer != paired.bearer) {
-      throw StateError('Remote wallet pairing changed during verifier read');
+      throw StateError('Remote wallet pairing changed during trust read');
     }
     return json;
   }

@@ -118,11 +118,11 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         purpose: 'presentation_signing',
         signingInput: prepared.signingInput,
       );
-      final snapshot = await holder.fetchIssuerKeys();
+      final snapshot = await holder.fetchIssuerKeysJson();
       final receipt = await _bridge.completeReceipt(
         sessionId: prepared.sessionId,
         remoteSignature: signature,
-        issuerSnapshotJson: jsonEncode(snapshot),
+        issuerSnapshotJson: snapshot,
       );
       final id = const Uuid().v4();
       await WalletCredentialStore.store(
@@ -304,7 +304,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 
     final tokens = <String, String>{};
     final matches = <Map<String, dynamic>>[];
-    final snapshot = jsonEncode(await holder.fetchIssuerKeys());
+    final snapshot = await holder.fetchIssuerKeysJson();
     final publicJwk = jsonEncode(
       await holder.publicJwkForPurpose('presentation_signing'),
     );
@@ -445,7 +445,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 
     final holder = _holderFactory();
     try {
-      final snapshot = await holder.fetchIssuerKeys();
+      final snapshot = await holder.fetchIssuerKeysJson();
       final publicJwk = await holder.publicJwkForPurpose(
         'presentation_signing',
       );
@@ -455,7 +455,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         credential: credential,
         queryId: pending.queryId,
         claimsToDisclose: pending.requiredClaims,
-        issuerSnapshotJson: jsonEncode(snapshot),
+        issuerSnapshotJson: snapshot,
         holderPublicJwkJson: jsonEncode(publicJwk),
       );
       final signature = await holder.signInput(

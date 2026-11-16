@@ -648,6 +648,61 @@ void main() {
     });
   });
 
+  test(
+    'raw issuer transport preserves original evidence and fails closed',
+    () async {
+      const original = ' {"issuer_keys":[], "issuer_keys":[]} ';
+      http.Response response = http.Response(
+        original,
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      var calls = 0;
+      var stored = confirmedEnrollment();
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => stored,
+        client: MockClient((request) async {
+          calls++;
+          expect(
+            request.url.toString(),
+            'https://wallet.example/v1/devices/wallet-issuer-keys',
+          );
+          expect(request.headers['authorization'], 'Bearer $bearer');
+          expect(request.followRedirects, isFalse);
+          return response;
+        }),
+      );
+      addTearDown(service.close);
+      expect(await service.fetchIssuerKeysJson(), original);
+      expect(await service.fetchIssuerKeysJson(), original);
+      expect(calls, 2);
+      response = http.Response(
+        '{}',
+        302,
+        headers: {'location': 'https://other.example'},
+      );
+      await expectLater(service.fetchIssuerKeysJson(), throwsStateError);
+      response = http.Response(
+        '{}',
+        200,
+        headers: {'content-type': 'text/plain'},
+      );
+      await expectLater(service.fetchIssuerKeysJson(), throwsFormatException);
+      response = http.Response(
+        'a' * (256 * 1024 + 1),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      await expectLater(service.fetchIssuerKeysJson(), throwsFormatException);
+      stored = jsonEncode({
+        ...jsonDecode(stored) as Map<String, dynamic>,
+        'confirmed': false,
+      });
+      await expectLater(service.fetchIssuerKeysJson(), throwsFormatException);
+      expect(calls, 5, reason: 'unconfirmed pairing must not send the bearer');
+    },
+  );
+
   test('rejects private, stale, and unconfirmed issuer trust reads', () async {
     final now = DateTime.now().toUtc();
     final snapshot = {
