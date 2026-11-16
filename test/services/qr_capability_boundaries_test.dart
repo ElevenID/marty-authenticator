@@ -203,6 +203,12 @@ void main() {
             matchingCredentials: const [
               {
                 'id': 'verified-receipt',
+                'alwaysSharedClaims': {
+                  'iss': '"did:web:issuer.example"',
+                  'sub': '"correlating-identifier"',
+                  'nested': '{"visible":true}',
+                },
+                'alwaysSharedHeader': {'kid': '"public-signing-key"'},
                 'requestedFields': {
                   'credential': ['SSN'],
                 },
@@ -222,6 +228,10 @@ void main() {
         findsOneWidget,
       );
       expect(approved, isNull);
+      expect(find.text('Always shared with this credential'), findsOneWidget);
+      expect(find.text('sub: "correlating-identifier"'), findsOneWidget);
+      expect(find.text('nested: {"visible":true}'), findsOneWidget);
+      expect(find.text('kid: "public-signing-key"'), findsOneWidget);
       await tester.tap(find.text('Share'));
       expect(approved, {
         'credentialId': 'verified-receipt',

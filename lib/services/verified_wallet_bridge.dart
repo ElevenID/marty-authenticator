@@ -31,6 +31,12 @@ abstract interface class VerifiedWalletBridge {
     required String holderPublicJwkJson,
   });
 
+  Future<String> reviewCredential({
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  });
+
   Future<rust_api.FrbPresentationResponse> completePresentation({
     required String sessionId,
     required List<int> remoteSignature,
@@ -39,6 +45,17 @@ abstract interface class VerifiedWalletBridge {
 
 class RustVerifiedWalletBridge implements VerifiedWalletBridge {
   const RustVerifiedWalletBridge();
+
+  @override
+  Future<String> reviewCredential({
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) => rust_api.walletReviewVerifiedSdJwtCredential(
+    credential: credential,
+    issuerSnapshotJson: issuerSnapshotJson,
+    holderPublicJwkJson: holderPublicJwkJson,
+  );
 
   @override
   Future<rust_api.FrbPreparedSdJwtReceipt> prepareReceipt({

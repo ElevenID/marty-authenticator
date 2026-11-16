@@ -82,7 +82,7 @@ verified receipts or explicit unsupported outcomes. Supported native method
 channel verification and presentation-selection forwarding retain positive
 tests. OB2 rejection and OB3 selection remain covered.
 
-## Qualification record
+## Historical qualification record
 
 The full validation record is maintained in PR 57. The integration has passed
 the private dependency reader tests (11), custody source guard, native Rust tests
@@ -119,10 +119,14 @@ PR 57 must remain draft until the following are addressed and qualified:
 - **Complete request semantics.** Fields such as `client_id_scheme` and
   `transaction_data` are not retained in the parsed request. Unsupported security
   semantics must be rejected or implemented before external conformance claims.
-- **Complete disclosure consent.** The exactness checks cover optional
-  disclosures. Cleartext signed claims and identifiers remain in the issuer JWT
-  and are not yet listed in the consent view. Display verified always-shared
-  claims alongside the optional set, or constrain the profile before acceptance.
+- **Disclosure consent qualification.** The native review now verifies the exact
+  stored credential with fresh governed issuer keys and the paired holder key
+  before returning all always-shared issuer payload members and protected-header
+  signing metadata. The consent view displays these beside optional disclosures.
+  Values cross the bridge as exact JSON text, retaining large numeric identifiers,
+  nested values and types without web-number rounding. This projection grants no
+  signing authority or verifier authentication. Final bridge and installed-wallet
+  execution remain required.
 - **Issuance-service relationship.** The signed issuer is authenticated against
   the governed key snapshot, but that snapshot does not map the selected service
   and configuration to allowed credential issuers. Define that relationship
@@ -136,6 +140,33 @@ Android/iOS behavior, browser storage migration or external interoperability.
 Those gates remain open, and PR 57 remains draft until its required acceptance
 is complete. Broader Final/HAIP request semantics and authenticated request-object
 handling belong to W04; this change does not advertise full Final conformance.
+
+### Consent projection source verification
+
+The candidate loop excludes individual credentials that fail native verification
+without deleting them or hiding other verified candidates. Trust/key acquisition
+failures and malformed successful bridge projections abort review. Submission
+keeps the exact token reviewed even if storage changes, and the existing native
+preparation still checks the request and fresh issuer trust before signing.
+The signing header is displayed as metadata; URLs and certificate fields are not
+resolved from the consent view, and neither raw signature nor compact token is
+returned in the projection.
+
+Collected local evidence for this slice: five tests pass in a standalone Linux
+Cargo subgraph importing the exact production review/trust modules and the pinned
+Core revision. These include the existing public remote-signature vector,
+forgery/wrong-holder/untrusted-issuer refusal, exact numeric/nested/escaped value
+rendering and duplicate-member rejection. Two Linux consent widget tests pass,
+covering immutable always-shared fields and switching credentials. These are
+module/crypto-fixture and widget tests, not a whole native bridge, current remote
+KMS execution, browser artifact regeneration or installed-wallet qualification.
+The new String-returning bridge method has been regenerated with FRB2.13.0 and
+the pinned Flutter3.44.6 SDK on Linux. The actual whole native bridge library
+reports 67 passes with no skips; the three new review regressions are included
+in that total. Focused Flutter orchestration/consent suites report 61 passes.
+Full Flutter candidate qualification remains pending: the live working tree has
+an unrelated tracked `version.g.dart` deletion, which is preserved outside this
+feature's commit. No public WASM binary or installed device was qualified.
 
 References: [OpenID4VCI 1.0 sections 8.3, 12.2.4 and 14.4](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html)
 and [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html).

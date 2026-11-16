@@ -62,6 +62,42 @@ class _Bridge implements VerifiedWalletBridge {
   int presentationParses = 0;
   int presentationPreparations = 0;
   int presentationCompletions = 0;
+  int credentialReviews = 0;
+  bool rejectReview = false;
+  String? reviewResponseOverride;
+  final Set<String> rejectedCredentials = {};
+
+  @override
+  Future<String> reviewCredential({
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) async {
+    credentialReviews++;
+    if (rejectedCredentials.contains(credential)) {
+      throw StateError('Untrusted stored credential');
+    }
+    expect(credential, 'header.payload.signature~');
+    expect(jsonDecode(issuerSnapshotJson), contains('issuer_keys'));
+    expect(jsonDecode(holderPublicJwkJson), containsPair('kty', 'EC'));
+    if (rejectReview) throw StateError('Native credential verification failed');
+    if (reviewResponseOverride != null) return reviewResponseOverride!;
+    return jsonEncode({
+      'issuer': 'https://issuer.example',
+      'credential_type': 'ExampleIdentity',
+      'format': 'dc+sd-jwt',
+      'protected_header': {
+        'typ': 'dc+sd-jwt',
+        'alg': 'ES256',
+        'kid': 'issuer-signing-key',
+      }.map((key, value) => MapEntry(key, jsonEncode(value))),
+      'always_shared': {
+        'iss': 'https://issuer.example',
+        'sub': 'holder-identifier',
+        'vct': 'ExampleIdentity',
+      }.map((key, value) => MapEntry(key, jsonEncode(value))),
+    });
+  }
 
   @override
   Future<FrbPreparedSdJwtReceipt> prepareReceipt({
@@ -351,7 +387,37 @@ void main() {
 
     final first = await initiate();
     expect(first.matches.single['id'], 'stored-identity');
+    expect(bridge.credentialReviews, 1);
+    expect(first.matches.single['issuer'], 'https://issuer.example');
+    expect(first.matches.single['type'], 'ExampleIdentity');
+    expect(
+      first.matches.single['alwaysSharedClaims'],
+      containsPair('sub', '"holder-identifier"'),
+    );
     expect(first.requestDetails['verifier'], 'https://verifier.example');
+    bridge.rejectReview = true;
+    await expectLater(
+      service.initiateOID4VPRequestSDK(
+        presentationRequest: 'openid4vp://approved',
+      ),
+      throwsStateError,
+    );
+    expect(bridge.presentationPreparations, 0);
+    bridge.rejectReview = false;
+    bridge.reviewResponseOverride = jsonEncode({
+      'issuer': 'https://issuer.example',
+      'credential_type': 'ExampleIdentity',
+      'format': 'dc+sd-jwt',
+      'always_shared': {'sub': 9},
+      'protected_header': {'alg': '"ES256"'},
+    });
+    await expectLater(
+      service.initiateOID4VPRequestSDK(
+        presentationRequest: 'openid4vp://approved',
+      ),
+      throwsStateError,
+    );
+    bridge.reviewResponseOverride = null;
     await expectLater(
       service.completeOID4VPRequestSDK(
         sessionId: first.sessionId,
@@ -401,6 +467,8 @@ void main() {
     expect(bridge.presentationPreparations, 0);
 
     final fifth = await initiate();
+    // Approval retains the exact reviewed token, even if storage changes.
+    await WalletCredentialStore.delete('stored-identity');
     final result = await service.completeOID4VPRequestSDK(
       sessionId: fifth.sessionId,
       selectedCredentialId: 'stored-identity',
@@ -413,6 +481,57 @@ void main() {
     expect(bridge.presentationPreparations, 1);
     expect(bridge.presentationCompletions, 1);
   });
+
+  for (final invalidFirst in [true, false]) {
+    test(
+      'invalid candidate does not suppress verified consent (invalidFirst=$invalidFirst)',
+      () async {
+        for (final valid in [true, false]) {
+          await WalletCredentialStore.store(
+            StoredCredential(
+              id: valid ? 'stored-identity' : 'untrusted-entry',
+              format: 'dc+sd-jwt',
+              issuer: 'unverified-storage-label',
+              types: const ['UnverifiedStorageType'],
+              rawJson: valid
+                  ? 'header.payload.signature~'
+                  : 'rejected.credential.signature~',
+              issuedAt: DateTime.utc(2026, 10, valid == invalidFirst ? 10 : 9),
+            ),
+          );
+        }
+        final bridge = _Bridge()
+          ..rejectedCredentials.add('rejected.credential.signature~');
+        final service = SpruceIdPlatformServiceExtended.withDependencies(
+          bridge,
+          _Holder.new,
+        );
+        UserSelectionRequiredException? review;
+        try {
+          await service.initiateOID4VPRequestSDK(
+            presentationRequest: 'openid4vp://approved',
+          );
+        } on UserSelectionRequiredException catch (value) {
+          review = value;
+        }
+        expect(review, isNotNull);
+        expect(bridge.credentialReviews, 2);
+        expect(review!.matches, hasLength(1));
+        expect(review.matches.single['id'], 'stored-identity');
+        expect(review.matches.single['issuer'], 'https://issuer.example');
+        expect(
+          review.matches.single['alwaysSharedClaims'],
+          containsPair('sub', '"holder-identifier"'),
+        );
+        expect(
+          await WalletCredentialStore.getAll(),
+          hasLength(2),
+          reason: 'rejected entries remain stored',
+        );
+        expect(bridge.presentationPreparations, 0);
+      },
+    );
+  }
 
   test('bounded approval sessions evict the oldest unused request', () async {
     await WalletCredentialStore.store(

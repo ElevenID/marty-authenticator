@@ -1936,6 +1936,18 @@ class RustLibWire implements BaseWire {
     proof_jwt,
   );
 
+  void wire__crate__api__wallet_review_verified_sd_jwt_credential(
+    NativePortType port_,
+    String credential,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_review_verified_sd_jwt_credential(
+    port_,
+    credential,
+    issuer_snapshot_json,
+    holder_public_jwk_json,
+  );
+
   void wire__crate__api__wallet_route_presentation_request(
     NativePortType port_,
     String input,
@@ -2259,6 +2271,13 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String credential_format,
     String? credential_configuration_id,
     String proof_jwt,
+  );
+
+  external void wire__crate__api__wallet_review_verified_sd_jwt_credential(
+    NativePortType port_,
+    String credential,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
   );
 
   external void wire__crate__api__wallet_route_presentation_request(

@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 518073499;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 175211210;
 
 // Section: executor
 
@@ -1118,6 +1118,37 @@ fn wire__crate__api__wallet_request_credential_impl(
                         std::result::Result::Ok(output_ok)
                     })()
                     .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_review_verified_sd_jwt_credential_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    credential: impl CstDecode<String>,
+    issuer_snapshot_json: impl CstDecode<String>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_review_verified_sd_jwt_credential",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_credential = credential.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::wallet_review_verified_sd_jwt_credential(
+                            api_credential,
+                            api_issuer_snapshot_json,
+                            api_holder_public_jwk_json,
+                        )?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
                 )
             }
         },
@@ -5189,6 +5220,21 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_review_verified_sd_jwt_credential(
+        port_: i64,
+        credential: *mut wire_cst_list_prim_u_8_strict,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_review_verified_sd_jwt_credential_impl(
+            port_,
+            credential,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_route_presentation_request(
         port_: i64,
         input: *mut wire_cst_list_prim_u_8_strict,
@@ -7227,6 +7273,21 @@ mod web {
             credential_format,
             credential_configuration_id,
             proof_jwt,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_review_verified_sd_jwt_credential(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        credential: String,
+        issuer_snapshot_json: String,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_review_verified_sd_jwt_credential_impl(
+            port_,
+            credential,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
         )
     }
 

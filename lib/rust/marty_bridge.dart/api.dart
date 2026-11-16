@@ -258,6 +258,18 @@ Future<FrbPresentationRequest> walletParsePresentationRequest({
   requestUri: requestUri,
 );
 
+/// Verify a candidate before consent and return every always-shared issuer
+/// payload member. This projection grants no signing/submission authority.
+Future<String> walletReviewVerifiedSdJwtCredential({
+  required String credential,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletReviewVerifiedSdJwtCredential(
+  credential: credential,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
 /// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
 /// the exact signing input for the paired non-exportable presentation key.
 Future<FrbPreparedSdJwtPresentation> walletPrepareVerifiedSdJwtPresentation({

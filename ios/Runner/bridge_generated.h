@@ -478,6 +478,11 @@ void frbgen_marty_authenticator_wire__crate__api__wallet_request_credential(int6
                                                                             struct wire_cst_list_prim_u_8_strict *credential_configuration_id,
                                                                             struct wire_cst_list_prim_u_8_strict *proof_jwt);
 
+void frbgen_marty_authenticator_wire__crate__api__wallet_review_verified_sd_jwt_credential(int64_t port_,
+                                                                                           struct wire_cst_list_prim_u_8_strict *credential,
+                                                                                           struct wire_cst_list_prim_u_8_strict *issuer_snapshot_json,
+                                                                                           struct wire_cst_list_prim_u_8_strict *holder_public_jwk_json);
+
 void frbgen_marty_authenticator_wire__crate__api__wallet_route_presentation_request(int64_t port_,
                                                                                     struct wire_cst_list_prim_u_8_strict *input);
 
@@ -608,6 +613,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_presentation);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_receipt);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_request_credential);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_review_verified_sd_jwt_credential);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_route_presentation_request);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_validate_presentation_context);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_validate_qr_input);

@@ -573,6 +573,21 @@ pub async fn wallet_parse_presentation_request(
     crate::operations::presentation::wallet_parse_presentation_request(request_uri).await
 }
 
+/// Verify a candidate before consent and return every always-shared issuer
+/// payload member. This projection grants no signing/submission authority.
+#[frb]
+pub fn wallet_review_verified_sd_jwt_credential(
+    credential: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<String> {
+    crate::operations::disclosure_review::review(
+        &credential,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+}
+
 /// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
 /// the exact signing input for the paired non-exportable presentation key.
 #[frb]

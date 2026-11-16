@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 518073499;
+  int get rustContentHash => 175211210;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -270,6 +270,12 @@ abstract class RustLibApi extends BaseApi {
     required String credentialFormat,
     String? credentialConfigurationId,
     required String proofJwt,
+  });
+
+  Future<String> crateApiWalletReviewVerifiedSdJwtCredential({
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
   });
 
   Future<String> crateApiWalletRoutePresentationRequest({
@@ -1642,6 +1648,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "credentialConfigurationId",
           "proofJwt",
         ],
+      );
+
+  @override
+  Future<String> crateApiWalletReviewVerifiedSdJwtCredential({
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(credential);
+          var arg1 = cst_encode_String(issuerSnapshotJson);
+          var arg2 = cst_encode_String(holderPublicJwkJson);
+          return wire
+              .wire__crate__api__wallet_review_verified_sd_jwt_credential(
+                port_,
+                arg0,
+                arg1,
+                arg2,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletReviewVerifiedSdJwtCredentialConstMeta,
+        argValues: [credential, issuerSnapshotJson, holderPublicJwkJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletReviewVerifiedSdJwtCredentialConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_review_verified_sd_jwt_credential",
+        argNames: ["credential", "issuerSnapshotJson", "holderPublicJwkJson"],
       );
 
   @override

@@ -4028,6 +4028,7 @@ name = "marty-authenticator-bridge"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64 0.22.1",
  "chrono",
  "flutter_rust_bridge",
  "flutter_rust_bridge_codegen",

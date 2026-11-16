@@ -138,6 +138,38 @@ class _PresentationRequestViewState extends State<PresentationRequestView> {
                     ),
                   ),
                 ..._buildFieldList(selectedCredential),
+                if (selectedCredential['alwaysSharedClaims']
+                    case final Map<String, dynamic> claims)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Always shared with this credential',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const Text(
+                          'These signed claims and identifiers are included even when optional fields are not selected.',
+                        ),
+                        ...claims.entries.map(
+                          (entry) =>
+                              SelectableText('${entry.key}: ${entry.value}'),
+                        ),
+                        if (selectedCredential['alwaysSharedHeader']
+                            case final Map<String, dynamic> header) ...[
+                          Text(
+                            'Signing metadata',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          ...header.entries.map(
+                            (entry) =>
+                                SelectableText('${entry.key}: ${entry.value}'),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

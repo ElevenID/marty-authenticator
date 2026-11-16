@@ -1,6 +1,7 @@
 //! Application operations behind the stable Flutter API.
 
 pub(crate) mod credentials;
+pub(crate) mod disclosure_review;
 pub(crate) mod issuance;
 pub(crate) mod issuer_trust;
 pub(crate) mod policy;

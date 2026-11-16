@@ -2970,6 +2970,44 @@ class RustLibWire implements BaseWire {
             )
           >();
 
+  void wire__crate__api__wallet_review_verified_sd_jwt_credential(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+  ) {
+    return _wire__crate__api__wallet_review_verified_sd_jwt_credential(
+      port_,
+      credential,
+      issuer_snapshot_json,
+      holder_public_jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_review_verified_sd_jwt_credentialPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_review_verified_sd_jwt_credential',
+      );
+  late final _wire__crate__api__wallet_review_verified_sd_jwt_credential =
+      _wire__crate__api__wallet_review_verified_sd_jwt_credentialPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__wallet_route_presentation_request(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> input,

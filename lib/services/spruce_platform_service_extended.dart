@@ -159,7 +159,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         );
       }
       await holder.renewIfDue();
-      return await _initiateVerifiedPresentation(presentationRequest);
+      return await _initiateVerifiedPresentation(presentationRequest, holder);
     } finally {
       holder.close();
     }
@@ -183,6 +183,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 
   Future<Map<String, dynamic>> _initiateVerifiedPresentation(
     String requestUri,
+    RemoteHolderPairingService holder,
   ) async {
     final request = await _bridge.parsePresentation(requestUri: requestUri);
     if (request.clientId.isEmpty ||
@@ -303,6 +304,10 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
 
     final tokens = <String, String>{};
     final matches = <Map<String, dynamic>>[];
+    final snapshot = jsonEncode(await holder.fetchIssuerKeys());
+    final publicJwk = jsonEncode(
+      await holder.publicJwkForPurpose('presentation_signing'),
+    );
     for (final credential in await WalletCredentialStore.getAll()) {
       if (!{
         'dc+sd-jwt',
@@ -313,16 +318,50 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       }
       final token = _storedSdJwt(credential.rawJson);
       if (token == null) continue;
+      // Only the native governed verification path can supply review claims.
+      // Freeze this exact token for submission; storage metadata is not proof.
+      late final String reviewJson;
+      try {
+        reviewJson = await _bridge.reviewCredential(
+          credential: token,
+          issuerSnapshotJson: snapshot,
+          holderPublicJwkJson: publicJwk,
+        );
+      } catch (_) {
+        // An expired, untrusted or wrong-holder entry must not suppress other
+        // verified candidates. Preserve it in storage and never show its claims.
+        continue;
+      }
+      if (reviewJson.length > 512 * 1024) {
+        throw StateError('Verified consent projection is too large');
+      }
+      final review = jsonDecode(reviewJson);
+      if (review is! Map<String, dynamic> ||
+          review['issuer'] is! String ||
+          review['credential_type'] is! String ||
+          !{'dc+sd-jwt', 'vc+sd-jwt'}.contains(review['format']) ||
+          review['always_shared'] is! Map<String, dynamic> ||
+          review['protected_header'] is! Map<String, dynamic> ||
+          !(review['always_shared'] as Map).values.every(
+            (value) => value is String,
+          ) ||
+          !(review['protected_header'] as Map).values.every(
+            (value) => value is String,
+          )) {
+        throw StateError('Verified consent projection is invalid');
+      }
       tokens[credential.id] = token;
       matches.add({
         'id': credential.id,
-        'type': credential.types.join(', '),
-        'issuer': credential.issuer,
+        'type': review['credential_type'],
+        'issuer': review['issuer'],
+        'alwaysSharedClaims': review['always_shared'],
+        'alwaysSharedHeader': review['protected_header'],
         'requestedFields': {'credential': requestedClaims},
       });
     }
     if (matches.isEmpty) {
-      throw StateError('No stored SD-JWT credential is available');
+      throw StateError('No verified SD-JWT credential is available');
     }
     final random = Random.secure();
     final sessionId = base64UrlEncode(
