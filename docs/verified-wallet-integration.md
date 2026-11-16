@@ -164,9 +164,12 @@ The new String-returning bridge method has been regenerated with FRB2.13.0 and
 the pinned Flutter3.44.6 SDK on Linux. The actual whole native bridge library
 reports 67 passes with no skips; the three new review regressions are included
 in that total. Focused Flutter orchestration/consent suites report 61 passes.
-Full Flutter candidate qualification remains pending: the live working tree has
-an unrelated tracked `version.g.dart` deletion, which is preserved outside this
-feature's commit. No public WASM binary or installed device was qualified.
+The exact committed candidate `9ef7e67a2b961dae13d876d214b8daa89e26a181` passed
+full Flutter analysis and all 347 tests, with four existing SIOPv2 skips, in an
+isolated detached checkout. The original working tree's unrelated changes were
+preserved outside that candidate. The mobile/desktop custody source guard and
+12 private-dependency reader tests also passed. No public WASM binary or installed
+device was qualified; the request-authentication and live acceptance gates remain.
 
 References: [OpenID4VCI 1.0 sections 8.3, 12.2.4 and 14.4](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html)
 and [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html).
