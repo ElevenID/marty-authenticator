@@ -311,7 +311,12 @@ fn verify_receipt(
     issuer_snapshot_json: &str,
 ) -> anyhow::Result<VerifiedReceipt> {
     let credential = single_credential(response)?;
-    let trusted = resolver_from_snapshot(issuer_snapshot_json, Utc::now())?;
+    let trusted = resolver_from_snapshot(
+        issuer_snapshot_json,
+        credential,
+        holder_public_jwk_json,
+        Utc::now(),
+    )?;
     let verified = WalletEngine::new().verify_received_sd_jwt_credential(
         credential,
         holder_public_jwk_json,
@@ -324,6 +329,10 @@ fn verify_receipt(
     ensure!(
         verified.format == expected_format,
         "issued credential format does not match the selected configuration"
+    );
+    ensure!(
+        trusted.expires_at > Utc::now(),
+        "issuer authority expired during credential verification"
     );
     Ok(VerifiedReceipt {
         credential: credential.to_string(),
@@ -391,6 +400,12 @@ mod tests {
             }]
         })
         .to_string();
+        let snapshot = super::super::issuer_trust::fixture_envelope(
+            serde_json::from_str(&snapshot).unwrap(),
+            fixture["holder_public_jwk"].clone(),
+            "urn:elevenid:credential:verified-wallet",
+        )
+        .to_string();
         let holder = fixture["holder_public_jwk"].to_string();
         let response: CredentialResponse = serde_json::from_value(json!({
             "credentials": [{"credential": fixture["credential"]}]
@@ -398,7 +413,7 @@ mod tests {
         .unwrap();
         let verify = |vct, format| verify_receipt(&response, vct, format, &holder, &snapshot);
         let issuer = fixture["issuer"].as_str().unwrap();
-        let verified = verify("VerifiedWalletCredential", "vc+sd-jwt").unwrap();
+        let verified = verify("urn:elevenid:credential:verified-wallet", "vc+sd-jwt").unwrap();
         assert_eq!(verified.credential, fixture["credential"].as_str().unwrap());
         assert_eq!(verified.issuer, issuer);
         // Issuer identity is authenticated through the governed resolver.
@@ -406,16 +421,20 @@ mod tests {
         // (OID4VCI 1.0 section 14.4); do not invent that equality here.
         for (vct, format, expected_error) in [
             ("OtherCredential", "vc+sd-jwt", "type"),
-            ("VerifiedWalletCredential", "dc+sd-jwt", "format"),
+            (
+                "urn:elevenid:credential:verified-wallet",
+                "dc+sd-jwt",
+                "format",
+            ),
         ] {
             let error = verify(vct, format).err().unwrap();
             assert!(error.to_string().contains(expected_error));
         }
         let mut other_issuer: Value = serde_json::from_str(&snapshot).unwrap();
-        other_issuer["issuer_keys"][0]["issuer"] = json!("did:web:other.example");
+        other_issuer["issuer"]["issuer_keys"][0]["issuer"] = json!("did:web:other.example");
         assert!(verify_receipt(
             &response,
-            "VerifiedWalletCredential",
+            "urn:elevenid:credential:verified-wallet",
             "vc+sd-jwt",
             &holder,
             &other_issuer.to_string(),

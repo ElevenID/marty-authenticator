@@ -402,3 +402,53 @@ not establish deployed governance, paused DeviceHTTP races, governed issuer-owne
 admission, installed Android/iOS/Web wallet, rootless installer or official-suite
 acceptance. Existing installations, services, production flags and cloud resources
 were not changed.
+
+## Canonical issuer v2 native admission
+
+The native issuer consumer now requires the original
+`marty.wallet/device-issuer-governance/v2` envelope and its canonical
+`marty.wallet/issuer-authority/v2` projection. Legacy key lists have no fallback.
+Strict unique-member and recursive custody validation precede typed parsing.
+Shared device-scope validation checks current credential expiry, canonical IDs,
+both holder-key roles/versions/thumbprints and the enrolled presentation key.
+Issuer-only pairings may have no verifier profile; presentation admission still
+requires an explicit verifier profile and never infers it from issuer trust.
+
+The resolver validates both freshness windows, profile/organization correspondence
+and the complete canonical revision. Each key retains its own exact SD-JWT/VCT
+grants. The credential's unverified VCT only selects eligible resolver keys; Core
+must verify the identical immutable credential before claims are shown, stored or
+signed. Numeric expiry is required, and not-before presence follows the owner
+control; any supplied not-before must be numeric and already valid. Receipt
+verification retains the selected format/VCT and native-session holder checks,
+then rechecks issuer-authority expiry before returning the credential.
+
+Presentation review freezes the issuer revision in the opaque native session.
+Preparation and completion require the same fresh revision and full device scope
+as the authenticated verifier evidence. Changed authority or scope consumes the
+failed transition's handle; retry cannot restore the old consent.
+
+Executed native tests report81 passes and two fixture-only ignores. The guarded
+runner explicitly executes both real TLS/non-exportable remote-key cases with
+zero ignores and one HTTPS submission. New assertions cover per-key grant
+isolation, legacy/revision/scope/time-policy refusals, and issuer revision/device
+scope changes at preparation and completion with consumed-handle retries.
+Formatting and bridge Clippy with warnings denied pass. FRB2.13 regeneration
+succeeds with all13 outputs byte-identical and hash `-948931303`; an internal
+duplicate type name was removed and generation rerun. The refreshed fictional
+public-only credential vector has a canonical URI type and numeric nbf/exp. Its
+new issuer signature was produced by a fresh bounded TLS OpenBao non-exportable
+key, export refusal checked and signature independently verified with OpenSSL.
+No private signing key was exported; owned fixtures and private material were
+removed. Independent read-only source review found no blocking issue and ran no
+tests. No dependency or exposed bridge API changed.
+
+UI #1978 separately supplies the canonical owner and fixed HTTPS Device path at
+`ffdb16713996b4845bb0de50ec5ea05287ed0851`, including29 actual paused HTTP/SQL
+scenarios with controlled authority/membership adapters. Those producer results
+and these synthetic-governance native cases do not execute a deployed combined
+Device/Trust Profile/PDP/Flow chain. Explicit issuance-service/configuration to
+permitted credential-issuer binding remains required: VCT/key grants alone do not
+establish that relationship. Exact combined Flutter/artifact/browser-storage and
+installed Android/iOS/Web/external acceptance also remain separate gates. The
+retained feature stays draft; no production or existing installation changed.

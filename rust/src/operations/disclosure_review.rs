@@ -35,7 +35,12 @@ pub(crate) fn review(
         !credential.is_empty() && credential.len() <= 1024 * 1024,
         "credential is invalid"
     );
-    let trusted = super::issuer_trust::resolver_from_snapshot(issuer_snapshot_json, Utc::now())?;
+    let trusted = super::issuer_trust::resolver_from_snapshot(
+        issuer_snapshot_json,
+        credential,
+        holder_public_jwk_json,
+        Utc::now(),
+    )?;
     let verified = marty_oid4vci::WalletEngine::new().verify_received_sd_jwt_credential(
         credential,
         holder_public_jwk_json,
@@ -104,6 +109,11 @@ mod tests {
         let snapshot = json!({"organization_id":"org-1", "trust_profile_id":"11111111-2222-4333-8444-555555555555",
             "generated_at":now, "expires_at":now+chrono::Duration::seconds(30),
             "issuer_keys":[{"issuer":vector["issuer"], "key_id":vector["issuer_key_id"], "algorithm":"ES256", "public_jwk":jwk}]});
+        let snapshot = super::super::issuer_trust::fixture_envelope(
+            snapshot,
+            vector["holder_public_jwk"].clone(),
+            "urn:elevenid:credential:verified-wallet",
+        );
         (
             vector["credential"].as_str().unwrap().into(),
             snapshot.to_string(),
@@ -192,7 +202,7 @@ mod tests {
         assert!(review(&(forged.join(".") + "~"), &snapshot, &holder).is_err());
         assert!(review(&credential, &snapshot, "{}").is_err());
         let mut untrusted: Value = serde_json::from_str(&snapshot).unwrap();
-        untrusted["issuer_keys"][0]["issuer"] = json!("did:attacker");
+        untrusted["issuer"]["issuer_keys"][0]["issuer"] = json!("did:attacker");
         assert!(review(&credential, &untrusted.to_string(), &holder).is_err());
     }
 }

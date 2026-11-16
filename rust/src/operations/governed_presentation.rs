@@ -25,6 +25,7 @@ struct Frozen {
     governance: FreshGovernance,
     authenticated: AuthenticatedPresentationRequest,
     credential: String,
+    issuer_revision: super::issuer_trust::Revision,
     expires_at: DateTime<Utc>,
 }
 
@@ -261,7 +262,7 @@ pub(crate) async fn review(
     let reservation = Reservation::new()?;
     let checked = verifier_governance::parse(&governance, &locator, &holder, Utc::now())?;
     let authenticated = checked.authenticate().await?;
-    let trusted = checked.issuer_trust(&issuer)?;
+    let trusted = checked.issuer_trust(&issuer, &credential)?;
     let verified = authenticated.verify_sd_jwt_for_consent(
         &credential,
         &checked.holder_jwk_json,
@@ -282,6 +283,7 @@ pub(crate) async fn review(
         governance: checked,
         authenticated,
         credential,
+        issuer_revision: trusted.revision,
         expires_at,
     };
     let session_id = reservation.publish(Stage::Reviewed(frozen), expires_at)?;
@@ -302,7 +304,11 @@ pub(crate) async fn prepare(
         anyhow::bail!("presentation session is not awaiting approval")
     };
     let (fresh, authenticated) = frozen.refresh(governance, holder).await?;
-    let trusted = fresh.issuer_trust(issuer)?;
+    let trusted = fresh.issuer_trust(issuer, &frozen.credential)?;
+    ensure!(
+        trusted.revision == frozen.issuer_revision,
+        "issuer authority revision changed"
+    );
     let prepared = authenticated.prepare_sd_jwt_presentation(
         &frozen.credential,
         claims,
@@ -339,7 +345,11 @@ pub(crate) async fn complete(
     };
     ensure!(signature.len() == 64, "remote ES256 signature is invalid");
     let (fresh, authenticated) = frozen.refresh(governance, holder).await?;
-    let trusted = fresh.issuer_trust(issuer)?;
+    let trusted = fresh.issuer_trust(issuer, &frozen.credential)?;
+    ensure!(
+        trusted.revision == frozen.issuer_revision,
+        "issuer authority revision changed"
+    );
     authenticated.verify_sd_jwt_for_consent(
         &frozen.credential,
         &fresh.holder_jwk_json,

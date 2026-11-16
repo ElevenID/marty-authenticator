@@ -19,10 +19,10 @@ pub(crate) struct DeviceScope {
     pairing_id: String,
     device_id: String,
     user_id: String,
-    organization_id: String,
-    issuer_trust_profile_id: String,
-    verifier_trust_profile_id: String,
-    credential_expires_at: DateTime<Utc>,
+    pub(crate) organization_id: String,
+    pub(crate) issuer_trust_profile_id: String,
+    verifier_trust_profile_id: Option<String>,
+    pub(crate) credential_expires_at: DateTime<Utc>,
     holder_binding_key: HolderKey,
     presentation_signing_key: HolderKey,
 }
@@ -204,7 +204,7 @@ fn fresh(observed: DateTime<Utc>, expires: DateTime<Utc>, now: DateTime<Utc>) ->
             .checked_add_signed(Duration::seconds(60))
             .is_some_and(|end| expires <= end)
 }
-fn thumbprint(key: &Value) -> anyhow::Result<String> {
+pub(crate) fn thumbprint(key: &Value) -> anyhow::Result<String> {
     let object = key.as_object().context("holder key is invalid")?;
     let names = match (key["kty"].as_str(), key["crv"].as_str()) {
         (Some("EC"), Some("P-256")) => vec!["crv", "kty", "x", "y"],
@@ -230,6 +230,67 @@ fn thumbprint(key: &Value) -> anyhow::Result<String> {
     Ok(URL_SAFE_NO_PAD.encode(Sha256::digest(serde_json::to_vec(&members)?)))
 }
 
+impl DeviceScope {
+    pub(crate) fn validate_holder(
+        &self,
+        current_holder: &str,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<String> {
+        let scope = self;
+        ensure!(
+            scope.credential_expires_at > now
+                && [
+                    scope.credential_id.as_str(),
+                    &scope.registration_id,
+                    &scope.pairing_id,
+                    &scope.issuer_trust_profile_id
+                ]
+                .iter()
+                .all(|v| uuid(v))
+                && scope.verifier_trust_profile_id.as_deref().is_none_or(uuid)
+                && scope.verifier_trust_profile_id.as_deref()
+                    != Some(scope.issuer_trust_profile_id.as_str())
+                && text(&scope.device_id)
+                && text(&scope.user_id)
+                && text(&scope.organization_id),
+            "device governance scope is invalid"
+        );
+        for (key, algorithm) in [
+            (&scope.holder_binding_key, "EdDSA"),
+            (&scope.presentation_signing_key, "ES256"),
+        ] {
+            ensure!(
+                uuid(&key.key_id)
+                    && key.algorithm == algorithm
+                    && key.version > 0
+                    && key.jwk_thumbprint == thumbprint(&key.public_jwk)?,
+                "holder governance is invalid"
+            );
+            ensure!(
+                (algorithm == "ES256" && key.public_jwk["kty"] == "EC")
+                    || (algorithm == "EdDSA" && key.public_jwk["kty"] == "OKP"),
+                "holder governance algorithm is invalid"
+            );
+        }
+        let holder = marty_crypto::strict_json::parse_unique_json(current_holder.as_bytes())?;
+        // Enrollment includes the public provider key ID. It is metadata rather
+        // than an RFC7638 member; admit only that one extra, never arbitrary fields.
+        let mut canonical_holder = holder.clone();
+        if let Some(kid) = canonical_holder
+            .as_object_mut()
+            .context("holder key is invalid")?
+            .remove("kid")
+        {
+            ensure!(kid.as_str().is_some_and(text), "holder key ID is invalid");
+        }
+        ensure!(
+            thumbprint(&canonical_holder)? == scope.presentation_signing_key.jwk_thumbprint,
+            "paired holder key changed"
+        );
+        Ok(holder.to_string())
+    }
+}
+
 pub(crate) fn parse(
     raw: &str,
     locator: &str,
@@ -248,6 +309,10 @@ pub(crate) fn parse(
     let envelope: Envelope = serde_json::from_value(value)?;
     let scope = &envelope.scope;
     let verifier = &envelope.verifier;
+    let verifier_profile = scope
+        .verifier_trust_profile_id
+        .as_deref()
+        .context("verifier profile is absent")?;
     let registration = &verifier.authority.registration;
     let request = &verifier.request;
     ensure!(
@@ -258,13 +323,13 @@ pub(crate) fn parse(
             && envelope.expires_at <= verifier.expires_at
             && envelope.expires_at <= scope.credential_expires_at
             && scope.organization_id == verifier.organization_id
-            && scope.verifier_trust_profile_id == verifier.trust_profile_id
+            && verifier_profile == verifier.trust_profile_id
             && [
                 scope.credential_id.as_str(),
                 &scope.registration_id,
                 &scope.pairing_id,
                 &scope.issuer_trust_profile_id,
-                &scope.verifier_trust_profile_id
+                verifier_profile
             ]
             .iter()
             .all(|v| uuid(v))
@@ -273,42 +338,11 @@ pub(crate) fn parse(
             && text(&scope.organization_id),
         "verifier governance scope is invalid"
     );
-    for (key, algorithm) in [
-        (&scope.holder_binding_key, "EdDSA"),
-        (&scope.presentation_signing_key, "ES256"),
-    ] {
-        ensure!(
-            uuid(&key.key_id)
-                && key.algorithm == algorithm
-                && key.version > 0
-                && key.jwk_thumbprint == thumbprint(&key.public_jwk)?,
-            "holder governance is invalid"
-        );
-        ensure!(
-            (algorithm == "ES256" && key.public_jwk["kty"] == "EC")
-                || (algorithm == "EdDSA" && key.public_jwk["kty"] == "OKP"),
-            "holder governance algorithm is invalid"
-        );
-    }
-    let holder = marty_crypto::strict_json::parse_unique_json(current_holder.as_bytes())?;
-    // Enrollment includes the public provider key ID. It is metadata rather
-    // than an RFC7638 member; admit only that one extra, never arbitrary fields.
-    let mut canonical_holder = holder.clone();
-    if let Some(kid) = canonical_holder
-        .as_object_mut()
-        .context("holder key is invalid")?
-        .remove("kid")
-    {
-        ensure!(kid.as_str().is_some_and(text), "holder key ID is invalid");
-    }
-    ensure!(
-        thumbprint(&canonical_holder)? == scope.presentation_signing_key.jwk_thumbprint,
-        "paired holder key changed"
-    );
+    let holder_json = scope.validate_holder(current_holder, now)?;
     let source = verifier
         .authority
         .authority_id
-        .strip_prefix(&format!("{}/", scope.verifier_trust_profile_id))
+        .strip_prefix(&format!("{verifier_profile}/"))
         .context("verifier authority is invalid")?;
     let did = registration
         .client_id
@@ -394,7 +428,7 @@ pub(crate) fn parse(
         scope: envelope.scope,
         authority,
         original_jws: request.compact_request_jws.clone(),
-        holder_jwk_json: holder.to_string(),
+        holder_jwk_json: holder_json,
         expires_at,
         request: envelope.verifier.request,
     })
@@ -420,15 +454,18 @@ impl FreshGovernance {
         Ok(authenticated)
     }
 
-    pub fn issuer_trust(&self, raw: &str) -> anyhow::Result<super::issuer_trust::FreshIssuerTrust> {
-        let trusted = super::issuer_trust::resolver_from_snapshot(raw, Utc::now())?;
-        let value = marty_crypto::strict_json::parse_unique_json(raw.as_bytes())?;
-        ensure!(
-            value["organization_id"].as_str() == Some(self.scope.organization_id.as_str())
-                && value["trust_profile_id"].as_str()
-                    == Some(self.scope.issuer_trust_profile_id.as_str()),
-            "issuer trust scope changed"
-        );
+    pub fn issuer_trust(
+        &self,
+        raw: &str,
+        credential: &str,
+    ) -> anyhow::Result<super::issuer_trust::FreshIssuerTrust> {
+        let trusted = super::issuer_trust::resolver_from_snapshot(
+            raw,
+            credential,
+            &self.holder_jwk_json,
+            Utc::now(),
+        )?;
+        ensure!(trusted.scope == self.scope, "issuer trust scope changed");
         Ok(trusted)
     }
 }

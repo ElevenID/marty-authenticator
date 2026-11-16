@@ -91,7 +91,7 @@ impl Fixture {
         let request_claims = json!({"iss":client,"client_id":client,"aud":"https://self-issued.me/v2",
             "iat":whole.timestamp(),"exp":whole.timestamp()+300,"response_type":"vp_token","response_mode":"direct_post",
             "response_uri":recipient,"nonce":"native-disposable-challenge","state":instance,
-            "dcql_query":{"credentials":[{"id":"identity","format":"dc+sd-jwt","meta":{"vct_values":["Identity"]},"claims":[{"path":["age"]}]}]},
+            "dcql_query":{"credentials":[{"id":"identity","format":"dc+sd-jwt","meta":{"vct_values":["urn:elevenid:credential:identity"]},"claims":[{"path":["age"]}]}]},
             "client_metadata":{"vp_formats_supported":{"dc+sd-jwt":{"sd-jwt_alg_values":["ES256"],"kb-jwt_alg_values":["ES256"]}}}});
         let request_header = json!({"alg":"ES256","typ":"oauth-authz-req+jwt","kid":kid});
         let jws = signed(&verifier, request_header.clone(), &request_claims);
@@ -113,7 +113,7 @@ impl Fixture {
         };
         let age = disclose("age", json!(21));
         let family = disclose("family_name", json!("not-approved"));
-        let issuer_claims = json!({"iss":"https://native-fixture-issuer.example","vct":"Identity","iat":whole.timestamp(),"exp":whole.timestamp()+600,
+        let issuer_claims = json!({"iss":"https://native-fixture-issuer.example","vct":"urn:elevenid:credential:identity","iat":whole.timestamp(),"nbf":whole.timestamp()-1,"exp":whole.timestamp()+600,
             "sub":9007199254740993_u64,"_sd_alg":"sha-256","_sd":[URL_SAFE_NO_PAD.encode(Sha256::digest(age.as_bytes())),URL_SAFE_NO_PAD.encode(Sha256::digest(family.as_bytes()))],"cnf":{"jwk":holder_jwk}});
         let issuer_jwt = signed(
             &issuer,
@@ -126,6 +126,13 @@ impl Fixture {
         issuer_key["alg"] = json!("ES256");
         let issuer = json!({"organization_id":"native-fixture-org","trust_profile_id":issuer_profile,"generated_at":now,"expires_at":now+Duration::seconds(60),
             "issuer_keys":[{"issuer":"https://native-fixture-issuer.example","key_id":"native-fixture-issuer-key","algorithm":"ES256","public_jwk":issuer_key}]}).to_string();
+        let mut issuer_envelope = super::super::issuer_trust::fixture_envelope(
+            serde_json::from_str(&issuer).unwrap(),
+            holder_jwk.clone(),
+            "urn:elevenid:credential:identity",
+        );
+        issuer_envelope["scope"] = governance["scope"].clone();
+        let issuer = issuer_envelope.to_string();
         let mut enrolled = holder_jwk;
         enrolled["kid"] = json!("native-fixture-enrolled-public-id");
         Self {
@@ -366,7 +373,7 @@ fn actual_remote_keys_authenticate_consent_and_submit_once_with_fresh_scope() {
     let prepared = fixture.prepare(&runtime, &reviewed);
     let signature = fixture.holder.sign(&prepared.signing_input).unwrap();
     let mut revoked: Value = serde_json::from_str(&fixture.issuer).unwrap();
-    revoked["issuer_keys"] = json!([]);
+    revoked["issuer"]["issuer_keys"] = json!([]);
     assert!(runtime
         .block_on(complete(
             &prepared.session_id,
@@ -396,6 +403,60 @@ fn actual_remote_keys_authenticate_consent_and_submit_once_with_fresh_scope() {
             &fixture.holder_json
         ))
         .is_err());
+    // A still-authorized credential does not carry old consent across an owner
+    // revision or pairing change. Every failed transition consumes its handle.
+    for at_completion in [false, true] {
+        for pointer in ["/issuer/revision/version", "/scope/credential_id"] {
+            let reviewed = fixture.review(&runtime);
+            let mut changed: Value = serde_json::from_str(&fixture.issuer).unwrap();
+            *changed.pointer_mut(pointer).unwrap() = if pointer.ends_with("version") {
+                json!(2)
+            } else {
+                json!(uuid::Uuid::new_v4().to_string())
+            };
+            if at_completion {
+                let prepared = fixture.prepare(&runtime, &reviewed);
+                let signature = fixture.holder.sign(&prepared.signing_input).unwrap();
+                assert!(runtime
+                    .block_on(complete(
+                        &prepared.session_id,
+                        &signature,
+                        &fixture.governance.to_string(),
+                        &changed.to_string(),
+                        &fixture.holder_json
+                    ))
+                    .is_err());
+                assert!(runtime
+                    .block_on(complete(
+                        &prepared.session_id,
+                        &signature,
+                        &fixture.governance.to_string(),
+                        &fixture.issuer,
+                        &fixture.holder_json
+                    ))
+                    .is_err());
+            } else {
+                assert!(runtime
+                    .block_on(prepare(
+                        &reviewed,
+                        &["age".into()],
+                        &fixture.governance.to_string(),
+                        &changed.to_string(),
+                        &fixture.holder_json
+                    ))
+                    .is_err());
+                assert!(runtime
+                    .block_on(prepare(
+                        &reviewed,
+                        &["age".into()],
+                        &fixture.governance.to_string(),
+                        &fixture.issuer,
+                        &fixture.holder_json
+                    ))
+                    .is_err());
+            }
+        }
+    }
     let unchanged: Value =
         serde_json::from_slice(&std::fs::read(&fixture.capture).unwrap()).unwrap();
     assert_eq!(

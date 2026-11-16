@@ -295,7 +295,12 @@ fn prepare_for_request(
         "presentation request changed after approval"
     );
     validate_disclosures(&request, &selection.query_id, &selection.claims_to_disclose)?;
-    let trusted = resolver_from_snapshot(&selection.issuer_snapshot_json, Utc::now())?;
+    let trusted = resolver_from_snapshot(
+        &selection.issuer_snapshot_json,
+        &selection.credential,
+        &selection.holder_public_jwk_json,
+        Utc::now(),
+    )?;
     let engine = WalletEngine::new();
     let verified = engine.verify_received_sd_jwt_credential(
         &selection.credential,
@@ -608,6 +613,11 @@ mod tests {
                 "public_jwk": issuer_jwk
             }]
         });
+        let snapshot = super::super::issuer_trust::fixture_envelope(
+            snapshot,
+            vector["holder_public_jwk"].clone(),
+            "urn:elevenid:credential:verified-wallet",
+        );
         Selection {
             request_uri: "openid4vp://unused".into(),
             approved_request_digest: request_digest(request).unwrap(),
