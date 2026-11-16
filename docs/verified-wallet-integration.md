@@ -392,9 +392,10 @@ bounded local container and private TLS/capture directory are removed on success
 or failure with exact ownership/nonce checks. An independent review caught a
 cleanup ordering gap and missing workflow filters; both were fixed and the
 cleanup regressions plus final native cases pass. Reviewers ran no tests. The
-first trusted receiver attempt failed correctly with an unsuitable CA-role leaf;
-the fixture now uses a separate root and a serverAuth CA:false IP certificate.
-TLS chain and hostname checks are retained; no global trust store was changed.
+first self-signed receiver attempt failed during TLS submission; Core's error
+did not expose the underlying TLS alert. The fixture now uses a separate root
+and an issued serverAuth CA:false IP certificate, and both cases pass. TLS chain
+and hostname checks are retained; no global trust store was changed.
 
 This native application/provider qualification is stronger than mocks but does
 not establish deployed governance, paused DeviceHTTP races, governed issuer-owner
