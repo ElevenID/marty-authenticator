@@ -228,8 +228,9 @@ class _Bridge implements VerifiedWalletBridge {
     events.add('receipt:finalize');
     expect(responseId, 'native-response-handle');
     expect(issuerSnapshotJson, _originalIssuerEvidence);
-    if (rejectFinalization)
+    if (rejectFinalization) {
       throw StateError('Authority changed during issuance');
+    }
     return const FrbVerifiedSdJwtReceipt(
       credential: 'header.payload.signature~',
       issuer: 'https://issuer.example',
