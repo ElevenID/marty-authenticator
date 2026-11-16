@@ -62,6 +62,11 @@ reqwest = { version = "=0.13.4", default-features = false, features = ["json", "
 # Accepted Core test-only remote signers. No software holder-key fallback.
 marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44aca4cb956cef5c2b74642620c736e" }
 
+# Android armv7 needs generated AWS-LC bindings for the existing TLS backend.
+# Keep the locked backend/version and host features; do not drop a packaged ABI.
+[target.'cfg(target_os = "android")'.dependencies]
+aws-lc-sys = { version = "=0.47.0", default-features = false, features = ["bindgen"] }
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
