@@ -157,9 +157,5 @@ jobs:
       - name: Enforce native status-list and liveness ownership
         shell: bash
         run: |
-          if grep -REn --include='*.dart' \
-            'gzip\.decode|base64Decode\(|Hmac\(sha256|local-dev-secret' \
-            lib/models lib/services lib/views; then
-            echo 'Status-list decoding and liveness challenge signing must remain in Rust.' >&2
-            exit 1
-          fi
+          python -m unittest discover -s scripts -p 'test_audit_native_ownership.py'
+          python scripts/audit_native_ownership.py
