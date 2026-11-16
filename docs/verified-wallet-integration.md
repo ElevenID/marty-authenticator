@@ -7,13 +7,22 @@ and Open Badges 3 retirement changes. It does not release a wallet artifact.
 
 ## Dependency and API boundary
 
-The merged foundation pins remain authoritative in `rust/Cargo.toml` and
-`rust/Cargo.lock`: Core `11655e38c2dbf69bfa5bc3c873f80c5fad628723` and Verifier
-`ab126edaa4ed381d86d9ee89c4b72ca70b40490d`, with the reviewed private SSI,
+The current development pins in `rust/Cargo.toml` and `rust/Cargo.lock` are
+Core `dbb7cfa9ef92dd26e836e64cbfe2b3022e8687f0` and Verifier
+`dc24be7118cee57863a89f5c0c78617a22e74085`, with the reviewed private SSI,
 SD-JWT, isomdl and independent linked-data sources. The wallet graph retains
 its holder role without enabling the issuer feature; wallet dependencies also
 enable verifier support. The integration adds the existing SHA-256 dependency used
 for request digests without changing the reviewed dependency families.
+
+These provisional published prerequisites are Core #440 and Verifier #196;
+they must be replaced with their verified accepted main commits and the exact
+graph requalified before merge eligibility. The prior merged foundation was
+Core `11655e38` / Verifier `ab126eda`. Upgrading only the direct Core pins failed
+resolution because the old transitive sync graph required Cedar4.12 while the
+new Core requires4.14. The canonical sync prerequisite aligns its Core graph
+and exact SQLCipher fork with Core; it retains encryption and existing
+`kms-only`/verification roles. No issuer capability is added to the wallet.
 
 The existing PR 57 Flutter/Rust bridge API is retained. The native implementation
 receives public keys and exact remote signatures; issuer and holder private
@@ -112,8 +121,11 @@ dispositions; the remaining activation gates are explicit below.
 
 PR 57 must remain draft until the following are addressed and qualified:
 
-- **Authenticated verifier and destination.** Core's request-object path decodes
-  a JWT payload without verifying its signature. Consent currently displays the
+- **Authenticated verifier and destination.** The wallet's currently used legacy
+  request-object path decodes a JWT payload without authenticating its signature.
+  Core #439 supplies an accepted registered-client API and #440 adds governed DID
+  semantics, but the wallet still needs their actual native session integration.
+  Consent currently displays the
   raw `client_id` and the actual HTTPS `response_uri` separately; those identifiers can differ. W04 must
   implement the supported request/client authentication profile and bind the authenticated recipient. A digest of parsed fields is not that authentication.
 - **Complete request semantics.** Fields such as `client_id_scheme` and
@@ -178,6 +190,38 @@ and [OpenID4VP 1.0](https://openid.net/specs/openid-4-verifiable-presentations-1
 
 Reconciles main `1a396a0641ad3996c543fc782de97ca2d7546e93` without rewriting retained feature history. Main's dependency updates, native status boundary, retired proximity placeholder and dependency-reader guards remain. QR merge conflicts preserve native classification, explicit offer review and the separation between parsed content and verified receipt selection; scanned compatibility fields cannot trigger automatic acceptance or establish trust. Main's advisory QR test cases are ported to these current APIs. Sensitive-field warnings now appear in the actual presentation consent view, which also displays the exact response URI. That URI remains request-supplied until W04 authenticates it.
 
-Validation on the combined source: locked Flutter dependencies restored with Flutter 3.44.6 / Dart 3.12.2; analysis reports no issues; 84 affected Flutter tests pass; full Flutter suite reports 334 passes and four existing SIOPv2 skips. These exercise mocked bridge/platform contracts and widgets. They do not execute the native Rust/KMS bridge, regenerate artifacts, install a device wallet or establish interoperable protocol acceptance. Current Core main and the UI-pinned Core revision also lack incoming request-object authentication; a pin change alone cannot close that prerequisite.
+Historical validation on that combined source: locked Flutter dependencies restored with Flutter 3.44.6 / Dart 3.12.2; analysis reports no issues; 84 affected Flutter tests pass; full Flutter suite reports 334 passes and four existing SIOPv2 skips. These exercise mocked bridge/platform contracts and widgets. They do not execute the native Rust/KMS bridge, regenerate artifacts, install a device wallet or establish interoperable protocol acceptance. The then-observed lack of an incoming-authentication API is superseded by Core #439/#440; a pin change alone still cannot qualify the consumer.
 
-Authentication/raw security semantics, verified always-shared claim projection, issuance service/configuration-to-issuer governance, native issuer/KMS integration and all installed/artifact/external acceptance gates above remain open. No production behavior is activated by this draft source checkpoint.
+Authentication/raw security semantics, issuance service/configuration-to-issuer governance, native issuer/KMS integration and all installed/artifact/external acceptance gates above remain open. Always-shared projection source work and its separately scoped checks are recorded above. No production behavior is activated by this draft source checkpoint.
+
+## November 16 original authority evidence and dependency qualification
+
+The paired transports now retain original strict UTF-8 JSON, use the confirmed
+pairing's fixed HTTPS origin/bearer without redirects, enforce status/media and
+byte bounds, and invalidate responses when that pairing changes. A single body
+deadline cannot be extended by continuous chunks or a stalled cancellation
+future. Verifier transport alone grants no authority. Issuance completion,
+consent review and presentation preparation pass original issuer evidence to
+native unique-member parsing and recursive private-material rejection before
+typed conversion. This preserves the earlier Dart custody check while moving
+validation to the native boundary.
+
+At `f440223`, actual native tests reported69 passed0 ignored, and focused
+mocked Flutter transport/orchestration tests reported36 passes with clean
+analysis. After the provisional coherent Core/sync upgrade, actual native
+execution reports70 passed0 ignored. The old policy fixture's bare verified
+boolean correctly stopped authorizing a named profile under current Core; the
+synthetic fixture now supplies its actual profile identity and missing/wrong
+identity regression cases deny. No runtime policy check was weakened.
+
+Independent source reviews identified the body-deadline and recursive private
+material regressions; both were corrected and re-reviewed without remaining
+findings. Reviewers executed no tests. Standard FRB2.13 generation passed on
+this provisional graph: all13 generated Rust/Dart/C sources match their
+preserved pre-generation bytes and the content hash remains175211210. The
+initial local tool invocation exposed Clang headers to GCC while rebuilding
+SQLCipher, then a scoped retry lacked ffigen's standard headers. Both failed
+runs were rejected. Supplying Clang headers only to bindgen/ffigen fixed the
+development tooling; no dependency or validation rule was relaxed. Final
+accepted-graph qualification remains required, as do actual authentication,
+issuer governance, installed-device, artifact and interoperability execution.

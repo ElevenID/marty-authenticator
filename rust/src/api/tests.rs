@@ -173,6 +173,30 @@ fn mobile_service_policy_adapter_matches_canonical_allow_and_deny() {
 }
 
 #[test]
+fn mobile_service_policy_adapter_requires_the_actually_verified_profile_identity() {
+    for actual in [None, Some("different-profile")] {
+        let mut request: serde_json::Value =
+            serde_json::from_str(&service_policy_request_json(true)).unwrap();
+        let credential = request["credentials"][0].as_object_mut().unwrap();
+        if let Some(actual) = actual {
+            credential.insert("trust_profile_id".into(), json!(actual));
+        } else {
+            credential.remove("trust_profile_id");
+        }
+        let result: serde_json::Value = serde_json::from_str(
+            &evaluate_service_presentation_policy(request.to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(result["decision"], "deny");
+        assert!(result["errors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|error| error["code"] == "trust_profile_not_verified"));
+    }
+}
+
+#[test]
 fn mobile_policy_format_aliases_match_shared_vectors() {
     let vector: serde_json::Value = serde_json::from_str(include_str!(
         "../../../test/fixtures/presentation_policy_service.json"
