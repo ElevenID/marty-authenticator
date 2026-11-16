@@ -28,6 +28,7 @@ IMAGE = "quay.io/openbao/openbao@sha256:6150c4a6b62067db6141c8da7a6a6b5763f4f47c
 OWNER = "marty-wallet-native-qualification"
 CASE = "operations::governed_presentation::native_tests::actual_remote_keys_authenticate_consent_and_submit_once_with_fresh_scope"
 TLS_DENY_CASE = "operations::governed_presentation::native_tests::actual_receiver_with_untrusted_ca_cannot_receive_a_native_presentation"
+ISSUANCE_CASE = "operations::verified_issuance::native_tests::actual_remote_receipt_authorizes_before_token_and_rechecks_after_response"
 
 
 def require(condition, message):
@@ -89,6 +90,10 @@ def executable(artifacts):
                             capture_output=True, text=True, timeout=30, check=False)
     require(listed.returncode == 0 and {line.removesuffix(": test") for line in listed.stdout.splitlines()
             if line.endswith(": test")} == {CASE, TLS_DENY_CASE}, "both exact native cases must exist before allocation")
+    listed = subprocess.run([str(binary), ISSUANCE_CASE, "--ignored", "--list"],
+                            capture_output=True, text=True, timeout=30, check=False)
+    require(listed.returncode == 0 and {line.removesuffix(": test") for line in listed.stdout.splitlines()
+            if line.endswith(": test")} == {ISSUANCE_CASE}, "exact native issuance case must exist before allocation")
     return binary
 
 
@@ -199,14 +204,66 @@ def qualify(binary):
             os.chmod(key, 0o600)
             os.chmod(ca_key, 0o600)
             capture, hits = private / "receiver.json", []
+            issuer_input = private / "issuer-input.json"
+            issuer_capture = private / "issuer-capture.json"
+            issuance_hits = {"token": 0, "nonce": 0, "credential": 0}
 
             class Receiver(http.server.BaseHTTPRequestHandler):
                 def log_message(self, *_):
                     pass
 
+                def reply(self, value):
+                    body = json.dumps(value).encode()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+
+                def do_GET(self):
+                    if self.path != "/.well-known/openid-credential-issuer":
+                        self.send_error(404)
+                        return
+                    service = f"https://127.0.0.1:{self.server.server_port}"
+                    self.reply({"credential_issuer": service, "credential_endpoint": service + "/credential",
+                        "token_endpoint": service + "/token", "nonce_endpoint": service + "/nonce",
+                        "credential_configurations_supported": {"identity": {"format": "dc+sd-jwt",
+                            "vct": "urn:elevenid:credential:identity", "cryptographic_binding_methods_supported": ["jwk"],
+                            "proof_types_supported": {"jwt": {"proof_signing_alg_values_supported": ["ES256"]}}}}})
+
+                def issuance(self):
+                    size = int(self.headers.get("Content-Length", "0"))
+                    require(0 <= size <= 65536, "invalid issuance request size")
+                    body = self.rfile.read(size)
+                    endpoint = self.path[1:]
+                    if endpoint == "token":
+                        form = urllib.parse.parse_qs(body.decode(), strict_parsing=True)
+                        require(form == {"grant_type": ["urn:ietf:params:oauth:grant-type:pre-authorized_code"],
+                            "pre-authorized_code": ["owned-fixture-code"]}, "invalid owned token request")
+                        reply = {"access_token": "owned-fixture-token", "token_type": "Bearer", "expires_in": 120}
+                    elif endpoint == "nonce":
+                        reply = {"c_nonce": "owned-fixture-nonce", "c_nonce_expires_in": 120}
+                    else:
+                        require(self.headers.get("Authorization") == "Bearer owned-fixture-token", "invalid owned bearer")
+                        request = json.loads(body)
+                        require(set(request) == {"credential_configuration_id", "proofs"}
+                            and request["credential_configuration_id"] == "identity"
+                            and set(request["proofs"]) == {"jwt"}
+                            and len(request["proofs"]["jwt"]) == 1, "invalid owned credential request")
+                        issued = json.loads(issuer_input.read_text())
+                        issued["transmitted_proof"] = request["proofs"]["jwt"][0]
+                        issuer_input.write_text(json.dumps(issued))
+                        reply = {"credentials": [{"credential": issued["credential"]}]}
+                    issuance_hits[endpoint] += 1
+                    issuer_capture.write_text(json.dumps(issuance_hits))
+                    self.reply(reply)
+
                 def do_POST(self):
                     try:
                         self.connection.settimeout(10)
+                        if self.path in {"/token", "/nonce", "/credential"}:
+                            self.issuance()
+                            return
                         require(re.fullmatch(r"/v1/flows/instances/[0-9a-f-]{36}/submit", self.path), "unexpected recipient")
                         size = int(self.headers.get("Content-Length", "0"))
                         require(0 < size <= 1024 * 1024, "invalid submission size")
@@ -222,7 +279,7 @@ def qualify(binary):
                         self.send_header("Content-Length", str(len(body)))
                         self.end_headers()
                         self.wfile.write(body)
-                    except (RuntimeError, ValueError, UnicodeError, OSError):
+                    except (RuntimeError, ValueError, UnicodeError, OSError, KeyError, TypeError):
                         self.send_error(400)
 
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -259,7 +316,8 @@ def qualify(binary):
                 MARTY_TEST_OPENBAO_DISPOSABLE_NONCE=nonce, MARTY_TEST_OPENBAO_CA_CERT=str(ca),
                 MARTY_TEST_WALLET_OWNER_NONCE=nonce, MARTY_TEST_WALLET_RECEIVER=f"https://127.0.0.1:{server.server_port}/",
                 MARTY_TEST_WALLET_CAPTURE=str(capture), SSL_CERT_FILE=str(trust), SSL_CERT_DIR=str(empty_roots), NO_PROXY="127.0.0.1,localhost")
-            for case, roots in [(TLS_DENY_CASE, ca), (CASE, trust)]:
+            env.update(MARTY_TEST_WALLET_ISSUER_INPUT=str(issuer_input), MARTY_TEST_WALLET_ISSUER_CAPTURE=str(issuer_capture))
+            for case, roots in [(TLS_DENY_CASE, ca), (ISSUANCE_CASE, trust), (CASE, trust)]:
                 env["SSL_CERT_FILE"] = str(roots)
                 result = subprocess.run([str(binary), case, "--ignored", "--exact", "--nocapture"],
                     env=env, capture_output=True, text=True, timeout=90, check=False)
@@ -272,10 +330,11 @@ def qualify(binary):
                 if case == TLS_DENY_CASE:
                     require(not hits, "untrusted receiver received a submission")
             require(len(hits) == 1, "native qualification did not submit exactly once")
+            require(issuance_hits == {"token": 2, "nonce": 2, "credential": 2}, "native issuance did not exercise both responses")
         finally:
             cleanup_fixtures(server, thread, name, cid, nonce)
-    print(json.dumps({"phase": "ok", "native_tests": 2, "submissions": 1,
-        "scope": "actual native review/prepare/remote-sign/HTTPS-submit with marked non-exportable TLS Transit keys and synthetic governance; not deployed governance, installed wallet, rootless qualification or official suite"}))
+    print(json.dumps({"phase": "ok", "native_tests": 3, "submissions": 1, "credential_responses": 2,
+        "scope": "actual native governed issuance and presentation with marked non-exportable TLS Transit keys, controlled HTTPS issuer and synthetic governance; not deployed governance, installed wallet, rootless qualification or official suite"}))
 
 
 if __name__ == "__main__":

@@ -233,21 +233,32 @@ Future<FrbPreparedSdJwtReceipt> walletPrepareVerifiedSdJwtReceipt({
   required String offerUri,
   String? txCode,
   required String holderPublicJwkJson,
+  required String issuerSnapshotJson,
 }) => RustLib.instance.api.crateApiWalletPrepareVerifiedSdJwtReceipt(
   offerUri: offerUri,
   txCode: txCode,
   holderPublicJwkJson: holderPublicJwkJson,
+  issuerSnapshotJson: issuerSnapshotJson,
 );
 
-/// Consume a prepared receipt once, verify the remote ES256 signature, and
-/// admit only a credential verified with a fresh paired issuer-key snapshot.
-Future<FrbVerifiedSdJwtReceipt> walletCompleteVerifiedSdJwtReceipt({
+/// Recheck authority, consume the proof and request the credential. Returns
+/// only an opaque handle; the response remains native until final verification.
+Future<String> walletCompleteVerifiedSdJwtReceipt({
   required String sessionId,
   required List<int> remoteSignature,
   required String issuerSnapshotJson,
 }) => RustLib.instance.api.crateApiWalletCompleteVerifiedSdJwtReceipt(
   sessionId: sessionId,
   remoteSignature: remoteSignature,
+  issuerSnapshotJson: issuerSnapshotJson,
+);
+
+/// Consume the response using authority fetched after the credential request.
+Future<FrbVerifiedSdJwtReceipt> walletFinalizeVerifiedSdJwtReceipt({
+  required String responseId,
+  required String issuerSnapshotJson,
+}) => RustLib.instance.api.crateApiWalletFinalizeVerifiedSdJwtReceipt(
+  responseId: responseId,
   issuerSnapshotJson: issuerSnapshotJson,
 );
 

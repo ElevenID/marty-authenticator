@@ -112,20 +112,27 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       final publicJwk = await holder.publicJwkForPurpose(
         'presentation_signing',
       );
+      final initialAuthority = await holder.fetchIssuerKeysJson();
       final prepared = await _bridge.prepareReceipt(
         offerUri: credentialOffer,
         txCode: pin,
         holderPublicJwkJson: jsonEncode(publicJwk),
+        issuerSnapshotJson: initialAuthority,
       );
       final signature = await holder.signInput(
         purpose: 'presentation_signing',
         signingInput: prepared.signingInput,
       );
       final snapshot = await holder.fetchIssuerKeysJson();
-      final receipt = await _bridge.completeReceipt(
+      final responseId = await _bridge.completeReceipt(
         sessionId: prepared.sessionId,
         remoteSignature: signature,
         issuerSnapshotJson: snapshot,
+      );
+      final finalAuthority = await holder.fetchIssuerKeysJson();
+      final receipt = await _bridge.finalizeReceipt(
+        responseId: responseId,
+        issuerSnapshotJson: finalAuthority,
       );
       final id = const Uuid().v4();
       await WalletCredentialStore.store(

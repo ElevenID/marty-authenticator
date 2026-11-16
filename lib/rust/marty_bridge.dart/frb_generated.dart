@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -948931303;
+  int get rustContentHash => -1414607535;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -224,7 +224,7 @@ abstract class RustLibApi extends BaseApi {
     required List<int> remoteSignature,
   });
 
-  Future<FrbVerifiedSdJwtReceipt> crateApiWalletCompleteVerifiedSdJwtReceipt({
+  Future<String> crateApiWalletCompleteVerifiedSdJwtReceipt({
     required String sessionId,
     required List<int> remoteSignature,
     required String issuerSnapshotJson,
@@ -246,6 +246,11 @@ abstract class RustLibApi extends BaseApi {
 
   Future<FrbIssuerMetadata> crateApiWalletFetchIssuerMetadata({
     required String issuerUrl,
+  });
+
+  Future<FrbVerifiedSdJwtReceipt> crateApiWalletFinalizeVerifiedSdJwtReceipt({
+    required String responseId,
+    required String issuerSnapshotJson,
   });
 
   Future<String> crateApiWalletNormalizeCredentialOffer({
@@ -284,6 +289,7 @@ abstract class RustLibApi extends BaseApi {
     required String offerUri,
     String? txCode,
     required String holderPublicJwkJson,
+    required String issuerSnapshotJson,
   });
 
   Future<FrbCredentialResponse> crateApiWalletRequestCredential({
@@ -1372,7 +1378,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<FrbVerifiedSdJwtReceipt> crateApiWalletCompleteVerifiedSdJwtReceipt({
+  Future<String> crateApiWalletCompleteVerifiedSdJwtReceipt({
     required String sessionId,
     required List<int> remoteSignature,
     required String issuerSnapshotJson,
@@ -1391,7 +1397,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: DcoCodec(
-          decodeSuccessData: dco_decode_frb_verified_sd_jwt_receipt,
+          decodeSuccessData: dco_decode_String,
           decodeErrorData: dco_decode_AnyhowException,
         ),
         constMeta: kCrateApiWalletCompleteVerifiedSdJwtReceiptConstMeta,
@@ -1519,6 +1525,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "wallet_fetch_issuer_metadata",
         argNames: ["issuerUrl"],
+      );
+
+  @override
+  Future<FrbVerifiedSdJwtReceipt> crateApiWalletFinalizeVerifiedSdJwtReceipt({
+    required String responseId,
+    required String issuerSnapshotJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(responseId);
+          var arg1 = cst_encode_String(issuerSnapshotJson);
+          return wire.wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+            port_,
+            arg0,
+            arg1,
+          );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_verified_sd_jwt_receipt,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletFinalizeVerifiedSdJwtReceiptConstMeta,
+        argValues: [responseId, issuerSnapshotJson],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletFinalizeVerifiedSdJwtReceiptConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_finalize_verified_sd_jwt_receipt",
+        argNames: ["responseId", "issuerSnapshotJson"],
       );
 
   @override
@@ -1738,6 +1777,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String offerUri,
     String? txCode,
     required String holderPublicJwkJson,
+    required String issuerSnapshotJson,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1745,11 +1785,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           var arg0 = cst_encode_String(offerUri);
           var arg1 = cst_encode_opt_String(txCode);
           var arg2 = cst_encode_String(holderPublicJwkJson);
+          var arg3 = cst_encode_String(issuerSnapshotJson);
           return wire.wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
             port_,
             arg0,
             arg1,
             arg2,
+            arg3,
           );
         },
         codec: DcoCodec(
@@ -1757,7 +1799,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: dco_decode_AnyhowException,
         ),
         constMeta: kCrateApiWalletPrepareVerifiedSdJwtReceiptConstMeta,
-        argValues: [offerUri, txCode, holderPublicJwkJson],
+        argValues: [offerUri, txCode, holderPublicJwkJson, issuerSnapshotJson],
         apiImpl: this,
       ),
     );
@@ -1766,7 +1808,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiWalletPrepareVerifiedSdJwtReceiptConstMeta =>
       const TaskConstMeta(
         debugName: "wallet_prepare_verified_sd_jwt_receipt",
-        argNames: ["offerUri", "txCode", "holderPublicJwkJson"],
+        argNames: [
+          "offerUri",
+          "txCode",
+          "holderPublicJwkJson",
+          "issuerSnapshotJson",
+        ],
       );
 
   @override

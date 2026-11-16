@@ -7,11 +7,17 @@ abstract interface class VerifiedWalletBridge {
     required String offerUri,
     String? txCode,
     required String holderPublicJwkJson,
+    required String issuerSnapshotJson,
   });
 
-  Future<rust_api.FrbVerifiedSdJwtReceipt> completeReceipt({
+  Future<String> completeReceipt({
     required String sessionId,
     required List<int> remoteSignature,
+    required String issuerSnapshotJson,
+  });
+
+  Future<rust_api.FrbVerifiedSdJwtReceipt> finalizeReceipt({
+    required String responseId,
     required String issuerSnapshotJson,
   });
 
@@ -67,20 +73,31 @@ class RustVerifiedWalletBridge implements VerifiedWalletBridge {
     required String offerUri,
     String? txCode,
     required String holderPublicJwkJson,
+    required String issuerSnapshotJson,
   }) => rust_api.walletPrepareVerifiedSdJwtReceipt(
     offerUri: offerUri,
     txCode: txCode,
     holderPublicJwkJson: holderPublicJwkJson,
+    issuerSnapshotJson: issuerSnapshotJson,
   );
 
   @override
-  Future<rust_api.FrbVerifiedSdJwtReceipt> completeReceipt({
+  Future<String> completeReceipt({
     required String sessionId,
     required List<int> remoteSignature,
     required String issuerSnapshotJson,
   }) => rust_api.walletCompleteVerifiedSdJwtReceipt(
     sessionId: sessionId,
     remoteSignature: remoteSignature,
+    issuerSnapshotJson: issuerSnapshotJson,
+  );
+
+  @override
+  Future<rust_api.FrbVerifiedSdJwtReceipt> finalizeReceipt({
+    required String responseId,
+    required String issuerSnapshotJson,
+  }) => rust_api.walletFinalizeVerifiedSdJwtReceipt(
+    responseId: responseId,
     issuerSnapshotJson: issuerSnapshotJson,
   );
 

@@ -2830,6 +2830,40 @@ class RustLibWire implements BaseWire {
             void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
           >();
 
+  void wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> response_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+  ) {
+    return _wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+      port_,
+      response_id,
+      issuer_snapshot_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_finalize_verified_sd_jwt_receiptPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_finalize_verified_sd_jwt_receipt',
+      );
+  late final _wire__crate__api__wallet_finalize_verified_sd_jwt_receipt =
+      _wire__crate__api__wallet_finalize_verified_sd_jwt_receiptPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__wallet_normalize_credential_offer(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> input,
@@ -3010,12 +3044,14 @@ class RustLibWire implements BaseWire {
     ffi.Pointer<wire_cst_list_prim_u_8_strict> offer_uri,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> tx_code,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
   ) {
     return _wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
       port_,
       offer_uri,
       tx_code,
       holder_public_jwk_json,
+      issuer_snapshot_json,
     );
   }
 
@@ -3024,6 +3060,7 @@ class RustLibWire implements BaseWire {
         ffi.NativeFunction<
           ffi.Void Function(
             ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
             ffi.Pointer<wire_cst_list_prim_u_8_strict>,
@@ -3037,6 +3074,7 @@ class RustLibWire implements BaseWire {
           .asFunction<
             void Function(
               int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,
               ffi.Pointer<wire_cst_list_prim_u_8_strict>,

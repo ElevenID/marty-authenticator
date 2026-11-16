@@ -1889,6 +1889,16 @@ class RustLibWire implements BaseWire {
     issuer_url,
   );
 
+  void wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String response_id,
+    String issuer_snapshot_json,
+  ) => wasmModule.wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+    port_,
+    response_id,
+    issuer_snapshot_json,
+  );
+
   void wire__crate__api__wallet_normalize_credential_offer(
     NativePortType port_,
     String input,
@@ -1954,11 +1964,13 @@ class RustLibWire implements BaseWire {
     String offer_uri,
     String? tx_code,
     String holder_public_jwk_json,
+    String issuer_snapshot_json,
   ) => wasmModule.wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(
     port_,
     offer_uri,
     tx_code,
     holder_public_jwk_json,
+    issuer_snapshot_json,
   );
 
   void wire__crate__api__wallet_request_credential(
@@ -2302,6 +2314,12 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String issuer_url,
   );
 
+  external void wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(
+    NativePortType port_,
+    String response_id,
+    String issuer_snapshot_json,
+  );
+
   external void wire__crate__api__wallet_normalize_credential_offer(
     NativePortType port_,
     String input,
@@ -2342,6 +2360,7 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String offer_uri,
     String? tx_code,
     String holder_public_jwk_json,
+    String issuer_snapshot_json,
   );
 
   external void wire__crate__api__wallet_request_credential(

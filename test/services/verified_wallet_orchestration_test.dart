@@ -30,6 +30,7 @@ class _Holder extends RemoteHolderPairingService {
   int verifierReads = 0;
   int issuerReads = 0;
   int? failVerifierRead;
+  int? failIssuerRead;
   Completer<void>? signatureGate;
   Completer<void>? signatureEntered;
   @override
@@ -64,6 +65,9 @@ class _Holder extends RemoteHolderPairingService {
   @override
   Future<String> fetchIssuerKeysJson() async {
     issuerReads++;
+    if (issuerReads == failIssuerRead) {
+      throw StateError('Issuer authority unavailable');
+    }
     return _originalIssuerEvidence;
   }
 
@@ -95,6 +99,8 @@ class _Bridge implements VerifiedWalletBridge {
   String expectedQueryId = 'identity-query';
   List<String> expectedClaims = const ['given_name'];
   int receiptCompletions = 0;
+  int receiptFinalizations = 0;
+  bool rejectFinalization = false;
   int presentationParses = 0;
   int presentationPreparations = 0;
   int presentationCompletions = 0;
@@ -186,8 +192,11 @@ class _Bridge implements VerifiedWalletBridge {
     required String offerUri,
     String? txCode,
     required String holderPublicJwkJson,
+    required String issuerSnapshotJson,
   }) async {
     expect(offerUri, 'openid-credential-offer://approved');
+    expect(issuerSnapshotJson, _originalIssuerEvidence);
+    events.add('receipt:prepare');
     expect(jsonDecode(holderPublicJwkJson), containsPair('kty', 'EC'));
     return FrbPreparedSdJwtReceipt(
       sessionId: 'receipt-session',
@@ -196,16 +205,31 @@ class _Bridge implements VerifiedWalletBridge {
   }
 
   @override
-  Future<FrbVerifiedSdJwtReceipt> completeReceipt({
+  Future<String> completeReceipt({
     required String sessionId,
     required List<int> remoteSignature,
     required String issuerSnapshotJson,
   }) async {
     receiptCompletions++;
+    events.add('receipt:request');
     expect(sessionId, 'receipt-session');
     expect(remoteSignature, [4, 5, 6]);
     expect(issuerSnapshotJson, _originalIssuerEvidence);
     if (rejectReceipt) throw StateError('Rust rejected the receipt');
+    return 'native-response-handle';
+  }
+
+  @override
+  Future<FrbVerifiedSdJwtReceipt> finalizeReceipt({
+    required String responseId,
+    required String issuerSnapshotJson,
+  }) async {
+    receiptFinalizations++;
+    events.add('receipt:finalize');
+    expect(responseId, 'native-response-handle');
+    expect(issuerSnapshotJson, _originalIssuerEvidence);
+    if (rejectFinalization)
+      throw StateError('Authority changed during issuance');
     return const FrbVerifiedSdJwtReceipt(
       credential: 'header.payload.signature~',
       issuer: 'https://issuer.example',
@@ -584,9 +608,10 @@ void main() {
 
   test('only a completed Rust receipt enters the wallet', () async {
     final bridge = _Bridge();
+    final holder = _Holder();
     final service = SpruceIdPlatformServiceExtended.withDependencies(
       bridge,
-      _Holder.new,
+      () => holder,
     );
     final result = await service.handleOID4VCOfferSDK(
       credentialOffer: 'openid-credential-offer://approved',
@@ -596,7 +621,76 @@ void main() {
     expect(stored.single.rawJson, 'header.payload.signature~');
     expect(stored.single.issuer, 'https://issuer.example');
     expect(bridge.receiptCompletions, 1);
+    expect(bridge.receiptFinalizations, 1);
+    expect(holder.issuerReads, 3);
+    expect(bridge.events, [
+      'receipt:prepare',
+      'receipt:request',
+      'receipt:finalize',
+    ]);
   });
+
+  test(
+    'authority lost after the response prevents finalization and storage',
+    () async {
+      final bridge = _Bridge();
+      final holder = _Holder()..failIssuerRead = 3;
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        () => holder,
+      );
+      await expectLater(
+        service.handleOID4VCOfferSDK(
+          credentialOffer: 'openid-credential-offer://approved',
+        ),
+        throwsStateError,
+      );
+      expect(bridge.receiptCompletions, 1);
+      expect(bridge.receiptFinalizations, 0);
+      expect(await WalletCredentialStore.getAll(), isEmpty);
+      expect(holder.closed, isTrue);
+    },
+  );
+
+  test(
+    'native finalization rejection never stores a received credential',
+    () async {
+      final bridge = _Bridge()..rejectFinalization = true;
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        _Holder.new,
+      );
+      await expectLater(
+        service.handleOID4VCOfferSDK(
+          credentialOffer: 'openid-credential-offer://approved',
+        ),
+        throwsStateError,
+      );
+      expect(bridge.receiptFinalizations, 1);
+      expect(await WalletCredentialStore.getAll(), isEmpty);
+    },
+  );
+
+  test(
+    'missing initial authority prevents preparing or signing an offer',
+    () async {
+      final bridge = _Bridge();
+      final holder = _Holder()..failIssuerRead = 1;
+      final service = SpruceIdPlatformServiceExtended.withDependencies(
+        bridge,
+        () => holder,
+      );
+      await expectLater(
+        service.handleOID4VCOfferSDK(
+          credentialOffer: 'openid-credential-offer://approved',
+        ),
+        throwsStateError,
+      );
+      expect(bridge.events, isEmpty);
+      expect(holder.signatures, 0);
+      expect(await WalletCredentialStore.getAll(), isEmpty);
+    },
+  );
 
   test(
     'unrecognized native routes and malformed requests never reach signing',

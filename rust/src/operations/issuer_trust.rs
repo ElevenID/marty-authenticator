@@ -57,6 +57,7 @@ struct IssuerKey {
     algorithm: SigningAlgorithm,
     public_jwk: Value,
     credential_authorizations: Vec<Grant>,
+    issuance_authorizations: Vec<IssuanceAuthorization>,
 }
 
 #[derive(Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -64,6 +65,179 @@ struct IssuerKey {
 struct Grant {
     format: String,
     vct: String,
+}
+
+/// Exact metadata-selected issuance inputs. These stay native with the receipt.
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct IssuanceSelection {
+    pub credential_issuer: String,
+    pub credential_configuration_id: String,
+    pub format: String,
+    pub vct: String,
+    pub authorization_server: String,
+    pub token_endpoint: String,
+}
+
+#[derive(Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(deny_unknown_fields)]
+struct IssuanceAuthorization {
+    credential_issuer: String,
+    credential_configuration_id: String,
+    format: String,
+    vct: String,
+    authorization_server: Option<String>,
+    token_endpoint: Option<String>,
+}
+
+fn bounded_text(value: &str, max: usize) -> bool {
+    !value.is_empty()
+        && value.len() <= max
+        && value.trim() == value
+        && !value.chars().any(char::is_control)
+}
+fn exact_https(value: &str, query: bool) -> bool {
+    bounded_text(value, 2048)
+        && !value.contains('*')
+        && url::Url::parse(value).is_ok_and(|u| {
+            u.scheme() == "https"
+                && u.host_str().is_some()
+                && u.username().is_empty()
+                && u.password().is_none()
+                && u.fragment().is_none()
+                && (query || u.query().is_none())
+        })
+}
+impl IssuanceAuthorization {
+    fn validate(&self) -> anyhow::Result<()> {
+        ensure!(
+            exact_https(&self.credential_issuer, false)
+                && bounded_text(&self.credential_configuration_id, 256)
+                && matches!(self.format.as_str(), "dc+sd-jwt" | "vc+sd-jwt")
+                && bounded_text(&self.vct, 2048)
+                && url::Url::parse(&self.vct).is_ok()
+                && match (&self.authorization_server, &self.token_endpoint) {
+                    (None, None) => true,
+                    (Some(server), Some(endpoint)) =>
+                        exact_https(server, false) && exact_https(endpoint, true),
+                    _ => false,
+                },
+            "issuer issuance grant is invalid"
+        );
+        Ok(())
+    }
+    fn permits(&self, selection: &IssuanceSelection) -> bool {
+        self.credential_issuer == selection.credential_issuer
+            && self.credential_configuration_id == selection.credential_configuration_id
+            && self.format == selection.format
+            && self.vct == selection.vct
+            && match (&self.authorization_server, &self.token_endpoint) {
+                (Some(server), Some(endpoint)) => {
+                    server == &selection.authorization_server
+                        && endpoint == &selection.token_endpoint
+                }
+                (None, None) => {
+                    selection.authorization_server == self.credential_issuer
+                        && exact_https(&selection.token_endpoint, true)
+                        && url::Url::parse(&selection.token_endpoint)
+                            .ok()
+                            .map(|u| u.origin())
+                            == url::Url::parse(&self.credential_issuer)
+                                .ok()
+                                .map(|u| u.origin())
+                }
+                _ => false,
+            }
+    }
+}
+
+pub(crate) struct IssuanceAdmission {
+    scope: super::verifier_governance::DeviceScope,
+    revision: Revision,
+    issuers: std::collections::BTreeSet<String>,
+    pub expires_at: DateTime<Utc>,
+}
+
+pub(crate) fn preflight_issuance(json: &str, holder: &str) -> anyhow::Result<()> {
+    parse_authority(json, holder, Utc::now())?;
+    Ok(())
+}
+
+pub(crate) fn admit_issuance(
+    json: &str,
+    holder: &str,
+    selection: &IssuanceSelection,
+    now: DateTime<Utc>,
+) -> anyhow::Result<IssuanceAdmission> {
+    ensure!(
+        exact_https(&selection.authorization_server, false)
+            && exact_https(&selection.token_endpoint, true),
+        "issuance endpoints are invalid"
+    );
+    let envelope = parse_authority(json, holder, now)?;
+    let issuers: std::collections::BTreeSet<_> = envelope
+        .issuer
+        .issuer_keys
+        .iter()
+        .filter(|key| {
+            key.issuance_authorizations
+                .iter()
+                .any(|grant| grant.permits(selection))
+        })
+        .map(|key| key.issuer.clone())
+        .collect();
+    ensure!(
+        !issuers.is_empty(),
+        "issuance service and configuration are not authorized"
+    );
+    Ok(IssuanceAdmission {
+        scope: envelope.scope,
+        revision: envelope.issuer.revision,
+        issuers,
+        expires_at: envelope.expires_at.min(envelope.issuer.expires_at),
+    })
+}
+
+impl IssuanceAdmission {
+    pub fn observed_after(
+        &self,
+        json: &str,
+        holder: &str,
+        boundary: DateTime<Utc>,
+    ) -> anyhow::Result<()> {
+        let envelope = parse_authority(json, holder, Utc::now())?;
+        ensure!(
+            envelope.observed_at >= boundary,
+            "issuer authority predates the receipt transition"
+        );
+        Ok(())
+    }
+    pub fn revalidate(
+        &self,
+        json: &str,
+        holder: &str,
+        selection: &IssuanceSelection,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<()> {
+        let fresh = admit_issuance(json, holder, selection, now)?;
+        ensure!(
+            self.scope == fresh.scope
+                && self.revision == fresh.revision
+                && self.issuers == fresh.issuers,
+            "issuance authority changed; restart issuance"
+        );
+        Ok(())
+    }
+    pub fn verify(
+        &self,
+        json: &str,
+        holder: &str,
+        selection: &IssuanceSelection,
+        credential: &str,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<FreshIssuerTrust> {
+        self.revalidate(json, holder, selection, now)?;
+        resolver_for_selection(json, credential, holder, now, Some(selection))
+    }
 }
 
 pub(crate) fn contains_private_material(value: &Value) -> bool {
@@ -87,12 +261,11 @@ pub(crate) fn contains_private_material(value: &Value) -> bool {
     }
 }
 
-pub(crate) fn resolver_from_snapshot(
+fn parse_authority(
     json: &str,
-    credential: &str,
     holder: &str,
     now: DateTime<Utc>,
-) -> anyhow::Result<FreshIssuerTrust> {
+) -> anyhow::Result<IssuerGovernanceEnvelope> {
     anyhow::ensure!(
         json.len() <= MAX_SNAPSHOT_BYTES,
         "issuer trust snapshot is too large"
@@ -105,7 +278,7 @@ pub(crate) fn resolver_from_snapshot(
         "issuer trust snapshot contains private key material"
     );
     let envelope: IssuerGovernanceEnvelope = serde_json::from_str(json)?;
-    let snapshot = envelope.issuer;
+    let snapshot = &envelope.issuer;
     envelope.scope.validate_holder(holder, now)?;
     ensure!(
         envelope.contract == "marty.wallet/device-issuer-governance/v2"
@@ -149,49 +322,8 @@ pub(crate) fn resolver_from_snapshot(
         !snapshot.issuer_keys.is_empty() && snapshot.issuer_keys.len() <= 256,
         "issuer trust key count is invalid"
     );
-    // The unverified VCT is only a resolver selector. No claim may be shown,
-    // stored or signed until Core verifies this identical immutable credential.
-    ensure!(
-        !credential.is_empty() && credential.len() <= 1024 * 1024,
-        "credential is invalid"
-    );
-    let jwt = credential
-        .split('~')
-        .next()
-        .context("issuer JWT is absent")?;
-    let segments: Vec<_> = jwt.split('.').collect();
-    ensure!(segments.len() == 3, "issuer JWT is invalid");
-    let payload_bytes = URL_SAFE_NO_PAD.decode(segments[1])?;
-    let payload = marty_crypto::strict_json::parse_unique_json(&payload_bytes)?;
-    let vct = payload
-        .get("vct")
-        .and_then(Value::as_str)
-        .context("credential type is absent")?;
-    ensure!(
-        vct.len() <= 2048 && url::Url::parse(vct).is_ok(),
-        "credential type is invalid"
-    );
-    ensure!(
-        payload
-            .get("exp")
-            .is_some_and(|v| v.as_i64().is_some_and(|exp| exp > now.timestamp())),
-        "credential expiry is absent or invalid"
-    );
-    if snapshot.require_not_before {
-        ensure!(
-            payload.get("nbf").is_some_and(|v| v.as_i64().is_some()),
-            "credential not-before is required"
-        );
-    }
-    if let Some(nbf) = payload.get("nbf") {
-        ensure!(
-            nbf.as_i64().is_some_and(|value| value <= now.timestamp()),
-            "credential is not yet valid"
-        );
-    }
     let mut identities = std::collections::BTreeSet::new();
-    let mut keys = Vec::new();
-    for key in snapshot.issuer_keys.into_iter() {
+    for key in &snapshot.issuer_keys {
         anyhow::ensure!(key.public_jwk.is_object(), "issuer key JWK is invalid");
         ensure!(
             matches!(
@@ -232,7 +364,7 @@ pub(crate) fn resolver_from_snapshot(
             "issuer credential grants are invalid"
         );
         let mut grants = std::collections::BTreeSet::new();
-        for grant in key.credential_authorizations {
+        for grant in &key.credential_authorizations {
             ensure!(
                 grant.format == "SD_JWT_VC"
                     && !grant.vct.is_empty()
@@ -242,15 +374,103 @@ pub(crate) fn resolver_from_snapshot(
                 "issuer credential grants are invalid"
             );
         }
-        if !grants.iter().any(|grant| grant.vct == vct) {
+        ensure!(
+            key.issuance_authorizations.len() <= 128,
+            "issuer issuance grants are invalid"
+        );
+        let mut issuance_grants = std::collections::BTreeSet::new();
+        for grant in &key.issuance_authorizations {
+            grant.validate()?;
+            ensure!(
+                issuance_grants.insert(grant)
+                    && key
+                        .credential_authorizations
+                        .iter()
+                        .any(|g| g.vct == grant.vct),
+                "issuer issuance grants are invalid"
+            );
+        }
+    }
+    Ok(envelope)
+}
+
+pub(crate) fn resolver_from_snapshot(
+    json: &str,
+    credential: &str,
+    holder: &str,
+    now: DateTime<Utc>,
+) -> anyhow::Result<FreshIssuerTrust> {
+    resolver_for_selection(json, credential, holder, now, None)
+}
+
+pub(crate) fn resolver_for_selection(
+    json: &str,
+    credential: &str,
+    holder: &str,
+    now: DateTime<Utc>,
+    selection: Option<&IssuanceSelection>,
+) -> anyhow::Result<FreshIssuerTrust> {
+    let envelope = parse_authority(json, holder, now)?;
+    let snapshot = envelope.issuer;
+    // The unverified VCT is only a resolver selector. No claim may be shown,
+    // stored or signed until Core verifies this identical immutable credential.
+    ensure!(
+        !credential.is_empty() && credential.len() <= 1024 * 1024,
+        "credential is invalid"
+    );
+    let jwt = credential
+        .split('~')
+        .next()
+        .context("issuer JWT is absent")?;
+    let segments: Vec<_> = jwt.split('.').collect();
+    ensure!(segments.len() == 3, "issuer JWT is invalid");
+    let payload_bytes = URL_SAFE_NO_PAD.decode(segments[1])?;
+    let payload = marty_crypto::strict_json::parse_unique_json(&payload_bytes)?;
+    let vct = payload
+        .get("vct")
+        .and_then(Value::as_str)
+        .context("credential type is absent")?;
+    ensure!(
+        vct.len() <= 2048 && url::Url::parse(vct).is_ok(),
+        "credential type is invalid"
+    );
+    ensure!(
+        payload
+            .get("exp")
+            .is_some_and(|v| v.as_i64().is_some_and(|exp| exp > now.timestamp())),
+        "credential expiry is absent or invalid"
+    );
+    if snapshot.require_not_before {
+        ensure!(
+            payload.get("nbf").is_some_and(|v| v.as_i64().is_some()),
+            "credential not-before is required"
+        );
+    }
+    if let Some(nbf) = payload.get("nbf") {
+        ensure!(
+            nbf.as_i64().is_some_and(|value| value <= now.timestamp()),
+            "credential is not yet valid"
+        );
+    }
+    let mut keys = Vec::new();
+    for key in snapshot.issuer_keys {
+        if !key
+            .credential_authorizations
+            .iter()
+            .any(|grant| grant.vct == vct)
+            || selection.is_some_and(|selection| {
+                !key.issuance_authorizations
+                    .iter()
+                    .any(|g| g.permits(selection))
+            })
+        {
             continue;
         }
-        let jwk = serde_json::to_string(&key.public_jwk)?;
         keys.push(ResolvedSdJwtIssuerKey::new(
             key.issuer,
             key.key_id,
             key.algorithm,
-            jwk,
+            serde_json::to_string(&key.public_jwk)?,
         ));
     }
     ensure!(!keys.is_empty(), "credential type is not authorized");
@@ -275,6 +495,7 @@ pub(crate) fn fixture_envelope(mut projection: Value, mut holder: Value, vct: &s
     projection["require_not_before"] = json!(true);
     for key in projection["issuer_keys"].as_array_mut().unwrap() {
         key["credential_authorizations"] = json!([{"format":"SD_JWT_VC","vct":vct}]);
+        key["issuance_authorizations"] = json!([]);
     }
     let binding =
         json!({"kty":"OKP","crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"});
@@ -334,6 +555,154 @@ mod tests {
             &vector["holder_public_jwk"].to_string(),
             now,
         )
+    }
+
+    fn issuance_selection() -> IssuanceSelection {
+        IssuanceSelection {
+            credential_issuer: "https://service.example/tenant".into(),
+            credential_configuration_id: "identity".into(),
+            format: "vc+sd-jwt".into(),
+            vct: "urn:elevenid:credential:verified-wallet".into(),
+            authorization_server: "https://service.example/tenant".into(),
+            token_endpoint: "https://service.example/token".into(),
+        }
+    }
+    fn service_grant() -> Value {
+        json!({"credential_issuer":"https://service.example/tenant",
+            "credential_configuration_id":"identity","format":"vc+sd-jwt",
+            "vct":"urn:elevenid:credential:verified-wallet",
+            "authorization_server":null,"token_endpoint":null})
+    }
+    fn issuance_holder() -> String {
+        let fixture: Value =
+            serde_json::from_str(include_str!("fixtures/remote_sd_jwt_wallet_public.json"))
+                .unwrap();
+        fixture["holder_public_jwk"].to_string()
+    }
+
+    #[test]
+    fn issuance_admission_requires_exact_owner_service_configuration_format_and_type() {
+        let now = Utc::now();
+        let holder = issuance_holder();
+        let mut raw = snapshot(now);
+        let selected = issuance_selection();
+        assert!(admit_issuance(&raw.to_string(), &holder, &selected, now).is_err());
+        raw["issuer"]["issuer_keys"][0]["issuance_authorizations"] = json!([service_grant()]);
+        let admitted = admit_issuance(&raw.to_string(), &holder, &selected, now).unwrap();
+        // A service URL is not converted to its credential issuer's DID.
+        assert!(admitted.issuers.contains("did:web:issuer.example"));
+        for selection in [
+            IssuanceSelection {
+                credential_issuer: "https://service.example/other".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                credential_configuration_id: "other".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                format: "dc+sd-jwt".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                vct: "urn:example:other".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                authorization_server: "https://delegated.example".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                token_endpoint: "https://delegated.example/token".into(),
+                ..selected.clone()
+            },
+            IssuanceSelection {
+                token_endpoint: "http://service.example/token".into(),
+                ..selected.clone()
+            },
+        ] {
+            assert!(admit_issuance(&raw.to_string(), &holder, &selection, now).is_err());
+        }
+        raw["issuer"]["issuer_keys"][0]["issuance_authorizations"][0]["authorization_server"] =
+            json!("https://delegated.example");
+        raw["issuer"]["issuer_keys"][0]["issuance_authorizations"][0]["token_endpoint"] =
+            json!("https://delegated.example/token?realm=approved");
+        let delegated = IssuanceSelection {
+            authorization_server: "https://delegated.example".into(),
+            token_endpoint: "https://delegated.example/token?realm=approved".into(),
+            ..selected
+        };
+        assert!(admit_issuance(&raw.to_string(), &holder, &delegated, now).is_ok());
+        let wrong_query = IssuanceSelection {
+            token_endpoint: "https://delegated.example/token?realm=other".into(),
+            ..delegated
+        };
+        assert!(admit_issuance(&raw.to_string(), &holder, &wrong_query, now).is_err());
+    }
+
+    #[test]
+    fn issuance_rechecks_full_scope_revision_and_per_key_grants() {
+        let now = Utc::now();
+        let holder = issuance_holder();
+        let selected = issuance_selection();
+        let mut raw = snapshot(now);
+        raw["issuer"]["issuer_keys"][0]["issuance_authorizations"] = json!([service_grant()]);
+        let admitted = admit_issuance(&raw.to_string(), &holder, &selected, now).unwrap();
+        assert!(admitted
+            .revalidate(&raw.to_string(), &holder, &selected, now)
+            .is_ok());
+        for (pointer, value) in [
+            ("/scope/device_id", json!("other-device")),
+            ("/issuer/revision/version", json!(2)),
+            ("/issuer/issuer_keys/0/issuance_authorizations", json!([])),
+            (
+                "/issuer/issuer_keys/0/issuer",
+                json!("did:web:other.example"),
+            ),
+        ] {
+            let mut changed = raw.clone();
+            *changed.pointer_mut(pointer).unwrap() = value;
+            assert!(admitted
+                .revalidate(&changed.to_string(), &holder, &selected, now)
+                .is_err());
+        }
+        let fixture: Value =
+            serde_json::from_str(include_str!("fixtures/remote_sd_jwt_wallet_public.json"))
+                .unwrap();
+        // Same VCT on a second trusted issuer does not grant this service to it.
+        let mut other = raw["issuer"]["issuer_keys"][0].clone();
+        other["issuer"] = json!("did:web:other.example");
+        raw["issuer"]["issuer_keys"][0]["issuance_authorizations"] = json!([]);
+        raw["issuer"]["issuer_keys"]
+            .as_array_mut()
+            .unwrap()
+            .push(other);
+        let admitted = admit_issuance(&raw.to_string(), &holder, &selected, now).unwrap();
+        let trusted = admitted
+            .verify(
+                &raw.to_string(),
+                &holder,
+                &selected,
+                fixture["credential"].as_str().unwrap(),
+                now,
+            )
+            .unwrap();
+        assert!(trusted
+            .resolver
+            .resolve(
+                "did:web:issuer.example",
+                Some("issuer-key-1"),
+                SigningAlgorithm::ES256
+            )
+            .is_err());
+        assert!(trusted
+            .resolver
+            .resolve(
+                "did:web:other.example",
+                Some("issuer-key-1"),
+                SigningAlgorithm::ES256
+            )
+            .is_ok());
     }
 
     #[test]

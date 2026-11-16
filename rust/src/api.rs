@@ -530,11 +530,13 @@ pub async fn wallet_prepare_verified_sd_jwt_receipt(
     offer_uri: String,
     tx_code: Option<String>,
     holder_public_jwk_json: String,
+    issuer_snapshot_json: String,
 ) -> anyhow::Result<FrbPreparedSdJwtReceipt> {
     let prepared = crate::operations::verified_issuance::prepare(
         &offer_uri,
         tx_code.as_deref(),
         &holder_public_jwk_json,
+        &issuer_snapshot_json,
     )
     .await?;
     Ok(FrbPreparedSdJwtReceipt {
@@ -543,20 +545,30 @@ pub async fn wallet_prepare_verified_sd_jwt_receipt(
     })
 }
 
-/// Consume a prepared receipt once, verify the remote ES256 signature, and
-/// admit only a credential verified with a fresh paired issuer-key snapshot.
+/// Recheck authority, consume the proof and request the credential. Returns
+/// only an opaque handle; the response remains native until final verification.
 #[frb]
 pub async fn wallet_complete_verified_sd_jwt_receipt(
     session_id: String,
     remote_signature: Vec<u8>,
     issuer_snapshot_json: String,
-) -> anyhow::Result<FrbVerifiedSdJwtReceipt> {
-    let verified = crate::operations::verified_issuance::complete(
+) -> anyhow::Result<String> {
+    crate::operations::verified_issuance::complete(
         &session_id,
         &remote_signature,
         &issuer_snapshot_json,
     )
-    .await?;
+    .await
+}
+
+/// Consume the response using authority fetched after the credential request.
+#[frb]
+pub fn wallet_finalize_verified_sd_jwt_receipt(
+    response_id: String,
+    issuer_snapshot_json: String,
+) -> anyhow::Result<FrbVerifiedSdJwtReceipt> {
+    let verified =
+        crate::operations::verified_issuance::finalize(&response_id, &issuer_snapshot_json)?;
     Ok(FrbVerifiedSdJwtReceipt {
         credential: verified.credential,
         issuer: verified.issuer,

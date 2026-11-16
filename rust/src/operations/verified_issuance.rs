@@ -3,6 +3,10 @@
 //! crosses the bridge. A credential is returned only after issuer and holder
 //! signatures have been verified against fresh pairing trust.
 
+#[cfg(test)]
+#[path = "verified_issuance_native_tests.rs"]
+mod native_tests;
+
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 
@@ -13,7 +17,9 @@ use marty_oid4vci::wallet::PreparedHolderProof;
 use marty_oid4vci::WalletEngine;
 use serde_json::Value;
 
-use super::issuer_trust::resolver_from_snapshot;
+use super::issuer_trust::{
+    admit_issuance, preflight_issuance, IssuanceAdmission, IssuanceSelection,
+};
 
 const MAX_PENDING: usize = 16;
 pub(super) const MAX_OFFER_BYTES: usize = 8192;
@@ -32,20 +38,71 @@ pub(crate) struct VerifiedReceipt {
 }
 
 struct PendingReceipt {
+    slot: ReceiptSlot,
     proof: PreparedHolderProof,
     access_token: String,
     credential_endpoint: String,
     credential_configuration_id: String,
-    expected_format: String,
-    expected_vct: String,
+    selection: IssuanceSelection,
+    admission: IssuanceAdmission,
     holder_public_jwk_json: String,
     expires_at: DateTime<Utc>,
+}
+
+struct PendingResponse {
+    _slot: ReceiptSlot,
+    received_at: DateTime<Utc>,
+    response: CredentialResponse,
+    selection: IssuanceSelection,
+    admission: IssuanceAdmission,
+    holder_public_jwk_json: String,
+    expires_at: DateTime<Utc>,
+}
+
+static RESPONSES: OnceLock<Mutex<HashMap<String, PendingResponse>>> = OnceLock::new();
+fn responses() -> &'static Mutex<HashMap<String, PendingResponse>> {
+    RESPONSES.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 static PENDING: OnceLock<Mutex<HashMap<String, PendingReceipt>>> = OnceLock::new();
 
 fn pending() -> &'static Mutex<HashMap<String, PendingReceipt>> {
     PENDING.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+// A reservation follows every receipt through awaited network transitions.
+// Dropping a failed/cancelled future releases it without another remote action.
+struct ReceiptSlot(String);
+static SLOTS: OnceLock<Mutex<std::collections::HashSet<String>>> = OnceLock::new();
+impl ReceiptSlot {
+    fn reserve() -> anyhow::Result<Self> {
+        let now = Utc::now();
+        pending()
+            .lock()
+            .map_err(|_| anyhow::anyhow!("issuance sessions are unavailable"))?
+            .retain(|_, session| session.expires_at > now);
+        responses()
+            .lock()
+            .map_err(|_| anyhow::anyhow!("issuance responses are unavailable"))?
+            .retain(|_, response| response.expires_at > now);
+        let mut slots = SLOTS
+            .get_or_init(|| Mutex::new(std::collections::HashSet::new()))
+            .lock()
+            .map_err(|_| anyhow::anyhow!("issuance capacity is unavailable"))?;
+        ensure!(slots.len() < MAX_PENDING, "too many pending issuances");
+        let id = uuid::Uuid::new_v4().to_string();
+        ensure!(slots.insert(id.clone()), "issuance session collision");
+        Ok(Self(id))
+    }
+}
+impl Drop for ReceiptSlot {
+    fn drop(&mut self) {
+        if let Some(slots) = SLOTS.get() {
+            if let Ok(mut slots) = slots.lock() {
+                slots.remove(&self.0);
+            }
+        }
+    }
 }
 
 fn https_endpoint(value: &str) -> anyhow::Result<url::Url> {
@@ -74,7 +131,10 @@ pub(crate) async fn prepare(
     offer_uri: &str,
     tx_code: Option<&str>,
     holder_public_jwk_json: &str,
+    issuer_snapshot_json: &str,
 ) -> anyhow::Result<PreparedReceipt> {
+    preflight_issuance(issuer_snapshot_json, holder_public_jwk_json)?;
+    let slot = ReceiptSlot::reserve()?;
     ensure!(
         !offer_uri.is_empty() && offer_uri.len() <= MAX_OFFER_BYTES,
         "credential offer URI is invalid"
@@ -133,8 +193,33 @@ pub(crate) async fn prepare(
         .get(&configuration_id)
         .context("offered credential configuration is missing from issuer metadata")?;
     let (format, expected_vct) = supported_configuration(configuration)?;
+    ensure!(
+        metadata.authorization_servers.len() <= 1,
+        "authorization server selection is required"
+    );
+    let authorization_server = metadata
+        .authorization_servers
+        .first()
+        .unwrap_or(&offer.credential_issuer)
+        .clone();
+    https_endpoint(&authorization_server)?;
     let token_endpoint = engine.resolve_token_endpoint(&metadata).await?;
     https_endpoint(&token_endpoint)?;
+    let selection = IssuanceSelection {
+        credential_issuer: offer.credential_issuer.clone(),
+        credential_configuration_id: configuration_id.clone(),
+        format: format.to_string(),
+        vct: expected_vct.to_string(),
+        authorization_server,
+        token_endpoint: token_endpoint.clone(),
+    };
+    // Admission precedes releasing the code or preparing any holder signature.
+    let admission = admit_issuance(
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+        &selection,
+        Utc::now(),
+    )?;
     let token = engine
         .exchange_pre_auth_code(&token_endpoint, &grant.pre_authorized_code, tx_code)
         .await
@@ -170,10 +255,10 @@ pub(crate) async fn prepare(
         !signing_input.is_empty() && signing_input.len() <= 64 * 1024,
         "proof signing input is invalid"
     );
-    let session_id = uuid::Uuid::new_v4().to_string();
+    let session_id = slot.0.clone();
     let now = Utc::now();
     ensure!(
-        token_expires_at > now,
+        token_expires_at > now && admission.expires_at > now,
         "issuer token expired before proof preparation"
     );
     let mut sessions = pending()
@@ -188,12 +273,13 @@ pub(crate) async fn prepare(
     sessions.insert(
         session_id.clone(),
         PendingReceipt {
+            slot,
             proof,
             access_token: token.access_token,
             credential_endpoint,
             credential_configuration_id: configuration_id,
-            expected_format: format.to_string(),
-            expected_vct: expected_vct.to_string(),
+            selection,
+            admission,
             holder_public_jwk_json: holder_public_jwk_json.to_string(),
             expires_at: token_expires_at,
         },
@@ -254,13 +340,19 @@ pub(crate) async fn complete(
     session_id: &str,
     remote_signature: &[u8],
     issuer_snapshot_json: &str,
-) -> anyhow::Result<VerifiedReceipt> {
+) -> anyhow::Result<String> {
     let session = pending()
         .lock()
         .map_err(|_| anyhow::anyhow!("issuance sessions are unavailable"))?
         .remove(session_id)
         .context("issuance session is missing or already consumed")?;
     ensure!(session.expires_at > Utc::now(), "issuance session expired");
+    session.admission.revalidate(
+        issuer_snapshot_json,
+        &session.holder_public_jwk_json,
+        &session.selection,
+        Utc::now(),
+    )?;
     let proof_jwt = session.proof.complete(remote_signature)?;
     let engine = WalletEngine::new();
     let response = engine
@@ -272,11 +364,61 @@ pub(crate) async fn complete(
         )
         .await
         .map_err(|_| anyhow::anyhow!("issuer credential request failed"))?;
+    single_credential(&response)?;
+    let now = Utc::now();
+    ensure!(
+        session.expires_at > now,
+        "issuance session expired during credential request"
+    );
+    let handle = uuid::Uuid::new_v4().to_string();
+    let mut received = responses()
+        .lock()
+        .map_err(|_| anyhow::anyhow!("issuance responses are unavailable"))?;
+    received.retain(|_, response| response.expires_at > now);
+    ensure!(
+        !received.contains_key(&handle),
+        "issuance response collision"
+    );
+    received.insert(
+        handle.clone(),
+        PendingResponse {
+            _slot: session.slot,
+            received_at: now,
+            response,
+            selection: session.selection,
+            admission: session.admission,
+            holder_public_jwk_json: session.holder_public_jwk_json,
+            expires_at: session.expires_at,
+        },
+    );
+    // Never expose an unverified credential. Dart must fetch authority after
+    // the network response, then consume this opaque finalization handle.
+    Ok(handle)
+}
+
+pub(crate) fn finalize(
+    response_id: &str,
+    issuer_snapshot_json: &str,
+) -> anyhow::Result<VerifiedReceipt> {
+    let received = responses()
+        .lock()
+        .map_err(|_| anyhow::anyhow!("issuance responses are unavailable"))?
+        .remove(response_id)
+        .context("issuance response is missing or already consumed")?;
+    ensure!(
+        received.expires_at > Utc::now(),
+        "issuance response expired"
+    );
+    received.admission.observed_after(
+        issuer_snapshot_json,
+        &received.holder_public_jwk_json,
+        received.received_at,
+    )?;
     verify_receipt(
-        &response,
-        &session.expected_vct,
-        &session.expected_format,
-        &session.holder_public_jwk_json,
+        &received.response,
+        &received.selection,
+        &received.admission,
+        &received.holder_public_jwk_json,
         issuer_snapshot_json,
     )
 }
@@ -305,16 +447,17 @@ fn single_credential(response: &CredentialResponse) -> anyhow::Result<&str> {
 
 fn verify_receipt(
     response: &CredentialResponse,
-    expected_vct: &str,
-    expected_format: &str,
+    selection: &IssuanceSelection,
+    admission: &IssuanceAdmission,
     holder_public_jwk_json: &str,
     issuer_snapshot_json: &str,
 ) -> anyhow::Result<VerifiedReceipt> {
     let credential = single_credential(response)?;
-    let trusted = resolver_from_snapshot(
+    let trusted = admission.verify(
         issuer_snapshot_json,
-        credential,
         holder_public_jwk_json,
+        selection,
+        credential,
         Utc::now(),
     )?;
     let verified = WalletEngine::new().verify_received_sd_jwt_credential(
@@ -323,11 +466,11 @@ fn verify_receipt(
         &trusted.resolver,
     )?;
     ensure!(
-        verified.credential_type == expected_vct,
+        verified.credential_type == selection.vct,
         "issued credential type does not match the selected configuration"
     );
     ensure!(
-        verified.format == expected_format,
+        verified.format == selection.format,
         "issued credential format does not match the selected configuration"
     );
     ensure!(
@@ -346,6 +489,113 @@ fn verify_receipt(
 mod tests {
     use super::*;
     use serde_json::json;
+
+    fn fixture_selection() -> IssuanceSelection {
+        IssuanceSelection {
+            credential_issuer: "https://issuer.example".into(),
+            credential_configuration_id: "fixture".into(),
+            format: "vc+sd-jwt".into(),
+            vct: "urn:elevenid:credential:verified-wallet".into(),
+            authorization_server: "https://issuer.example".into(),
+            token_endpoint: "https://issuer.example/token".into(),
+        }
+    }
+    fn fixture_authority(fixture: &Value) -> String {
+        let now = Utc::now();
+        let selection = fixture_selection();
+        let mut jwk = fixture["issuer_public_jwk"].clone();
+        jwk["kid"] = fixture["issuer_key_id"].clone();
+        let mut envelope = super::super::issuer_trust::fixture_envelope(
+            json!({
+            "organization_id":"org-1","trust_profile_id":"11111111-2222-4333-8444-555555555555",
+            "generated_at":now,"expires_at":now+Duration::seconds(30),
+            "issuer_keys":[{"issuer":fixture["issuer"],"key_id":fixture["issuer_key_id"],
+                "algorithm":"ES256","public_jwk":jwk}]}),
+            fixture["holder_public_jwk"].clone(),
+            &selection.vct,
+        );
+        envelope["issuer"]["issuer_keys"][0]["issuance_authorizations"] = json!([{
+            "credential_issuer":selection.credential_issuer,"credential_configuration_id":selection.credential_configuration_id,
+            "format":selection.format,"vct":selection.vct,"authorization_server":null,"token_endpoint":null}]);
+        envelope.to_string()
+    }
+
+    fn stage_response(fixture: &Value, snapshot: &str, received_at: DateTime<Utc>) -> String {
+        let holder = fixture["holder_public_jwk"].to_string();
+        let selection = fixture_selection();
+        let admission = admit_issuance(snapshot, &holder, &selection, Utc::now()).unwrap();
+        let slot = ReceiptSlot::reserve().unwrap();
+        let id = slot.0.clone();
+        responses().lock().unwrap().insert(
+            id.clone(),
+            PendingResponse {
+                _slot: slot,
+                received_at,
+                response: serde_json::from_value(
+                    json!({"credentials":[{"credential":fixture["credential"]}]}),
+                )
+                .unwrap(),
+                selection,
+                admission,
+                holder_public_jwk_json: holder,
+                expires_at: Utc::now() + Duration::seconds(30),
+            },
+        );
+        id
+    }
+
+    fn refresh_authority(raw: &str) -> String {
+        let now = Utc::now();
+        let mut value: Value = serde_json::from_str(raw).unwrap();
+        value["observed_at"] = json!(now);
+        value["expires_at"] = json!(now + Duration::seconds(30));
+        value["issuer"]["generated_at"] = json!(now);
+        value["issuer"]["expires_at"] = value["expires_at"].clone();
+        value.to_string()
+    }
+
+    #[test]
+    fn finalization_requires_post_response_authority_and_consumes_every_attempt() {
+        let fixture: Value =
+            serde_json::from_str(include_str!("fixtures/remote_sd_jwt_wallet_public.json"))
+                .unwrap();
+        let before = fixture_authority(&fixture);
+        let received_at = Utc::now();
+        let id = stage_response(&fixture, &before, received_at);
+        let error = finalize(&id, &before).err().unwrap();
+        assert!(error.to_string().contains("predates"));
+        assert!(finalize(&id, &refresh_authority(&before)).is_err());
+        assert!(!SLOTS.get().unwrap().lock().unwrap().contains(&id));
+
+        let id = stage_response(&fixture, &before, Utc::now());
+        let fresh = refresh_authority(&before);
+        let verified = finalize(&id, &fresh).unwrap();
+        assert_eq!(verified.credential, fixture["credential"].as_str().unwrap());
+        assert!(finalize(&id, &fresh).is_err());
+        assert!(!SLOTS.get().unwrap().lock().unwrap().contains(&id));
+
+        for pointer in ["/issuer/revision/version", "/scope/device_id"] {
+            let id = stage_response(&fixture, &before, Utc::now());
+            let mut changed: Value = serde_json::from_str(&refresh_authority(&before)).unwrap();
+            *changed.pointer_mut(pointer).unwrap() = if pointer.ends_with("version") {
+                json!(2)
+            } else {
+                json!("other-device")
+            };
+            assert!(finalize(&id, &changed.to_string()).is_err());
+            assert!(finalize(&id, &refresh_authority(&before)).is_err());
+            assert!(!SLOTS.get().unwrap().lock().unwrap().contains(&id));
+        }
+    }
+
+    #[test]
+    fn dropped_receipt_reservation_releases_its_inflight_slot() {
+        let slot = ReceiptSlot::reserve().unwrap();
+        let id = slot.0.clone();
+        assert!(SLOTS.get().unwrap().lock().unwrap().contains(&id));
+        drop(slot);
+        assert!(!SLOTS.get().unwrap().lock().unwrap().contains(&id));
+    }
 
     #[test]
     fn accepts_one_final_credential_object_or_one_legacy_credential() {
@@ -400,18 +650,30 @@ mod tests {
             }]
         })
         .to_string();
-        let snapshot = super::super::issuer_trust::fixture_envelope(
+        let mut snapshot = super::super::issuer_trust::fixture_envelope(
             serde_json::from_str(&snapshot).unwrap(),
             fixture["holder_public_jwk"].clone(),
             "urn:elevenid:credential:verified-wallet",
-        )
-        .to_string();
+        );
+        let selection = fixture_selection();
+        snapshot["issuer"]["issuer_keys"][0]["issuance_authorizations"] = json!([{
+            "credential_issuer":selection.credential_issuer,
+            "credential_configuration_id":selection.credential_configuration_id,
+            "format":selection.format,"vct":selection.vct,
+            "authorization_server":null,"token_endpoint":null}]);
+        let snapshot = snapshot.to_string();
         let holder = fixture["holder_public_jwk"].to_string();
         let response: CredentialResponse = serde_json::from_value(json!({
             "credentials": [{"credential": fixture["credential"]}]
         }))
         .unwrap();
-        let verify = |vct, format| verify_receipt(&response, vct, format, &holder, &snapshot);
+        let admission = admit_issuance(&snapshot, &holder, &selection, now).unwrap();
+        let verify = |vct: &str, format: &str| {
+            let mut selected = selection.clone();
+            selected.vct = vct.into();
+            selected.format = format.into();
+            verify_receipt(&response, &selected, &admission, &holder, &snapshot)
+        };
         let issuer = fixture["issuer"].as_str().unwrap();
         let verified = verify("urn:elevenid:credential:verified-wallet", "vc+sd-jwt").unwrap();
         assert_eq!(verified.credential, fixture["credential"].as_str().unwrap());
@@ -428,14 +690,17 @@ mod tests {
             ),
         ] {
             let error = verify(vct, format).err().unwrap();
-            assert!(error.to_string().contains(expected_error));
+            assert!(
+                error.to_string().contains(expected_error)
+                    || error.to_string().contains("not authorized")
+            );
         }
         let mut other_issuer: Value = serde_json::from_str(&snapshot).unwrap();
         other_issuer["issuer"]["issuer_keys"][0]["issuer"] = json!("did:web:other.example");
         assert!(verify_receipt(
             &response,
-            "urn:elevenid:credential:verified-wallet",
-            "vc+sd-jwt",
+            &selection,
+            &admission,
             &holder,
             &other_issuer.to_string(),
         )
@@ -500,21 +765,30 @@ mod tests {
                 &holder_public_jwk_json,
             )
             .unwrap();
-        let session_id = uuid::Uuid::new_v4().to_string();
+        let slot = ReceiptSlot::reserve().unwrap();
+        let session_id = slot.0.clone();
+        let snapshot = fixture_authority(&fixture);
         pending().lock().unwrap().insert(
             session_id.clone(),
             PendingReceipt {
+                slot,
                 proof,
                 access_token: "never-sent".into(),
                 credential_endpoint: "https://issuer.invalid/credential".into(),
                 credential_configuration_id: "fixture".into(),
-                expected_format: "dc+sd-jwt".into(),
-                expected_vct: "fixture".into(),
+                selection: fixture_selection(),
+                admission: admit_issuance(
+                    &snapshot,
+                    &holder_public_jwk_json,
+                    &fixture_selection(),
+                    Utc::now(),
+                )
+                .unwrap(),
                 holder_public_jwk_json,
                 expires_at: Utc::now() + Duration::minutes(1),
             },
         );
-        assert!(complete(&session_id, &[0; 64], "{}").await.is_err());
+        assert!(complete(&session_id, &[0; 64], &snapshot).await.is_err());
         let replay = complete(&session_id, &[0; 64], "{}")
             .await
             .err()

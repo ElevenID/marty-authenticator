@@ -458,6 +458,10 @@ void frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token
 void frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata(int64_t port_,
                                                                                struct wire_cst_list_prim_u_8_strict *issuer_url);
 
+void frbgen_marty_authenticator_wire__crate__api__wallet_finalize_verified_sd_jwt_receipt(int64_t port_,
+                                                                                          struct wire_cst_list_prim_u_8_strict *response_id,
+                                                                                          struct wire_cst_list_prim_u_8_strict *issuer_snapshot_json);
+
 void frbgen_marty_authenticator_wire__crate__api__wallet_normalize_credential_offer(int64_t port_,
                                                                                     struct wire_cst_list_prim_u_8_strict *input);
 
@@ -486,7 +490,8 @@ void frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt
 void frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_receipt(int64_t port_,
                                                                                          struct wire_cst_list_prim_u_8_strict *offer_uri,
                                                                                          struct wire_cst_list_prim_u_8_strict *tx_code,
-                                                                                         struct wire_cst_list_prim_u_8_strict *holder_public_jwk_json);
+                                                                                         struct wire_cst_list_prim_u_8_strict *holder_public_jwk_json,
+                                                                                         struct wire_cst_list_prim_u_8_strict *issuer_snapshot_json);
 
 void frbgen_marty_authenticator_wire__crate__api__wallet_request_credential(int64_t port_,
                                                                             struct wire_cst_list_prim_u_8_strict *credential_endpoint,
@@ -633,6 +638,7 @@ static int64_t dummy_method_to_enforce_bundling(void) {
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_auth_code_token);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_exchange_pre_auth_token);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_fetch_issuer_metadata);
+    dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_finalize_verified_sd_jwt_receipt);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_normalize_credential_offer);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_parse_credential_offer);
     dummy_var ^= ((int64_t) (void*) frbgen_marty_authenticator_wire__crate__api__wallet_parse_presentation_request);
