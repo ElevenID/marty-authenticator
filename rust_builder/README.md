@@ -15,6 +15,8 @@ names from explicit/normalized library names, and reject builds that produce
 none of the expected libraries. The Android minimum SDK and NDK match the
 application (26 and 28.2.13676358). The standalone build-tool test dependency
 closure is updated for Dart 3.12; collection, path and YAML stay exactly pinned.
+The plugin and standalone tool share the application SDK floors so formatting
+is consistent before and after the standalone package resolves dependencies.
 
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
