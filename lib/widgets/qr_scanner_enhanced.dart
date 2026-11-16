@@ -22,6 +22,7 @@
 library;
 
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_zxing/flutter_zxing.dart';
 import '../services/qr_scanner_service_enhanced.dart';
 import '../services/remote_holder_pairing_service.dart';
 import '../services/spruce_client_extended.dart';
+import '../interfaces/spruce_interfaces_extended.dart';
 import '../services/spruce_platform_service_extended.dart';
 import '../widgets/presentation_request_view.dart';
 import '../utils/logger.dart';
@@ -40,6 +42,8 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
   final bool enableBackgroundProcessing;
   final bool showLivePreview;
   final bool enableHapticFeedback;
+  @visibleForTesting
+  final Widget? scannerOverride;
 
   const QRScannerEnhanced({
     super.key,
@@ -47,6 +51,7 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
     this.enableBackgroundProcessing = true,
     this.showLivePreview = true,
     this.enableHapticFeedback = true,
+    this.scannerOverride,
   });
 
   @override
@@ -59,6 +64,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   bool _isProcessing = false;
   String? _lastScannedCode;
   ProcessedQRResult? _currentResult;
+  final Map<String, ISpruceIdClientExtended> _consentSessions = {};
+  final Completer<void> _disposed = Completer<void>();
 
   // Performance tracking
   DateTime? _scanStartTime;
@@ -106,6 +113,11 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   @override
   void dispose() {
+    _disposed.complete();
+    for (final entry in _consentSessions.entries) {
+      unawaited(entry.value.cancelOID4VPRequestSDK(sessionId: entry.key));
+    }
+    _consentSessions.clear();
     _processingAnimationController.dispose();
     _resultPreviewController.dispose();
     super.dispose();
@@ -214,52 +226,69 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     }
   }
 
-  Future<void> _handlePresentationRequest(
-    EnrichedQRResult enrichedResult,
-  ) async {
-    final requestUri = enrichedResult.validatedResult.parsedData.rawData;
+  Future<void> _handlePresentationRequest(EnrichedQRResult enrichedResult) =>
+      handlePresentationRequest(
+        enrichedResult.validatedResult.parsedData.rawData,
+      );
+
+  @visibleForTesting
+  Future<void> handlePresentationRequest(String requestUri) async {
+    final client = ref.read(spruceIdClientExtendedProvider);
 
     try {
-      final client = ref.read(spruceIdClientExtendedProvider);
-
       // Initiate request processing via SDK
       // This will throw UserSelectionRequiredException if matches are found
       await client.initiateOID4VPRequestSDK(presentationRequest: requestUri);
 
       throw StateError('Presentation approval was not requested');
     } on UserSelectionRequiredException catch (e) {
-      // Show selection UI
-      if (!mounted) return;
-
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PresentationRequestView(
-            requestDetails: e.requestDetails,
-            matchingCredentials: e.matches,
-            onReject: () => Navigator.of(context).pop(),
-            onApprove: (selection) async {
-              Navigator.of(context).pop();
-              await _completePresentation(
-                e.sessionId,
-                selection['credentialId'],
-                selection['selectedFields'],
-              );
-            },
+      if (!mounted) {
+        await client.cancelOID4VPRequestSDK(sessionId: e.sessionId);
+        return;
+      }
+      _consentSessions[e.sessionId] = client;
+      var approved = false;
+      try {
+        await Future.any<void>([
+          Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (context) => PresentationRequestView(
+                requestDetails: e.requestDetails,
+                matchingCredentials: e.matches,
+                onReject: () => Navigator.of(context).pop(),
+                onApprove: (selection) async {
+                  approved = true;
+                  Navigator.of(context).pop();
+                  await _completePresentation(
+                    client,
+                    e.sessionId,
+                    selection['credentialId'],
+                    selection['selectedFields'],
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      );
+          _disposed.future,
+        ]);
+      } finally {
+        if (!approved) {
+          _consentSessions.remove(e.sessionId);
+          await client.cancelOID4VPRequestSDK(sessionId: e.sessionId);
+        }
+      }
     } catch (_) {
       _showError('Failed to process presentation request');
     }
   }
 
   Future<void> _completePresentation(
+    ISpruceIdClientExtended client,
     String sessionId,
     String credentialId,
     List<String>? fields,
   ) async {
     try {
-      final client = ref.read(spruceIdClientExtendedProvider);
       await client.completeOID4VPRequestSDK(
         sessionId: sessionId,
         selectedCredentialId: credentialId,
@@ -268,6 +297,9 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       _showSuccess('Presentation submitted successfully');
     } catch (e) {
       _showError('Failed to submit presentation: $e');
+    } finally {
+      _consentSessions.remove(sessionId);
+      await client.cancelOID4VPRequestSDK(sessionId: sessionId);
     }
   }
 
@@ -368,6 +400,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   Widget _buildScannerInterface() {
+    if (widget.scannerOverride != null) return widget.scannerOverride!;
     // For web, show image upload interface
     if (kIsWeb) {
       return _buildWebInterface();

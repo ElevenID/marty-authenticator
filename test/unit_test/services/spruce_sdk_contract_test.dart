@@ -17,6 +17,11 @@ class _BoundWalletPlatform implements ISpruceIdPlatformServiceExtended {
   bool initialized = false;
   Map<String, dynamic>? received;
   Object? rejection;
+  @override
+  Future<void> cancelOID4VPRequestSDK({required String sessionId}) async {
+    received = {'cancelled_session': sessionId};
+  }
+
   final selection = UserSelectionRequiredException(
     sessionId: 'selection-session',
     matches: const [
@@ -80,6 +85,17 @@ class _UnusedBridge implements VerifiedWalletBridge {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'client forwards consent cancellation to the same platform session',
+    () async {
+      final platform = _BoundWalletPlatform();
+      await SpruceIdClientExtended(
+        platform,
+      ).cancelOID4VPRequestSDK(sessionId: 'consent-handle');
+      expect(platform.received, {'cancelled_session': 'consent-handle'});
+    },
+  );
 
   test('client preserves the approved offer and transaction code', () async {
     final platform = _BoundWalletPlatform();

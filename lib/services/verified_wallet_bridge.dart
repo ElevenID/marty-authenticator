@@ -17,21 +17,17 @@ abstract interface class VerifiedWalletBridge {
 
   Future<String> routePresentation({required String input});
 
-  Future<rust_api.FrbPresentationRequest> parsePresentation({
-    required String requestUri,
-  });
-
   Future<rust_api.FrbPreparedSdJwtPresentation> preparePresentation({
-    required String requestUri,
-    required String approvedRequestDigest,
-    required String credential,
-    required String queryId,
+    required String sessionId,
+    required String governanceJson,
     required List<String> claimsToDisclose,
     required String issuerSnapshotJson,
     required String holderPublicJwkJson,
   });
 
   Future<String> reviewCredential({
+    required String requestUri,
+    required String governanceJson,
     required String credential,
     required String issuerSnapshotJson,
     required String holderPublicJwkJson,
@@ -40,7 +36,12 @@ abstract interface class VerifiedWalletBridge {
   Future<rust_api.FrbPresentationResponse> completePresentation({
     required String sessionId,
     required List<int> remoteSignature,
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
   });
+
+  Future<void> cancelPresentation({required String sessionId});
 }
 
 class RustVerifiedWalletBridge implements VerifiedWalletBridge {
@@ -48,10 +49,14 @@ class RustVerifiedWalletBridge implements VerifiedWalletBridge {
 
   @override
   Future<String> reviewCredential({
+    required String requestUri,
+    required String governanceJson,
     required String credential,
     required String issuerSnapshotJson,
     required String holderPublicJwkJson,
-  }) => rust_api.walletReviewVerifiedSdJwtCredential(
+  }) => rust_api.walletReviewGovernedSdJwtPresentation(
+    requestUri: requestUri,
+    governanceJson: governanceJson,
     credential: credential,
     issuerSnapshotJson: issuerSnapshotJson,
     holderPublicJwkJson: holderPublicJwkJson,
@@ -84,24 +89,15 @@ class RustVerifiedWalletBridge implements VerifiedWalletBridge {
       rust_api.walletRoutePresentationRequest(input: input);
 
   @override
-  Future<rust_api.FrbPresentationRequest> parsePresentation({
-    required String requestUri,
-  }) => rust_api.walletParsePresentationRequest(requestUri: requestUri);
-
-  @override
   Future<rust_api.FrbPreparedSdJwtPresentation> preparePresentation({
-    required String requestUri,
-    required String approvedRequestDigest,
-    required String credential,
-    required String queryId,
+    required String sessionId,
+    required String governanceJson,
     required List<String> claimsToDisclose,
     required String issuerSnapshotJson,
     required String holderPublicJwkJson,
-  }) => rust_api.walletPrepareVerifiedSdJwtPresentation(
-    requestUri: requestUri,
-    approvedRequestDigest: approvedRequestDigest,
-    credential: credential,
-    queryId: queryId,
+  }) => rust_api.walletPrepareGovernedSdJwtPresentation(
+    sessionId: sessionId,
+    governanceJson: governanceJson,
     claimsToDisclose: claimsToDisclose,
     issuerSnapshotJson: issuerSnapshotJson,
     holderPublicJwkJson: holderPublicJwkJson,
@@ -111,8 +107,18 @@ class RustVerifiedWalletBridge implements VerifiedWalletBridge {
   Future<rust_api.FrbPresentationResponse> completePresentation({
     required String sessionId,
     required List<int> remoteSignature,
-  }) => rust_api.walletCompleteVerifiedSdJwtPresentation(
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) => rust_api.walletCompleteGovernedSdJwtPresentation(
     sessionId: sessionId,
     remoteSignature: remoteSignature,
+    governanceJson: governanceJson,
+    issuerSnapshotJson: issuerSnapshotJson,
+    holderPublicJwkJson: holderPublicJwkJson,
   );
+
+  @override
+  Future<void> cancelPresentation({required String sessionId}) =>
+      rust_api.walletCancelGovernedSdJwtPresentation(sessionId: sessionId);
 }

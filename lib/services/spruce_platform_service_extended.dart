@@ -53,19 +53,21 @@ class UserSelectionRequiredException implements Exception {
 
 class _PendingVerifiedPresentation {
   final String requestUri;
-  final String requestDigest;
-  final String queryId;
+  final String clientId;
   final List<String> requiredClaims;
+  // Storage IDs select opaque native review handles, never replacement tokens.
   final Map<String, String> credentials;
-  final DateTime createdAt;
+  final Set<String> nativeHandles;
+  DateTime expiresAt;
+  bool active = true;
 
-  const _PendingVerifiedPresentation({
+  _PendingVerifiedPresentation({
     required this.requestUri,
-    required this.requestDigest,
-    required this.queryId,
+    required this.clientId,
     required this.requiredClaims,
     required this.credentials,
-    required this.createdAt,
+    required this.expiresAt,
+    required this.nativeHandles,
   });
 }
 
@@ -94,6 +96,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   final Set<String> _presentationSessions = {};
   final Map<String, _PendingVerifiedPresentation>
   _pendingVerifiedPresentations = {};
+  int _initiationEpoch = 0;
 
   // ========================
   // SDK-Enhanced OID4VC Operations
@@ -145,6 +148,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
   Future<Map<String, dynamic>> initiateOID4VPRequestSDK({
     required String presentationRequest,
   }) async {
+    final epoch = ++_initiationEpoch;
     final holder = _holderFactory();
     try {
       final route = await _bridge.routePresentation(input: presentationRequest);
@@ -159,7 +163,14 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         );
       }
       await holder.renewIfDue();
-      return await _initiateVerifiedPresentation(presentationRequest, holder);
+      if (epoch != _initiationEpoch) {
+        throw StateError('Presentation request superseded');
+      }
+      return await _initiateVerifiedPresentation(
+        presentationRequest,
+        holder,
+        epoch,
+      );
     } finally {
       holder.close();
     }
@@ -181,218 +192,275 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     );
   }
 
-  Future<Map<String, dynamic>> _initiateVerifiedPresentation(
-    String requestUri,
-    RemoteHolderPairingService holder,
-  ) async {
-    final request = await _bridge.parsePresentation(requestUri: requestUri);
-    if (request.clientId.isEmpty ||
-        request.nonce.isEmpty ||
-        request.requestDigest.isEmpty) {
-      throw StateError('Presentation request is invalid');
+  Future<void> _cancelNative(String handle) async {
+    try {
+      await _bridge.cancelPresentation(sessionId: handle);
+    } catch (_) {
+      // Native sessions also expire independently. Never log handles/evidence.
+      debugPrint('Could not retire native presentation session');
     }
-    late final String queryId;
-    final requestedClaims = <String>[];
-    String? purpose;
-    if (request.queryType == 'dcql_query') {
-      final query = jsonDecode(request.dcqlQueryJson ?? 'null');
-      if (query is! Map<String, dynamic> ||
-          query['credentials'] is! List ||
-          (query['credentials'] as List).length != 1) {
-        throw StateError('Presentation query is unsupported');
-      }
-      final credential = (query['credentials'] as List).single;
-      if (credential is! Map<String, dynamic> ||
-          credential['id'] is! String ||
-          credential['meta'] != null ||
-          !{'dc+sd-jwt', 'vc+sd-jwt'}.contains(credential['format'])) {
-        throw StateError('Presentation credential format is unsupported');
-      }
-      queryId = credential['id'] as String;
-      final claims = credential['claims'] ?? [];
-      if (claims is! List) throw StateError('Presentation claims are invalid');
-      for (final claim in claims) {
-        if (claim is! Map<String, dynamic> ||
-            claim['path'] is! List ||
-            (claim['path'] as List).length != 1 ||
-            (claim['path'] as List).single is! String) {
-          throw StateError('Presentation claim path is unsupported');
-        }
-        requestedClaims.add((claim['path'] as List).single as String);
-      }
-    } else if (request.queryType == 'presentation_definition') {
-      final definition = jsonDecode(
-        request.presentationDefinitionJson ?? 'null',
-      );
-      if (definition is! Map<String, dynamic> ||
-          definition['input_descriptors'] is! List ||
-          (definition['input_descriptors'] as List).length != 1) {
-        throw StateError('Presentation definition is unsupported');
-      }
-      final descriptor = (definition['input_descriptors'] as List).single;
-      if (descriptor is! Map<String, dynamic> || descriptor['id'] is! String) {
-        throw StateError('Presentation descriptor is invalid');
-      }
-      final formats = descriptor['format'];
-      if (formats != null &&
-          (formats is! Map<String, dynamic> ||
-              !formats.entries.any((entry) {
-                if (!{
-                  'dc+sd-jwt',
-                  'vc+sd-jwt',
-                  'sd_jwt_vc',
-                }.contains(entry.key)) {
-                  return false;
-                }
-                final requirement = entry.value;
-                if (requirement is! Map<String, dynamic>) {
-                  return false;
-                }
-                final algorithms = requirement['alg'];
-                // These describe the issuer signature. The paired holder
-                // still signs with ES256; Rust verifies the selected issuer
-                // algorithm against this format's exact requirement.
-                return algorithms == null ||
-                    (algorithms is List &&
-                        algorithms.isNotEmpty &&
-                        algorithms.length <= 16 &&
-                        algorithms.every((algorithm) => algorithm is String) &&
-                        algorithms.any(
-                          const {'ES256', 'ES384', 'EdDSA', 'RS256'}.contains,
-                        ));
-              }))) {
-        throw StateError('Presentation descriptor format is unsupported');
-      }
-      queryId = descriptor['id'] as String;
-      purpose = definition['purpose'] is String
-          ? definition['purpose'] as String
-          : null;
-      final constraints = descriptor['constraints'];
-      final fields = constraints is Map<String, dynamic>
-          ? constraints['fields'] ?? []
-          : [];
-      if (fields is! List) throw StateError('Presentation fields are invalid');
-      for (final field in fields) {
-        if (field is! Map<String, dynamic> ||
-            field['filter'] != null ||
-            field['zk_predicate'] != null ||
-            field['optional'] == true ||
-            field['path'] is! List ||
-            (field['path'] as List).length != 1) {
-          throw StateError('Presentation field constraint is unsupported');
-        }
-        final path = (field['path'] as List).single;
-        if (path is! String ||
-            !RegExp(r'^\$\.[A-Za-z_][A-Za-z0-9_]*$').hasMatch(path)) {
-          throw StateError('Presentation field path is unsupported');
-        }
-        requestedClaims.add(path.substring(2));
-      }
-    } else {
-      throw StateError('Presentation query type is unsupported');
-    }
-    if (queryId.isEmpty ||
-        requestedClaims.length > 64 ||
-        requestedClaims.any(
-          (claim) =>
-              claim.length > 256 ||
-              !RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$').hasMatch(claim),
-        ) ||
-        requestedClaims.toSet().length != requestedClaims.length) {
-      throw StateError('Presentation request claims are invalid');
-    }
+  }
 
-    final tokens = <String, String>{};
+  Future<void> _releasePresentation(
+    _PendingVerifiedPresentation pending,
+  ) async {
+    pending.active = false;
+    final handles = pending.nativeHandles.toList();
+    pending.nativeHandles.clear();
+    await Future.wait(handles.map(_cancelNative));
+  }
+
+  @override
+  Future<void> cancelOID4VPRequestSDK({required String sessionId}) async {
+    _presentationSessions.remove(sessionId);
+    final pending = _pendingVerifiedPresentations.remove(sessionId);
+    if (pending != null) await _releasePresentation(pending);
+  }
+
+  static void _requireActive(_PendingVerifiedPresentation pending) {
+    if (!pending.active || !pending.expiresAt.isAfter(DateTime.now().toUtc())) {
+      throw StateError('Presentation approval expired or cancelled');
+    }
+  }
+
+  Future<Map<String, dynamic>> _initiateVerifiedPresentation(
+    String input,
+    RemoteHolderPairingService holder,
+    int epoch,
+  ) async {
+    // These untrusted QR fields select only a governed record through the fixed
+    // paired-device endpoint. No URL from the QR is fetched by Dart.
+    final qr = Uri.tryParse(input);
+    final parameters = qr?.queryParametersAll;
+    if (input.length > 8192 ||
+        qr == null ||
+        qr.scheme != 'openid4vp' ||
+        qr.hasFragment ||
+        qr.userInfo.isNotEmpty ||
+        parameters == null ||
+        parameters.length != 2 ||
+        parameters.keys.any(
+          (name) => !{'client_id', 'request_uri'}.contains(name),
+        ) ||
+        parameters.values.any((values) => values.length != 1)) {
+      throw StateError('A managed signed request locator is required');
+    }
+    final clientId = parameters['client_id']!.single;
+    final locator = parameters['request_uri']!.single;
+    for (final entry in _pendingVerifiedPresentations.entries.toList()) {
+      if (!entry.value.expiresAt.isAfter(DateTime.now().toUtc())) {
+        await cancelOID4VPRequestSDK(sessionId: entry.key);
+      }
+    }
+    if (_pendingVerifiedPresentations.length >= 16) {
+      await cancelOID4VPRequestSDK(
+        sessionId: _pendingVerifiedPresentations.keys.first,
+      );
+    }
+    final handles = <String>{};
+    final pending = _PendingVerifiedPresentation(
+      requestUri: locator,
+      clientId: clientId,
+      requiredClaims: [],
+      credentials: {},
+      nativeHandles: handles,
+      expiresAt: DateTime.now().toUtc().add(const Duration(seconds: 60)),
+    );
+    Map<String, dynamic>? authenticatedRequest;
     final matches = <Map<String, dynamic>>[];
-    final snapshot = await holder.fetchIssuerKeysJson();
-    final publicJwk = jsonEncode(
-      await holder.publicJwkForPurpose('presentation_signing'),
-    );
-    for (final credential in await WalletCredentialStore.getAll()) {
-      if (!{
-        'dc+sd-jwt',
-        'vc+sd-jwt',
-        'sd_jwt_vc',
-      }.contains(credential.format)) {
-        continue;
+    var handedToConsent = false;
+    try {
+      final governance = await holder.fetchVerifierAuthorityJson(
+        clientId: clientId,
+        requestUri: locator,
+      );
+      final snapshot = await holder.fetchIssuerKeysJson();
+      final publicJwk = jsonEncode(
+        await holder.publicJwkForPurpose('presentation_signing'),
+      );
+      if (epoch != _initiationEpoch) {
+        throw StateError('Presentation request superseded');
       }
-      final token = _storedSdJwt(credential.rawJson);
-      if (token == null) continue;
-      // Only the native governed verification path can supply review claims.
-      // Freeze this exact token for submission; storage metadata is not proof.
-      late final String reviewJson;
-      try {
-        reviewJson = await _bridge.reviewCredential(
-          credential: token,
-          issuerSnapshotJson: snapshot,
-          holderPublicJwkJson: publicJwk,
-        );
-      } catch (_) {
-        // An expired, untrusted or wrong-holder entry must not suppress other
-        // verified candidates. Preserve it in storage and never show its claims.
-        continue;
+      for (final stored in await WalletCredentialStore.getAll()) {
+        if (!{'dc+sd-jwt', 'vc+sd-jwt', 'sd_jwt_vc'}.contains(stored.format)) {
+          continue;
+        }
+        final token = _storedSdJwt(stored.rawJson);
+        if (token == null) continue;
+        late final String raw;
+        try {
+          raw = await _bridge.reviewCredential(
+            requestUri: locator,
+            governanceJson: governance,
+            credential: token,
+            issuerSnapshotJson: snapshot,
+            holderPublicJwkJson: publicJwk,
+          );
+        } catch (_) {
+          // Failed issuer/holder/type policy does not remove stored credentials
+          // or suppress other valid candidates. No decoded fallback exists.
+          if (epoch != _initiationEpoch) {
+            throw StateError('Presentation request superseded');
+          }
+          continue;
+        }
+        if (raw.length > 768 * 1024) {
+          throw StateError('Native consent response is too large');
+        }
+        final envelope = jsonDecode(raw);
+        if (envelope is! Map<String, dynamic> ||
+            envelope['session_id'] is! String ||
+            !RegExp(
+              r'^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$',
+            ).hasMatch(envelope['session_id'] as String)) {
+          throw StateError('Native consent handle is invalid');
+        }
+        final handle = envelope['session_id'] as String;
+        // Register before checking staleness or parsing display fields so every
+        // newly returned handle is retired if this callback loses its owner.
+        if (!handles.add(handle)) {
+          throw StateError('Duplicate native consent handle');
+        }
+        if (epoch != _initiationEpoch) {
+          throw StateError('Presentation request superseded');
+        }
+        final expires = envelope['expires_at'] is String
+            ? DateTime.tryParse(envelope['expires_at'] as String)?.toUtc()
+            : null;
+        if (expires == null ||
+            !expires.isAfter(DateTime.now().toUtc()) ||
+            expires.isAfter(
+              DateTime.now().toUtc().add(const Duration(seconds: 60)),
+            )) {
+          throw StateError('Native consent response expired');
+        }
+        if (expires.isBefore(pending.expiresAt)) pending.expiresAt = expires;
+        final request = envelope['request'];
+        final review = envelope['credential'];
+        if (request is! Map<String, dynamic> ||
+            review is! Map<String, dynamic>) {
+          throw StateError('Native consent response is invalid');
+        }
+        final claims = _authenticatedClaims(request, clientId);
+        if (authenticatedRequest != null &&
+            jsonEncode(authenticatedRequest) != jsonEncode(request)) {
+          throw StateError('Authenticated presentation changed during review');
+        }
+        authenticatedRequest = request;
+        pending.requiredClaims.clear();
+        pending.requiredClaims.addAll(claims);
+        if (review['issuer'] is! String ||
+            review['credential_type'] is! String ||
+            !{'dc+sd-jwt', 'vc+sd-jwt'}.contains(review['format']) ||
+            review['always_shared'] is! Map<String, dynamic> ||
+            review['protected_header'] is! Map<String, dynamic> ||
+            !(review['always_shared'] as Map).values.every(
+              (value) => value is String,
+            ) ||
+            !(review['protected_header'] as Map).values.every(
+              (value) => value is String,
+            )) {
+          throw StateError('Verified consent projection is invalid');
+        }
+        pending.credentials[stored.id] = handle;
+        matches.add({
+          'id': stored.id,
+          'type': review['credential_type'],
+          'issuer': review['issuer'],
+          'alwaysSharedClaims': review['always_shared'],
+          'alwaysSharedHeader': review['protected_header'],
+          'requestedFields': {'credential': List<String>.of(claims)},
+        });
       }
-      if (reviewJson.length > 512 * 1024) {
-        throw StateError('Verified consent projection is too large');
+      if (matches.isEmpty || authenticatedRequest == null) {
+        throw StateError('No verified SD-JWT credential is available');
       }
-      final review = jsonDecode(reviewJson);
-      if (review is! Map<String, dynamic> ||
-          review['issuer'] is! String ||
-          review['credential_type'] is! String ||
-          !{'dc+sd-jwt', 'vc+sd-jwt'}.contains(review['format']) ||
-          review['always_shared'] is! Map<String, dynamic> ||
-          review['protected_header'] is! Map<String, dynamic> ||
-          !(review['always_shared'] as Map).values.every(
-            (value) => value is String,
-          ) ||
-          !(review['protected_header'] as Map).values.every(
-            (value) => value is String,
-          )) {
-        throw StateError('Verified consent projection is invalid');
+      _requireActive(pending);
+      if (epoch != _initiationEpoch) {
+        throw StateError('Presentation request superseded');
       }
-      tokens[credential.id] = token;
-      matches.add({
-        'id': credential.id,
-        'type': review['credential_type'],
-        'issuer': review['issuer'],
-        'alwaysSharedClaims': review['always_shared'],
-        'alwaysSharedHeader': review['protected_header'],
-        'requestedFields': {'credential': requestedClaims},
-      });
+      final random = Random.secure();
+      final sessionId = base64UrlEncode(
+        List<int>.generate(32, (_) => random.nextInt(256)),
+      ).replaceAll('=', '');
+      if (!_presentationSessions.add(sessionId)) {
+        throw StateError('Presentation session collision');
+      }
+      _pendingVerifiedPresentations[sessionId] = pending;
+      handedToConsent = true;
+      throw UserSelectionRequiredException(
+        sessionId: sessionId,
+        matches: matches,
+        requestDetails: {
+          'verifier': authenticatedRequest['client_id'],
+          'recipient': authenticatedRequest['response_uri'],
+        },
+      );
+    } finally {
+      if (!handedToConsent) await _releasePresentation(pending);
     }
-    if (matches.isEmpty) {
-      throw StateError('No verified SD-JWT credential is available');
+  }
+
+  static List<String> _authenticatedClaims(
+    Map<String, dynamic> request,
+    String clientId,
+  ) {
+    if (request['client_id'] != clientId ||
+        request['nonce'] is! String ||
+        (request['nonce'] as String).isEmpty ||
+        request['request_digest'] is! String ||
+        (request['request_digest'] as String).isEmpty ||
+        request['query_type'] != 'dcql_query') {
+      throw StateError('Authenticated presentation request is invalid');
     }
-    final random = Random.secure();
-    final sessionId = base64UrlEncode(
-      List<int>.generate(32, (_) => random.nextInt(256)),
-    ).replaceAll('=', '');
-    if (_presentationSessions.contains(sessionId)) {
-      throw StateError('Presentation session collision');
+    final recipient = request['response_uri'] is String
+        ? Uri.tryParse(request['response_uri'] as String)
+        : null;
+    if (recipient == null ||
+        recipient.scheme != 'https' ||
+        recipient.host.isEmpty ||
+        recipient.userInfo.isNotEmpty ||
+        recipient.hasFragment) {
+      throw StateError('Authenticated presentation recipient is invalid');
     }
-    if (_presentationSessions.length >= 16) {
-      final evicted = _presentationSessions.first;
-      _presentationSessions.remove(evicted);
-      _pendingVerifiedPresentations.remove(evicted);
+    final query = request['dcql_query_json'] is String
+        ? jsonDecode(request['dcql_query_json'] as String)
+        : null;
+    if (query is! Map<String, dynamic> ||
+        query['credentials'] is! List ||
+        (query['credentials'] as List).length != 1) {
+      throw StateError('Authenticated presentation query is unsupported');
     }
-    _presentationSessions.add(sessionId);
-    _pendingVerifiedPresentations[sessionId] = _PendingVerifiedPresentation(
-      requestUri: requestUri,
-      requestDigest: request.requestDigest,
-      queryId: queryId,
-      requiredClaims: requestedClaims,
-      credentials: tokens,
-      createdAt: DateTime.now().toUtc(),
-    );
-    throw UserSelectionRequiredException(
-      sessionId: sessionId,
-      matches: matches,
-      requestDetails: {
-        'verifier': request.clientId,
-        'recipient': request.responseUri,
-        'purpose': purpose,
-      },
-    );
+    final credential = (query['credentials'] as List).single;
+    if (credential is! Map<String, dynamic> ||
+        credential['id'] is! String ||
+        (credential['id'] as String).isEmpty ||
+        credential['format'] != 'dc+sd-jwt') {
+      throw StateError('Authenticated presentation credential is unsupported');
+    }
+    // VCT and algorithm policy has already been enforced by native Core. Dart
+    // extracts display paths only; it does not decide whether a token matches.
+    final fields = credential['claims'] ?? [];
+    if (fields is! List || fields.length > 64) {
+      throw StateError('Authenticated disclosure fields are invalid');
+    }
+    final claims = <String>[];
+    for (final field in fields) {
+      if (field is! Map<String, dynamic> ||
+          field['path'] is! List ||
+          (field['path'] as List).length != 1 ||
+          (field['path'] as List).single is! String) {
+        throw StateError('Authenticated disclosure path is unsupported');
+      }
+      final name = (field['path'] as List).single as String;
+      if (name.length > 256 ||
+          !RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$').hasMatch(name) ||
+          claims.contains(name)) {
+        throw StateError('Authenticated disclosure fields are invalid');
+      }
+      claims.add(name);
+    }
+    return claims;
   }
 
   static String? _storedSdJwt(String raw) {
@@ -417,55 +485,83 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     String selectedCredentialId,
     List<String>? selectedFields,
   ) async {
-    final pending = _pendingVerifiedPresentations.remove(sessionId);
-    if (pending == null ||
-        DateTime.now().toUtc().difference(pending.createdAt) >
-            const Duration(minutes: 2)) {
-      throw StateError('Presentation approval expired');
-    }
-    final credential = pending.credentials[selectedCredentialId];
-    if (credential == null) {
-      throw StateError('Selected credential is unavailable');
-    }
-    if (selectedFields == null) {
-      throw StateError('Presentation disclosures require explicit approval');
-    }
-    final selected = selectedFields.map((field) {
-      if (!field.startsWith('credential/')) {
-        throw StateError('Selected disclosure field is invalid');
-      }
-      return field.substring('credential/'.length);
-    }).toSet();
-    if (!selected.containsAll(pending.requiredClaims) ||
-        selected.difference(pending.requiredClaims.toSet()).isNotEmpty) {
-      throw StateError(
-        'Selected disclosure does not match the approved request',
-      );
-    }
-
-    final holder = _holderFactory();
+    final pending = _pendingVerifiedPresentations[sessionId];
+    if (pending == null) throw StateError('Presentation approval expired');
+    RemoteHolderPairingService? holder;
     try {
-      final snapshot = await holder.fetchIssuerKeysJson();
-      final publicJwk = await holder.publicJwkForPurpose(
-        'presentation_signing',
-      );
-      final prepared = await _bridge.preparePresentation(
+      _requireActive(pending);
+      final handle = pending.credentials[selectedCredentialId];
+      if (handle == null) {
+        throw StateError('Selected credential is unavailable');
+      }
+      if (selectedFields == null) {
+        throw StateError('Presentation disclosures require explicit approval');
+      }
+      final selected = <String>[];
+      for (final field in selectedFields) {
+        if (!field.startsWith('credential/')) {
+          throw StateError('Selected disclosure field is invalid');
+        }
+        selected.add(field.substring('credential/'.length));
+      }
+      if (selected.length != selected.toSet().length ||
+          selected.length != pending.requiredClaims.length ||
+          !selected.toSet().containsAll(pending.requiredClaims)) {
+        throw StateError(
+          'Selected disclosure does not match the approved request',
+        );
+      }
+      for (final other in pending.nativeHandles.toList()) {
+        if (other != handle) {
+          pending.nativeHandles.remove(other);
+          await _cancelNative(other);
+        }
+      }
+      holder = _holderFactory();
+      final governance = await holder.fetchVerifierAuthorityJson(
+        clientId: pending.clientId,
         requestUri: pending.requestUri,
-        approvedRequestDigest: pending.requestDigest,
-        credential: credential,
-        queryId: pending.queryId,
-        claimsToDisclose: pending.requiredClaims,
-        issuerSnapshotJson: snapshot,
-        holderPublicJwkJson: jsonEncode(publicJwk),
       );
+      final issuer = await holder.fetchIssuerKeysJson();
+      final publicJwk = jsonEncode(
+        await holder.publicJwkForPurpose('presentation_signing'),
+      );
+      _requireActive(pending);
+      final prepared = await _bridge.preparePresentation(
+        sessionId: handle,
+        claimsToDisclose: selected,
+        governanceJson: governance,
+        issuerSnapshotJson: issuer,
+        holderPublicJwkJson: publicJwk,
+      );
+      pending.nativeHandles.remove(handle);
+      pending.nativeHandles.add(prepared.sessionId);
+      _requireActive(pending);
       final signature = await holder.signInput(
         purpose: 'presentation_signing',
         signingInput: prepared.signingInput,
       );
+      _requireActive(pending);
+      // Signing may overlap revocation, bearer rotation or key replacement.
+      // Fetch all evidence again after the remote result; native compares it
+      // to the frozen scope and reauthenticates the retained original request.
+      final completionGovernance = await holder.fetchVerifierAuthorityJson(
+        clientId: pending.clientId,
+        requestUri: pending.requestUri,
+      );
+      final completionIssuer = await holder.fetchIssuerKeysJson();
+      final completionHolder = jsonEncode(
+        await holder.publicJwkForPurpose('presentation_signing'),
+      );
+      _requireActive(pending);
       final response = await _bridge.completePresentation(
         sessionId: prepared.sessionId,
         remoteSignature: signature,
+        governanceJson: completionGovernance,
+        issuerSnapshotJson: completionIssuer,
+        holderPublicJwkJson: completionHolder,
       );
+      _requireActive(pending);
       if (!response.ok) {
         throw StateError(
           response.errorDescription ?? 'Verifier rejected presentation',
@@ -473,7 +569,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       }
       return {'ok': true, 'redirect_uri': response.redirectUri};
     } finally {
-      holder.close();
+      _pendingVerifiedPresentations.remove(sessionId);
+      await _releasePresentation(pending);
+      holder?.close();
     }
   }
 

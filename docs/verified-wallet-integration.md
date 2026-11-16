@@ -316,8 +316,43 @@ zero ignores; formatting, bridge Clippy with warnings denied and focused Dart
 analysis pass. Reviewers executed no tests, and the corrected publication path
 was re-reviewed without remaining findings.
 
-This is a native API checkpoint, not completed product integration. Dart still
-calls the retired path and must be wired to these new operations, including
-cleanup of handles returned by stale callbacks. The successful authenticated
-review-to-submission lifecycle, paused device-HTTP scope changes, installed
-wallet acceptance and official interoperability have not been executed here.
+At `b5b4793e2e14f9ec6c8c9ea17256471c32cc8eb9`, this was a native API checkpoint:
+Dart still called the retired path. The next checkpoint supplies product wiring
+as described below. Successful authenticated native lifecycle, paused device-HTTP
+scope changes, installed wallet acceptance and official interoperability remain
+separate execution gates.
+
+## Governed Dart consent and remote-signing coordinator
+
+The product bridge now calls the governed native operations. A QR supplies only
+the client/locator selectors sent to the fixed authenticated paired-device
+endpoint; duplicate, inline, alternate-transport and extra authority parameters
+are refused. Original verifier/issuer JSON reaches native unchanged. Dart no
+longer parses an unsigned request for consent or retains replacement credential
+tokens for preparation. It displays the native-authenticated request and exact
+always-shared lexemes, retains opaque native review handles and passes the
+explicit approved disclosure set. The supported native DID/DCQL profile admits
+signed VCT metadata; historical mocked Presentation Exchange success cases do
+not establish support in this profile.
+
+Preparation reads fresh governance, issuer trust and holder metadata. After the
+remote signature arrives, completion reads all three again. Native remains
+responsible for current scope, original JWS and credential policy, recipient
+and stored signing-input verification. Reject/back/dispose, failed transitions,
+expired choices, unused candidates and stale callbacks retire native handles;
+rotated handles are registered before checking cancellation. A disposal signal
+also settles navigation awaits, since disposing a Navigator does not guarantee
+that its pushed-route future completes.
+
+Actual mocked execution:41 orchestration/client tests and3 widget lifecycle
+tests pass; focused analysis of8 source/test items is clean. Paused preparation,
+paused signing, stale initiation, failed post-signing governance, cleanup order,
+malformed native display shapes and disposed scanner results are exercised.
+Independent source review found no remaining issue and ran no tests. The full
+Flutter command ran356 passes/4skips but failed to load `version_test.dart`
+because this assigned checkout has a pre-existing user deletion of tracked
+`lib/model/version.g.dart`; that deletion is preserved. The subsequently added
+QR rejection test is covered by the41-test focused run. Full exact-candidate
+qualification must use an isolated checkout with the committed file present.
+These mocked tests do not execute the real native signing/submission lifecycle,
+installed wallet, managed owner/PDP deployment or official suites.

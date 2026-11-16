@@ -191,6 +191,10 @@ class SpruceIdClientExtended extends SpruceIdClient
       selectedFields: selectedFields,
     );
   }
+
+  @override
+  Future<void> cancelOID4VPRequestSDK({required String sessionId}) =>
+      _platformService.cancelOID4VPRequestSDK(sessionId: sessionId);
 }
 
 /// Riverpod provider for extended client

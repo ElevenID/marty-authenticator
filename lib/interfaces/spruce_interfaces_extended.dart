@@ -53,6 +53,9 @@ abstract class ISpruceIdPlatformServiceExtended
     List<String>? selectedFields,
   });
 
+  /// Retire pending native consent/signing handles when approval is abandoned.
+  Future<void> cancelOID4VPRequestSDK({required String sessionId});
+
   // ========================
   // Advanced Credential Operations
   // ========================
@@ -278,6 +281,8 @@ abstract class ISpruceIdClientExtended extends ISpruceIdClient {
     required String selectedCredentialId,
     List<String>? selectedFields,
   });
+
+  Future<void> cancelOID4VPRequestSDK({required String sessionId});
 }
 
 /// Extended mDoc manager with SDK capabilities
