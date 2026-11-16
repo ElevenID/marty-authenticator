@@ -279,9 +279,45 @@ Clippy with warnings denied pass. Independent review caught the enrolled-key
 metadata mismatch; it was fixed and re-reviewed without remaining findings.
 Reviewers executed no tests.
 
-This module is internal, deliberately unwired groundwork. Its temporary local
-dead-code allowance does not relax any runtime validation or qualify a product
-entry point. Opaque authenticated request/review/preparation/completion storage,
-fresh authority at each transition, bridge regeneration, Dart product wiring
-and installed acceptance remain required. The existing presentation parser is
-not authenticated by the existence of this module.
+At `a82c0d28e6e9f56da31129cc78191cde32df92b4`, this module was internal,
+deliberately unwired groundwork. Its temporary local dead-code allowance did
+not relax runtime validation or qualify a product entry point. The following
+checkpoint supplies native sessions and regenerated APIs; Dart product wiring
+and installed acceptance remain required. The standalone presentation parser
+is not authenticated by the existence of this module.
+
+## Opaque native presentation API checkpoint
+
+Four governed bridge operations now review, prepare, complete and cancel native
+sessions. Review authenticates the original owner JWS through Core before
+verifying the candidate against its signed type/VCT/algorithm policy. Only an
+opaque handle and bounded authenticated request/always-shared consent projection
+leave native storage; the exact credential remains frozen. Preparation consumes
+that handle and accepts disclosures, rather than a replacement credential or
+request. Completion verifies the remote signature against the original retained
+signing input. Both transitions require fresh device scope, holder, verifier
+authority and issuer evidence and reauthenticate the original signed bytes.
+
+Storage bounds all ready and in-flight work to16 slots and a maximum60-second
+consent lifetime. Transitions rotate handles, failures consume old handles, and
+cancelled/expired callbacks cannot republish sessions. Locks never span network
+awaits. Explicit guard destruction precedes the consumed reservation's destructor
+to avoid a Rust2021 temporary-drop mutex deadlock caught by independent review.
+The actual reservation wrapper now has publication/consumption/cancellation/
+expiration regressions, separately from generic store tests.
+
+The old preparation and completion bridge signatures always reject calls; their
+historical implementation is compiled only for tests. The untrusted parser and
+standalone issuer projection grant no signing or submission authority. The
+temporary native dead-code allowance was removed. FRB2.13 generation succeeds,
+changing seven generated outputs (content hash `-948931303`); the other six
+generated files match their preserved bytes. Native tests report78 passes and
+zero ignores; formatting, bridge Clippy with warnings denied and focused Dart
+analysis pass. Reviewers executed no tests, and the corrected publication path
+was re-reviewed without remaining findings.
+
+This is a native API checkpoint, not completed product integration. Dart still
+calls the retired path and must be wired to these new operations, including
+cleanup of handles returned by stale callbacks. The successful authenticated
+review-to-submission lifecycle, paused device-HTTP scope changes, installed
+wallet acceptance and official interoperability have not been executed here.

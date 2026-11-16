@@ -1805,6 +1805,31 @@ class RustLibWire implements BaseWire {
     issuer_state,
   );
 
+  void wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+  ) => wasmModule.wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+    port_,
+    session_id,
+  );
+
+  void wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+    JSAny remote_signature,
+    String governance_json,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  ) =>
+      wasmModule.wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+        port_,
+        session_id,
+        remote_signature,
+        governance_json,
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+      );
+
   void wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
     NativePortType port_,
     String session_id,
@@ -1888,6 +1913,22 @@ class RustLibWire implements BaseWire {
     request_uri,
   );
 
+  void wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+    JSAny claims_to_disclose,
+    String governance_json,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+    port_,
+    session_id,
+    claims_to_disclose,
+    governance_json,
+    issuer_snapshot_json,
+    holder_public_jwk_json,
+  );
+
   void wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
     NativePortType port_,
     String request_uri,
@@ -1934,6 +1975,22 @@ class RustLibWire implements BaseWire {
     credential_format,
     credential_configuration_id,
     proof_jwt,
+  );
+
+  void wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String request_uri,
+    String governance_json,
+    String credential,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  ) => wasmModule.wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+    port_,
+    request_uri,
+    governance_json,
+    credential,
+    issuer_snapshot_json,
+    holder_public_jwk_json,
   );
 
   void wire__crate__api__wallet_review_verified_sd_jwt_credential(
@@ -2197,6 +2254,20 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String? issuer_state,
   );
 
+  external void wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+  );
+
+  external void wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+    JSAny remote_signature,
+    String governance_json,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  );
+
   external void wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
     NativePortType port_,
     String session_id,
@@ -2246,6 +2317,15 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String request_uri,
   );
 
+  external void wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String session_id,
+    JSAny claims_to_disclose,
+    String governance_json,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
+  );
+
   external void wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
     NativePortType port_,
     String request_uri,
@@ -2271,6 +2351,15 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
     String credential_format,
     String? credential_configuration_id,
     String proof_jwt,
+  );
+
+  external void wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+    NativePortType port_,
+    String request_uri,
+    String governance_json,
+    String credential,
+    String issuer_snapshot_json,
+    String holder_public_jwk_json,
   );
 
   external void wire__crate__api__wallet_review_verified_sd_jwt_credential(

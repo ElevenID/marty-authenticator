@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 175211210;
+  int get rustContentHash => -948931303;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -205,6 +205,19 @@ abstract class RustLibApi extends BaseApi {
     String? issuerState,
   });
 
+  Future<void> crateApiWalletCancelGovernedSdJwtPresentation({
+    required String sessionId,
+  });
+
+  Future<FrbPresentationResponse>
+  crateApiWalletCompleteGovernedSdJwtPresentation({
+    required String sessionId,
+    required List<int> remoteSignature,
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  });
+
   Future<FrbPresentationResponse>
   crateApiWalletCompleteVerifiedSdJwtPresentation({
     required String sessionId,
@@ -248,6 +261,15 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<FrbPreparedSdJwtPresentation>
+  crateApiWalletPrepareGovernedSdJwtPresentation({
+    required String sessionId,
+    required List<String> claimsToDisclose,
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  });
+
+  Future<FrbPreparedSdJwtPresentation>
   crateApiWalletPrepareVerifiedSdJwtPresentation({
     required String requestUri,
     required String approvedRequestDigest,
@@ -270,6 +292,14 @@ abstract class RustLibApi extends BaseApi {
     required String credentialFormat,
     String? credentialConfigurationId,
     required String proofJwt,
+  });
+
+  Future<String> crateApiWalletReviewGovernedSdJwtPresentation({
+    required String requestUri,
+    required String governanceJson,
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
   });
 
   Future<String> crateApiWalletReviewVerifiedSdJwtCredential({
@@ -1220,6 +1250,93 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiWalletCancelGovernedSdJwtPresentation({
+    required String sessionId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(sessionId);
+          return wire
+              .wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+                port_,
+                arg0,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_unit,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletCancelGovernedSdJwtPresentationConstMeta,
+        argValues: [sessionId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletCancelGovernedSdJwtPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_cancel_governed_sd_jwt_presentation",
+        argNames: ["sessionId"],
+      );
+
+  @override
+  Future<FrbPresentationResponse>
+  crateApiWalletCompleteGovernedSdJwtPresentation({
+    required String sessionId,
+    required List<int> remoteSignature,
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(sessionId);
+          var arg1 = cst_encode_list_prim_u_8_loose(remoteSignature);
+          var arg2 = cst_encode_String(governanceJson);
+          var arg3 = cst_encode_String(issuerSnapshotJson);
+          var arg4 = cst_encode_String(holderPublicJwkJson);
+          return wire
+              .wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+                port_,
+                arg0,
+                arg1,
+                arg2,
+                arg3,
+                arg4,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_presentation_response,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletCompleteGovernedSdJwtPresentationConstMeta,
+        argValues: [
+          sessionId,
+          remoteSignature,
+          governanceJson,
+          issuerSnapshotJson,
+          holderPublicJwkJson,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletCompleteGovernedSdJwtPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_complete_governed_sd_jwt_presentation",
+        argNames: [
+          "sessionId",
+          "remoteSignature",
+          "governanceJson",
+          "issuerSnapshotJson",
+          "holderPublicJwkJson",
+        ],
+      );
+
+  @override
   Future<FrbPresentationResponse>
   crateApiWalletCompleteVerifiedSdJwtPresentation({
     required String sessionId,
@@ -1496,6 +1613,62 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<FrbPreparedSdJwtPresentation>
+  crateApiWalletPrepareGovernedSdJwtPresentation({
+    required String sessionId,
+    required List<String> claimsToDisclose,
+    required String governanceJson,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(sessionId);
+          var arg1 = cst_encode_list_String(claimsToDisclose);
+          var arg2 = cst_encode_String(governanceJson);
+          var arg3 = cst_encode_String(issuerSnapshotJson);
+          var arg4 = cst_encode_String(holderPublicJwkJson);
+          return wire
+              .wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+                port_,
+                arg0,
+                arg1,
+                arg2,
+                arg3,
+                arg4,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_frb_prepared_sd_jwt_presentation,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletPrepareGovernedSdJwtPresentationConstMeta,
+        argValues: [
+          sessionId,
+          claimsToDisclose,
+          governanceJson,
+          issuerSnapshotJson,
+          holderPublicJwkJson,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletPrepareGovernedSdJwtPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_prepare_governed_sd_jwt_presentation",
+        argNames: [
+          "sessionId",
+          "claimsToDisclose",
+          "governanceJson",
+          "issuerSnapshotJson",
+          "holderPublicJwkJson",
+        ],
+      );
+
+  @override
+  Future<FrbPreparedSdJwtPresentation>
   crateApiWalletPrepareVerifiedSdJwtPresentation({
     required String requestUri,
     required String approvedRequestDigest,
@@ -1647,6 +1820,61 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "credentialFormat",
           "credentialConfigurationId",
           "proofJwt",
+        ],
+      );
+
+  @override
+  Future<String> crateApiWalletReviewGovernedSdJwtPresentation({
+    required String requestUri,
+    required String governanceJson,
+    required String credential,
+    required String issuerSnapshotJson,
+    required String holderPublicJwkJson,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          var arg0 = cst_encode_String(requestUri);
+          var arg1 = cst_encode_String(governanceJson);
+          var arg2 = cst_encode_String(credential);
+          var arg3 = cst_encode_String(issuerSnapshotJson);
+          var arg4 = cst_encode_String(holderPublicJwkJson);
+          return wire
+              .wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+                port_,
+                arg0,
+                arg1,
+                arg2,
+                arg3,
+                arg4,
+              );
+        },
+        codec: DcoCodec(
+          decodeSuccessData: dco_decode_String,
+          decodeErrorData: dco_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiWalletReviewGovernedSdJwtPresentationConstMeta,
+        argValues: [
+          requestUri,
+          governanceJson,
+          credential,
+          issuerSnapshotJson,
+          holderPublicJwkJson,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiWalletReviewGovernedSdJwtPresentationConstMeta =>
+      const TaskConstMeta(
+        debugName: "wallet_review_governed_sd_jwt_presentation",
+        argNames: [
+          "requestUri",
+          "governanceJson",
+          "credential",
+          "issuerSnapshotJson",
+          "holderPublicJwkJson",
         ],
       );
 

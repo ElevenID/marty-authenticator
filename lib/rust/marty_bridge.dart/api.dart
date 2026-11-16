@@ -270,8 +270,63 @@ Future<String> walletReviewVerifiedSdJwtCredential({
   holderPublicJwkJson: holderPublicJwkJson,
 );
 
-/// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
-/// the exact signing input for the paired non-exportable presentation key.
+/// Authenticate the canonical signed request and retain the exact verified
+/// credential behind a short-lived native consent handle. Governance JSON must
+/// come only from the fixed, authenticated paired-device transport.
+Future<String> walletReviewGovernedSdJwtPresentation({
+  required String requestUri,
+  required String governanceJson,
+  required String credential,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletReviewGovernedSdJwtPresentation(
+  requestUri: requestUri,
+  governanceJson: governanceJson,
+  credential: credential,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Consume the native consent handle; Flutter cannot replace its credential,
+/// request, recipient or authenticated policy when approving disclosures.
+Future<FrbPreparedSdJwtPresentation> walletPrepareGovernedSdJwtPresentation({
+  required String sessionId,
+  required List<String> claimsToDisclose,
+  required String governanceJson,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletPrepareGovernedSdJwtPresentation(
+  sessionId: sessionId,
+  claimsToDisclose: claimsToDisclose,
+  governanceJson: governanceJson,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Reauthenticate the retained original request using fresh confirmed-device
+/// governance and issuer trust, then verify the stored input's remote signature.
+Future<FrbPresentationResponse> walletCompleteGovernedSdJwtPresentation({
+  required String sessionId,
+  required List<int> remoteSignature,
+  required String governanceJson,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletCompleteGovernedSdJwtPresentation(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+  governanceJson: governanceJson,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Idempotently retire an unsubmitted consent or signing handle.
+Future<void> walletCancelGovernedSdJwtPresentation({
+  required String sessionId,
+}) => RustLib.instance.api.crateApiWalletCancelGovernedSdJwtPresentation(
+  sessionId: sessionId,
+);
+
+/// Retired unbound presentation API. Approval requires a native governed handle.
 Future<FrbPreparedSdJwtPresentation> walletPrepareVerifiedSdJwtPresentation({
   required String requestUri,
   required String approvedRequestDigest,
@@ -290,8 +345,7 @@ Future<FrbPreparedSdJwtPresentation> walletPrepareVerifiedSdJwtPresentation({
   holderPublicJwkJson: holderPublicJwkJson,
 );
 
-/// Consume the prepared session once, verify the remote signature against the
-/// paired public key, and submit with the original OID4VP request state.
+/// Retired completion API. Fresh confirmed-device governance is mandatory.
 Future<FrbPresentationResponse> walletCompleteVerifiedSdJwtPresentation({
   required String sessionId,
   required List<int> remoteSignature,

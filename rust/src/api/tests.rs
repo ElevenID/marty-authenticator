@@ -1,6 +1,31 @@
 use super::*;
 use serde_json::json;
 
+#[tokio::test]
+async fn retired_presentation_apis_cannot_prepare_or_submit_without_fresh_governance() {
+    // These bridge signatures remain for binary/source compatibility only.
+    // Even supplied request/credential identifiers cannot mint a native handle.
+    let error = wallet_prepare_verified_sd_jwt_presentation(
+        "openid4vp://unused".into(),
+        "claimed-digest".into(),
+        "claimed-credential".into(),
+        "query".into(),
+        vec![],
+        "claimed-issuer-trust".into(),
+        "claimed-holder".into(),
+    )
+    .await
+    .unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("governed native consent session"));
+    let error =
+        wallet_complete_verified_sd_jwt_presentation(uuid::Uuid::new_v4().to_string(), vec![0; 64])
+            .await
+            .unwrap_err();
+    assert!(error.to_string().contains("fresh governed authority"));
+}
+
 #[test]
 fn issuer_metadata_conversion_requires_a_resolved_token_endpoint() {
     let raw = json!({

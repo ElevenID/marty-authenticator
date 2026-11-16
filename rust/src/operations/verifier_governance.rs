@@ -1,4 +1,3 @@
-#![allow(dead_code)] // Staged native boundary; opaque session wiring follows.
 //! Native admission of fresh confirmed-device managed verifier evidence.
 //! Transport-provided keys do not replace Core DID/signature authentication.
 use anyhow::{ensure, Context};

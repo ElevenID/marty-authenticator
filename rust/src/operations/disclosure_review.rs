@@ -41,6 +41,19 @@ pub(crate) fn review(
         holder_public_jwk_json,
         &trusted.resolver,
     )?;
+    let projection = projection(credential, &verified)?;
+    ensure!(
+        trusted.expires_at > Utc::now(),
+        "issuer trust snapshot expired"
+    );
+    Ok(projection)
+}
+
+/// Called only with the result of native verification of these exact bytes.
+pub(crate) fn projection(
+    credential: &str,
+    verified: &marty_oid4vci::VerifiedSdJwtCredential,
+) -> anyhow::Result<String> {
     // Core has just verified this same immutable string, including unique JSON
     // members, issuer signature, time policy, disclosures and holder binding.
     // Preserve every signed payload member: protocol metadata and identifiers
@@ -61,10 +74,6 @@ pub(crate) fn review(
         .context("issuer payload is absent")?;
     let bytes = URL_SAFE_NO_PAD.decode(encoded)?;
     let claims = exact_members(&bytes, 64 * 1024)?;
-    ensure!(
-        trusted.expires_at > Utc::now(),
-        "issuer trust snapshot expired"
-    );
     let projection = serde_json::to_string(&json!({
         "issuer": verified.issuer,
         "credential_type": verified.credential_type,

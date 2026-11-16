@@ -2577,6 +2577,79 @@ class RustLibWire implements BaseWire {
             )
           >();
 
+  void wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id,
+  ) {
+    return _wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+      port_,
+      session_id,
+    );
+  }
+
+  late final _wire__crate__api__wallet_cancel_governed_sd_jwt_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_cancel_governed_sd_jwt_presentation',
+      );
+  late final _wire__crate__api__wallet_cancel_governed_sd_jwt_presentation =
+      _wire__crate__api__wallet_cancel_governed_sd_jwt_presentationPtr
+          .asFunction<
+            void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
+          >();
+
+  void wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> remote_signature,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> governance_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+  ) {
+    return _wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+      port_,
+      session_id,
+      remote_signature,
+      governance_json,
+      issuer_snapshot_json,
+      holder_public_jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_complete_governed_sd_jwt_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_complete_governed_sd_jwt_presentation',
+      );
+  late final _wire__crate__api__wallet_complete_governed_sd_jwt_presentation =
+      _wire__crate__api__wallet_complete_governed_sd_jwt_presentationPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id,
@@ -2832,6 +2905,52 @@ class RustLibWire implements BaseWire {
             void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)
           >();
 
+  void wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> session_id,
+    ffi.Pointer<wire_cst_list_String> claims_to_disclose,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> governance_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+  ) {
+    return _wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+      port_,
+      session_id,
+      claims_to_disclose,
+      governance_json,
+      issuer_snapshot_json,
+      holder_public_jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_prepare_governed_sd_jwt_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_String>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_prepare_governed_sd_jwt_presentation',
+      );
+  late final _wire__crate__api__wallet_prepare_governed_sd_jwt_presentation =
+      _wire__crate__api__wallet_prepare_governed_sd_jwt_presentationPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_String>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
   void wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> request_uri,
@@ -2959,6 +3078,52 @@ class RustLibWire implements BaseWire {
       );
   late final _wire__crate__api__wallet_request_credential =
       _wire__crate__api__wallet_request_credentialPtr
+          .asFunction<
+            void Function(
+              int,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+              ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            )
+          >();
+
+  void wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> request_uri,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> governance_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> credential,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> issuer_snapshot_json,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> holder_public_jwk_json,
+  ) {
+    return _wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+      port_,
+      request_uri,
+      governance_json,
+      credential,
+      issuer_snapshot_json,
+      holder_public_jwk_json,
+    );
+  }
+
+  late final _wire__crate__api__wallet_review_governed_sd_jwt_presentationPtr =
+      _lookup<
+        ffi.NativeFunction<
+          ffi.Void Function(
+            ffi.Int64,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+            ffi.Pointer<wire_cst_list_prim_u_8_strict>,
+          )
+        >
+      >(
+        'frbgen_marty_authenticator_wire__crate__api__wallet_review_governed_sd_jwt_presentation',
+      );
+  late final _wire__crate__api__wallet_review_governed_sd_jwt_presentation =
+      _wire__crate__api__wallet_review_governed_sd_jwt_presentationPtr
           .asFunction<
             void Function(
               int,

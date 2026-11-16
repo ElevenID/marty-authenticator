@@ -588,8 +588,79 @@ pub fn wallet_review_verified_sd_jwt_credential(
     )
 }
 
-/// Verify an SD-JWT against a fresh paired Trust Profile snapshot and prepare
-/// the exact signing input for the paired non-exportable presentation key.
+/// Authenticate the canonical signed request and retain the exact verified
+/// credential behind a short-lived native consent handle. Governance JSON must
+/// come only from the fixed, authenticated paired-device transport.
+#[frb]
+pub async fn wallet_review_governed_sd_jwt_presentation(
+    request_uri: String,
+    governance_json: String,
+    credential: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<String> {
+    crate::operations::governed_presentation::review(
+        request_uri,
+        governance_json,
+        credential,
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+    )
+    .await
+}
+
+/// Consume the native consent handle; Flutter cannot replace its credential,
+/// request, recipient or authenticated policy when approving disclosures.
+#[frb]
+pub async fn wallet_prepare_governed_sd_jwt_presentation(
+    session_id: String,
+    claims_to_disclose: Vec<String>,
+    governance_json: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtPresentation> {
+    let prepared = crate::operations::governed_presentation::prepare(
+        &session_id,
+        &claims_to_disclose,
+        &governance_json,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+    .await?;
+    Ok(FrbPreparedSdJwtPresentation {
+        session_id: prepared.session_id,
+        signing_input: prepared.signing_input,
+    })
+}
+
+/// Reauthenticate the retained original request using fresh confirmed-device
+/// governance and issuer trust, then verify the stored input's remote signature.
+#[frb]
+pub async fn wallet_complete_governed_sd_jwt_presentation(
+    session_id: String,
+    remote_signature: Vec<u8>,
+    governance_json: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPresentationResponse> {
+    crate::operations::governed_presentation::complete(
+        &session_id,
+        &remote_signature,
+        &governance_json,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+    .await
+    .map(Into::into)
+}
+
+/// Idempotently retire an unsubmitted consent or signing handle.
+#[frb]
+pub fn wallet_cancel_governed_sd_jwt_presentation(session_id: String) -> anyhow::Result<()> {
+    crate::operations::governed_presentation::cancel(&session_id)
+}
+
+/// Retired unbound presentation API. Approval requires a native governed handle.
 #[frb]
 pub async fn wallet_prepare_verified_sd_jwt_presentation(
     request_uri: String,
@@ -600,34 +671,26 @@ pub async fn wallet_prepare_verified_sd_jwt_presentation(
     issuer_snapshot_json: String,
     holder_public_jwk_json: String,
 ) -> anyhow::Result<FrbPreparedSdJwtPresentation> {
-    let prepared = crate::operations::verified_presentation::prepare(
-        crate::operations::verified_presentation::Selection {
-            request_uri,
-            approved_request_digest,
-            credential,
-            query_id,
-            claims_to_disclose,
-            issuer_snapshot_json,
-            holder_public_jwk_json,
-        },
-    )
-    .await?;
-    Ok(FrbPreparedSdJwtPresentation {
-        session_id: prepared.session_id,
-        signing_input: prepared.signing_input,
-    })
+    let _ = (
+        request_uri,
+        approved_request_digest,
+        credential,
+        query_id,
+        claims_to_disclose,
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+    );
+    anyhow::bail!("Presentation approval requires a governed native consent session")
 }
 
-/// Consume the prepared session once, verify the remote signature against the
-/// paired public key, and submit with the original OID4VP request state.
+/// Retired completion API. Fresh confirmed-device governance is mandatory.
 #[frb]
 pub async fn wallet_complete_verified_sd_jwt_presentation(
     session_id: String,
     remote_signature: Vec<u8>,
 ) -> anyhow::Result<FrbPresentationResponse> {
-    crate::operations::verified_presentation::complete(&session_id, &remote_signature)
-        .await
-        .map(Into::into)
+    let _ = (session_id, remote_signature);
+    anyhow::bail!("Presentation completion requires fresh governed authority")
 }
 
 /// Retired unverified VP entry point. Always rejects until the verified

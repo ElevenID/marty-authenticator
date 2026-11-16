@@ -10,7 +10,22 @@ pub(crate) async fn wallet_parse_presentation_request(
         .parse_presentation_request(&request_uri)
         .await
         .map_err(|e| anyhow::anyhow!("Presentation request parse error: {}", e))?;
-    let request_digest = super::verified_presentation::request_digest(&request)?;
+    // This parser supplies untrusted routing/display data only. Governed
+    // consent uses Core's digest of the authenticated original signed bytes.
+    let mut canonical = serde_json::to_value(&request)?;
+    canonical.sort_all_objects();
+    use sha2::Digest;
+    let request_digest = format!(
+        "{:x}",
+        sha2::Sha256::digest(serde_json::to_vec(&canonical)?)
+    );
+    request_projection(&request, request_digest)
+}
+
+pub(crate) fn request_projection(
+    request: &marty_oid4vci::ParsedPresentationRequest,
+    request_digest: String,
+) -> anyhow::Result<FrbPresentationRequest> {
     let presentation_definition_json = request
         .presentation_definition
         .as_ref()
@@ -31,11 +46,11 @@ pub(crate) async fn wallet_parse_presentation_request(
     }
     .to_string();
     Ok(FrbPresentationRequest {
-        client_id: request.client_id,
-        nonce: request.nonce,
-        response_uri: request.response_uri,
-        response_mode: request.response_mode,
-        state: request.state,
+        client_id: request.client_id.clone(),
+        nonce: request.nonce.clone(),
+        response_uri: request.response_uri.clone(),
+        response_mode: request.response_mode.clone(),
+        state: request.state.clone(),
         request_digest,
         query_type,
         presentation_definition_json,

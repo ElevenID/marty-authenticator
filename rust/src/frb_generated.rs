@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 175211210;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -948931303;
 
 // Section: executor
 
@@ -773,6 +773,69 @@ fn wire__crate__api__wallet_build_auth_request_impl(
         },
     )
 }
+fn wire__crate__api__wallet_cancel_governed_sd_jwt_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    session_id: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_cancel_governed_sd_jwt_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_session_id = session_id.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::wallet_cancel_governed_sd_jwt_presentation(api_session_id)?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_complete_governed_sd_jwt_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    session_id: impl CstDecode<String>,
+    remote_signature: impl CstDecode<Vec<u8>>,
+    governance_json: impl CstDecode<String>,
+    issuer_snapshot_json: impl CstDecode<String>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_complete_governed_sd_jwt_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_session_id = session_id.cst_decode();
+            let api_remote_signature = remote_signature.cst_decode();
+            let api_governance_json = governance_json.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_complete_governed_sd_jwt_presentation(
+                            api_session_id,
+                            api_remote_signature,
+                            api_governance_json,
+                            api_issuer_snapshot_json,
+                            api_holder_public_jwk_json,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__wallet_complete_verified_sd_jwt_presentation_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     session_id: impl CstDecode<String>,
@@ -1006,6 +1069,45 @@ fn wire__crate__api__wallet_parse_presentation_request_impl(
         },
     )
 }
+fn wire__crate__api__wallet_prepare_governed_sd_jwt_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    session_id: impl CstDecode<String>,
+    claims_to_disclose: impl CstDecode<Vec<String>>,
+    governance_json: impl CstDecode<String>,
+    issuer_snapshot_json: impl CstDecode<String>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_prepare_governed_sd_jwt_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_session_id = session_id.cst_decode();
+            let api_claims_to_disclose = claims_to_disclose.cst_decode();
+            let api_governance_json = governance_json.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_prepare_governed_sd_jwt_presentation(
+                            api_session_id,
+                            api_claims_to_disclose,
+                            api_governance_json,
+                            api_issuer_snapshot_json,
+                            api_holder_public_jwk_json,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__wallet_prepare_verified_sd_jwt_presentation_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     request_uri: impl CstDecode<String>,
@@ -1113,6 +1215,45 @@ fn wire__crate__api__wallet_request_credential_impl(
                             api_credential_format,
                             api_credential_configuration_id,
                             api_proof_jwt,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__wallet_review_governed_sd_jwt_presentation_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    request_uri: impl CstDecode<String>,
+    governance_json: impl CstDecode<String>,
+    credential: impl CstDecode<String>,
+    issuer_snapshot_json: impl CstDecode<String>,
+    holder_public_jwk_json: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::DcoCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "wallet_review_governed_sd_jwt_presentation",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_request_uri = request_uri.cst_decode();
+            let api_governance_json = governance_json.cst_decode();
+            let api_credential = credential.cst_decode();
+            let api_issuer_snapshot_json = issuer_snapshot_json.cst_decode();
+            let api_holder_public_jwk_json = holder_public_jwk_json.cst_decode();
+            move |context| async move {
+                transform_result_dco::<_, _, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::wallet_review_governed_sd_jwt_presentation(
+                            api_request_uri,
+                            api_governance_json,
+                            api_credential,
+                            api_issuer_snapshot_json,
+                            api_holder_public_jwk_json,
                         )
                         .await?;
                         std::result::Result::Ok(output_ok)
@@ -5069,6 +5210,33 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+        port_: i64,
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_cancel_governed_sd_jwt_presentation_impl(port_, session_id)
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+        port_: i64,
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        remote_signature: *mut wire_cst_list_prim_u_8_loose,
+        governance_json: *mut wire_cst_list_prim_u_8_strict,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_complete_governed_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            remote_signature,
+            governance_json,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
         port_: i64,
         session_id: *mut wire_cst_list_prim_u_8_strict,
@@ -5163,6 +5331,25 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+        port_: i64,
+        session_id: *mut wire_cst_list_prim_u_8_strict,
+        claims_to_disclose: *mut wire_cst_list_String,
+        governance_json: *mut wire_cst_list_prim_u_8_strict,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_prepare_governed_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            claims_to_disclose,
+            governance_json,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
         port_: i64,
         request_uri: *mut wire_cst_list_prim_u_8_strict,
@@ -5216,6 +5403,25 @@ mod io {
             credential_format,
             credential_configuration_id,
             proof_jwt,
+        )
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_marty_authenticator_wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+        port_: i64,
+        request_uri: *mut wire_cst_list_prim_u_8_strict,
+        governance_json: *mut wire_cst_list_prim_u_8_strict,
+        credential: *mut wire_cst_list_prim_u_8_strict,
+        issuer_snapshot_json: *mut wire_cst_list_prim_u_8_strict,
+        holder_public_jwk_json: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__wallet_review_governed_sd_jwt_presentation_impl(
+            port_,
+            request_uri,
+            governance_json,
+            credential,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
         )
     }
 
@@ -7126,6 +7332,33 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_cancel_governed_sd_jwt_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        session_id: String,
+    ) {
+        wire__crate__api__wallet_cancel_governed_sd_jwt_presentation_impl(port_, session_id)
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_complete_governed_sd_jwt_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        session_id: String,
+        remote_signature: Box<[u8]>,
+        governance_json: String,
+        issuer_snapshot_json: String,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_complete_governed_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            remote_signature,
+            governance_json,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__wallet_complete_verified_sd_jwt_presentation(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         session_id: String,
@@ -7220,6 +7453,25 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_prepare_governed_sd_jwt_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        session_id: String,
+        claims_to_disclose: flutter_rust_bridge::for_generated::wasm_bindgen::JsValue,
+        governance_json: String,
+        issuer_snapshot_json: String,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_prepare_governed_sd_jwt_presentation_impl(
+            port_,
+            session_id,
+            claims_to_disclose,
+            governance_json,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
+        )
+    }
+
+    #[wasm_bindgen]
     pub fn wire__crate__api__wallet_prepare_verified_sd_jwt_presentation(
         port_: flutter_rust_bridge::for_generated::MessagePort,
         request_uri: String,
@@ -7273,6 +7525,25 @@ mod web {
             credential_format,
             credential_configuration_id,
             proof_jwt,
+        )
+    }
+
+    #[wasm_bindgen]
+    pub fn wire__crate__api__wallet_review_governed_sd_jwt_presentation(
+        port_: flutter_rust_bridge::for_generated::MessagePort,
+        request_uri: String,
+        governance_json: String,
+        credential: String,
+        issuer_snapshot_json: String,
+        holder_public_jwk_json: String,
+    ) {
+        wire__crate__api__wallet_review_governed_sd_jwt_presentation_impl(
+            port_,
+            request_uri,
+            governance_json,
+            credential,
+            issuer_snapshot_json,
+            holder_public_jwk_json,
         )
     }
 
