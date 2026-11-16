@@ -178,11 +178,12 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         expect(client.accepted, accept ? ['frozen-reviewed-offer'] : isEmpty);
         expect(find.byType(AlertDialog), findsNothing);
-        if (accept)
+        if (accept) {
           expect(
             find.text('Credential offer accepted successfully'),
             findsOneWidget,
           );
+        }
       },
     );
   }
