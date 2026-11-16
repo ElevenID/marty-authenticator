@@ -10,8 +10,8 @@ dependencies:
     decision: upgrade
     advisories: []
     tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/25
-    review-after: 2026-11-15
-    rationale: Rechecked 2026-10-16 against the upstream 13.0.2 changelog and Google's repository2-3.xml. Android 37.0 is now published, but this application still compiles against SDK 36. Version 13 requires SDK 37 and changes Android permanentlyDenied handling to a request-driven flow. Retain 12.0.3 until the platform upgrade and permission behavior migration are validated together in issue 25.
+    review-after: 2026-12-01
+    rationale: Rechecked 2026-11-16 against upstream main dd5055571a1f8cddcaae714e54d3f6c347e50ec5 (13.0.2 changelog), Google's repository2-3.xml, android/app/build.gradle and both camera permission consumers. Android 37.0 through 37.2 are published, but this application still compiles against SDK 36. Version 13 requires SDK 37 and changes permanentlyDenied detection to a request-driven flow. QRScannerView requests permission, while DocumentView still checks isPermanentlyDenied before opening it. Retain 12.0.3 until the SDK and permission behavior migration are validated together in issue 25; SDK publication alone no longer blocks that work. Re-review by December 1; this decision does not qualify the upgrade or waive dependency checks.
   - package: flutter_secure_storage_web
     ecosystem: pub
     owner: ElevenID
