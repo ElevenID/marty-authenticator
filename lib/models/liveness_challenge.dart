@@ -1,3 +1,5 @@
+import 'package:clock/clock.dart';
+
 import 'document_verification_config.dart';
 
 class LivenessChallenge {
@@ -19,7 +21,7 @@ class LivenessChallenge {
     this.nativePayload,
   });
 
-  bool get isExpired => DateTime.now().toUtc().isAfter(expiresAt);
+  bool get isExpired => !clock.now().toUtc().isBefore(expiresAt);
 
   void validateForCapture() {
     if (challengeId.isEmpty ||

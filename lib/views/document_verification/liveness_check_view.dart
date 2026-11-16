@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../utils/logger.dart';
@@ -67,7 +68,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
         _challenge = challenge;
         _gestures = challenge.gestures;
         _expirySeconds = challenge.expiresAt
-            .difference(DateTime.now().toUtc())
+            .difference(clock.now().toUtc())
             .inSeconds;
       });
       if (widget.enableExpiryTicker) _startExpiryTicker();
@@ -89,7 +90,7 @@ class _LivenessCheckViewState extends State<LivenessCheckView> {
         return;
       }
       final remaining = _challenge!.expiresAt
-          .difference(DateTime.now().toUtc())
+          .difference(clock.now().toUtc())
           .inSeconds;
       if (remaining <= 0) {
         setState(() => _expirySeconds = 0);

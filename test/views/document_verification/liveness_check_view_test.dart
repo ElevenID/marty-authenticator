@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/models/document_verification_config.dart';
 import 'package:marty_authenticator/models/liveness_challenge.dart';
@@ -88,34 +89,49 @@ void main() {
   });
 
   testWidgets('expires a short-lived challenge', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: LivenessCheckView(
-          config: DocumentVerificationConfig.passport,
-          cameraPreviewOverride: const ColoredBox(color: Colors.black),
-          mockGestureDelay: const Duration(minutes: 1),
-          challengeFactory: () async {
-            final now = DateTime.now().toUtc();
-            return LivenessChallenge(
-              challengeId: 'lv-short',
-              nonce: 'nonce-short',
-              issuedAt: now,
-              expiresAt: now.add(const Duration(seconds: 2)),
-              gestures: const [LivenessGesture.smile],
-              signature: 'signed-payload',
-              nativePayload: 'opaque-payload',
-            );
-          },
+    var now = DateTime.utc(2026, 11, 16);
+    await withClock(Clock(() => now), () async {
+      late LivenessChallenge challenge;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LivenessCheckView(
+            config: DocumentVerificationConfig.passport,
+            cameraPreviewOverride: const ColoredBox(color: Colors.black),
+            mockGestureDelay: const Duration(minutes: 1),
+            reviewBuilder: (_) => const Scaffold(
+              body: Text('Expired challenge must not advance'),
+            ),
+            challengeFactory: () async {
+              return challenge = LivenessChallenge(
+                challengeId: 'lv-short',
+                nonce: 'nonce-short',
+                issuedAt: now,
+                expiresAt: now.add(const Duration(seconds: 2)),
+                gestures: const [LivenessGesture.smile],
+                signature: 'signed-payload',
+                nativePayload: 'opaque-payload',
+              );
+            },
+          ),
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 2200)),
-    );
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump();
-    expect(find.textContaining('Expires in 0 s'), findsOneWidget);
+      );
+      await tester.pump();
+      expect(find.textContaining('Expires in 2 s'), findsOneWidget);
+      expect(challenge.isExpired, isFalse);
+      now = now.add(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.textContaining('Expires in 1 s'), findsOneWidget);
+      expect(challenge.isExpired, isFalse);
+      now = now.add(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      expect(find.textContaining('Expires in 0 s'), findsOneWidget);
+      expect(challenge.isExpired, isTrue);
+      expect(challenge.validateForCapture, throwsFormatException);
+      await tester.pump(const Duration(minutes: 1));
+      expect(find.text('Liveness challenge unavailable'), findsOneWidget);
+      expect(find.text('Expired challenge must not advance'), findsNothing);
+    });
   });
 
   testWidgets('rejects a malformed remote gesture set before camera starts', (
