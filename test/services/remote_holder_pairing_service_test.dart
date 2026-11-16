@@ -535,6 +535,57 @@ void main() {
   );
 
   test(
+    'managed request locator selects fixed paired endpoint without supplying scope',
+    () async {
+      const locator =
+          'https://verifier.example/v1/flows/instances/11111111-2222-4333-8444-555555555555/request';
+      const client = 'decentralized_identifier:did:web:verifier.example';
+      const original = '{"contract":"first","con\\u0074ract":"second"}';
+      var calls = 0;
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => confirmedEnrollment(),
+        client: MockClient((request) async {
+          calls++;
+          expect(request.url.origin, 'https://wallet.example');
+          expect(request.url.path, '/v1/devices/wallet-verifier-authority');
+          expect(request.url.queryParameters, {
+            'client_id': client,
+            'request_uri': locator,
+          });
+          expect(request.headers['authorization'], 'Bearer $bearer');
+          expect(request.followRedirects, isFalse);
+          expect(request.headers.containsKey('x-user-id'), isFalse);
+          return http.Response(
+            original,
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      addTearDown(service.close);
+      expect(
+        await service.fetchVerifierAuthorityJson(
+          clientId: client,
+          requestUri: locator,
+        ),
+        original,
+      );
+      for (final uri in [
+        'http://verifier.example/request',
+        '$locator?next=evil',
+        '$locator#fragment',
+        'https://user@verifier.example/request',
+      ]) {
+        await expectLater(
+          service.fetchVerifierAuthorityJson(clientId: client, requestUri: uri),
+          throwsFormatException,
+        );
+      }
+      expect(calls, 1);
+    },
+  );
+
+  test(
     'verifier read rejects unconfirmed and concurrently replaced pairing',
     () async {
       String stored = confirmedEnrollment();

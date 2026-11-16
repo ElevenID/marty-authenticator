@@ -475,16 +475,37 @@ class RemoteHolderPairingService {
   /// Retrieves unparsed verifier evidence from this confirmed pairing's origin.
   /// The native verifier must validate the original JSON, including duplicate
   /// members, before treating it as authority. Never decode/re-encode or cache it.
-  Future<String> fetchVerifierAuthorityJson({required String clientId}) async {
+  Future<String> fetchVerifierAuthorityJson({
+    required String clientId,
+    String? requestUri,
+  }) async {
     if (clientId.isEmpty ||
         clientId.length > 2048 ||
         clientId.trim() != clientId ||
         clientId.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
       throw const FormatException('Wallet verifier client ID is invalid');
     }
+    if (requestUri != null) {
+      final locator = Uri.tryParse(requestUri);
+      if (!clientId.startsWith('decentralized_identifier:did:') ||
+          requestUri.isEmpty ||
+          requestUri.length > 2048 ||
+          requestUri.trim() != requestUri ||
+          requestUri.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f) ||
+          locator == null ||
+          locator.scheme != 'https' ||
+          locator.host.isEmpty ||
+          locator.userInfo.isNotEmpty ||
+          locator.hasQuery ||
+          locator.hasFragment) {
+        throw const FormatException(
+          'Wallet verifier request locator is invalid',
+        );
+      }
+    }
     return _fetchAuthorityJson(
       path: '/v1/devices/wallet-verifier-authority',
-      query: {'client_id': clientId},
+      query: {'client_id': clientId, 'request_uri': ?requestUri},
       limit: 64 * 1024,
     );
   }
