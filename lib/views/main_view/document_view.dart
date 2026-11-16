@@ -70,6 +70,23 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
             body: SingleChildScrollView(
               child: Column(
                 children: [
+                  if (storageUnavailable)
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Your wallet storage could not be opened. Your existing data has been kept.',
+                          ),
+                          TextButton(
+                            onPressed: () => ref
+                                .read(cardStateProvider.notifier)
+                                .refreshCards(),
+                            child: const Text('Retry opening wallet'),
+                          ),
+                        ],
+                      ),
+                    ),
                   StackedNotificationCards(
                     notifications: [
                       NotificationCardData(
@@ -101,24 +118,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                   ),
                   const PassportPlaceholderCard(),
                   const MdlPlaceholderCard(),
-                  if (storageUnavailable)
-                    Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Your wallet storage could not be opened. Your existing data has been kept.',
-                          ),
-                          TextButton(
-                            onPressed: () => ref
-                                .read(cardStateProvider.notifier)
-                                .refreshCards(),
-                            child: const Text('Retry opening wallet'),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
+                  if (!storageUnavailable)
                     CascadingCardList(
                       cardGroups: cardGroups,
                       isDragging: isDragging,
