@@ -76,17 +76,6 @@ export function health_check(): string;
 export function init_panic_hook(): void;
 
 /**
- * Verify an Open Badges v2 assertion.
- *
- * # Arguments
- * * `request_json` - JSON payload with assertion + document_store
- *
- * # Returns
- * JSON: { "valid": true|false, "version": "2.0", "errors": [...], "warnings": [...] }
- */
-export function open_badge_ob2_verify(request_json: string): string;
-
-/**
  * Verify an Open Badges v3 credential with Data Integrity proof.
  *
  * # Arguments
@@ -108,11 +97,10 @@ export interface InitOutput {
     readonly generate_offer_uri: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
     readonly get_version: (a: number) => void;
     readonly health_check: (a: number) => void;
-    readonly open_badge_ob2_verify: (a: number, b: number, c: number) => void;
     readonly open_badge_ob3_verify: (a: number, b: number) => number;
     readonly init_panic_hook: () => void;
-    readonly __wasm_bindgen_func_elem_4435: (a: number, b: number, c: number, d: number) => void;
-    readonly __wasm_bindgen_func_elem_4449: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4297: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4308: (a: number, b: number, c: number, d: number) => void;
     readonly __wbindgen_export: (a: number) => void;
     readonly __wbindgen_export2: (a: number, b: number, c: number) => void;
     readonly __wbindgen_export3: (a: number, b: number) => number;

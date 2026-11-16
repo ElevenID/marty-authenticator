@@ -17,7 +17,6 @@ const allowed = new Set([
   'health_check',
   'initSync',
   'init_panic_hook',
-  'open_badge_ob2_verify',
   'open_badge_ob3_verify',
 ]);
 const forbidden = new Set([
@@ -27,6 +26,7 @@ const forbidden = new Set([
   'create_presentation',
   'extract_credentials_from_vp',
   'verify_jwt_claims',
+  'open_badge_ob2_verify',
 ]);
 const files = [
   '_marty_rs.js',
