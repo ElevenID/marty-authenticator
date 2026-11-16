@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
-import { Jimp } from 'jimp';
+import { writeFile } from 'node:fs/promises';
+import { decodeQrScreenshotPng } from './qr_screenshot_png.js';
 import jsQR from 'jsqr';
 
 (async () => {
@@ -35,13 +36,13 @@ import jsQR from 'jsqr';
     const dataUrl = await page.$eval(canvasSelector, (canvas) => canvas.toDataURL());
 
     const buffer = Buffer.from(dataUrl.replace(/^data:image\/\w+;base64,/, ""), 'base64');
-    const image = await Jimp.read(buffer);
+    const image = decodeQrScreenshotPng(buffer);
 
     // Debug: Save the image
-    await image.write('debug_qr.png');
-    console.error(`Image dimensions: ${image.bitmap.width}x${image.bitmap.height}`);
+    await writeFile('debug_qr.png', buffer);
+    console.error(`Image dimensions: ${image.width}x${image.height}`);
 
-    const code = jsQR(image.bitmap.data, image.bitmap.width, image.bitmap.height);
+    const code = jsQR(image.data, image.width, image.height);
 
     if (code) {
       console.log(code.data);

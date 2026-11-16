@@ -223,5 +223,39 @@ initial local tool invocation exposed Clang headers to GCC while rebuilding
 SQLCipher, then a scoped retry lacked ffigen's standard headers. Both failed
 runs were rejected. Supplying Clang headers only to bindgen/ffigen fixed the
 development tooling; no dependency or validation rule was relaxed. Final
-accepted-graph qualification remains required, as do actual authentication,
-issuer governance, installed-device, artifact and interoperability execution.
+accepted-graph qualification is recorded below. Actual authentication,
+issuer governance, installed-device, artifact and interoperability execution
+remain required.
+
+## Accepted graph and PNG QR tooling repair
+
+Core #440 merged at `8e06ee93b44aca4cb956cef5c2b74642620c736e` and
+Verifier #196 merged at `117289db9b19bb21acbe992c4a58d4877a004ae9`.
+Wallet commit `766c0ae90c061f1820e7543b2ad15264d7416765` uses those accepted
+revisions for all seven direct Core dependencies and the sync dependency.
+The eleven locked Core packages share that same revision. Package versions,
+wallet/verifier/prover roles, `kms-only` enforcement and the pinned SQLCipher
+closure remain unchanged. Actual native execution reports 70 passes and zero
+ignores; Rust formatting and bridge Clippy with warnings denied pass.
+Independent source review found no issue and executed no tests. This dependency
+qualification does not establish native authenticated sessions or installed
+wallet acceptance; FRB generation was not rerun for this pin-only change.
+
+GitHub advisory [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)
+affects Zod versions below 4.6.6. The Node QR tools inherited Zod 3 through Jimp's
+editing plugins. Both callers produce PNG through Playwright screenshot/canvas
+APIs, so they now use Jimp's existing `pngjs` 7.0.0 decoder directly. This removes
+the Jimp/Zod closure without forcing an incompatible schema major version.
+Retained package versions do not change. The decoder bounds encoded bytes and
+dimensions and chunk structure before parsing, permits only the non-interlaced
+8-bit RGB/RGBA profile produced by these browser APIs, preserves RGBA bytes and
+transparency, and checks PNG CRCs. Duplicate headers and trailing data are
+refused before decoding. Existing debug PNG output is ignored by Git.
+
+Four synthetic Node tests pass with zero skips, both live-fetch scripts pass
+syntax checks, and `npm audit` reports zero vulnerabilities in the resulting
+tooling graph. The live external QR services were not contacted. The existing
+Flutter test job installs the locked Node dependencies without lifecycle scripts
+and runs these checks; no runner was added. This is local tooling evidence,
+not hosted CI or external interoperability execution. The default-branch
+Dependabot alert remains open until an accepted main change resolves it.

@@ -13,6 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Set up QR tooling runtime
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24.22.1"
+          package-manager-cache: false
+
+      - name: Test bounded QR screenshot decoding
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node --test scripts/qr_screenshot_png.test.js
+          node --check scripts/fetch_live_qr.js
+          node --check scripts/fetch_live_presentation_qr.js
+
       - name: Guard mobile and desktop custody sources
         run: node scripts/audit_mobile_custody.mjs
 
