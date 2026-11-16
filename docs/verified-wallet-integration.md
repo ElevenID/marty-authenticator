@@ -259,3 +259,29 @@ Flutter test job installs the locked Node dependencies without lifecycle scripts
 and runs these checks; no runner was added. This is local tooling evidence,
 not hosted CI or external interoperability execution. The default-branch
 Dependabot alert remains open until an accepted main change resolves it.
+
+## Native managed-governance boundary under construction
+
+An internal native module now admits the original strict, duplicate-free device
+v2 envelope, rejects private/unknown material, checks the complete confirmed
+scope and current presentation-holder thumbprint, and binds exact locator,
+instance, callback, original-JWS digest and freshness. Enrolled public `kid`
+metadata is admitted separately from the closed RFC 7638 hash members. Fresh
+issuer evidence must match the same organization and confirmed issuer profile.
+The authentication method delegates DID/key binding and original signed-request
+verification to accepted Core and compares signed nonce/state/recipient/expiry
+with owner evidence.
+
+Actual native execution reports 72 passes with zero ignores, including scope,
+holder, recipient, digest, clock and escaped-duplicate negatives and rejection
+of forged JWS despite a well-scoped synthetic envelope. Formatting and bridge
+Clippy with warnings denied pass. Independent review caught the enrolled-key
+metadata mismatch; it was fixed and re-reviewed without remaining findings.
+Reviewers executed no tests.
+
+This module is internal, deliberately unwired groundwork. Its temporary local
+dead-code allowance does not relax any runtime validation or qualify a product
+entry point. Opaque authenticated request/review/preparation/completion storage,
+fresh authority at each transition, bridge regeneration, Dart product wiring
+and installed acceptance remain required. The existing presentation parser is
+not authenticated by the existence of this module.

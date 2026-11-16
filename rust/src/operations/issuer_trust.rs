@@ -33,7 +33,7 @@ struct IssuerKey {
     public_jwk: Value,
 }
 
-fn contains_private_material(value: &Value) -> bool {
+pub(crate) fn contains_private_material(value: &Value) -> bool {
     match value {
         Value::Array(values) => values.iter().any(contains_private_material),
         Value::Object(values) => values.iter().any(|(key, value)| {
