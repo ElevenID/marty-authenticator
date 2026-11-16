@@ -104,7 +104,23 @@ class AndroidEnvironment {
       throw Exception('Failed to find ar for $target in $toolchainPath');
     }
 
-    final targetArg = '--target=${target.rust}$minSdkVersion';
+    // The NDK's LLVM target and sysroot directory differ for ARMv7. Bindgen
+    // needs the same versioned target and Android headers as the C compiler;
+    // otherwise host libclang discovers host libc headers during cross-builds.
+    final clangTarget = target.rust == 'armv7-linux-androideabi'
+        ? 'armv7a-linux-androideabi'
+        : target.rust;
+    final sysrootTarget = target.rust == 'armv7-linux-androideabi'
+        ? 'arm-linux-androideabi'
+        : target.rust;
+    final targetArg = '--target=$clangTarget$minSdkVersion';
+    final sysroot = path.join(path.dirname(toolchainPath), 'sysroot');
+    final targetHeaders = path.join(sysroot, 'usr', 'include', sysrootTarget);
+    String quotedClangPath(String value) =>
+        '"${value.replaceAll('\\', '/').replaceAll('"', r'\"')}"';
+    final bindgenArgs =
+        '$targetArg --sysroot=${quotedClangPath(sysroot)} '
+        '-I${quotedClangPath(targetHeaders)}';
 
     final ccKey = 'CC_${target.rust}';
     final ccValue = path.join(toolchainPath, 'clang$exe');
@@ -148,6 +164,9 @@ class AndroidEnvironment {
       cfFlagsKey: cFlagsValue,
       cxxKey: cxxValue,
       cxxFlagsKey: cxxFlagsValue,
+      'CLANG_PATH': ccValue,
+      'BINDGEN_EXTRA_CLANG_ARGS_${target.rust.replaceAll('-', '_')}':
+          bindgenArgs,
       ranlibKey: ranlibValue,
       rustFlagsKey: rustFlagsValue,
       linkerKey: selfPath,

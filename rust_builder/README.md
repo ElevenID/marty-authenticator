@@ -17,6 +17,11 @@ application (26 and 28.2.13676358). The standalone build-tool test dependency
 closure is updated for Dart 3.12; collection, path and YAML stay exactly pinned.
 The plugin and standalone tool share the application SDK floors so formatting
 is consistent before and after the standalone package resolves dependencies.
+Android builds also pass the versioned NDK target, sysroot and target header
+directory to bindgen, and select the same NDK clang executable used for C builds.
+The ARMv7 LLVM target and sysroot-directory mapping follow
+[cargo-ndk](https://github.com/bbqsrc/cargo-ndk/blob/main/src/cargo.rs); host
+libc headers are not an Android binding input.
 
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
