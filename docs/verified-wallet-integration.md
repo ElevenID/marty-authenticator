@@ -356,3 +356,48 @@ QR rejection test is covered by the41-test focused run. Full exact-candidate
 qualification must use an isolated checkout with the committed file present.
 These mocked tests do not execute the real native signing/submission lifecycle,
 installed wallet, managed owner/PDP deployment or official suites.
+
+## Native remote-KMS and HTTPS qualification
+
+The native application boundary now has two explicitly executed guarded cases.
+The shared accepted Core test-support dependency creates only marked disposable
+OpenBao sign-only keys; request, credential-issuer, presentation-holder and
+binding keys remain non-exportable. Governance envelopes are synthetic fixture
+inputs, not observations from deployed Device Registration/Trust Profile/PDP.
+
+One process proves that an untrusted receiver CA cannot receive a presentation.
+A separate process, with the fixture CA scoped to that child process, exercises
+real Core DID/key/JWS authentication, exact signed VCT/algorithm policy, native
+consent, preparation of the stored signing input, remote ES256 and one HTTPS
+submission. The receiver captures the exact state and destination; native checks
+the submitted issuer JWT, one approved disclosure, holder signature, full client
+audience, nonce and disclosure hash. Replay, cancelled approval, changed user,
+authority revision, holder version, a newly signed replacement request, removed
+issuer keys, unsupported transaction semantics and policy mismatches fail closed.
+
+Actual execution reports two cases passed with zero ignores and exactly one
+HTTPS submission. The default native run separately reports78 passes and two
+fixture-only ignores; collection is not execution. Four driver cleanup regressions
+and12 private-fork boundary tests pass. Formatting and bridge Clippy with warnings
+denied pass. FRB2.13 regeneration succeeds with all13 generated outputs byte
+identical and content hash `-948931303`. No retained package identity/version was
+removed or upgraded: five new test-only packages support the accepted remote
+signers. Locked metadata retains `kms-only`, the wallet/verifier roles and no
+OID4VCI issuer capability. All12 Core packages, including the dev-only fixture,
+use accepted `8e06ee93b44aca4cb956cef5c2b74642620c736e`.
+
+The existing bridge CI job now executes both guarded cases from the actual
+compiler-recorded test executable; driver changes trigger the job. Its fresh
+bounded local container and private TLS/capture directory are removed on success
+or failure with exact ownership/nonce checks. An independent review caught a
+cleanup ordering gap and missing workflow filters; both were fixed and the
+cleanup regressions plus final native cases pass. Reviewers ran no tests. The
+first trusted receiver attempt failed correctly with an unsuitable CA-role leaf;
+the fixture now uses a separate root and a serverAuth CA:false IP certificate.
+TLS chain and hostname checks are retained; no global trust store was changed.
+
+This native application/provider qualification is stronger than mocks but does
+not establish deployed governance, paused DeviceHTTP races, governed issuer-owner
+admission, installed Android/iOS/Web wallet, rootless installer or official-suite
+acceptance. Existing installations, services, production flags and cloud resources
+were not changed.

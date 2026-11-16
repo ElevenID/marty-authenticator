@@ -496,3 +496,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "governed_presentation_native_tests.rs"]
+mod native_tests;

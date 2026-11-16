@@ -10,6 +10,8 @@ on:
       - "rust/src/**"
       - "rust/Cargo.toml"
       - "rust/Cargo.lock"
+      - "scripts/qualify_native_wallet_governance.py"
+      - "scripts/test_qualify_native_wallet_governance.py"
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
@@ -26,6 +28,8 @@ on:
       - "rust/src/**"
       - "rust/Cargo.toml"
       - "rust/Cargo.lock"
+      - "scripts/qualify_native_wallet_governance.py"
+      - "scripts/test_qualify_native_wallet_governance.py"
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
@@ -99,6 +103,12 @@ jobs:
 
       - name: Test native bridge behavior and lifecycle
         run: cargo test --locked --manifest-path rust/Cargo.toml --lib
+
+      - name: Qualify governed native wallet with owned TLS and non-exportable keys
+        run: |
+          python scripts/test_qualify_native_wallet_governance.py
+          cargo test --locked --manifest-path rust/Cargo.toml --lib --no-run --message-format=json > "$RUNNER_TEMP/wallet-native-artifacts.jsonl"
+          python scripts/qualify_native_wallet_governance.py --artifacts "$RUNNER_TEMP/wallet-native-artifacts.jsonl"
 
       - name: Upload generated bridge surfaces
         if: always()

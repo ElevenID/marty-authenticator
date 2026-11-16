@@ -57,6 +57,10 @@ tokio = { version = "1.0", features = ["rt", "sync"] }
 [build-dependencies]
 flutter_rust_bridge_codegen = "=2.13.0"
 
+[dev-dependencies]
+# Accepted Core test-only remote signers. No software holder-key fallback.
+marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44aca4cb956cef5c2b74642620c736e" }
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
