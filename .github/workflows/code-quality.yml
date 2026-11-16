@@ -16,9 +16,13 @@ concurrency:
 
 jobs:
   flutter-quality:
-    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@e20b459cf2f78967272d3b54762f1a9bf1379360
+    uses: ElevenID/.github/.github/workflows/quality-flutter.yml@bf660ca444c40b260b413d599f6504d4324227e8
     with:
       flutter-version: "3.44.6"
+      working-directory: "."
+      native-rust-bridge: true
       test-command: flutter test --coverage
       build-command: flutter build apk --debug --flavor netknights -t lib/main_document.dart
       android-api-level: "36"
+    secrets:
+      PRIVATE_FORKS_READ_TOKEN: ${{ secrets.PRIVATE_FORKS_READ_TOKEN }}

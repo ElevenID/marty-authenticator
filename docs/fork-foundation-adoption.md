@@ -11,8 +11,10 @@ The exact revisions are recorded in `rust/Cargo.toml` and `rust/Cargo.lock`.
 The original foundation coordinated Core PR 414, SD-JWT PR 44, isomdl PR 38 and
 Verifier PR 180. Retained PR 57 now pins accepted Core
 `8e06ee93b44aca4cb956cef5c2b74642620c736e` (Core #440) and Verifier
-`117289db9b19bb21acbe992c4a58d4877a004ae9` (Verifier #196), with its graph and
+`3d4e81c25360fd434bb4f9fa90b245b7ddd6033c` (Verifier #197), with its graph and
 behavior requalified separately from that historical foundation.
+The wallet selects only the portable policy/profile client of marty-sync; native
+trust-list acquisition, database and USB-import capabilities are not wallet roles.
 Existing wallet, native biometrics and ZK prover feature selections are retained.
 
 The retired standalone SSI-JWT patch removed an unused `serde_with` 2.x

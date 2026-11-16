@@ -25,6 +25,8 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
+  marty_authenticator_bridge:
+    path: rust_builder
   app_links: ^7.2.1
   asn1lib: ^1.6.8
   async: ^2.11.0

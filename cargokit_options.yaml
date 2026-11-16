@@ -1,0 +1,2 @@
+# Build the reviewed locked source. Do not substitute downloaded libraries.
+use_precompiled_binaries: false

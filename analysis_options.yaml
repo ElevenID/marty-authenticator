@@ -1,4 +1,7 @@
 analyzer:
+  # Cargokit is a standalone build package with its own pinned tests/analysis.
+  exclude:
+    - rust_builder/cargokit/build_tool/**
   errors:
     constant_identifier_names: ignore
 include: package:flutter_lints/flutter.yaml

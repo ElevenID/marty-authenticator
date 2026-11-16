@@ -22,8 +22,8 @@ marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44
 marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44aca4cb956cef5c2b74642620c736e", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44aca4cb956cef5c2b74642620c736e" }
 
-# Sync for policy caching
-marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "117289db9b19bb21acbe992c4a58d4877a004ae9" }
+# Portable policy/profile client only; native trust-list acquisition is not a wallet role.
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "3d4e81c25360fd434bb4f9fa90b245b7ddd6033c", default-features = false }
 
 # Biometric face verification (ONNX-backed for on-device matching)
 marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "8e06ee93b44aca4cb956cef5c2b74642620c736e", features = ["native", "onnx", "liveness"] }
