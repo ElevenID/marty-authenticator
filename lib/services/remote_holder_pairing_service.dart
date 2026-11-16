@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -97,17 +98,35 @@ class RemoteHolderPairingService {
   static Future<Object?> _readBoundedJson(
     http.StreamedResponse response,
     int limit,
+  ) async => jsonDecode(await _readBoundedUtf8(response, limit));
+
+  static Future<String> _readBoundedUtf8(
+    http.StreamedResponse response,
+    int limit,
   ) async {
     final bytes = <int>[];
-    await for (final chunk in response.stream.timeout(
-      const Duration(seconds: 45),
-    )) {
-      bytes.addAll(chunk);
-      if (bytes.length > limit) {
-        throw const FormatException('Remote wallet response is too large');
+    final chunks = StreamIterator(response.stream);
+    final deadline = Completer<bool>();
+    final timer = Timer(const Duration(seconds: 45), () {
+      deadline.completeError(
+        TimeoutException('Remote wallet response timed out'),
+      );
+    });
+    try {
+      while (await Future.any([chunks.moveNext(), deadline.future])) {
+        bytes.addAll(chunks.current);
+        if (bytes.length > limit) {
+          throw const FormatException('Remote wallet response is too large');
+        }
       }
+      return utf8.decode(bytes);
+    } finally {
+      timer.cancel();
+      // Initiate cancellation immediately, but do not let a transport's
+      // cancellation future postpone the total read deadline or replace the
+      // original read error. No further chunks are consumed after this point.
+      unawaited(chunks.cancel().catchError((Object _) {}));
     }
-    return jsonDecode(utf8.decode(bytes));
   }
 
   Future<String> pair({
@@ -451,6 +470,50 @@ class RemoteHolderPairingService {
       }
     }
     return snapshot;
+  }
+
+  /// Retrieves unparsed verifier evidence from this confirmed pairing's origin.
+  /// The native verifier must validate the original JSON, including duplicate
+  /// members, before treating it as authority. Never decode/re-encode or cache it.
+  Future<String> fetchVerifierAuthorityJson({required String clientId}) async {
+    if (clientId.isEmpty ||
+        clientId.length > 2048 ||
+        clientId.trim() != clientId ||
+        clientId.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
+      throw const FormatException('Wallet verifier client ID is invalid');
+    }
+    final paired = await _currentConfirmedBearer();
+    final request = http.Request(
+      'GET',
+      paired.origin
+          .resolve('/v1/devices/wallet-verifier-authority')
+          .replace(queryParameters: {'client_id': clientId}),
+    )..followRedirects = false;
+    request.headers['authorization'] = 'Bearer ${paired.bearer}';
+    request.headers['accept'] = 'application/json';
+    final response = await _client
+        .send(request)
+        .timeout(const Duration(seconds: 45));
+    if (response.statusCode != 200) {
+      throw StateError('Wallet verifier trust is unavailable');
+    }
+    final mediaType = response.headers['content-type']
+        ?.split(';')
+        .first
+        .trim()
+        .toLowerCase();
+    if (mediaType != 'application/json') {
+      throw const FormatException(
+        'Wallet verifier trust media type is invalid',
+      );
+    }
+    final json = await _readBoundedUtf8(response, 64 * 1024);
+    // A concurrent pairing replacement/renewal must invalidate this response.
+    final current = await _currentConfirmedBearer();
+    if (current.origin != paired.origin || current.bearer != paired.bearer) {
+      throw StateError('Remote wallet pairing changed during verifier read');
+    }
+    return json;
   }
 
   /// Signs an exact JWS input with the paired, non-exportable remote key.

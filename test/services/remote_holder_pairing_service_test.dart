@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -437,6 +438,215 @@ void main() {
       service.close();
     },
   );
+
+  test(
+    'verifier transport preserves raw duplicate JSON and paired origin',
+    () async {
+      const original = '{"authority":{"revision":"first","revision":"second"}}';
+      var calls = 0;
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => confirmedEnrollment(),
+        client: MockClient((request) async {
+          calls++;
+          expect(request.url.origin, 'https://wallet.example');
+          expect(request.url.path, '/v1/devices/wallet-verifier-authority');
+          expect(request.url.queryParameters, {
+            'client_id': 'did:example:rp?x=&y',
+          });
+          expect(request.headers['authorization'], 'Bearer $bearer');
+          expect(request.followRedirects, isFalse);
+          expect(request.headers.containsKey('x-user-id'), isFalse);
+          return http.Response(
+            original,
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }),
+      );
+      addTearDown(service.close);
+      expect(
+        await service.fetchVerifierAuthorityJson(
+          clientId: 'did:example:rp?x=&y',
+        ),
+        original,
+      );
+      expect(
+        await service.fetchVerifierAuthorityJson(
+          clientId: 'did:example:rp?x=&y',
+        ),
+        original,
+      );
+      expect(
+        calls,
+        2,
+        reason:
+            'native validation requires freshly retrieved original evidence',
+      );
+    },
+  );
+
+  test(
+    'verifier transport rejects status, media type, size and malformed UTF8',
+    () async {
+      http.Response result = http.Response(
+        '{}',
+        302,
+        headers: {'location': 'https://other.example/'},
+      );
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => confirmedEnrollment(),
+        client: MockClient((request) async => result),
+      );
+      addTearDown(service.close);
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsStateError,
+      );
+      result = http.Response('{}', 200, headers: {'content-type': 'text/html'});
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsFormatException,
+      );
+      result = http.Response(
+        'a' * (64 * 1024 + 1),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsFormatException,
+      );
+      result = http.Response.bytes(
+        [0xff],
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsFormatException,
+      );
+      for (final client in ['', ' client', 'client\n', 'a' * 2049]) {
+        await expectLater(
+          service.fetchVerifierAuthorityJson(clientId: client),
+          throwsFormatException,
+        );
+      }
+    },
+  );
+
+  test(
+    'verifier read rejects unconfirmed and concurrently replaced pairing',
+    () async {
+      String stored = confirmedEnrollment();
+      var calls = 0;
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => stored,
+        client: MockClient((request) async {
+          calls++;
+          final changed = jsonDecode(stored) as Map<String, dynamic>;
+          changed['device_credential'] = base64UrlEncode(
+            List<int>.filled(32, 42),
+          ).replaceAll('=', '');
+          stored = jsonEncode(changed);
+          return http.Response(
+            '{}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+      addTearDown(service.close);
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsStateError,
+      );
+      stored = jsonEncode({
+        ...jsonDecode(stored) as Map<String, dynamic>,
+        'confirmed': false,
+      });
+      await expectLater(
+        service.fetchVerifierAuthorityJson(clientId: 'client'),
+        throwsFormatException,
+      );
+      expect(
+        calls,
+        1,
+        reason: 'unconfirmed enrollment must not send the device bearer',
+      );
+    },
+  );
+
+  test('verifier read has a total deadline despite continuous chunks', () {
+    fakeAsync((clock) {
+      var listened = false;
+      var cancellations = 0;
+      final cancellation = Completer<void>();
+      var returned = false;
+      Object? failure;
+      final chunks = StreamController<List<int>>(
+        onListen: () {
+          listened = true;
+        },
+        onCancel: () {
+          cancellations++;
+          return cancellation.future;
+        },
+      );
+      final service = RemoteHolderPairingService(
+        readEnrollment: () async => confirmedEnrollment(),
+        client: MockClient.streaming(
+          (request, body) async => http.StreamedResponse(
+            chunks.stream,
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
+      service
+          .fetchVerifierAuthorityJson(clientId: 'client')
+          .then<void>(
+            (_) {
+              returned = true;
+            },
+            onError: (Object error, StackTrace stack) {
+              failure = error;
+            },
+          );
+      clock.flushMicrotasks();
+      expect(
+        listened,
+        isTrue,
+        reason: 'arm the actual body subscription before advancing time',
+      );
+      for (var elapsed = 0; elapsed < 44; elapsed++) {
+        chunks.add([0x20]);
+        clock.flushMicrotasks();
+        clock.elapse(const Duration(seconds: 1));
+      }
+      expect(failure, isNull);
+      expect(cancellations, 0);
+      chunks.add([0x20]);
+      clock.flushMicrotasks();
+      clock.elapse(const Duration(seconds: 1));
+      clock.flushMicrotasks();
+      expect(
+        cancellations,
+        1,
+        reason: 'deadline cancels the stream before surfacing its error',
+      );
+      expect(
+        failure,
+        isA<TimeoutException>(),
+        reason: clock.pendingTimersDebugString.join(';'),
+      );
+      expect(returned, isFalse);
+      expect(cancellations, 1);
+      cancellation.complete();
+      clock.flushMicrotasks();
+      unawaited(chunks.close());
+      service.close();
+    });
+  });
 
   test('rejects private, stale, and unconfirmed issuer trust reads', () async {
     final now = DateTime.now().toUtc();
