@@ -101,7 +101,7 @@ void main() {
       await tester.drag(find.byType(PageView), const Offset(-600, 0));
       await tester.pumpAndSettle();
       expect(find.text('2 of 2'), findsOneWidget);
-      await tester.pageBack();
+      await tester.tap(find.text('Back').first);
       await tester.pumpAndSettle();
       expect(find.byType(DocumentView), findsOneWidget);
       expect((await WalletCredentialStore.getAll()).length, 3);
@@ -140,7 +140,7 @@ void main() {
           size,
         );
         expect(find.text('RECEIPT ID'), findsWidgets);
-        await tester.pageBack();
+        await tester.tap(find.text('Back').first);
         await tester.pumpAndSettle();
       },
     );
