@@ -8,9 +8,18 @@ import '../models/card_data.dart';
 import '../services/wallet_credential_store.dart';
 import '../utils/logger.dart';
 
+final walletStorageUnavailableProvider = StateProvider<bool>((ref) => false);
+
 final cardStateProvider =
     StateNotifierProvider<CardStateNotifier, List<CardGroup>>((ref) {
-      return CardStateNotifier();
+      return CardStateNotifier(
+        onStorageUnavailable: (unavailable) {
+          if (ref.mounted) {
+            ref.read(walletStorageUnavailableProvider.notifier).state =
+                unavailable;
+          }
+        },
+      );
     });
 
 final activeCardGroupsProvider = Provider<List<CardGroup>>((ref) {
@@ -40,11 +49,12 @@ final expiredCardsProvider = Provider<List<CardData>>((ref) {
 final draggingCardProvider = StateProvider<CardData?>((ref) => null);
 
 class CardStateNotifier extends StateNotifier<List<CardGroup>> {
-  CardStateNotifier() : super([]) {
+  CardStateNotifier({this.onStorageUnavailable}) : super([]) {
     loadCards();
   }
 
   final _storage = const FlutterSecureStorage();
+  final void Function(bool)? onStorageUnavailable;
   static const _storageKey = 'card_groups_data';
   Future<void> _lastWrite = Future.value();
 
@@ -56,6 +66,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
 
     try {
       final stored = await WalletCredentialStore.getAll();
+      onStorageUnavailable?.call(false);
       Logger.debug(
         'DEBUG: Loaded ${stored.length} credentials from WalletCredentialStore',
       );
@@ -63,6 +74,7 @@ class CardStateNotifier extends StateNotifier<List<CardGroup>> {
         allCards.add(_mapStoredCredentialToCardData(cred));
       }
     } catch (e) {
+      onStorageUnavailable?.call(true);
       Logger.error('Error loading credentials from WalletCredentialStore: $e');
       return;
     }

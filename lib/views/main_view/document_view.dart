@@ -47,6 +47,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   @override
   Widget build(BuildContext context) {
     final cardGroups = ref.watch(activeCardGroupsProvider);
+    final storageUnavailable = ref.watch(walletStorageUnavailableProvider);
     final expiredCards = ref.watch(expiredCardsProvider);
     final draggingCard = ref.watch(draggingCardProvider);
     final isDragging = draggingCard != null;
@@ -100,17 +101,35 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                   ),
                   const PassportPlaceholderCard(),
                   const MdlPlaceholderCard(),
-                  CascadingCardList(
-                    cardGroups: cardGroups,
-                    isDragging: isDragging,
-                    onCardTap: _handleCardTap,
-                    onCardLongPress: _handleCardLongPress,
-                    onReorder: (oldIndex, newIndex) {
-                      ref
-                          .read(cardStateProvider.notifier)
-                          .reorderGroup(oldIndex, newIndex);
-                    },
-                  ),
+                  if (storageUnavailable)
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Your wallet storage could not be opened. Your existing data has been kept.',
+                          ),
+                          TextButton(
+                            onPressed: () => ref
+                                .read(cardStateProvider.notifier)
+                                .refreshCards(),
+                            child: const Text('Retry opening wallet'),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    CascadingCardList(
+                      cardGroups: cardGroups,
+                      isDragging: isDragging,
+                      onCardTap: _handleCardTap,
+                      onCardLongPress: _handleCardLongPress,
+                      onReorder: (oldIndex, newIndex) {
+                        ref
+                            .read(cardStateProvider.notifier)
+                            .reorderGroup(oldIndex, newIndex);
+                      },
+                    ),
                   const SizedBox(height: 40),
                   if (expiredCards.isNotEmpty)
                     IgnorePointer(

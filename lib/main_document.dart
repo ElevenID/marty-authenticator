@@ -5,9 +5,11 @@ import 'package:marty_authenticator/l10n/app_localizations.dart';
 import 'package:marty_authenticator/utils/app_scroll_behavior.dart';
 import 'package:marty_authenticator/views/main_view/document_view.dart';
 import 'package:marty_authenticator/rust/marty_bridge.dart/frb_generated.dart';
+import 'services/browser_storage_migration.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configureBrowserSecureStorage();
   await RustLib.init();
   runApp(const DocumentApp());
 }

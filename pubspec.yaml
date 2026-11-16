@@ -48,6 +48,8 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.4.2
   flutter_secure_storage: ^10.3.1
+  flutter_secure_storage_platform_interface: 2.1.1
+  flutter_secure_storage_web: 2.1.1
   flutter_svg: ^2.0.16
   flutter_zxing: ^2.1.0
   font_awesome_flutter: ^11.0.0
@@ -77,6 +79,7 @@ dependencies:
   simple_icons: ^16.23.0
   url_launcher: ^6.3.3
   uuid: ^4.5.2
+  web: 1.1.1
   zxing2: ^0.2.4
 
   # SpruceID integration dependencies - Real SDK libraries
@@ -108,14 +111,6 @@ dev_dependencies:
     sdk: flutter
   json_serializable: ^6.15.2
   mockito: ^5.4.4
-
-# Dependency overrides to address WASM compatibility issues
-dependency_overrides:
-  # Temporarily exclude flutter_secure_storage_web to resolve WASM compatibility
-  # This addresses dart:html, dart:js, and dart:js_util incompatibilities with WASM
-  flutter_secure_storage_web:
-    # Use a stub implementation or override to shared_preferences for WASM builds
-    path: ./local_wasm_overrides/flutter_secure_storage_web
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
