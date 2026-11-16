@@ -10,7 +10,6 @@ import '../../widgets/scrolling_wallet_header.dart';
 import '../../widgets/cascading_card_list.dart';
 import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
-import '../../utils/view_utils.dart';
 import '../qr_scanner_view/qr_scanner_view.dart';
 import '../card_details_screen.dart';
 import '../grouped_card_details_screen.dart';
@@ -152,8 +151,11 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   Future<void> _handleScanPressed() async {
     try {
       if (await Permission.camera.isPermanentlyDenied) {
-        showAsyncDialog(
+        if (!mounted) return;
+        await showDialog<void>(
+          context: context,
           builder: (_) => DefaultDialog(
+            hasCloseButton: true,
             title: Text(
               AppLocalizations.of(context)!.grantCameraPermissionDialogTitle,
             ),

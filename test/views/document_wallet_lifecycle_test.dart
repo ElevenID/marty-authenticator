@@ -7,11 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/l10n/app_localizations.dart';
+import 'package:marty_authenticator/main_document.dart';
 import 'package:marty_authenticator/providers/card_state_provider.dart';
 import 'package:marty_authenticator/services/wallet_credential_store.dart';
 import 'package:marty_authenticator/views/expired_passes_view.dart';
 import 'package:marty_authenticator/views/grouped_card_details_screen.dart';
 import 'package:marty_authenticator/views/main_view/document_view.dart';
+import 'package:marty_authenticator/views/qr_scanner_view/qr_scanner_view.dart';
 import 'package:marty_authenticator/widgets/cascading_card_list.dart';
 import 'package:marty_authenticator/widgets/stacked_wallet_card.dart';
 
@@ -293,4 +295,88 @@ void main() {
       expect((await WalletCredentialStore.getAll()).length, 2);
     },
   );
+  testWidgets('permanent camera denial is visible without a global navigator', (
+    tester,
+  ) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, (call) async {
+          if (call.method == 'checkPermissionStatus') return 4;
+          throw StateError('Permanently denied camera must not be requested');
+        });
+    await store('kept', 'issuer-kept');
+    final value = await container();
+    await mount(tester, value, const DocumentView());
+    await tester.tap(find.byIcon(Icons.qr_code_scanner));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(QRScannerView), findsNothing);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect((await WalletCredentialStore.getAll()).single.id, 'kept');
+  });
+
+  testWidgets(
+    'the actual document app registers the scanner route and returns after denial',
+    (tester) async {
+      var requests = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(permissionChannel, (call) async {
+            if (call.method == 'checkPermissionStatus') return 1;
+            if (call.method == 'requestPermissions') {
+              requests++;
+              return <int, int>{1: 0};
+            }
+            throw StateError('Unexpected permission operation');
+          });
+      await tester.pumpWidget(const DocumentApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.qr_code_scanner));
+      await tester.pumpAndSettle();
+      expect(find.byType(QRScannerView), findsOneWidget);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      final labels = AppLocalizations.of(
+        tester.element(find.byType(QRScannerView)),
+      )!;
+      await tester.tap(find.text(labels.cancel));
+      await tester.pumpAndSettle();
+      expect(find.byType(DocumentView), findsOneWidget);
+      expect(requests, 1);
+      expect(await WalletCredentialStore.getAll(), isEmpty);
+    },
+  );
+
+  testWidgets('scanner permission retry respects a new permanent denial', (
+    tester,
+  ) async {
+    var requests = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, (call) async {
+          if (call.method == 'checkPermissionStatus') return 1;
+          if (call.method == 'requestPermissions') {
+            requests++;
+            return <int, int>{1: requests == 1 ? 0 : 4};
+          }
+          throw StateError('Unexpected permission operation');
+        });
+    await tester.pumpWidget(const DocumentApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.qr_code_scanner));
+    await tester.pumpAndSettle();
+    final labels = AppLocalizations.of(
+      tester.element(find.byType(QRScannerView)),
+    )!;
+    await tester.tap(find.text(labels.grantCameraPermissionDialogButton));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(labels.grantCameraPermissionDialogPermanentlyDenied),
+      findsOneWidget,
+    );
+    expect(find.text(labels.grantCameraPermissionDialogButton), findsNothing);
+    expect(requests, 2);
+    expect(await WalletCredentialStore.getAll(), isEmpty);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(DocumentView), findsOneWidget);
+  });
 }
