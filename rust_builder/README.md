@@ -54,6 +54,13 @@ unchanged. Reproduce that job's profile by setting the same environment variable
 when invoking `flutter build apk --debug`. The organization Flutter-quality
 caller's approved build command and default debug profile remain unchanged.
 
+That job uses Flutter's supported `apk --config-only` preparation, followed by
+one Gradle invocation for `assembleNetknightsDebug` and
+`assembleNetknights_debugDebug`. Both tasks use `lib/main_document.dart` and all
+three configured Flutter platforms; shared native tasks execute in the same
+Gradle graph. Both APKs must pass the existing native payload validator before
+the artifact is retained. A successful configuration step alone is not a build.
+
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
 `cargokit_options.yaml` rejects downloaded precompiled library substitution.

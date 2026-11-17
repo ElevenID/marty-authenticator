@@ -132,12 +132,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Build the Android APK (Debug)
-      - name: Build Android APK (Debug)
-        run: flutter build apk -t "lib/main_document.dart" --debug --flavor netknights
-
-      - name: Build internal Android flavor (Debug)
-        run: flutter build apk -t "lib/main_document.dart" --debug --flavor netknights_debug
+      - name: Build both Android debug flavors
+        shell: bash
+        run: |
+          flutter build apk -t lib/main_document.dart --debug --no-pub --config-only
+          cd android
+          ./gradlew --console=plain \
+            -Ptarget="$GITHUB_WORKSPACE/lib/main_document.dart" \
+            -Ptarget-platform=android-arm,android-arm64,android-x64 \
+            -Pbase-application-name=android.app.Application \
+            assembleNetknightsDebug assembleNetknights_debugDebug
 
       - name: Validate packaged native ABIs and ELF alignment
         shell: bash
