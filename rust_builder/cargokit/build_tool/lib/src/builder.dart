@@ -139,17 +139,19 @@ class RustBuilder {
   String get _toolchain => _buildOptions?.toolchain.name ?? 'stable';
   String get _effectiveToolchain => _resolvedToolchain ?? _toolchain;
 
-  /// Returns the path of directory containing build artifacts.
-  Future<String> build() async {
+  /// Cargo arguments shared by execution and the native command contract test.
+  List<String> get cargoArguments {
     final extraArgs = _buildOptions?.flags ?? [];
     final manifestPath = path.join(environment.manifestDir, 'Cargo.toml');
-    runCommand('rustup', [
-      'run',
-      _effectiveToolchain,
-      'cargo',
+    return [
       (target.android == null && environment.glibcVersion != null)
           ? 'zigbuild'
+          : target.android != null
+          ? 'rustc'
           : 'build',
+      // Android packages only the shared library. Do not assemble a second,
+      // unused static archive containing the whole native dependency graph.
+      if (target.android != null) ...['--lib', '--crate-type', 'cdylib'],
       ...extraArgs,
       '--manifest-path',
       manifestPath,
@@ -163,6 +165,16 @@ class RustBuilder {
               : ""),
       '--target-dir',
       environment.targetTempDir,
+    ];
+  }
+
+  /// Returns the path of directory containing build artifacts.
+  Future<String> build() async {
+    runCommand('rustup', [
+      'run',
+      _effectiveToolchain,
+      'cargo',
+      ...cargoArguments,
     ], environment: await _buildEnvironment());
     return path.join(
       environment.targetTempDir,

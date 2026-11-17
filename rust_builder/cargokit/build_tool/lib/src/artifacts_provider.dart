@@ -60,7 +60,8 @@ class ArtifactProvider {
       builder.prepare(rustup);
       _log.info('Building ${environment.crateInfo.packageName} for $target');
       final targetDir = await builder.build();
-      // For local build accept both static and dynamic libraries.
+      // Android must produce the shared library its JNI packager consumes.
+      // Other platforms retain the existing static/dynamic local selection.
       final artifactNames = <String>{
         ...getArtifactNames(
           target: target,
@@ -68,12 +69,13 @@ class ArtifactProvider {
           aritifactType: AritifactType.dylib,
           remote: false,
         ),
-        ...getArtifactNames(
-          target: target,
-          libraryName: environment.crateInfo.libraryName,
-          aritifactType: AritifactType.staticlib,
-          remote: false,
-        ),
+        if (target.android == null)
+          ...getArtifactNames(
+            target: target,
+            libraryName: environment.crateInfo.libraryName,
+            aritifactType: AritifactType.staticlib,
+            remote: false,
+          ),
       };
       final artifacts = artifactNames
           .map(

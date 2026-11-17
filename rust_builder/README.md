@@ -61,6 +61,13 @@ three configured Flutter platforms; shared native tasks execute in the same
 Gradle graph. Both APKs must pass the existing native payload validator before
 the artifact is retained. A successful configuration step alone is not a build.
 
+Android Cargokit invokes `cargo rustc --lib --crate-type cdylib` with the same
+toolchain, locked/offline flags, manifest, package, target and environment. JNI
+packaging uses only that shared library, so Android no longer assembles the
+unused static archive as well. Other platforms keep the existing Cargo build
+and static/dynamic artifact behavior. This changes build output selection,
+not native features, exported bridge APIs or the inference/prover backend.
+
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
 `cargokit_options.yaml` rejects downloaded precompiled library substitution.
