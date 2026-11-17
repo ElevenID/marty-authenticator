@@ -748,10 +748,9 @@ mod tests {
 
     #[tokio::test]
     async fn missing_session_fails_before_network_or_trust_use() {
-        let error = complete("missing", &[0; 64], "{}")
-            .await
-            .err()
-            .expect("missing receipt must fail");
+        let Err(error) = complete("missing", &[0; 64], "{}").await else {
+            panic!("missing receipt must fail");
+        };
         assert!(error.to_string().contains("missing or already consumed"));
     }
 
@@ -793,10 +792,9 @@ mod tests {
             },
         );
         assert!(complete(&session_id, &[0; 64], &snapshot).await.is_err());
-        let replay = complete(&session_id, &[0; 64], "{}")
-            .await
-            .err()
-            .expect("consumed receipt must fail");
+        let Err(replay) = complete(&session_id, &[0; 64], "{}").await else {
+            panic!("consumed receipt must fail");
+        };
         assert!(replay.to_string().contains("missing or already consumed"));
     }
 }

@@ -1,5 +1,6 @@
 //! One-use, verified SD-JWT presentation sessions. Only the exact JWS input
 //! crosses to the paired remote signer; issuer and holder keys stay public.
+//! Historical test fixtures only; product submission uses governed sessions.
 
 use std::collections::{HashMap, HashSet};
 use std::sync::{Mutex, OnceLock};
@@ -16,11 +17,9 @@ use sha2::{Digest, Sha256};
 
 use super::issuer_trust::resolver_from_snapshot;
 
-const MAX_CREDENTIAL_BYTES: usize = 1024 * 1024;
 const MAX_PENDING_SESSIONS: usize = 16;
 
 pub(crate) struct Selection {
-    pub request_uri: String,
     pub approved_request_digest: String,
     pub credential: String,
     pub query_id: String,
@@ -256,34 +255,6 @@ impl SdJwtIssuerKeyResolver for PresentationIssuerKeys<'_> {
         }
         self.trusted.resolve(issuer, key_id, algorithm)
     }
-}
-
-pub(crate) async fn prepare(selection: Selection) -> anyhow::Result<PreparedSelection> {
-    ensure!(
-        !selection.request_uri.is_empty() && selection.request_uri.len() <= 8192,
-        "presentation request URI is invalid"
-    );
-    ensure!(
-        !selection.credential.is_empty() && selection.credential.len() <= MAX_CREDENTIAL_BYTES,
-        "selected credential is invalid"
-    );
-    ensure!(
-        !selection.query_id.is_empty() && selection.query_id.len() <= 256,
-        "selected query ID is invalid"
-    );
-    ensure!(
-        selection.claims_to_disclose.len() <= 64
-            && selection
-                .claims_to_disclose
-                .iter()
-                .all(|claim| !claim.is_empty() && claim.len() <= 256),
-        "selected claims are invalid"
-    );
-
-    let request = WalletEngine::new()
-        .parse_presentation_request(&selection.request_uri)
-        .await?;
-    prepare_for_request(selection, request)
 }
 
 fn prepare_for_request(
@@ -548,7 +519,6 @@ mod tests {
         let request = request_for_claims(&["email"]);
         for claims_to_disclose in [vec![], vec!["email".into(), "address".into()]] {
             let selection = Selection {
-                request_uri: "openid4vp://unused".into(),
                 approved_request_digest: request_digest(&request).unwrap(),
                 credential: "not-inspected".into(),
                 query_id: "member".into(),
@@ -619,7 +589,6 @@ mod tests {
             "urn:elevenid:credential:verified-wallet",
         );
         Selection {
-            request_uri: "openid4vp://unused".into(),
             approved_request_digest: request_digest(request).unwrap(),
             credential: vector["credential"].as_str().unwrap().into(),
             query_id: "member".into(),
