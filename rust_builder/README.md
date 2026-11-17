@@ -30,18 +30,29 @@ existing `ort-sys` 2.0.0-rc.12 native backend. Microsoft documents this
 SHA-256 and each ABI library's size and SHA-256. The archive digest was
 bootstrapped from that HTTPS download; no independent signed checksum was
 available. Gradle verifies cached/downloaded bytes before extracting only the
-four runtime libraries used by Cargokit's existing target selection. No AAR
+four official runtime libraries. Cargokit selects the libraries for Flutter's
+validated requested targets. No AAR
 Java dependency or precompiled Rust bridge is substituted.
 
 Both `ORT_LIB_PATH` and `ORT_LIB_LOCATION` select the verified target library;
 dynamic linking and no-download settings prevent the crate's missing ARMv7
 prebuilt fallback. Cargokit copies that same library beside the source-built
 bridge. The app retains its bytes through packaging and the APK validator
-requires its pinned digest for all three configured Flutter ABIs. Debug builds
-still compile Cargokit's additional x86 target; Flutter's existing ABI filters
-control APK inclusion. The runtime supports ORT API 24 and Android API 24; the
+requires its pinned digest for all three configured Flutter ABIs. The old
+scaffold's debug-only x86 addition is removed to match Flutter 3.44, whose
+supported/default platforms and embedding dependencies are ARMv7, ARM64 and
+x86_64. Both debug and release builds use Flutter's validated requested target
+set; all three required APK ABIs remain. The runtime supports ORT API 24 and Android API 24; the
 unchanged Rust feature selection uses ORT API 17 and the app minimum remains 26.
 No inference backend, operator set, prover or wallet feature is disabled.
+
+The dedicated Android APK job uses `CARGO_PROFILE_DEV_DEBUG=line-tables-only` to retain
+backtrace source locations without generating full Rust dependency type/variable
+debug information for each ABI. Debug assertions, overflow checks and target
+selection retain their defaults; the runner and 15-minute Android job limit are
+unchanged. Reproduce that job's profile by setting the same environment variable
+when invoking `flutter build apk --debug`. The organization Flutter-quality
+caller's approved build command and default debug profile remain unchanged.
 
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
