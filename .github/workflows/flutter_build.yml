@@ -45,9 +45,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      # Preserve backtrace locations without generating full dependency type info
-      # four times. Keep the same runner, time bound and debug assertions.
-      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+      # Omit native debug information for the bounded qualification APK build.
+      # Keep the same runner, time bound, features and debug assertions.
+      CARGO_PROFILE_DEV_DEBUG: "0"
     # Removed the 'strategy' block with 'api-level' and 'target' matrix
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

@@ -46,9 +46,9 @@ set; all three required APK ABIs remain. The runtime supports ORT API 24 and And
 unchanged Rust feature selection uses ORT API 17 and the app minimum remains 26.
 No inference backend, operator set, prover or wallet feature is disabled.
 
-The dedicated Android APK job uses `CARGO_PROFILE_DEV_DEBUG=line-tables-only` to retain
-backtrace source locations without generating full Rust dependency type/variable
-debug information for each ABI. Debug assertions, overflow checks and target
+The dedicated Android APK job uses `CARGO_PROFILE_DEV_DEBUG=0` to omit native
+debug information for each ABI. Rust backtraces in those qualification APKs lose
+source-line detail. Debug assertions, overflow checks, features and target
 selection retain their defaults; the runner and 15-minute Android job limit are
 unchanged. Reproduce that job's profile by setting the same environment variable
 when invoking `flutter build apk --debug`. The organization Flutter-quality
