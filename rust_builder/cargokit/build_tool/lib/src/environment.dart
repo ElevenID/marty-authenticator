@@ -43,6 +43,9 @@ class Environment {
   static List<String> get targetPlatforms =>
       _getEnv("CARGOKIT_TARGET_PLATFORMS").split(',');
 
+  static String? get androidOrtDirectory =>
+      _getEnvOptional('CARGOKIT_ANDROID_ORT_DIR');
+
   static String? get ohosSdkHome => _getEnvOptional("CARGOKIT_OHOS_SDK_HOME");
 
   // CMAKE

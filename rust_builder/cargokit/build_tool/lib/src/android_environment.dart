@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:version/version.dart';
 
+import 'android_onnx_runtime.dart';
 import 'target.dart';
 import 'util.dart';
 
@@ -16,6 +17,8 @@ class AndroidEnvironment {
     required this.minSdkVersion,
     required this.targetTempDir,
     required this.target,
+    this.manifestDir,
+    this.ortDirectory,
   });
 
   static void clangLinkerWrapper(List<String> args) {
@@ -49,6 +52,8 @@ class AndroidEnvironment {
 
   /// Target being built.
   final Target target;
+  final String? manifestDir;
+  final String? ortDirectory;
 
   bool ndkIsInstalled() {
     final ndkPath = path.join(sdkPath, 'ndk', ndkVersion);
@@ -174,6 +179,14 @@ class AndroidEnvironment {
       '_CARGOKIT_NDK_LINK_TARGET': targetArg,
       '_CARGOKIT_NDK_LINK_CLANG': ccValue,
       'CARGOKIT_TOOL_TEMP_DIR': toolTempDir,
+      if (ortDirectory != null)
+        ...AndroidOnnxRuntime.load(
+          manifestDir:
+              manifestDir ?? (throw StateError('ORT manifest is absent')),
+          runtimeDir: ortDirectory!,
+          target: target,
+          minSdkVersion: minSdkVersion,
+        ).environment,
     };
   }
 

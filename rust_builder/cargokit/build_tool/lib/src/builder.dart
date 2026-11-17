@@ -47,6 +47,7 @@ class BuildEnvironment {
   final String? androidSdkPath;
   final String? androidNdkVersion;
   final int? androidMinSdkVersion;
+  final String? androidOrtDirectory;
   final String? javaHome;
   final String? ohosSdkHome;
 
@@ -62,6 +63,7 @@ class BuildEnvironment {
     this.androidSdkPath,
     this.androidNdkVersion,
     this.androidMinSdkVersion,
+    this.androidOrtDirectory,
     this.javaHome,
     this.glibcVersion,
     this.ohosSdkHome,
@@ -100,6 +102,7 @@ class BuildEnvironment {
           ? int.parse(Environment.minSdkVersion)
           : null,
       javaHome: isAndroid ? Environment.javaHome : null,
+      androidOrtDirectory: isAndroid ? Environment.androidOrtDirectory : null,
       ohosSdkHome: Environment.ohosSdkHome,
     );
   }
@@ -197,6 +200,8 @@ class RustBuilder {
       minSdkVersion: minSdkVersion,
       targetTempDir: environment.targetTempDir,
       target: target,
+      manifestDir: environment.manifestDir,
+      ortDirectory: environment.androidOrtDirectory,
     );
     if (!env.ndkIsInstalled() && environment.javaHome != null) {
       env.installNdk(javaHome: environment.javaHome!);

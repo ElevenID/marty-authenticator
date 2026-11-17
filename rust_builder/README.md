@@ -23,6 +23,26 @@ The ARMv7 LLVM target and sysroot-directory mapping follow
 [cargo-ndk](https://github.com/bbqsrc/cargo-ndk/blob/main/src/cargo.rs); host
 libc headers are not an Android binding input.
 
+Android also stages the official full ONNX Runtime 1.24.2 Android AAR for the
+existing `ort-sys` 2.0.0-rc.12 native backend. Microsoft documents this
+[native-library distribution](https://onnxruntime.ai/docs/install/#cc-1).
+`android/onnxruntime-android.lock.json` pins its primary Maven HTTPS URL, archive
+SHA-256 and each ABI library's size and SHA-256. The archive digest was
+bootstrapped from that HTTPS download; no independent signed checksum was
+available. Gradle verifies cached/downloaded bytes before extracting only the
+four runtime libraries used by Cargokit's existing target selection. No AAR
+Java dependency or precompiled Rust bridge is substituted.
+
+Both `ORT_LIB_PATH` and `ORT_LIB_LOCATION` select the verified target library;
+dynamic linking and no-download settings prevent the crate's missing ARMv7
+prebuilt fallback. Cargokit copies that same library beside the source-built
+bridge. The app retains its bytes through packaging and the APK validator
+requires its pinned digest for all three configured Flutter ABIs. Debug builds
+still compile Cargokit's additional x86 target; Flutter's existing ABI filters
+control APK inclusion. The runtime supports ORT API 24 and Android API 24; the
+unchanged Rust feature selection uses ORT API 17 and the app minimum remains 26.
+No inference backend, operator set, prover or wallet feature is disabled.
+
 `../rust/cargokit.yaml` selects Rust 1.97.1 and locked, offline Cargo builds.
 Fetch the reviewed lockfile dependencies before building. The root
 `cargokit_options.yaml` rejects downloaded precompiled library substitution.

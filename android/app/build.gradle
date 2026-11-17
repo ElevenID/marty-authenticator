@@ -74,6 +74,13 @@ android {
         jvmTarget = '17'
     }
 
+    packagingOptions {
+        jniLibs {
+            // Retain the reviewed runtime bytes for the APK digest check.
+            keepDebugSymbols += ['**/libonnxruntime.so']
+        }
+    }
+
     defaultConfig {
         applicationId "it.netknights.piauthenticator"
         minSdkVersion 26  // Required for SpruceID Mobile SDK

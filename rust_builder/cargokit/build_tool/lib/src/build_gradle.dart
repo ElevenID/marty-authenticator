@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import 'android_onnx_runtime.dart';
 import 'artifacts_provider.dart';
 import 'builder.dart';
 import 'environment.dart';
@@ -46,6 +47,15 @@ class BuildGradle {
         if (lib.type == AritifactType.dylib) {
           File(lib.path).copySync(path.join(outputDir, lib.finalFileName));
         }
+      }
+      if (environment.androidOrtDirectory != null) {
+        final runtime = AndroidOnnxRuntime.load(
+          manifestDir: environment.manifestDir,
+          runtimeDir: environment.androidOrtDirectory!,
+          target: target,
+          minSdkVersion: environment.androidMinSdkVersion!,
+        );
+        runtime.library.copySync(path.join(outputDir, 'libonnxruntime.so'));
       }
     }
   }

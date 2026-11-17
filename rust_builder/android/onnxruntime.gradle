@@ -1,0 +1,133 @@
+// App-owned dependency preparation. The Rust bridge remains source-built.
+import groovy.json.JsonSlurper
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.security.MessageDigest
+import java.util.zip.ZipFile
+
+def pinFile = file('onnxruntime-android.lock.json')
+def pin = new JsonSlurper().parse(pinFile)
+def abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'] as Set
+def expectedUrl = 'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.24.2/onnxruntime-android-1.24.2.aar'
+if (pin.schema != 1 || pin.version != '1.24.2' || pin.ortSysVersion != '2.0.0-rc.12' ||
+    pin.androidMinApi != 24 || pin.url != expectedUrl ||
+    !(pin.sha256 ==~ /[a-f0-9]{64}/) || !(pin.libraries instanceof Map) ||
+    pin.libraries.keySet() != abis) {
+    throw new GradleException('Invalid pinned Android ONNX dependency')
+}
+pin.libraries.each { abi, value ->
+    if (!(value.bytes instanceof Number) || value.bytes < 64 || value.bytes > 64 * 1024 * 1024 ||
+        !(value.sha256 ==~ /[a-f0-9]{64}/)) {
+        throw new GradleException('Invalid pinned Android ONNX library')
+    }
+}
+
+def buildRoot = project.buildDir.canonicalFile
+def archive = new File(buildRoot, "onnxruntime-download/${pin.version}-${pin.sha256}.aar")
+def runtimeRoot = new File(buildRoot, "onnxruntime/${pin.version}-${pin.sha256}")
+def requireBound = { File value ->
+    if (!value.canonicalPath.startsWith(buildRoot.path + File.separator)) {
+        throw new GradleException('Android ONNX output escaped the build directory')
+    }
+}
+requireBound(archive)
+requireBound(runtimeRoot)
+
+def digest = { File value ->
+    if (!Files.isRegularFile(value.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+        throw new GradleException('Android ONNX dependency must be a regular file')
+    }
+    if (value.length() > 64 * 1024 * 1024) throw new GradleException('Android ONNX file exceeds its size bound')
+    def sha = MessageDigest.getInstance('SHA-256')
+    value.withInputStream { input ->
+        byte[] buffer = new byte[1024 * 1024]
+        int count
+        while ((count = input.read(buffer)) != -1) sha.update(buffer, 0, count)
+    }
+    sha.digest().encodeHex().toString()
+}
+def copyBounded = { InputStream input, File output, Long maximum, Long exact ->
+    long total = 0
+    output.withOutputStream { stream ->
+        byte[] buffer = new byte[1024 * 1024]
+        int count
+        while ((count = input.read(buffer)) != -1) {
+            total += count
+            if (total > maximum) throw new GradleException('Android ONNX dependency exceeds its size bound')
+            stream.write(buffer, 0, count)
+        }
+    }
+    if (exact != null && total != exact) throw new GradleException('Truncated Android ONNX dependency')
+}
+
+def prepareRuntime = tasks.register('prepareMartyAndroidOnnxRuntime') {
+    inputs.file(pinFile)
+    inputs.file(file('../../rust/Cargo.lock'))
+    outputs.file(archive)
+    outputs.dir(runtimeRoot)
+    // Recheck cached bytes on every build; do not silently adopt a host runtime.
+    outputs.upToDateWhen { false }
+    doLast {
+        requireBound(archive)
+        requireBound(runtimeRoot)
+        archive.parentFile.mkdirs()
+        runtimeRoot.mkdirs()
+        if (!archive.exists()) {
+            def connection = new URL(pin.url).openConnection()
+            connection.connectTimeout = 30000
+            connection.readTimeout = 60000
+            connection.instanceFollowRedirects = false
+            if (connection.responseCode != 200) throw new GradleException('Pinned Android ONNX download failed')
+            long length = connection.contentLengthLong
+            if (length > 64 * 1024 * 1024) throw new GradleException('Android ONNX archive is too large')
+            def partial = File.createTempFile('onnx-', '.aar.partial', archive.parentFile)
+            connection.inputStream.withCloseable { input ->
+                copyBounded(input, partial, 64L * 1024 * 1024, length >= 0 ? length : null)
+            }
+            if (digest(partial) != pin.sha256) throw new GradleException('Android ONNX archive checksum mismatch')
+            Files.move(partial.toPath(), archive.toPath())
+        }
+        if (digest(archive) != pin.sha256) throw new GradleException('Cached Android ONNX archive checksum mismatch')
+        new ZipFile(archive).withCloseable { zip ->
+            def wanted = abis.collect { 'jni/' + it + '/libonnxruntime.so' } as Set
+            def selected = [:]
+            zip.entries().each { entry ->
+                if (wanted.contains(entry.name)) {
+                    if (selected.containsKey(entry.name) || entry.directory) {
+                        throw new GradleException('Duplicate Android ONNX archive entry')
+                    }
+                    selected[entry.name] = entry
+                }
+            }
+            if (selected.keySet() != wanted) throw new GradleException('Android ONNX archive lacks a required ABI')
+            abis.each { abi ->
+                def expected = pin.libraries[abi]
+                def entry = selected['jni/' + abi + '/libonnxruntime.so']
+                if (entry.size != expected.bytes) throw new GradleException('Android ONNX archive entry size mismatch')
+                def library = new File(runtimeRoot, "${abi}/libonnxruntime.so")
+                requireBound(library)
+                library.parentFile.mkdirs()
+                if (!library.exists()) {
+                    def partial = File.createTempFile('onnx-', '.so.partial', library.parentFile)
+                    zip.getInputStream(entry).withCloseable { input ->
+                        copyBounded(input, partial, expected.bytes as long, expected.bytes as Long)
+                    }
+                    if (digest(partial) != expected.sha256) throw new GradleException('Android ONNX library checksum mismatch')
+                    Files.move(partial.toPath(), library.toPath())
+                }
+                if (library.length() != expected.bytes || digest(library) != expected.sha256) {
+                    throw new GradleException('Cached Android ONNX library checksum mismatch')
+                }
+            }
+        }
+    }
+}
+
+// Cargokit copies the verified per-target runtime beside the bridge. No second
+// AAR dependency or JNI producer is added to the application.
+project.cargokit.androidOrtDirectory = runtimeRoot.absolutePath
+tasks.matching { it.name.startsWith('cargokitCargoBuild') }.configureEach {
+    dependsOn(prepareRuntime)
+    inputs.file(pinFile)
+    inputs.dir(runtimeRoot)
+}

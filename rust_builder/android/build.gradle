@@ -54,3 +54,5 @@ cargokit {
     manifestDir = "../../rust"
     libname = "marty_authenticator_bridge"
 }
+
+apply from: "onnxruntime.gradle"

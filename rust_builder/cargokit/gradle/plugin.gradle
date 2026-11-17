@@ -10,6 +10,7 @@ apply plugin: CargoKitPlugin
 class CargoKitExtension {
     String manifestDir; // Relative path to folder containing Cargo.toml
     String libname; // Library name within Cargo.toml. Must be a cdylib
+    String androidOrtDirectory; // Optional verified Android runtime staging root.
 }
 
 abstract class CargoKitBuildTask extends DefaultTask {
@@ -43,6 +44,10 @@ abstract class CargoKitBuildTask extends DefaultTask {
 
     @Input
     List<String> targetPlatforms
+
+    @Input
+    @Optional
+    String androidOrtDirectory
 
     @TaskAction
     def build() {
@@ -82,6 +87,9 @@ abstract class CargoKitBuildTask extends DefaultTask {
             environment "CARGOKIT_MIN_SDK_VERSION", minSdkVersion
             environment "CARGOKIT_TARGET_PLATFORMS", targetPlatforms.join(",")
             environment "CARGOKIT_JAVA_HOME", System.properties['java.home']
+            if (androidOrtDirectory != null) {
+                environment "CARGOKIT_ANDROID_ORT_DIR", androidOrtDirectory
+            }
         }
     }
 }
@@ -170,6 +178,7 @@ class CargoKitPlugin implements Plugin<Project> {
                     compileSdkVersion = plugin.project.android.compileSdkVersion.substring(8) as int
                     targetPlatforms = platforms
                     pluginFile = CargoKitPlugin.file
+                    androidOrtDirectory = project.cargokit.androidOrtDirectory
                 }
                 def onTask = { newTask ->
                     if (newTask.name == "merge${buildType.capitalize()}NativeLibs") {

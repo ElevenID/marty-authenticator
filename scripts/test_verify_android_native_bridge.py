@@ -1,7 +1,9 @@
 from pathlib import Path
+import hashlib
 import struct
 import tempfile
 import unittest
+from unittest.mock import patch
 import warnings
 import zipfile
 
@@ -31,7 +33,12 @@ class AndroidNativePayloadTests(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.apk = Path(self.directory.name) / "synthetic.apk"
         self.entries = {f"lib/{abi}/{library}": elf(abi)
-                        for abi in verifier.ABIS for library in ("libflutter.so", verifier.BRIDGE)}
+                        for abi in verifier.ABIS for library in ("libflutter.so", verifier.BRIDGE, verifier.ONNX_RUNTIME)}
+        # These are structural fixture bytes, never executable runtime evidence.
+        fixture_hashes = {abi: hashlib.sha256(elf(abi)).hexdigest() for abi in verifier.ABIS}
+        replacement = patch.object(verifier, "runtime_hashes", return_value=fixture_hashes)
+        replacement.start()
+        self.addCleanup(replacement.stop)
 
     def write(self):
         with zipfile.ZipFile(self.apk, "w") as archive:
@@ -76,6 +83,14 @@ class AndroidNativePayloadTests(unittest.TestCase):
         self.entries["lib/other/libextra.so"] = elf("x86_64")
         self.write()
         with self.assertRaisesRegex(ValueError, "unexpected"):
+            verifier.verify(self.apk)
+
+    def test_structurally_valid_runtime_substitution_is_rejected(self):
+        native = bytearray(elf("arm64-v8a"))
+        native.extend(b"substituted runtime")
+        self.entries[f"lib/arm64-v8a/{verifier.ONNX_RUNTIME}"] = native
+        self.write()
+        with self.assertRaisesRegex(ValueError, "runtime checksum"):
             verifier.verify(self.apk)
 
 

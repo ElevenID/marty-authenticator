@@ -11,6 +11,13 @@ import zipfile
 
 ABIS = {"armeabi-v7a": (1, 40), "arm64-v8a": (2, 183), "x86_64": (2, 62)}
 BRIDGE = "libmarty_authenticator_bridge.so"
+ONNX_RUNTIME = "libonnxruntime.so"
+
+
+def runtime_hashes() -> dict[str, str]:
+    lock = Path(__file__).resolve().parents[1] / "rust_builder/android/onnxruntime-android.lock.json"
+    data = json.loads(lock.read_text(encoding="utf-8"))
+    return {abi: data["libraries"][abi]["sha256"] for abi in ABIS}
 
 
 def check_elf(stream, abi: str) -> None:
@@ -56,14 +63,20 @@ def verify(apk: Path) -> dict:
             raise ValueError("duplicate APK native library entries")
         flutter_abis = {abi for abi in ABIS if f"lib/{abi}/libflutter.so" in names}
         bridge_abis = {abi for abi in ABIS if f"lib/{abi}/{BRIDGE}" in names}
-        if flutter_abis != set(ABIS) or bridge_abis != flutter_abis:
-            raise ValueError("APK must bundle Flutter and the native bridge for all three configured ABIs")
+        runtime_abis = {abi for abi in ABIS if f"lib/{abi}/{ONNX_RUNTIME}" in names}
+        if flutter_abis != set(ABIS) or bridge_abis != flutter_abis or runtime_abis != flutter_abis:
+            raise ValueError("APK must bundle Flutter, bridge and ONNX runtime for all three configured ABIs")
+        expected_runtime_hashes = runtime_hashes()
         for entry in native:
             parts = entry.filename.split("/")
             if len(parts) != 3 or parts[1] not in ABIS:
                 raise ValueError("unexpected APK native library path or ABI")
             with archive.open(entry) as stream:
                 check_elf(stream, parts[1])
+                if parts[2] == ONNX_RUNTIME:
+                    stream.seek(0)
+                    if hashlib.file_digest(stream, "sha256").hexdigest() != expected_runtime_hashes[parts[1]]:
+                        raise ValueError(f"APK ONNX runtime checksum mismatch for {parts[1]}")
     digest = hashlib.file_digest
     with apk.open("rb") as stream:
         sha256 = digest(stream, "sha256").hexdigest()
