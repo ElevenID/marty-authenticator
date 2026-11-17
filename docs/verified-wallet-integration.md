@@ -7,14 +7,18 @@ integration does not activate or release a production wallet.
 
 ## Dependency and bridge boundary
 
-The manifests pin accepted Core `8e06ee93b44aca4cb956cef5c2b74642620c736e`
-(Core #440) and Verifier `3d4e81c25360fd434bb4f9fa90b245b7ddd6033c`
-(Verifier #197). Core dependencies of `marty-sync` share that revision. The
+The manifests pin accepted Core `8b553b472890cebbf4972cd0fdcb440141085d35`
+(Core #441) and Verifier `8b417a9bd3618fe2bb690727dfee1fd7c6de12eb`
+(Verifier #198). Core dependencies of `marty-sync` share that revision. The
 wallet uses only the portable policy/profile client of marty-sync, without
 native trust-list acquisition, database or USB-import capabilities. The
 reviewed SSI, SD-JWT, isomdl, linked-data and SQLCipher closures remain
 coordinated. The application retains its wallet, verification and prover roles;
 it does not enable an issuer capability or local private-key fallback.
+
+Core #441 supplies Android target-owned OpenSSL/zstd includes and NDK static
+C++ link metadata for the real prover. This packaging support is separate from
+APK loading and installed-device acceptance; it does not change holder custody.
 
 FRB 2.13 connects Dart orchestration to native operations. Public holder keys
 and exact remote signatures cross that boundary; identity-signing private keys

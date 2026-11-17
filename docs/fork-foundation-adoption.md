@@ -10,8 +10,8 @@ registry SSI graph and standalone SSI-JWT patch are removed from the lockfile.
 The exact revisions are recorded in `rust/Cargo.toml` and `rust/Cargo.lock`.
 The original foundation coordinated Core PR 414, SD-JWT PR 44, isomdl PR 38 and
 Verifier PR 180. Retained PR 57 now pins accepted Core
-`8e06ee93b44aca4cb956cef5c2b74642620c736e` (Core #440) and Verifier
-`3d4e81c25360fd434bb4f9fa90b245b7ddd6033c` (Verifier #197), with its graph and
+`8b553b472890cebbf4972cd0fdcb440141085d35` (Core #441) and Verifier
+`8b417a9bd3618fe2bb690727dfee1fd7c6de12eb` (Verifier #198), with its graph and
 behavior requalified separately from that historical foundation.
 The wallet selects only the portable policy/profile client of marty-sync; native
 trust-list acquisition, database and USB-import capabilities are not wallet roles.
@@ -47,8 +47,8 @@ dependency adoption alone.
 
 ## Qualification
 
-The reviewed foundation candidate passes a native Linux bridge check and all
-37 existing Rust bridge tests against the committed graph, using the real native
+The historical foundation candidate passed a native Linux bridge check and all
+37 then-existing Rust bridge tests against the committed graph, using the real native
 ZK and ONNX runtime dependencies. Those tests do not qualify biometric model
 accuracy or device behavior. All 11 existing private-fork reader tests pass.
 Independent metadata review confirms one Core revision across all 11 selected
