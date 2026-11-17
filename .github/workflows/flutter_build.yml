@@ -121,9 +121,10 @@ jobs:
       - name: Generate localization files
         run: flutter gen-l10n
 
-      # Cache Gradle dependencies for faster subsequent builds
-      - name: Cache Gradle dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+      # Read existing caches without a post-job archive delaying the bounded
+      # APK qualification job after validation and artifact retention complete.
+      - name: Restore Gradle dependencies
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
             ~/.gradle/caches
