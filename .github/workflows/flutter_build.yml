@@ -76,6 +76,7 @@ jobs:
       - name: Require trusted native fork access
         if: vars.PRIVATE_FORKS_ENABLED == 'true'
         shell: bash
+        working-directory: ${{ github.workspace }}
         run: python .github/scripts/private-forks.py check
 
       - name: Fetch locked native fork dependencies
@@ -120,6 +121,7 @@ jobs:
           flutter pub get
           flutter gen-l10n
           flutter build apk -t lib/main_document.dart --debug --no-pub --config-only
+          git diff --exit-code --name-status HEAD --
 
       - name: Restore Gradle dependencies
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
@@ -212,6 +214,7 @@ jobs:
           flutter pub get
           flutter gen-l10n
           flutter build apk -t lib/main_document.dart --debug --no-pub --config-only
+          git diff --exit-code --name-status HEAD --
 
       - name: Restore Gradle dependencies
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9

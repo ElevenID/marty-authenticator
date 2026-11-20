@@ -219,9 +219,14 @@ class ActualContextTests(unittest.TestCase):
                                ("GITHUB_REPOSITORY", "foreign/repo"), ("CARGO_PROFILE_DEV_DEBUG", "1")):
                 with self.subTest(key=key), self.assertRaises(ValueError):
                     artifacts.current_context(root, dict(env, **{key: value}))
-            (root / "rust/Cargo.lock").write_text("changed")
-            with self.assertRaises(subprocess.CalledProcessError):
-                artifacts.current_context(root, env)
+            for name in ("rust/Cargo.lock", "android/gradle.properties"):
+                file = root / name
+                original = file.read_bytes()
+                file.write_text("changed")
+                with self.subTest(name=name), self.assertRaises(subprocess.CalledProcessError):
+                    artifacts.current_context(root, env)
+                file.write_bytes(original)
+            self.assertEqual(artifacts.current_context(root, env), context)
 
     def test_strip_tool_preserves_alias_and_rejects_escape_or_wrong_ndk(self):
         with tempfile.TemporaryDirectory() as temp:

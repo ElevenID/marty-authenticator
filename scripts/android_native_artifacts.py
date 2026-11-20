@@ -36,7 +36,7 @@ INPUTS = (
     "rust-toolchain.toml", "cargokit_options.yaml",
     "rust_builder/android/onnxruntime-android.lock.json",
     "rust_builder/cargokit/gradle/plugin.gradle",
-    "android/app/build.gradle", "android/settings.gradle",
+    "android/app/build.gradle", "android/settings.gradle", "android/gradle.properties",
     "android/gradle/wrapper/gradle-wrapper.properties",
 )
 MAX_LIBRARY = 256 * 1024 * 1024

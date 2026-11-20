@@ -70,6 +70,23 @@ Git checkout, temporary outputs and Gradle daemon, and also runs in the final
 Android job. The Cargokit helper is tracked as executable so the real task's
 Unix setup does not change the source tree before provenance is recorded.
 
+`android/gradle.properties` also records `android.builtInKotlin=false` and
+`android.newDsl=false`, the values that pinned Flutter 3.44.6 otherwise appends
+while preparing the Android configuration. Flutter's
+[built-in Kotlin migrator](https://github.com/flutter/flutter/blob/3.44.6/packages/flutter_tools/lib/src/android/migrations/disable_built_in_kotlin_migration.dart)
+and [DSL migrator](https://github.com/flutter/flutter/blob/3.44.6/packages/flutter_tools/lib/src/android/migrations/disable_new_dsl_migration.dart)
+leave existing properties unchanged. Both source and assembly jobs reject any
+tracked change immediately after Flutter configuration, and artifact export
+and validation retain their complete clean-tree check. The properties file is
+included in the explicit native input hashes.
+
+In run [44800287738](https://github.com/ElevenID/marty-authenticator/actions/runs/44800287738),
+all three native source tasks compiled, but export rejected tracked changes
+after Flutter reported both properties-file upgrades. No artifacts from that
+failed run qualified. Committing the migration values preserves the existing
+build configuration; the repaired candidate still needs its own successful
+hosted compilation and APK qualification.
+
 These tests use synthetic ELF fixtures to exercise rejection and transfer logic.
 They do not replace actual Android compilation, APK payload validation, native
 loading, installed-wallet flows or independent interoperability qualification.
