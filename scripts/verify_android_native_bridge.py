@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
 import json
 from pathlib import Path
 import struct
-import sys
 import zipfile
 
 
@@ -54,7 +54,7 @@ def check_elf(stream, abi: str) -> None:
         raise ValueError(f"native ELF has no LOAD segments for {abi}")
 
 
-def verify(apk: Path) -> dict:
+def verify(apk: Path, native_manifests: dict | None = None) -> dict:
     with zipfile.ZipFile(apk) as archive:
         native = [entry for entry in archive.infolist()
                   if entry.filename.startswith("lib/") and entry.filename.endswith(".so")]
@@ -77,18 +77,33 @@ def verify(apk: Path) -> dict:
                     stream.seek(0)
                     if hashlib.file_digest(stream, "sha256").hexdigest() != expected_runtime_hashes[parts[1]]:
                         raise ValueError(f"APK ONNX runtime checksum mismatch for {parts[1]}")
+        if native_manifests is not None:
+            from android_native_artifacts import verify_apk_bytes
+            verify_apk_bytes(archive, native_manifests)
     digest = hashlib.file_digest
     with apk.open("rb") as stream:
         sha256 = digest(stream, "sha256").hexdigest()
-    return {"apk": apk.name, "sha256": sha256, "abis": sorted(bridge_abis),
-            "nativeLibrariesChecked": len(native), "scope": "packaged ELF/ABI structure, not installed-wallet acceptance"}
+    result = {"apk": apk.name, "sha256": sha256, "abis": sorted(bridge_abis),
+              "nativeLibrariesChecked": len(native), "scope": "packaged ELF/ABI structure, not installed-wallet acceptance"}
+    if native_manifests is not None:
+        result["nativeSource"] = next(iter(native_manifests.values()))["context"]
+        result["nativeLibraries"] = {abi: manifest["libraries"]
+                                     for abi, manifest in native_manifests.items()}
+    return result
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        raise SystemExit("usage: verify_android_native_bridge.py APK [APK ...]")
-    for argument in sys.argv[1:]:
-        print(json.dumps(verify(Path(argument)), sort_keys=True))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--native-artifacts", type=Path,
+                        help="require exact same-run source-built bridge/runtime bytes")
+    parser.add_argument("apks", nargs="+", type=Path)
+    args = parser.parse_args()
+    manifests = None
+    if args.native_artifacts is not None:
+        from android_native_artifacts import current_context, strip_tool, validate_artifacts
+        manifests = validate_artifacts(args.native_artifacts, current_context(), strip_tool())
+    for apk in args.apks:
+        print(json.dumps(verify(apk, manifests), sort_keys=True))
 
 
 if __name__ == "__main__":

@@ -7,9 +7,9 @@ integration does not activate or release a production wallet.
 
 ## Dependency and bridge boundary
 
-The manifests pin accepted Core `8b553b472890cebbf4972cd0fdcb440141085d35`
-(Core #441) and Verifier `8b417a9bd3618fe2bb690727dfee1fd7c6de12eb`
-(Verifier #198). Core dependencies of `marty-sync` share that revision. The
+The manifests pin accepted Core `64601c9513850e3eb60b00f6aa893cae8d9e4b0d`
+(Core #445) and Verifier `9c51381ab686d13503d59071e829feeeec2bd800`
+(Verifier #199). Core dependencies of `marty-sync` share that revision. The
 wallet uses only the portable policy/profile client of marty-sync, without
 native trust-list acquisition, database or USB-import capabilities. The
 reviewed SSI, SD-JWT, isomdl, linked-data and SQLCipher closures remain
@@ -19,6 +19,12 @@ it does not enable an issuer capability or local private-key fallback.
 Core #441 supplies Android target-owned OpenSSL/zstd includes and NDK static
 C++ link metadata for the real prover. This packaging support is separate from
 APK loading and installed-device acceptance; it does not change holder custody.
+
+Core #445 and SD-JWT #47 add explicit disclosure-digest options while the
+wallet's existing receipt and presentation APIs continue to admit SHA-256.
+The selected crypto, X.509 and liveness paths use the accepted maintained-clock
+implementation. Optional external mdoc-status verification remains unselected;
+status references alone cannot establish a revocation result or issuer authority.
 
 FRB 2.13 connects Dart orchestration to native operations. Public holder keys
 and exact remote signatures cross that boundary; identity-signing private keys

@@ -12,10 +12,68 @@ baseline. File-format, Markdown links, Dart and local security hooks remain in
 the root configuration. Existing live-QR and platform build targets remain.
 
 The Python extension prototype is retired, with its unfinished feature intent in
-[Python issuer integration](python-issuer-integration.md). There are no tracked
-Python source files to lint; the web test server still uses a small Python
-standard-library command. Pre-commit itself may also require Python, but that is
-not a Python application dependency.
+[Python issuer integration](python-issuer-integration.md). Python standard-library
+utilities now support build qualification, artifact validation and isolated test
+fixtures. They are separate from the application's runtime. Pre-commit may also
+require Python.
+
+## Android native compilation and APK qualification
+
+The dedicated Android workflow source-builds the bridge independently for
+`armeabi-v7a`, `arm64-v8a` and `x86_64`. Each matrix job invokes the existing
+Cargokit Gradle task with one validated Flutter target. It retains Rust 1.97.1,
+Flutter 3.44.6, NDK 28.2.13676358, the locked/offline Cargo graph, current feature
+selection and `CARGO_PROFILE_DEV_DEBUG=0`. Each job keeps its 15-minute bound.
+The application's ordinary builds still compile the bridge from source.
+
+Each successful producer exports only its bridge, the reviewed ONNX runtime and
+a bounded manifest. The manifest binds the actual clean checkout commit/tree,
+repository, workflow run and attempt, native input hashes, target and build
+configuration. It records original library hashes and the expected packaged
+bridge hash after the pinned NDK's `llvm-strip --strip-unneeded` transformation.
+ONNX runtime bytes remain unchanged through packaging. No Cargo target directory
+or third-party precompiled bridge is transferred.
+
+The existing `(Android)` check runs after the complete matrix, including when a
+producer fails or is skipped, and requires every producer to succeed. It downloads
+only artifacts from the current run and attempt through the pinned artifact
+action, with checksum mismatches treated as errors. The CI-only Gradle init
+adapter validates exactly three producers before staging their verified files at
+the existing native task boundary. It rejects stale/mixed source or run identities,
+missing/duplicate/extra artifacts, symlinks, changed native bytes and changed NDK
+strip tools. Normal application builds do not load that adapter.
+
+The final 15-minute job assembles both original debug flavors in one Gradle graph.
+The adapter checks each real Flutter task's flavor, `lib/main_document.dart`
+entrypoint, debug mode, all three target platforms and unchanged Dart defines.
+The existing APK validation still checks every native library's ELF/ABI structure
+and 64-bit 16-KiB load alignment. It additionally requires the packaged bridge and
+ONNX runtime bytes to match the current source producers for all three ABIs.
+Both complete APKs and their provenance report are retained only after validation,
+under a run/attempt/commit-specific name that preserves earlier evidence on retry.
+
+Because artifact identity includes the workflow attempt, rerun **all jobs** after
+a partial failed-job retry; successful producers from an older attempt are not
+silently reused. Local structural and provenance checks use Python 3.12:
+
+```sh
+python -m unittest discover -s scripts -p 'test_android_native_artifacts.py'
+python -m unittest discover -s scripts -p 'test_verify_android_native_bridge.py'
+python scripts/qualify_android_native_adapter.py --gradle "$PWD/android/gradlew"
+```
+
+The adapter fixture executes the actual Cargokit task and CI init script in
+Gradle 8.11.1 with controlled Android interfaces. It checks both flavor tasks,
+the original entrypoint/defines, all three transfers, changed-run rejection and
+failure when a source task is skipped despite stale outputs. It uses an owned
+Git checkout, temporary outputs and Gradle daemon, and also runs in the final
+Android job. The Cargokit helper is tracked as executable so the real task's
+Unix setup does not change the source tree before provenance is recorded.
+
+These tests use synthetic ELF fixtures to exercise rejection and transfer logic.
+They do not replace actual Android compilation, APK payload validation, native
+loading, installed-wallet flows or independent interoperability qualification.
+Exact executed candidates and remaining device acceptance stay in PR57.
 
 ## Device integration coverage remains unfinished
 

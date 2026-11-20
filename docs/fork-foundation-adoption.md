@@ -1,21 +1,31 @@
 # Reviewed fork foundation in the wallet bridge
 
 The Rust bridge adopts the reviewed Core and private-fork foundation as one
-dependency graph. Its seven direct Core dependencies and the Core dependencies
-of `marty-sync` resolve to the same immutable revision. SSI, its DID methods and
-the verification-only ECDSA compatibility patch resolve from the whole reviewed
-SSI fork; the dedicated linked-data revision remains separate. The former
+dependency graph. Its seven production Core dependencies, native test-support
+crate and the Core dependencies of `marty-sync` resolve to the same immutable
+revision. SSI, its DID methods and the verification-only ECDSA compatibility
+patch resolve from the whole reviewed SSI fork; the dedicated linked-data
+revision remains separate. The former
 registry SSI graph and standalone SSI-JWT patch are removed from the lockfile.
 
 The exact revisions are recorded in `rust/Cargo.toml` and `rust/Cargo.lock`.
 The original foundation coordinated Core PR 414, SD-JWT PR 44, isomdl PR 38 and
 Verifier PR 180. Retained PR 57 now pins accepted Core
-`8b553b472890cebbf4972cd0fdcb440141085d35` (Core #441) and Verifier
-`8b417a9bd3618fe2bb690727dfee1fd7c6de12eb` (Verifier #198), with its graph and
-behavior requalified separately from that historical foundation.
+`64601c9513850e3eb60b00f6aa893cae8d9e4b0d` (Core #445) and Verifier
+`9c51381ab686d13503d59071e829feeeec2bd800` (Verifier #199), with the current graph
+and runtime qualification recorded separately from that historical foundation.
 The wallet selects only the portable policy/profile client of marty-sync; native
 trust-list acquisition, database and USB-import capabilities are not wallet roles.
 Existing wallet, native biometrics and ZK prover feature selections are retained.
+
+This checkpoint carries the accepted maintained-clock implementation through
+crypto, X.509 and the selected biometric liveness feature. SD-JWT resolves to
+accepted `ba5a9a154ae530ddcfcc5b52adf3da71e91b1929` (SD-JWT #47). The wallet
+receipt and presentation entrypoints retain SHA-256 digest admission; Core's
+explicit wider-digest APIs require their own product profile. Optional
+`mdoc-status-verification` remains unselected, and raw status references do not
+establish current revocation authority. The separate JWT 11 migration is not
+part of these accepted revisions.
 
 The retired standalone SSI-JWT patch removed an unused `serde_with` 2.x
 dependency; that security maintenance change remains present in the monorepo
@@ -46,6 +56,14 @@ profile, holder-key fallback, cryptosuite or transport was enabled by the
 dependency adoption alone.
 
 ## Qualification
+
+For the Core #445 / Verifier #199 checkpoint, Rust 1.97.1 locked metadata resolves
+all 11 Core packages from one accepted revision, the portable sync client without
+native acquisition features, and one accepted SD-JWT source with holder/verifier
+roles. All 736 lockfile package records and 684 registry identities, versions and
+checksums are retained. The clock dependency edges are reconciled, including the
+browser clock carrier; unrelated broad-range dependency choices stay unchanged.
+Native bridge, generated-binding and platform execution remain separate CI gates.
 
 The historical foundation candidate passed a native Linux bridge check and all
 37 then-existing Rust bridge tests against the committed graph, using the real native
