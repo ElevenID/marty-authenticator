@@ -28,7 +28,7 @@ test: ## Run Flutter tests
 
 test-device-smoke: ## Run native smoke/rejection checks on a fresh Android/iOS app (DEVICE_ID required)
 	@test -n "$(DEVICE_ID)" || { echo 'Set DEVICE_ID to an explicit isolated Android/iOS device from flutter devices.' >&2; exit 2; }
-	flutter test integration_test/installed_wallet_smoke_test.dart \
+	flutter test $(FLUTTER_DEVICE_SMOKE_FLAGS) integration_test/installed_wallet_smoke_test.dart \
 		--flavor netknights_debug -d "$(DEVICE_ID)" \
 		--dart-define=WALLET_DEVICE_SMOKE=true \
 		--dart-define=QR_CODE=WALLET_DEVICE_SMOKE_CAMERA_DISABLED

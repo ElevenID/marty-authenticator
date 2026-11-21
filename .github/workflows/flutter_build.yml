@@ -112,7 +112,13 @@ jobs:
           # simulator uses the host architecture, including for native Pods.
           export XCODE_XCCONFIG_FILE="$RUNNER_TEMP/wallet-smoke-simulator.xcconfig"
           printf 'ARCHS[sdk=iphonesimulator*] = %s\n' "$(uname -m)" > "$XCODE_XCCONFIG_FILE"
-          make test-device-smoke DEVICE_ID="$device"
+          smoke_log="$RUNNER_TEMP/wallet-ios-smoke.log"
+          if ! make test-device-smoke DEVICE_ID="$device" FLUTTER_DEVICE_SMOKE_FLAGS=--verbose > "$smoke_log" 2>&1; then
+            # Keep the symbol and its competing objects together in the job log.
+            grep -E -A 3 'duplicate symbol|Undefined symbol|Error \(Xcode\)|EXCEPTION CAUGHT|Some tests failed' "$smoke_log" | head -n 160 || true
+            exit 1
+          fi
+          grep -F 'All tests passed!' "$smoke_log"
 
   build_android_native:
     name: Android native (${{ matrix.abi }})
