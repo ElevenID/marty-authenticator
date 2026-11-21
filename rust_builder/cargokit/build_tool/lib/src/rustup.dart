@@ -6,10 +6,10 @@ import 'package:path/path.dart' as path;
 import 'util.dart';
 
 class _Toolchain {
-  _Toolchain(this.name, this.targets);
+  _Toolchain(this.name);
 
   final String name;
-  final List<String> targets;
+  late final List<String> targets = Rustup._getInstalledTargets(name);
 }
 
 class Rustup {
@@ -32,9 +32,7 @@ class Rustup {
   void installToolchain(String toolchain) {
     log.info("Installing Rust toolchain: $toolchain");
     runCommand("rustup", ['toolchain', 'install', toolchain]);
-    _installedToolchains.add(
-      _Toolchain(toolchain, _getInstalledTargets(toolchain)),
-    );
+    _installedToolchains.add(_Toolchain(toolchain));
   }
 
   void installTarget(String target, {required String toolchain}) {
@@ -97,13 +95,12 @@ class Rustup {
     final lines = res.stdout
         .toString()
         .split('\n')
+        .map((line) => line.trim())
         .where((e) => e.isNotEmpty && nonCustom.hasMatch(e))
         .map(extractToolchainName)
         .toList(growable: true);
 
-    return lines
-        .map((name) => _Toolchain(name, _getInstalledTargets(name)))
-        .toList(growable: true);
+    return lines.map(_Toolchain.new).toList(growable: true);
   }
 
   static List<String> _getInstalledTargets(String toolchain) {
@@ -117,6 +114,7 @@ class Rustup {
     final lines = res.stdout
         .toString()
         .split('\n')
+        .map((line) => line.trim())
         .where((e) => e.isNotEmpty)
         .toList(growable: true);
     return lines;

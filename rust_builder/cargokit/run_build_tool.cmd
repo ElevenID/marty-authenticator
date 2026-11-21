@@ -8,7 +8,8 @@ SET BASEDIR=%~dp0
 if not exist "%CARGOKIT_TOOL_TEMP_DIR%" (
     mkdir "%CARGOKIT_TOOL_TEMP_DIR%"
 )
-cd /D "%CARGOKIT_TOOL_TEMP_DIR%"
+cd /D "%CARGOKIT_TOOL_TEMP_DIR%" || exit /b 1
+if not exist .dart_tool mkdir .dart_tool || exit /b 1
 
 SET BUILD_TOOL_PKG_DIR=%BASEDIR%build_tool
 SET DART=%FLUTTER_ROOT%\bin\cache\dart-sdk\bin\dart
@@ -77,15 +78,18 @@ REM There is no CUR_PACKAGE_INFO it was renamed in previous step to %PREV_PACKAG
 REM which means  we need to do pub get and precompile
 if not exist "%PRECOMPILED%" (
     echo Running pub get in "%cd%"
-    "%DART%" pub get --no-precompile
-    "%DART%" compile kernel bin/build_tool_runner.dart
+    "%DART%" pub get --no-precompile || exit /b 1
+    "%DART%" compile kernel bin/build_tool_runner.dart || exit /b 1
 )
 
 "%DART%" "%PRECOMPILED%" %*
 
 REM 253 means invalid snapshot version.
-If %ERRORLEVEL% equ 253 (
-    "%DART%" pub get --no-precompile
-    "%DART%" compile kernel bin/build_tool_runner.dart
+set "RUN_RESULT=%ERRORLEVEL%"
+If %RUN_RESULT% equ 253 (
+    "%DART%" pub get --no-precompile || exit /b 1
+    "%DART%" compile kernel bin/build_tool_runner.dart || exit /b 1
     "%DART%" "%PRECOMPILED%" %*
+    exit /b !ERRORLEVEL!
 )
+exit /b %RUN_RESULT%

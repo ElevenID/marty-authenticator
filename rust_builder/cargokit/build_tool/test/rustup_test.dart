@@ -18,7 +18,8 @@ void main() {
                   'esp\n',
             );
           case ['target', 'list', '--toolchain', String name, '--installed']:
-            return TestRunCommandResult(stdout: '$name:target\n');
+            expect(name, '1.97.1-x86_64-unknown-linux-gnu');
+            return TestRunCommandResult(stdout: '$name:target\r\n');
           default:
             throw Exception('Unexpected call: ${args.arguments}');
         }
@@ -61,11 +62,12 @@ void main() {
     rustup.installToolchain('stable');
     expect(didInstallStable, true);
     expect(didListToolchains, true);
-    expect(didListTargets, true);
+    expect(didListTargets, false);
     expect(rustup.installedTargets('stable'), [
       'x86_64-unknown-linux-gnu',
       'x86_64-apple-darwin',
     ]);
+    expect(didListTargets, true);
     testRunCommandOverride = null;
   });
 
@@ -89,15 +91,16 @@ void main() {
       }
     };
     final rustup = Rustup();
-    expect(targetsQueried, [
-      'stable-aarch64-apple-darwin',
-      'nightly-aarch64-apple-darwin',
-    ]);
+    expect(targetsQueried, isEmpty);
     expect(rustup.installedTargets('stable'), [
       'stable-aarch64-apple-darwin:target',
     ]);
     expect(rustup.installedTargets('nightly'), [
       'nightly-aarch64-apple-darwin:target',
+    ]);
+    expect(targetsQueried, [
+      'stable-aarch64-apple-darwin',
+      'nightly-aarch64-apple-darwin',
     ]);
   });
 }
