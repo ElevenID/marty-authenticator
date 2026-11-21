@@ -478,6 +478,7 @@ class RemoteHolderPairingService {
   Future<String> fetchVerifierAuthorityJson({
     required String clientId,
     String? requestUri,
+    bool deviceScope = false,
   }) async {
     if (clientId.isEmpty ||
         clientId.length > 2048 ||
@@ -505,7 +506,11 @@ class RemoteHolderPairingService {
     }
     return _fetchAuthorityJson(
       path: '/v1/devices/wallet-verifier-authority',
-      query: {'client_id': clientId, 'request_uri': ?requestUri},
+      query: {
+        'client_id': clientId,
+        'request_uri': ?requestUri,
+        if (deviceScope) 'device_scope': 'true',
+      },
       limit: 64 * 1024,
     );
   }

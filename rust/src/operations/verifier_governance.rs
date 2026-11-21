@@ -1,10 +1,10 @@
-//! Native admission of fresh confirmed-device managed verifier evidence.
+//! Native admission of signed requests under fresh confirmed-device verifier governance.
 //! Transport-provided keys do not replace Core DID/signature authentication.
 use anyhow::{ensure, Context};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use chrono::{DateTime, Duration, Utc};
 use marty_oid4vci::{
-    wallet_request_auth::{AuthenticatedPresentationRequest, GovernedDidVerifierAuthority},
+    wallet_request_auth::{AuthenticatedPresentationRequest, GovernedVerifierAuthority},
     WalletEngine,
 };
 use serde::{Deserialize, Serialize};
@@ -51,6 +51,26 @@ mod tests {
                 "request":{"producer_id":"flow-primary","instance_id":id,"request_uri":locator,"response_uri":recipient,"nonce":"nonce-1","compact_request_jws":"synthetic.not.authenticated","request_jws_sha256":format!("{:x}",Sha256::digest(b"synthetic.not.authenticated")),"request_issued_at":whole,"request_expires_at":whole+Duration::seconds(120)}}});
         (value, locator, ec.to_string())
     }
+    #[test]
+    fn registered_governance_binds_scope_and_separates_request_profiles() {
+        let now = Utc::now();
+        let (mut value, managed_locator, holder) = fixture(now);
+        let locator = "openid4vp://?client_id=registered-service&request=signed";
+        value["verifier"]["contract"] = json!("marty.wallet/verifier-authority/v1");
+        let registration = &mut value["verifier"]["authority"]["registration"];
+        registration["client_id"] = json!("registered-service");
+        registration["request_key_id"] = json!("request-key");
+        assert!(parse(&value.to_string(), locator, &holder, now).is_err());
+        value["verifier"].as_object_mut().unwrap().remove("request");
+        let parsed = parse(&value.to_string(), locator, &holder, now).unwrap();
+        assert_eq!(parsed.authority.client_id, "registered-service");
+        assert_eq!(parsed.request_input, locator);
+        assert!(parsed.request.is_none());
+        assert!(parse(&value.to_string(), &managed_locator, &holder, now).is_err());
+        value["scope"]["organization_id"] = json!("other-org");
+        assert!(parse(&value.to_string(), locator, &holder, now).is_err());
+    }
+
     #[test]
     fn rejects_scope_holder_recipient_digest_and_clock_substitution() {
         let now = Utc::now();
@@ -145,7 +165,7 @@ struct Verifier {
     observed_at: DateTime<Utc>,
     expires_at: DateTime<Utc>,
     authority: Authority,
-    request: Request,
+    request: Option<Request>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -184,11 +204,11 @@ struct Request {
 
 pub(crate) struct FreshGovernance {
     pub scope: DeviceScope,
-    pub authority: GovernedDidVerifierAuthority,
-    pub original_jws: String,
+    pub authority: GovernedVerifierAuthority,
+    pub request_input: String,
     pub holder_jwk_json: String,
     pub expires_at: DateTime<Utc>,
-    request: Request,
+    request: Option<Request>,
 }
 fn text(v: &str) -> bool {
     !v.is_empty() && v.len() <= 2048 && v.trim() == v && !v.chars().any(char::is_control)
@@ -298,7 +318,7 @@ pub(crate) fn parse(
     now: DateTime<Utc>,
 ) -> anyhow::Result<FreshGovernance> {
     ensure!(
-        raw.len() <= 65536 && text(locator),
+        raw.len() <= 65536 && locator.len() <= 65536 && !locator.is_empty(),
         "verifier governance is invalid"
     );
     let value = marty_crypto::strict_json::parse_unique_json(raw.as_bytes())?;
@@ -314,10 +334,14 @@ pub(crate) fn parse(
         .as_deref()
         .context("verifier profile is absent")?;
     let registration = &verifier.authority.registration;
-    let request = &verifier.request;
+    let registered = verifier.contract == "marty.wallet/verifier-authority/v1";
+    ensure!(
+        registered == locator.starts_with("openid4vp://?"),
+        "verifier profile and request transport disagree"
+    );
     ensure!(
         envelope.contract == "marty.wallet/device-verifier-governance/v2"
-            && verifier.contract == "marty.wallet/verifier-authority/v2"
+            && (registered || verifier.contract == "marty.wallet/verifier-authority/v2")
             && fresh(envelope.observed_at, envelope.expires_at, now)
             && fresh(verifier.observed_at, verifier.expires_at, now)
             && envelope.expires_at <= verifier.expires_at
@@ -344,6 +368,52 @@ pub(crate) fn parse(
         .authority_id
         .strip_prefix(&format!("{verifier_profile}/"))
         .context("verifier authority is invalid")?;
+    ensure!(
+        uuid(source)
+            && text(&verifier.authority.revision)
+            && verifier.authority.key_purpose == "oid4vp_request_signing"
+            && verifier.authority.algorithm == "ES256"
+            && verifier.authority.request_clock_skew_seconds == 30
+            && verifier.authority.max_request_lifetime_seconds == 900
+            && registration.valid_from <= now
+            && verifier.expires_at <= registration.valid_until,
+        "verifier registration is invalid"
+    );
+    let expires_at = envelope.expires_at.min(verifier.expires_at);
+    let authority = GovernedVerifierAuthority {
+        authority_id: verifier.authority.authority_id.clone(),
+        revision: verifier.authority.revision.clone(),
+        client_id: registration.client_id.clone(),
+        request_key_id: registration.request_key_id.clone(),
+        public_jwk_json: registration.public_jwk.to_string(),
+        response_uris: registration.response_uris.clone(),
+        valid_from: registration.valid_from.timestamp(),
+        valid_until: registration.valid_until.timestamp(),
+        observed_at: envelope
+            .observed_at
+            .timestamp()
+            .max(verifier.observed_at.timestamp()),
+        expires_at: expires_at.timestamp(),
+    };
+    if registered {
+        ensure!(
+            verifier.request.is_none() && !registration.client_id.contains(':'),
+            "registered verifier evidence is invalid"
+        );
+        return Ok(FreshGovernance {
+            scope: envelope.scope,
+            authority,
+            request_input: locator.to_owned(),
+            holder_jwk_json: holder_json,
+            expires_at,
+            request: None,
+        });
+    }
+    ensure!(text(locator), "managed verifier locator is invalid");
+    let request = verifier
+        .request
+        .as_ref()
+        .context("managed request is absent")?;
     let did = registration
         .client_id
         .strip_prefix("decentralized_identifier:")
@@ -355,15 +425,9 @@ pub(crate) fn parse(
         .context("verifier locator is invalid")?;
     let response = format!("{base}/v1/flows/instances/{}/submit", request.instance_id);
     ensure!(
-        uuid(source)
-            && text(&verifier.authority.revision)
-            && verifier.authority.key_purpose == "oid4vp_request_signing"
-            && verifier.authority.algorithm == "ES256"
-            && verifier.authority.request_clock_skew_seconds == 30
-            && verifier.authority.max_request_lifetime_seconds == 900
-            && ["did:web:", "did:key:", "did:jwk:"]
-                .iter()
-                .any(|prefix| did.strip_prefix(prefix).is_some_and(|s| !s.is_empty()))
+        ["did:web:", "did:key:", "did:jwk:"]
+            .iter()
+            .any(|prefix| did.strip_prefix(prefix).is_some_and(|s| !s.is_empty()))
             && registration
                 .request_key_id
                 .strip_prefix(&format!("{did}#"))
@@ -409,25 +473,10 @@ pub(crate) fn parse(
         .expires_at
         .min(verifier.expires_at)
         .min(request.request_expires_at);
-    let authority = GovernedDidVerifierAuthority {
-        authority_id: verifier.authority.authority_id.clone(),
-        revision: verifier.authority.revision.clone(),
-        client_id: registration.client_id.clone(),
-        request_key_id: registration.request_key_id.clone(),
-        public_jwk_json: registration.public_jwk.to_string(),
-        response_uris: registration.response_uris.clone(),
-        valid_from: registration.valid_from.timestamp(),
-        valid_until: registration.valid_until.timestamp(),
-        observed_at: envelope
-            .observed_at
-            .timestamp()
-            .max(verifier.observed_at.timestamp()),
-        expires_at: expires_at.timestamp(),
-    };
     Ok(FreshGovernance {
         scope: envelope.scope,
         authority,
-        original_jws: request.compact_request_jws.clone(),
+        request_input: request.compact_request_jws.clone(),
         holder_jwk_json: holder_json,
         expires_at,
         request: envelope.verifier.request,
@@ -436,19 +485,36 @@ pub(crate) fn parse(
 
 impl FreshGovernance {
     pub async fn authenticate(&self) -> anyhow::Result<AuthenticatedPresentationRequest> {
+        if self.request.is_none() {
+            return Ok(WalletEngine::new()
+                .open_governed_registered_request(&self.request_input, &self.authority)
+                .await?);
+        }
+        self.authenticate_retained(&self.request_input).await
+    }
+
+    pub async fn authenticate_retained(
+        &self,
+        signed: &str,
+    ) -> anyhow::Result<AuthenticatedPresentationRequest> {
+        let Some(request) = self.request.as_ref() else {
+            return Ok(self
+                .authority
+                .authenticate_registered(signed, Utc::now().timestamp())?);
+        };
+        ensure!(signed == self.request_input, "managed request changed");
         let authenticated = WalletEngine::new()
-            .reauthenticate_governed_did_signed_request(&self.original_jws, &self.authority)
+            .reauthenticate_governed_did_signed_request(&self.request_input, &self.authority)
             .await?;
         ensure!(
             self.expires_at > Utc::now()
-                && authenticated.request().nonce == self.request.nonce
-                && authenticated.request().state.as_deref()
-                    == Some(self.request.instance_id.as_str())
-                && authenticated.request().response_uri == self.request.response_uri,
+                && authenticated.request().nonce == request.nonce
+                && authenticated.request().state.as_deref() == Some(request.instance_id.as_str())
+                && authenticated.request().response_uri == request.response_uri,
             "verifier evidence changed"
         );
         ensure!(
-            authenticated.expires_at() == self.request.request_expires_at.timestamp(),
+            authenticated.expires_at() == request.request_expires_at.timestamp(),
             "verifier expiry evidence changed"
         );
         Ok(authenticated)

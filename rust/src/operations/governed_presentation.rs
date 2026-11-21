@@ -198,7 +198,7 @@ fn same_authority(old: &FreshGovernance, fresh: &FreshGovernance) -> bool {
     let a = &old.authority;
     let b = &fresh.authority;
     old.scope == fresh.scope
-        && old.original_jws == fresh.original_jws
+        && old.request_input == fresh.request_input
         && a.authority_id == b.authority_id
         && a.revision == b.revision
         && a.client_id == b.client_id
@@ -223,7 +223,9 @@ impl Frozen {
         );
         // Equality above requires byte-for-byte original JWS identity. Core
         // authenticates those bytes again, using current DID and authority.
-        let authenticated = fresh.authenticate().await?;
+        let authenticated = fresh
+            .authenticate_retained(self.authenticated.compact_jws())
+            .await?;
         ensure!(
             self.expires_at > Utc::now()
                 && authenticated.consent_binding_digest()
@@ -277,6 +279,10 @@ pub(crate) async fn review(
     let expires_at = checked
         .expires_at
         .min(trusted.expires_at)
+        .min(
+            DateTime::from_timestamp(authenticated.expires_at(), 0)
+                .context("invalid request expiry")?,
+        )
         .min(Utc::now() + Duration::seconds(60));
     let frozen = Frozen {
         locator,

@@ -37,6 +37,7 @@ class _Holder extends RemoteHolderPairingService {
   Future<String> fetchVerifierAuthorityJson({
     required String clientId,
     String? requestUri,
+    bool deviceScope = false,
   }) async {
     expect(clientId, _clientId);
     expect(requestUri, _locator);

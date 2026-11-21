@@ -52,7 +52,7 @@ class UserSelectionRequiredException implements Exception {
 }
 
 class _PendingVerifiedPresentation {
-  final String requestUri;
+  final String? requestUri;
   final String clientId;
   final List<String> requiredClaims;
   // Storage IDs select opaque native review handles, never replacement tokens.
@@ -239,21 +239,36 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     // paired-device endpoint. No URL from the QR is fetched by Dart.
     final qr = Uri.tryParse(input);
     final parameters = qr?.queryParametersAll;
-    if (input.length > 8192 ||
+    if (input.length > 65536 ||
         qr == null ||
         qr.scheme != 'openid4vp' ||
+        (qr.host.isNotEmpty && qr.host != "authorize") ||
+        qr.hasPort ||
+        qr.path.isNotEmpty ||
         qr.hasFragment ||
         qr.userInfo.isNotEmpty ||
         parameters == null ||
-        parameters.length != 2 ||
-        parameters.keys.any(
-          (name) => !{'client_id', 'request_uri'}.contains(name),
-        ) ||
         parameters.values.any((values) => values.length != 1)) {
-      throw StateError('A managed signed request locator is required');
+      throw StateError('A signed verifier request is required');
     }
-    final clientId = parameters['client_id']!.single;
-    final locator = parameters['request_uri']!.single;
+    final clientId = parameters['client_id']?.single;
+    if (clientId == null || clientId.isEmpty) {
+      throw StateError('Verifier client ID is missing');
+    }
+    final managed = clientId.startsWith('decentralized_identifier:did:');
+    final byValue = parameters.containsKey('request');
+    final allowed = byValue
+        ? {'client_id', 'request'}
+        : {'client_id', 'request_uri', 'request_uri_method'};
+    if ((managed && byValue) ||
+        (!managed && clientId.contains(':')) ||
+        parameters.keys.any((key) => !allowed.contains(key)) ||
+        (!byValue && !parameters.containsKey('request_uri')) ||
+        (parameters['request_uri_method']?.single ?? 'get') != 'get') {
+      throw StateError('Unsupported verifier request transport');
+    }
+    final locator = managed ? parameters['request_uri']!.single : 'openid4vp://?${qr.query}';
+    final ownerLocator = managed ? locator : null;
     for (final entry in _pendingVerifiedPresentations.entries.toList()) {
       if (!entry.value.expiresAt.isAfter(DateTime.now().toUtc())) {
         await cancelOID4VPRequestSDK(sessionId: entry.key);
@@ -266,7 +281,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     }
     final handles = <String>{};
     final pending = _PendingVerifiedPresentation(
-      requestUri: locator,
+      requestUri: ownerLocator,
       clientId: clientId,
       requiredClaims: [],
       credentials: {},
@@ -279,7 +294,8 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
     try {
       final governance = await holder.fetchVerifierAuthorityJson(
         clientId: clientId,
-        requestUri: locator,
+        requestUri: ownerLocator,
+        deviceScope: ownerLocator == null,
       );
       final snapshot = await holder.fetchIssuerKeysJson();
       final publicJwk = jsonEncode(
@@ -528,6 +544,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       final governance = await holder.fetchVerifierAuthorityJson(
         clientId: pending.clientId,
         requestUri: pending.requestUri,
+        deviceScope: pending.requestUri == null,
       );
       final issuer = await holder.fetchIssuerKeysJson();
       final publicJwk = jsonEncode(
@@ -555,6 +572,7 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
       final completionGovernance = await holder.fetchVerifierAuthorityJson(
         clientId: pending.clientId,
         requestUri: pending.requestUri,
+        deviceScope: pending.requestUri == null,
       );
       final completionIssuer = await holder.fetchIssuerKeysJson();
       final completionHolder = jsonEncode(
