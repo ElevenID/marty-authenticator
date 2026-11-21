@@ -116,7 +116,7 @@ jobs:
           smoke_log="$RUNNER_TEMP/wallet-ios-smoke.log"
           if ! make test-device-smoke DEVICE_ID="$device" FLUTTER_DEVICE_SMOKE_FLAGS=--verbose > "$smoke_log" 2>&1; then
             # Keep the symbol and its competing objects together in the job log.
-            grep -Ei -A 3 'duplicate symbol|undefined symbol|error \(xcode\)|exception caught|some tests failed|test failed|failed to |exit code [1-9]|timed out' "$smoke_log" | head -n 160 || true
+            grep -Ei -A 3 'duplicate symbol|undefined symbol|error[: (]|fatal:|(^|[[:space:]])(ld|clang|llvm-nm):|No such file|not found|unrecognized|Cargokit BuildTool failed|exception caught|tests failed|test failed|exit code [1-9]|timed out' "$smoke_log" | tail -n 200 || true
             exit 1
           fi
           # Flutter's verbose reporter can render its completion line differently.
