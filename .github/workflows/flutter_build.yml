@@ -108,6 +108,10 @@ jobs:
           trap 'xcrun simctl delete "$device"' EXIT
           xcrun simctl boot "$device"
           xcrun simctl bootstatus "$device" -b
+          # Flutter asks Xcode for both simulator architectures. The installed
+          # simulator uses the host architecture, including for native Pods.
+          export XCODE_XCCONFIG_FILE="$RUNNER_TEMP/wallet-smoke-simulator.xcconfig"
+          printf 'ARCHS[sdk=iphonesimulator*] = %s\n' "$(uname -m)" > "$XCODE_XCCONFIG_FILE"
           make test-device-smoke DEVICE_ID="$device"
 
   build_android_native:

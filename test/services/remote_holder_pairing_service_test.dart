@@ -485,6 +485,34 @@ void main() {
     },
   );
 
+  test('registered verifier fetch requests the paired device scope', () async {
+    final service = RemoteHolderPairingService(
+      readEnrollment: () async => confirmedEnrollment(),
+      client: MockClient((request) async {
+        expect(request.url.origin, 'https://wallet.example');
+        expect(request.url.path, '/v1/devices/wallet-verifier-authority');
+        expect(request.url.queryParameters, {
+          'client_id': 'enrolled-verifier',
+          'device_scope': 'true',
+        });
+        expect(request.headers['authorization'], 'Bearer $bearer');
+        return http.Response(
+          '{}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+    addTearDown(service.close);
+    expect(
+      await service.fetchVerifierAuthorityJson(
+        clientId: 'enrolled-verifier',
+        deviceScope: true,
+      ),
+      '{}',
+    );
+  });
+
   test(
     'verifier transport rejects status, media type, size and malformed UTF8',
     () async {

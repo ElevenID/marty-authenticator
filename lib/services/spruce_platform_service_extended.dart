@@ -267,7 +267,9 @@ class SpruceIdPlatformServiceExtended extends SpruceIdPlatformService
         (parameters['request_uri_method']?.single ?? 'get') != 'get') {
       throw StateError('Unsupported verifier request transport');
     }
-    final locator = managed ? parameters['request_uri']!.single : 'openid4vp://?${qr.query}';
+    final locator = managed
+        ? parameters['request_uri']!.single
+        : 'openid4vp://?${qr.query}';
     final ownerLocator = managed ? locator : null;
     for (final entry in _pendingVerifiedPresentations.entries.toList()) {
       if (!entry.value.expiresAt.isAfter(DateTime.now().toUtc())) {
