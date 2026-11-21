@@ -20,6 +20,8 @@ Builds the governed Marty wallet Rust bridge.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
+  # The Rust archive includes the native ONNX Runtime C++ objects.
+  s.libraries = 'c++'
   s.platform = :ios, '11.0'
 
   # Flutter.framework does not contain a i386 slice.
