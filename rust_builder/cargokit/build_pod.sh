@@ -51,6 +51,20 @@ done
 
 sh "$BASEDIR/run_build_tool.sh" build-pod "$@"
 
+case "$PLATFORM_NAME" in
+  iphoneos|iphonesimulator)
+    # Force references only to the dynamically looked-up Rust/Dart bridge.
+    # Force-loading the entire archive loads duplicate ONNX protobuf objects.
+    archive="$CARGOKIT_OUTPUT_DIR/lib$2.a"
+    symbols=$(xcrun nm -gUj "$archive" | LC_ALL=C sort -u)
+    printf '%s\n' "$symbols" | grep -q '^_frbgen_'
+    printf '%s\n' "$symbols" | grep -q '^_frb_init_frb_dart_api_dl$'
+    printf '%s\n' "$symbols" | awk '/^_(frb_|frbgen_|Dart_)[A-Za-z0-9_]+$/ || /^_(dummy_method_to_enforce_bundling|store_dart_post_cobject)$/ {
+      print "-u", $0
+    }' > "$CARGOKIT_OUTPUT_DIR/$2.ffi-link.rsp"
+    ;;
+esac
+
 # Make a symlink from built framework to phony file, which will be used as input to
 # build script. This should force rebuild (podspec currently doesn't support alwaysOutOfDate
 # attribute on custom build phase)
