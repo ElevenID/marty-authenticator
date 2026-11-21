@@ -56,7 +56,15 @@ case "$PLATFORM_NAME" in
     # Force references only to the dynamically looked-up Rust/Dart bridge.
     # Force-loading the entire archive loads duplicate ONNX protobuf objects.
     archive="$CARGOKIT_OUTPUT_DIR/lib$2.a"
-    symbols=$(xcrun nm -gUj "$archive" | LC_ALL=C sort -u)
+    # Inspect compiler_builtins with the LLVM version that produced its bitcode.
+    host_libdir=$(cd "$CARGOKIT_MANIFEST_DIR" && rustc --print target-libdir)
+    llvm_nm="$(dirname "$host_libdir")/bin/llvm-nm"
+    if [ ! -x "$llvm_nm" ]; then
+      echo "Rust llvm-tools-preview is required to link the iOS bridge" >&2
+      exit 1
+    fi
+    symbols=$("$llvm_nm" -gUj "$archive")
+    symbols=$(printf '%s\n' "$symbols" | LC_ALL=C sort -u)
     printf '%s\n' "$symbols" | grep -q '^_frbgen_'
     printf '%s\n' "$symbols" | grep -q '^_frb_init_frb_dart_api_dl$'
     printf '%s\n' "$symbols" | awk '/^_(frb_|frbgen_|Dart_)[A-Za-z0-9_]+$/ || /^_(dummy_method_to_enforce_bundling|store_dart_post_cobject)$/ {
