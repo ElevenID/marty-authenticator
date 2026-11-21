@@ -1,0 +1,112 @@
+// CI-only handoff between source compilation and the normal APK assembler.
+// Application builds do not load this init script or gain a binary fallback.
+def env = System.getenv()
+if (env.GITHUB_ACTIONS != 'true' || env.GITHUB_REPOSITORY != 'ElevenID/marty-authenticator' ||
+    !(env.GITHUB_RUN_ID ==~ /[1-9][0-9]*/) || !(env.GITHUB_RUN_ATTEMPT ==~ /[1-9][0-9]*/) ||
+    !(env.GITHUB_SHA ==~ /[a-f0-9]{40}/) || env.CARGO_PROFILE_DEV_DEBUG != '0') {
+    throw new GradleException('Android native transfer requires the exact CI run context')
+}
+def workspace = new File(env.GITHUB_WORKSPACE).canonicalFile
+def androidRoot = new File(workspace, 'android').canonicalFile
+def artifactScript = new File(workspace, 'scripts/android_native_artifacts.py').canonicalFile
+def platforms = [
+    'armeabi-v7a': 'android-arm',
+    'arm64-v8a': 'android-arm64',
+    'x86_64': 'android-x64',
+]
+def nativeTaskPath = ':marty_authenticator_bridge:cargokitCargoBuildMarty_authenticator_bridgeDebug'
+
+gradle.projectsEvaluated {
+    // Flutter's included Gradle build also receives init scripts.
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    def root = gradle.rootProject
+    def mode = root.findProperty('martyNativeMode')
+    def artifactRootValue = root.findProperty('martyNativeArtifactRoot')
+    if (!(mode in ['source', 'assemble']) || !(artifactRootValue instanceof String)) {
+        throw new GradleException('Android native CI mode and artifact root are required')
+    }
+    def artifactRoot = new File(artifactRootValue).canonicalFile
+    def runnerTemp = new File(env.RUNNER_TEMP).canonicalFile
+    if (!artifactRoot.toPath().startsWith(runnerTemp.toPath()) || artifactRoot == runnerTemp) {
+        throw new GradleException('Android native artifacts must stay inside the owned runner temporary directory')
+    }
+    def task = root.tasks.getByPath(nativeTaskPath)
+    if (task.class.name.split('_')[0] != 'CargoKitBuildTask' || task.buildMode != 'debug' ||
+        task.ndkVersion != '28.2.13676358' || task.minSdkVersion != 26 || task.compileSdkVersion != 36 ||
+        task.project.cargokit.libname != 'marty_authenticator_bridge') {
+        throw new GradleException('Android native task no longer matches its reviewed source-build contract')
+    }
+    def expectedOutput = new File(workspace, 'build/marty_authenticator_bridge/jniLibs/debug').canonicalFile
+    if (new File(task.outputDir).canonicalFile != expectedOutput ||
+        new File(task.project.projectDir, task.project.cargokit.manifestDir).canonicalFile != new File(workspace, 'rust').canonicalFile) {
+        throw new GradleException('Android native task source/output binding changed')
+    }
+    def runTransfer = { List<String> arguments ->
+        root.exec {
+            commandLine(['python3', artifactScript.path] + arguments)
+        }
+    }
+    def completed = false
+    if (mode == 'source') {
+        def sourceTaskExecuted = false
+        def abi = root.findProperty('martyNativeAbi')
+        if (!platforms.containsKey(abi) || task.targetPlatforms != [platforms[abi]]) {
+            throw new GradleException('Source job must compile exactly its assigned Android ABI')
+        }
+        task.outputs.upToDateWhen { false }
+        task.doLast { sourceTaskExecuted = true }
+        def exportTask = root.tasks.register('martyExportAndroidNativeArtifact') {
+            dependsOn(task)
+            doLast {
+                if (!sourceTaskExecuted || task.state.skipped || !task.state.didWork) {
+                    throw new GradleException('The source-build action did not execute')
+                }
+                runTransfer(['export', '--abi', abi, '--native-root', task.outputDir, '--output', artifactRoot.path])
+                completed = true
+            }
+        }
+        gradle.taskGraph.whenReady { graph ->
+            if (!graph.hasTask(task) || !graph.hasTask(exportTask.get())) {
+                throw new GradleException('Source qualification must execute native compilation and artifact export')
+            }
+        }
+    } else {
+        if (task.targetPlatforms.size() != platforms.size() || task.targetPlatforms.toSet() != platforms.values().toSet()) {
+            throw new GradleException('APK assembly requires all three reviewed Android targets')
+        }
+        // All three source jobs are mandatory workflow dependencies. Replace
+        // this packaging invocation only after binding the original task's
+        // source, target, NDK, mode and output location above. The action itself
+        // validates current commit/tree/run/attempt and every library byte.
+        task.setActions([])
+        task.outputs.upToDateWhen { false }
+        task.doLast {
+            runTransfer(['stage', '--artifacts', artifactRoot.path, '--output', task.outputDir])
+            completed = true
+        }
+        gradle.taskGraph.whenReady { graph ->
+            def variants = [
+                'NetknightsDebug': 'netknights',
+                'Netknights_debugDebug': 'netknights_debug',
+            ]
+            if (!graph.hasTask(task)) throw new GradleException('Native staging is absent from APK assembly')
+            variants.each { suffix, flavor ->
+                def compile = root.tasks.getByPath(":app:compileFlutterBuild${suffix}")
+                def assemble = root.tasks.getByPath(":app:assemble${suffix}")
+                def target = new File(compile.targetPath).canonicalFile
+                if (!graph.hasTask(compile) || !graph.hasTask(assemble) || compile.flavor != flavor ||
+                    compile.buildMode != 'debug' || target != new File(workspace, 'lib/main_document.dart').canonicalFile ||
+                    compile.targetPlatformValues.size() != platforms.size() ||
+                    compile.targetPlatformValues.toSet() != platforms.values().toSet() ||
+                    !(compile.dartDefines == null || compile.dartDefines == '')) {
+                    throw new GradleException('Both original Flutter flavors, entrypoint, targets and Dart defines are required')
+                }
+            }
+        }
+    }
+    gradle.buildFinished { result ->
+        if (result.failure == null && !completed) {
+            throw new GradleException('Native source export/staging did not execute')
+        }
+    }
+}

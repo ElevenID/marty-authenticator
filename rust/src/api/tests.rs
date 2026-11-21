@@ -1,6 +1,31 @@
 use super::*;
 use serde_json::json;
 
+#[tokio::test]
+async fn retired_presentation_apis_cannot_prepare_or_submit_without_fresh_governance() {
+    // These bridge signatures remain for binary/source compatibility only.
+    // Even supplied request/credential identifiers cannot mint a native handle.
+    let error = wallet_prepare_verified_sd_jwt_presentation(
+        "openid4vp://unused".into(),
+        "claimed-digest".into(),
+        "claimed-credential".into(),
+        "query".into(),
+        vec![],
+        "claimed-issuer-trust".into(),
+        "claimed-holder".into(),
+    )
+    .await
+    .unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("governed native consent session"));
+    let error =
+        wallet_complete_verified_sd_jwt_presentation(uuid::Uuid::new_v4().to_string(), vec![0; 64])
+            .await
+            .unwrap_err();
+    assert!(error.to_string().contains("fresh governed authority"));
+}
+
 #[test]
 fn issuer_metadata_conversion_requires_a_resolved_token_endpoint() {
     let raw = json!({
@@ -173,6 +198,30 @@ fn mobile_service_policy_adapter_matches_canonical_allow_and_deny() {
 }
 
 #[test]
+fn mobile_service_policy_adapter_requires_the_actually_verified_profile_identity() {
+    for actual in [None, Some("different-profile")] {
+        let mut request: serde_json::Value =
+            serde_json::from_str(&service_policy_request_json(true)).unwrap();
+        let credential = request["credentials"][0].as_object_mut().unwrap();
+        if let Some(actual) = actual {
+            credential.insert("trust_profile_id".into(), json!(actual));
+        } else {
+            credential.remove("trust_profile_id");
+        }
+        let result: serde_json::Value = serde_json::from_str(
+            &evaluate_service_presentation_policy(request.to_string()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(result["decision"], "deny");
+        assert!(result["errors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|error| error["code"] == "trust_profile_not_verified"));
+    }
+}
+
+#[test]
 fn mobile_policy_format_aliases_match_shared_vectors() {
     let vector: serde_json::Value = serde_json::from_str(include_str!(
         "../../../test/fixtures/presentation_policy_service.json"
@@ -271,6 +320,19 @@ async fn wallet_qr_validation_uses_canonical_rust_parsers() {
 }
 
 #[tokio::test]
+async fn signed_presentation_envelopes_reach_governance_without_network_or_preview_claims() {
+    for input in [
+        "openid4vp://?client_id=registered&request=signed.request.object",
+        "openid4vp://authorize?client_id=registered&request_uri=https%3A%2F%2Fverifier.invalid%2Frequest",
+    ] {
+        let preview = wallet_validate_qr_input(input.to_owned()).await.unwrap().unwrap();
+        assert_eq!(preview.kind, "presentation_request");
+        assert_eq!(preview.normalized, input);
+        assert_eq!(preview.parsed_content_json, "{}");
+    }
+}
+
+#[tokio::test]
 async fn wallet_qr_validation_rejects_malformed_protocol_input() {
     assert!(wallet_validate_qr_input("openid4vp://".to_string())
         .await
@@ -306,6 +368,26 @@ async fn wallet_qr_validation_parses_push_registration_in_rust() {
     assert_eq!(content["api_url"], "https://api.example/push");
     assert_eq!(content["registration_token"], "secret");
     assert_eq!(content["user_id"], "alice");
+}
+
+#[tokio::test]
+async fn wallet_qr_validation_accepts_only_scoped_remote_pairing() {
+    let code = "A".repeat(43);
+    let uri = format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2F");
+    let validated = wallet_validate_qr_input(uri).await.unwrap().unwrap();
+    assert_eq!(validated.kind, "remote_pairing");
+    let content: serde_json::Value = serde_json::from_str(&validated.parsed_content_json).unwrap();
+    assert_eq!(content["pairing_code"], code);
+    assert_eq!(content["api_origin"], "https://wallet.example/");
+    for invalid in [
+        format!("marty://pair?code={code}&api=http%3A%2F%2Fwallet.example%2F"),
+        format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2Fpath"),
+        format!("marty://pair?code={code}&code={code}&api=https%3A%2F%2Fwallet.example%2F"),
+        format!("marty://pair?code={code}&api=https%3A%2F%2Fwallet.example%2F&user=alice"),
+        "marty://pair?code=short&api=https%3A%2F%2Fwallet.example%2F".into(),
+    ] {
+        assert!(wallet_validate_qr_input(invalid).await.is_err());
+    }
 }
 
 #[tokio::test]

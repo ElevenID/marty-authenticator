@@ -1,4 +1,4 @@
-.PHONY: help setup-precommit install-deps dev-setup dev-setup-comprehensive format lint analyze type-check complexity docs check check-comprehensive test test-live-credential test-live-presentation security security-baseline pre-commit precommit-run precommit-update quality-gate ci-check ci-check-comprehensive clean flutter-doctor build-android build-ios
+.PHONY: help setup-precommit install-deps dev-setup dev-setup-comprehensive format lint analyze type-check complexity docs check check-comprehensive test test-device-smoke test-live-credential test-live-presentation security security-baseline pre-commit precommit-run precommit-update quality-gate ci-check ci-check-comprehensive clean flutter-doctor build-android build-ios
 
 help: ## Show developer commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-24s %s\n", $$1, $$2}'
@@ -26,11 +26,20 @@ check check-comprehensive quality-gate: lint pre-commit ## Run analysis and repo
 test: ## Run Flutter tests
 	flutter test
 
+test-device-smoke: ## Run native smoke/rejection checks on a fresh Android/iOS app (DEVICE_ID required)
+	@test -n "$(DEVICE_ID)" || { echo 'Set DEVICE_ID to an explicit isolated Android/iOS device from flutter devices.' >&2; exit 2; }
+	flutter test $(FLUTTER_DEVICE_SMOKE_FLAGS) integration_test/installed_wallet_smoke_test.dart \
+		--flavor netknights_debug -d "$(DEVICE_ID)" \
+		--dart-define=WALLET_DEVICE_SMOKE=true \
+		--dart-define=QR_CODE=WALLET_DEVICE_SMOKE_CAMERA_DISABLED
+
 test-live-credential: ## Run the live credential QR integration test
+	@test -f integration_test/real_credential_flow_test.dart || { echo 'The live credential suite is absent; no demo service was contacted. See docs/development-checks.md.' >&2; exit 2; }
 	@QR_CODE=$$(node scripts/fetch_live_qr.js) && test -n "$$QR_CODE" && \
 	flutter test integration_test/real_credential_flow_test.dart --dart-define=QR_CODE="$$QR_CODE"
 
 test-live-presentation: ## Run the live presentation QR integration test
+	@test -f integration_test/real_presentation_flow_test.dart || { echo 'The live presentation suite is absent; no demo service was contacted. See docs/development-checks.md.' >&2; exit 2; }
 	@QR_CODE=$$(node scripts/fetch_live_presentation_qr.js) && test -n "$$QR_CODE" && \
 	flutter test integration_test/real_presentation_flow_test.dart -d macos --dart-define=QR_CODE="$$QR_CODE"
 

@@ -1,0 +1,7 @@
+cargo:
+  debug:
+    toolchain: 1.97.1
+    extra_flags: [--locked, --offline]
+  release:
+    toolchain: 1.97.1
+    extra_flags: [--locked, --offline]

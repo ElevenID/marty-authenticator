@@ -10,6 +10,12 @@ on:
       - "rust/src/**"
       - "rust/Cargo.toml"
       - "rust/Cargo.lock"
+      - "rust/cargokit.yaml"
+      - "rust_builder/**"
+      - "cargokit_options.yaml"
+      - "test_support/native_bridge_smoke.dart"
+      - "scripts/qualify_native_wallet_governance.py"
+      - "scripts/test_qualify_native_wallet_governance.py"
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
@@ -26,6 +32,12 @@ on:
       - "rust/src/**"
       - "rust/Cargo.toml"
       - "rust/Cargo.lock"
+      - "rust/cargokit.yaml"
+      - "rust_builder/**"
+      - "cargokit_options.yaml"
+      - "test_support/native_bridge_smoke.dart"
+      - "scripts/qualify_native_wallet_governance.py"
+      - "scripts/test_qualify_native_wallet_governance.py"
       - "flutter_rust_bridge.yaml"
       - "pubspec.yaml"
       - "pubspec.lock"
@@ -66,6 +78,14 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get --enforce-lockfile
 
+      - name: Test native build integration tooling
+        working-directory: rust_builder/cargokit/build_tool
+        run: |
+          dart pub get --enforce-lockfile
+          dart format --output=none --set-exit-if-changed .
+          dart test
+          dart analyze
+
       - name: Install pinned bridge generator
         run: cargo install flutter_rust_bridge_codegen --version 2.13.0 --locked
 
@@ -99,6 +119,28 @@ jobs:
 
       - name: Test native bridge behavior and lifecycle
         run: cargo test --locked --manifest-path rust/Cargo.toml --lib
+
+      - name: Build and load the packaged native bridge
+        shell: bash
+        env:
+          CARGOKIT_CONFIGURATION: debug
+          CARGOKIT_MANIFEST_DIR: ${{ github.workspace }}/rust
+          CARGOKIT_ROOT_PROJECT_DIR: ${{ github.workspace }}
+          CARGOKIT_TARGET_PLATFORM: linux-x64
+          CARGOKIT_TARGET_TEMP_DIR: ${{ github.workspace }}/rust/target
+          CARGOKIT_OUTPUT_DIR: ${{ runner.temp }}/wallet-native-bridge
+          CARGOKIT_TOOL_TEMP_DIR: ${{ runner.temp }}/wallet-cargokit-tool
+          FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR: ${{ runner.temp }}/wallet-native-bridge
+        run: |
+          mkdir -p "$CARGOKIT_OUTPUT_DIR"
+          bash "$GITHUB_WORKSPACE/rust_builder/cargokit/run_build_tool.sh" build-cmake
+          dart run test_support/native_bridge_smoke.dart
+
+      - name: Qualify governed native wallet with owned TLS and non-exportable keys
+        run: |
+          python scripts/test_qualify_native_wallet_governance.py
+          cargo test --locked --manifest-path rust/Cargo.toml --lib --no-run --message-format=json > "$RUNNER_TEMP/wallet-native-artifacts.jsonl"
+          python scripts/qualify_native_wallet_governance.py --artifacts "$RUNNER_TEMP/wallet-native-artifacts.jsonl"
 
       - name: Upload generated bridge surfaces
         if: always()
@@ -147,9 +189,5 @@ jobs:
       - name: Enforce native status-list and liveness ownership
         shell: bash
         run: |
-          if grep -REn --include='*.dart' \
-            'gzip\.decode|base64Decode\(|Hmac\(sha256|local-dev-secret' \
-            lib/models lib/services lib/views; then
-            echo 'Status-list decoding and liveness challenge signing must remain in Rust.' >&2
-            exit 1
-          fi
+          python -m unittest discover -s scripts -p 'test_audit_native_ownership.py'
+          python scripts/audit_native_ownership.py

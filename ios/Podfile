@@ -33,8 +33,6 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
-  # SpruceID Mobile SDK will be added via Swift Package Manager in Xcode
-  # pod 'SpruceIDMobileSdk', :git => 'https://github.com/spruceid/sprucekit-mobile.git', :tag => '0.12.11'
 end
 
 post_install do |installer|

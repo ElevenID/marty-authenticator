@@ -7,7 +7,7 @@ import 'credential.dart';
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `try_from`
 
 /// Parse a raw JSON string into a VerifiableCredential.
 Future<VerifiableCredential> parseVerifiableCredential({
@@ -212,19 +212,6 @@ Future<FrbTokenResponse> walletExchangeAuthCodeToken({
   clientId: clientId,
 );
 
-/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
-Future<String> walletCreateProofJwt({
-  required String holderKid,
-  required String cNonce,
-  required String issuerUrl,
-  required String jwkJson,
-}) => RustLib.instance.api.crateApiWalletCreateProofJwt(
-  holderKid: holderKid,
-  cNonce: cNonce,
-  issuerUrl: issuerUrl,
-  jwkJson: jwkJson,
-);
-
 /// Request a credential from the issuer.
 Future<FrbCredentialResponse> walletRequestCredential({
   required String credentialEndpoint,
@@ -240,6 +227,41 @@ Future<FrbCredentialResponse> walletRequestCredential({
   proofJwt: proofJwt,
 );
 
+/// Prepare pre-authorized SD-JWT receipt. Only one offered configuration is
+/// accepted until an explicit credential-selection UI is available.
+Future<FrbPreparedSdJwtReceipt> walletPrepareVerifiedSdJwtReceipt({
+  required String offerUri,
+  String? txCode,
+  required String holderPublicJwkJson,
+  required String issuerSnapshotJson,
+}) => RustLib.instance.api.crateApiWalletPrepareVerifiedSdJwtReceipt(
+  offerUri: offerUri,
+  txCode: txCode,
+  holderPublicJwkJson: holderPublicJwkJson,
+  issuerSnapshotJson: issuerSnapshotJson,
+);
+
+/// Recheck authority, consume the proof and request the credential. Returns
+/// only an opaque handle; the response remains native until final verification.
+Future<String> walletCompleteVerifiedSdJwtReceipt({
+  required String sessionId,
+  required List<int> remoteSignature,
+  required String issuerSnapshotJson,
+}) => RustLib.instance.api.crateApiWalletCompleteVerifiedSdJwtReceipt(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+  issuerSnapshotJson: issuerSnapshotJson,
+);
+
+/// Consume the response using authority fetched after the credential request.
+Future<FrbVerifiedSdJwtReceipt> walletFinalizeVerifiedSdJwtReceipt({
+  required String responseId,
+  required String issuerSnapshotJson,
+}) => RustLib.instance.api.crateApiWalletFinalizeVerifiedSdJwtReceipt(
+  responseId: responseId,
+  issuerSnapshotJson: issuerSnapshotJson,
+);
+
 /// Parse an `openid4vp://` or `https://…` presentation request URI.
 Future<FrbPresentationRequest> walletParsePresentationRequest({
   required String requestUri,
@@ -247,7 +269,104 @@ Future<FrbPresentationRequest> walletParsePresentationRequest({
   requestUri: requestUri,
 );
 
-/// Build and submit a standard VP presentation.
+/// Verify a candidate before consent and return every always-shared issuer
+/// payload member. This projection grants no signing/submission authority.
+Future<String> walletReviewVerifiedSdJwtCredential({
+  required String credential,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletReviewVerifiedSdJwtCredential(
+  credential: credential,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Authenticate the canonical signed request and retain the exact verified
+/// credential behind a short-lived native consent handle. Governance JSON must
+/// come only from the fixed, authenticated paired-device transport.
+Future<String> walletReviewGovernedSdJwtPresentation({
+  required String requestUri,
+  required String governanceJson,
+  required String credential,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletReviewGovernedSdJwtPresentation(
+  requestUri: requestUri,
+  governanceJson: governanceJson,
+  credential: credential,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Consume the native consent handle; Flutter cannot replace its credential,
+/// request, recipient or authenticated policy when approving disclosures.
+Future<FrbPreparedSdJwtPresentation> walletPrepareGovernedSdJwtPresentation({
+  required String sessionId,
+  required List<String> claimsToDisclose,
+  required String governanceJson,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletPrepareGovernedSdJwtPresentation(
+  sessionId: sessionId,
+  claimsToDisclose: claimsToDisclose,
+  governanceJson: governanceJson,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Reauthenticate the retained original request using fresh confirmed-device
+/// governance and issuer trust, then verify the stored input's remote signature.
+Future<FrbPresentationResponse> walletCompleteGovernedSdJwtPresentation({
+  required String sessionId,
+  required List<int> remoteSignature,
+  required String governanceJson,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletCompleteGovernedSdJwtPresentation(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+  governanceJson: governanceJson,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Idempotently retire an unsubmitted consent or signing handle.
+Future<void> walletCancelGovernedSdJwtPresentation({
+  required String sessionId,
+}) => RustLib.instance.api.crateApiWalletCancelGovernedSdJwtPresentation(
+  sessionId: sessionId,
+);
+
+/// Retired unbound presentation API. Approval requires a native governed handle.
+Future<FrbPreparedSdJwtPresentation> walletPrepareVerifiedSdJwtPresentation({
+  required String requestUri,
+  required String approvedRequestDigest,
+  required String credential,
+  required String queryId,
+  required List<String> claimsToDisclose,
+  required String issuerSnapshotJson,
+  required String holderPublicJwkJson,
+}) => RustLib.instance.api.crateApiWalletPrepareVerifiedSdJwtPresentation(
+  requestUri: requestUri,
+  approvedRequestDigest: approvedRequestDigest,
+  credential: credential,
+  queryId: queryId,
+  claimsToDisclose: claimsToDisclose,
+  issuerSnapshotJson: issuerSnapshotJson,
+  holderPublicJwkJson: holderPublicJwkJson,
+);
+
+/// Retired completion API. Fresh confirmed-device governance is mandatory.
+Future<FrbPresentationResponse> walletCompleteVerifiedSdJwtPresentation({
+  required String sessionId,
+  required List<int> remoteSignature,
+}) => RustLib.instance.api.crateApiWalletCompleteVerifiedSdJwtPresentation(
+  sessionId: sessionId,
+  remoteSignature: remoteSignature,
+);
+
+/// Retired unverified VP entry point. Always rejects until the verified
+/// remote-KMS presenter is exposed through the bridge.
 Future<FrbPresentationResponse> walletBuildAndSubmitPresentation({
   required String responseUri,
   String? presentationDefinitionJson,
@@ -452,6 +571,50 @@ class FrbIssuerMetadata {
           credentialConfigurationsJson == other.credentialConfigurationsJson;
 }
 
+/// Verified presentation awaiting one remote KMS ES256 signature.
+class FrbPreparedSdJwtPresentation {
+  final String sessionId;
+  final Uint8List signingInput;
+
+  const FrbPreparedSdJwtPresentation({
+    required this.sessionId,
+    required this.signingInput,
+  });
+
+  @override
+  int get hashCode => sessionId.hashCode ^ signingInput.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPreparedSdJwtPresentation &&
+          runtimeType == other.runtimeType &&
+          sessionId == other.sessionId &&
+          signingInput == other.signingInput;
+}
+
+/// One-use remote ES256 proof challenge for an OID4VCI credential offer.
+class FrbPreparedSdJwtReceipt {
+  final String sessionId;
+  final Uint8List signingInput;
+
+  const FrbPreparedSdJwtReceipt({
+    required this.sessionId,
+    required this.signingInput,
+  });
+
+  @override
+  int get hashCode => sessionId.hashCode ^ signingInput.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbPreparedSdJwtReceipt &&
+          runtimeType == other.runtimeType &&
+          sessionId == other.sessionId &&
+          signingInput == other.signingInput;
+}
+
 /// Presentation holder-binding values validated by the canonical Rust wallet.
 class FrbPresentationBindingContext {
   final String challenge;
@@ -479,6 +642,9 @@ class FrbPresentationRequest {
   final String clientId;
   final String nonce;
   final String responseUri;
+  final String? responseMode;
+  final String? state;
+  final String requestDigest;
   final String queryType;
   final String? presentationDefinitionJson;
   final String? dcqlQueryJson;
@@ -487,6 +653,9 @@ class FrbPresentationRequest {
     required this.clientId,
     required this.nonce,
     required this.responseUri,
+    this.responseMode,
+    this.state,
+    required this.requestDigest,
     required this.queryType,
     this.presentationDefinitionJson,
     this.dcqlQueryJson,
@@ -497,6 +666,9 @@ class FrbPresentationRequest {
       clientId.hashCode ^
       nonce.hashCode ^
       responseUri.hashCode ^
+      responseMode.hashCode ^
+      state.hashCode ^
+      requestDigest.hashCode ^
       queryType.hashCode ^
       presentationDefinitionJson.hashCode ^
       dcqlQueryJson.hashCode;
@@ -509,6 +681,9 @@ class FrbPresentationRequest {
           clientId == other.clientId &&
           nonce == other.nonce &&
           responseUri == other.responseUri &&
+          responseMode == other.responseMode &&
+          state == other.state &&
+          requestDigest == other.requestDigest &&
           queryType == other.queryType &&
           presentationDefinitionJson == other.presentationDefinitionJson &&
           dcqlQueryJson == other.dcqlQueryJson;
@@ -576,6 +751,39 @@ class FrbTokenResponse {
           tokenType == other.tokenType &&
           expiresIn == other.expiresIn &&
           scope == other.scope;
+}
+
+/// An issuer-signed SD-JWT verified against fresh issuer trust and the paired
+/// public presentation key. No access token or signing key crosses this API.
+class FrbVerifiedSdJwtReceipt {
+  final String credential;
+  final String issuer;
+  final String credentialType;
+  final String format;
+
+  const FrbVerifiedSdJwtReceipt({
+    required this.credential,
+    required this.issuer,
+    required this.credentialType,
+    required this.format,
+  });
+
+  @override
+  int get hashCode =>
+      credential.hashCode ^
+      issuer.hashCode ^
+      credentialType.hashCode ^
+      format.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FrbVerifiedSdJwtReceipt &&
+          runtimeType == other.runtimeType &&
+          credential == other.credential &&
+          issuer == other.issuer &&
+          credentialType == other.credentialType &&
+          format == other.format;
 }
 
 /// A protocol QR/deep-link accepted by the canonical Rust wallet parsers.
