@@ -161,7 +161,11 @@ Future<void> _checkApplicationRejections(WidgetTester tester) async {
   expect((await _storage.readAll().timeout(_ioTimeout)).isEmpty, isTrue);
 }
 
-Future<void> _waitFor(WidgetTester tester, Finder finder, {int count = 1}) async {
+Future<void> _waitFor(
+  WidgetTester tester,
+  Finder finder, {
+  int count = 1,
+}) async {
   // The scanner owns a repeating animation; pumpAndSettle cannot finish there.
   for (var attempt = 0; attempt < 100; attempt++) {
     await tester.pump(const Duration(milliseconds: 100));
