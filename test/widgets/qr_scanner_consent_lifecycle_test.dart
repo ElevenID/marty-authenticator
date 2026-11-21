@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marty_authenticator/interfaces/spruce_interfaces_extended.dart';
+import 'package:marty_authenticator/services/qr_scanner_service_enhanced.dart';
 import 'package:marty_authenticator/services/spruce_client_extended.dart';
 import 'package:marty_authenticator/services/spruce_platform_service_extended.dart';
 import 'package:marty_authenticator/widgets/presentation_request_view.dart';
@@ -50,6 +51,45 @@ class _Client implements ISpruceIdClientExtended {
 }
 
 void main() {
+  testWidgets(
+    'wallet link uses the native parser once without opening the scanner',
+    (tester) async {
+      const link = 'openid4vp://?client_id=example';
+      final inputs = <String>[];
+      final parser = QRScannerServiceEnhanced(
+        parseNativeQr: ({required rawData}) async {
+          inputs.add(rawData);
+          return null;
+        },
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            qrScannerServiceEnhancedProvider.overrideWithValue(parser),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: QRScannerEnhanced(
+                walletLink: link,
+                scannerOverride: Text('camera surface'),
+                enableHapticFeedback: false,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(inputs, [link]);
+      expect(find.text('camera surface'), findsNothing);
+      expect(
+        find.text('Unsupported QR content was not parsed by the native wallet'),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   Future<GlobalKey<QRScannerEnhancedState>> mount(
     WidgetTester tester,
     _Client client,

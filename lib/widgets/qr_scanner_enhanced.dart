@@ -39,6 +39,7 @@ import '../utils/logger.dart';
 /// Enhanced QR scanner widget with SDK integration
 class QRScannerEnhanced extends ConsumerStatefulWidget {
   final void Function(ProcessedQRResult result)? onScanResult;
+  final String? walletLink;
   final bool enableBackgroundProcessing;
   final bool showLivePreview;
   final bool enableHapticFeedback;
@@ -48,6 +49,7 @@ class QRScannerEnhanced extends ConsumerStatefulWidget {
   const QRScannerEnhanced({
     super.key,
     this.onScanResult,
+    this.walletLink,
     this.enableBackgroundProcessing = true,
     this.showLivePreview = true,
     this.enableHapticFeedback = true,
@@ -82,6 +84,12 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   void initState() {
     super.initState();
     _initializeAnimations();
+    final link = widget.walletLink;
+    if (link != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(handleScanResult(link));
+      });
+    }
   }
 
   void _initializeAnimations() {
@@ -146,6 +154,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       // Process QR code with enhanced service
       final qrService = ref.read(qrScannerServiceEnhancedProvider);
       final result = await qrService.processQRCode(scannedData);
+      if (!mounted) return;
 
       if (result.isSuccess) {
         _parsedScans++;
@@ -400,6 +409,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   Widget _buildScannerInterface() {
+    if (widget.walletLink != null) return const SizedBox.expand();
     if (widget.scannerOverride != null) return widget.scannerOverride!;
     // For web, show image upload interface
     if (kIsWeb) {

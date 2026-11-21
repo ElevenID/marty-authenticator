@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,6 +11,7 @@ import '../../models/card_data.dart';
 import '../../providers/card_state_provider.dart';
 import '../../controllers/scroll_fade_controller.dart';
 import '../../widgets/scrolling_wallet_header.dart';
+import '../../widgets/qr_scanner_enhanced.dart';
 import '../../widgets/cascading_card_list.dart';
 import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
@@ -26,6 +31,7 @@ class DocumentView extends ConsumerStatefulWidget {
 
 class _DocumentViewState extends ConsumerState<DocumentView> {
   late ScrollFadeController fadeController;
+  StreamSubscription<Uri>? _walletLinks;
 
   @override
   void initState() {
@@ -35,10 +41,40 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
       onOpacityChanged: () => setState(() {}),
     );
     fadeController.initialize();
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
+      _walletLinks = AppLinks().uriLinkStream.listen(
+        _receiveWalletLink,
+        onError: (Object _) {},
+      );
+    }
+  }
+
+  void _receiveWalletLink(Uri uri) {
+    if (uri.scheme != 'openid-credential-offer' && uri.scheme != 'openid4vp') {
+      return;
+    }
+    final input = uri.toString();
+    if (input.length > 65536) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            appBar: AppBar(title: const Text('Wallet request')),
+            body: QRScannerEnhanced(walletLink: input),
+          ),
+        ),
+      );
+      if (mounted) await ref.read(cardStateProvider.notifier).refreshCards();
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override
   void dispose() {
+    unawaited(_walletLinks?.cancel());
     fadeController.dispose();
     super.dispose();
   }
