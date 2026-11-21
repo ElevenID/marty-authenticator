@@ -320,6 +320,19 @@ async fn wallet_qr_validation_uses_canonical_rust_parsers() {
 }
 
 #[tokio::test]
+async fn signed_presentation_envelopes_reach_governance_without_network_or_preview_claims() {
+    for input in [
+        "openid4vp://?client_id=registered&request=signed.request.object",
+        "openid4vp://authorize?client_id=registered&request_uri=https%3A%2F%2Fverifier.invalid%2Frequest",
+    ] {
+        let preview = wallet_validate_qr_input(input.to_owned()).await.unwrap().unwrap();
+        assert_eq!(preview.kind, "presentation_request");
+        assert_eq!(preview.normalized, input);
+        assert_eq!(preview.parsed_content_json, "{}");
+    }
+}
+
+#[tokio::test]
 async fn wallet_qr_validation_rejects_malformed_protocol_input() {
     assert!(wallet_validate_qr_input("openid4vp://".to_string())
         .await

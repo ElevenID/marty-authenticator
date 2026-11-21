@@ -156,6 +156,21 @@ pub(crate) async fn wallet_validate_qr_input(
             reviewed_credential_offer(&offer).map(Some)
         }
         WalletInputKind::PresentationRequest => {
+            let envelope = url::Url::parse(&classified.normalized)?;
+            if envelope.scheme() == "openid4vp"
+                && envelope
+                    .query_pairs()
+                    .any(|(key, _)| matches!(key.as_ref(), "request" | "request_uri"))
+            {
+                // The paired governance path authenticates the signed object before
+                // deriving consent. Scanner previews only identify its transport.
+                return Ok(Some(FrbWalletQrInput {
+                    kind: "presentation_request".to_owned(),
+                    normalized: classified.normalized,
+                    parsed_content_json: "{}".to_owned(),
+                    requires_external_provider: false,
+                }));
+            }
             let engine = marty_oid4vci::WalletEngine::new();
             let request = engine
                 .parse_presentation_request(&classified.normalized)
