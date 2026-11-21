@@ -43,6 +43,73 @@ jobs:
       # generated Xcode project without producing an iOS installer.
       - run: flutter build ios -t "lib/main_document.dart" --debug --flavor netknights --no-codesign --config-only
 
+  smoke_ios:
+    name: Installed wallet smoke (iOS simulator)
+    runs-on: macos-latest
+    timeout-minutes: 15
+    env:
+      CARGO_PROFILE_DEV_DEBUG: "0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set Xcode version
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90
+        with:
+          xcode-version: "26.6"
+
+      - name: Set up native Rust toolchain
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: "1.97.1"
+
+      - name: Set up native dependency helper runtime
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+
+      - name: Require trusted native fork access
+        if: vars.PRIVATE_FORKS_ENABLED == 'true'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: python .github/scripts/private-forks.py check
+
+      - name: Fetch locked native fork dependencies
+        if: vars.PRIVATE_FORKS_ENABLED == 'true'
+        shell: bash
+        env:
+          PRIVATE_FORKS_READ_TOKEN: ${{ secrets.PRIVATE_FORKS_READ_TOKEN }}
+        run: python .github/scripts/private-forks.py fetch --manifest-path rust/Cargo.toml
+
+      - name: Fetch locked public native dependencies
+        if: vars.PRIVATE_FORKS_ENABLED != 'true'
+        shell: bash
+        run: cargo fetch --locked --manifest-path rust/Cargo.toml
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: "stable"
+          flutter-version: "3.44.6"
+
+      - run: flutter pub get --enforce-lockfile
+
+      - name: Run wallet smoke on a fresh iPhone simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Use a device type known to be compatible with an installed iOS runtime.
+          pair=$(xcrun simctl list devices available --json | jq -er '
+            first(.devices | to_entries[] | select(.key | contains(".iOS-")) |
+              .key as $runtime | .value[] | select(.name | startswith("iPhone")) |
+              [$runtime, .deviceTypeIdentifier] | @tsv)')
+          IFS=$'\t' read -r runtime device_type <<< "$pair"
+          device=$(xcrun simctl create "WalletSmoke-${GITHUB_RUN_ID}" "$device_type" "$runtime")
+          trap 'xcrun simctl delete "$device"' EXIT
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          make test-device-smoke DEVICE_ID="$device"
+
   build_android_native:
     name: Android native (${{ matrix.abi }})
     runs-on: ubuntu-latest
