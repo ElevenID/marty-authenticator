@@ -11,8 +11,8 @@ registry SSI graph and standalone SSI-JWT patch are removed from the lockfile.
 The exact revisions are recorded in `rust/Cargo.toml` and `rust/Cargo.lock`.
 The original foundation coordinated Core PR 414, SD-JWT PR 44, isomdl PR 38 and
 Verifier PR 180. Retained PR 57 now pins accepted Core
-`64601c9513850e3eb60b00f6aa893cae8d9e4b0d` (Core #445) and Verifier
-`9c51381ab686d13503d59071e829feeeec2bd800` (Verifier #199), with the current graph
+`11152cfb83ec47174a21ad76fd4c9e811c93602f` (Core #446) and Verifier
+`9158ffb0ed6523a978b788fa68fc34357403a490` (Verifier #201), with the current graph
 and runtime qualification recorded separately from that historical foundation.
 The wallet selects only the portable policy/profile client of marty-sync; native
 trust-list acquisition, database and USB-import capabilities are not wallet roles.
@@ -20,7 +20,7 @@ Existing wallet, native biometrics and ZK prover feature selections are retained
 
 This checkpoint carries the accepted maintained-clock implementation through
 crypto, X.509 and the selected biometric liveness feature. SD-JWT resolves to
-accepted `ba5a9a154ae530ddcfcc5b52adf3da71e91b1929` (SD-JWT #47). The wallet
+accepted `9fc75ab0befe6b7f80987acd8b740baead40ee76` (SD-JWT #43). The wallet
 receipt and presentation entrypoints retain SHA-256 digest admission; Core's
 explicit wider-digest APIs require their own product profile. Optional
 `mdoc-status-verification` remains unselected, and raw status references do not

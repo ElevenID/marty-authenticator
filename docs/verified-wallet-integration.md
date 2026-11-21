@@ -7,9 +7,9 @@ integration does not activate or release a production wallet.
 
 ## Dependency and bridge boundary
 
-The manifests pin accepted Core `64601c9513850e3eb60b00f6aa893cae8d9e4b0d`
-(Core #445) and Verifier `9c51381ab686d13503d59071e829feeeec2bd800`
-(Verifier #199). Core dependencies of `marty-sync` share that revision. The
+The manifests pin accepted Core `11152cfb83ec47174a21ad76fd4c9e811c93602f`
+(Core #446) and Verifier `9158ffb0ed6523a978b788fa68fc34357403a490`
+(Verifier #201). Core dependencies of `marty-sync` share that revision. The
 wallet uses only the portable policy/profile client of marty-sync, without
 native trust-list acquisition, database or USB-import capabilities. The
 reviewed SSI, SD-JWT, isomdl, linked-data and SQLCipher closures remain

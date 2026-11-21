@@ -13,21 +13,21 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 # Core crates from marty-core
-marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d" }
-marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d", default-features = false, features = ["iaca", "csca"] }
+marty-crypto = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
+marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", default-features = false, features = ["iaca", "csca"] }
 # Wallet holders generate presentation proofs; Core defaults to verification only.
-marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d", default-features = false, features = ["prover"] }
+marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", default-features = false, features = ["prover"] }
 
 # OID4VCI/VP wallet (holder) — no issuer feature; wallet enables verifier support.
-marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
-marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d" }
+marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
+marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
 
 # Portable policy/profile client only; native trust-list acquisition is not a wallet role.
-marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "9c51381ab686d13503d59071e829feeeec2bd800", default-features = false }
+marty-sync = { git = "https://github.com/ElevenID/marty-verifier", rev = "9158ffb0ed6523a978b788fa68fc34357403a490", default-features = false }
 
 # Biometric face verification (ONNX-backed for on-device matching)
-marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d", features = ["native", "onnx", "liveness"] }
-marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d" }
+marty-biometrics = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", features = ["native", "onnx", "liveness"] }
+marty-status = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
 
 # Flutter Rust Bridge
 flutter_rust_bridge = "=2.13.0"
@@ -60,7 +60,7 @@ flutter_rust_bridge_codegen = "=2.13.0"
 [dev-dependencies]
 reqwest = { version = "=0.13.4", default-features = false, features = ["json", "rustls"] }
 # Accepted Core test-only remote signers. No software holder-key fallback.
-marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "64601c9513850e3eb60b00f6aa893cae8d9e4b0d" }
+marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
 
 # Android armv7 needs generated AWS-LC bindings for the existing TLS backend.
 # Keep the locked backend/version and host features; do not drop a packaged ABI.
