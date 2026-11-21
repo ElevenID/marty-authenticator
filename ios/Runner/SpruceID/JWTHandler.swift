@@ -4,8 +4,6 @@
 //
 
 import Foundation
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
 /// Handles JWT/SD-JWT operations with URL-based issuers
 class JWTHandler {

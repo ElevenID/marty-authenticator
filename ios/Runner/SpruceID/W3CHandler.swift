@@ -4,8 +4,6 @@
 //
 
 import Foundation
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
 /// Handles W3C Verifiable Credentials (DID-based only)
 class W3CHandler {
