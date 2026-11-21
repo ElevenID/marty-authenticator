@@ -696,7 +696,6 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 98247EKA3A;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = lib/main_document.dart;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",

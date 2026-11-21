@@ -92,20 +92,108 @@ They do not replace actual Android compilation, APK payload validation, native
 loading, installed-wallet flows or independent interoperability qualification.
 Exact executed candidates and remaining device acceptance stay in PR57.
 
-## Device integration coverage remains unfinished
+## Installed-device smoke suite and remaining acceptance
 
-The retired `scripts/run_driver.sh` invoked `flutter driver` against
-`test_driver/run_all.dart`, which is absent. There is no tracked `test_driver/`
-or `integration_test/` suite. The existing `test/` suite, including protocol
-tests under `test/integration/`, and platform build checks remain; their success
-does not establish device integration coverage.
+`integration_test/installed_wallet_smoke_test.dart` is an executable Android/iOS
+smoke and rejection suite. It boots `lib/main_document.dart`, loads the packaged
+Rust bridge through the real application initializer, and uses the real
+secure-storage plugin and default wallet providers. It does not replace native
+adapters or HTTP clients with mocks.
 
-Before claiming that coverage, provide an executable device/emulator suite,
-document its Android/iOS setup and exact commands, and exercise real application
-flows through the current native wallet adapters. Retain coverage needs for
-enrollment, OTP/PUSH, deep links and credential offer/presentation handling,
-including permission, lifecycle, network and rejection cases. Use isolated test
-accounts and fixtures and preserve any failed-run diagnostics outside Git.
+The bounded checks cover:
+
+- Secure-storage write/read/delete for one owned non-credential probe key.
+- Native inline-offer parsing and preservation of the reviewed offer, unsupported
+  QR input, malformed credential rejection, offer/presentation route separation,
+  and issuer-authority rejection before any credential exchange.
+- The document view's scanner route, native offer review and decline, rejection
+  when an unpaired wallet accepts an offer, and malformed presentation rejection
+  without a consent screen or success message.
+- Return to the document view and confirmation that rejection stored no receipt
+  or enrollment and that the wallet can still read its empty storage.
+
+Use a disposable device, emulator or simulator profile with a fresh
+`netknights_debug` app and empty secure storage. The suite refuses existing data
+without printing it or clearing it. Its cleanup deletes only the exact probe
+value it wrote. In particular, it never calls `deleteAll`, removes receipts or
+resets enrollment. An iOS reinstall may retain Keychain data, so use an isolated
+simulator/profile rather than relying on uninstalling a personal wallet.
+
+Restore the declared dependencies with Flutter **3.44.6** (`flutter pub get
+--enforce-lockfile`). For Android, use the repository's Java/SDK/NDK and Rust
+target setup from the packaging section above and an already running isolated
+Android device/emulator. For iOS, use a macOS host with the repository's Xcode,
+CocoaPods and native Rust build prerequisites, plus an already running isolated
+iOS simulator or a development-signed test device. The existing
+`netknights_debug` scheme is used on both platforms. Private native dependencies
+must be available through the repository's existing authenticated setup.
+
+For this iOS debug scheme, the Runner configuration inherits `FLUTTER_TARGET`
+from the project's `Flutter/Generated.xcconfig`. Its former hardcoded application
+entrypoint is removed so Flutter can select the generated integration-test
+listener. Do not set `FLUTTER_TARGET` to the test file manually; the listener
+wrapper is required. Ordinary explicit `-t lib/main_document.dart` builds still
+select the application entrypoint. The other flavor/release overrides are
+unchanged. This is source wiring only: the existing hosted iOS job uses
+`netknights --config-only` and does not build or execute this changed debug
+scheme. Its effective listener target, native build and installed run still need
+verification on a macOS device host.
+
+Select the exact identifier from `flutter devices`, then run either platform
+with the same command:
+
+```sh
+make test-device-smoke DEVICE_ID='<exact Android or iOS device identifier>'
+```
+
+The equivalent direct command is:
+
+```sh
+flutter test integration_test/installed_wallet_smoke_test.dart \
+  --flavor netknights_debug -d '<exact device identifier>' \
+  --dart-define=WALLET_DEVICE_SMOKE=true \
+  --dart-define=QR_CODE=WALLET_DEVICE_SMOKE_CAMERA_DISABLED
+```
+
+These defines explicitly select a smoke run and the existing camera-disabled
+test seam. The test feeds deterministic inline input at the scanner callback;
+it does not exercise camera capture or the OS permission prompt. The fixture
+uses an `.invalid` issuer and needs no demo service, test account or pairing
+credential. Parsing never authenticates that issuer. Normal `flutter test`
+discovery continues to run `test/`; this device suite runs only when explicitly
+selected. Global formatting and analysis include its source.
+
+Run from a clean checkout of the candidate being qualified. Preserve diagnostics
+outside the checkout, including the source commit, Flutter
+version, device identifier/OS/ABI, command and full failed-run output. For
+example, in Bash on the device host:
+
+```sh
+run_dir=$(mktemp -d "${TMPDIR:-/tmp}/wallet-device-smoke.XXXXXX")
+git rev-parse HEAD > "$run_dir/source-commit.txt"
+flutter --version > "$run_dir/flutter-version.txt"
+flutter devices --machine > "$run_dir/devices.json"
+set -o pipefail
+make test-device-smoke DEVICE_ID='<exact device identifier>' 2>&1 \
+  | tee "$run_dir/test.log"
+```
+
+The tracked suite and a passing source/build check do not establish an installed
+run. Record each actual device execution and exact candidate in PR57 before
+claiming that bounded coverage. Neither this suite nor a successful run closes
+W14: enrollment/renewal and remote signing, OTP/PUSH, OS deep links, camera and
+permission behavior, process/lifecycle and network failures, successful governed
+issuance/presentation, deployed issuer services and independent interoperability
+still need their applicable fixtures and runtime qualification. Synthetic
+native provider fixtures and the mocked tests in `test/integration/` and
+`acceptance_test/` remain distinct evidence.
+
+The retired `scripts/run_driver.sh` targeted absent
+`test_driver/run_all.dart`. The separate `test-live-credential` and
+`test-live-presentation` Make targets also reference absent `real_*_flow_test.dart`
+suites; they now fail before fetching a QR from a demo service. Restoring those
+flows requires their own supported, governed exchange suite. The installed smoke
+suite is not a replacement for live credential acceptance.
 
 The separate web-test launchers have cross-repository E2E consumers. Their
 ownership and missing application entrypoint need separate qualification;
