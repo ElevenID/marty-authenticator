@@ -27,3 +27,6 @@ pub use credential::{
     Credential, MDocCredential, SdJwtCredential, TrustInfo, VerifiableCredential,
 };
 pub use error::{MartyError, MartyResult};
+
+#[cfg(target_os = "android")]
+mod android_tls;

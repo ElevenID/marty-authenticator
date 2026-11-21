@@ -18,7 +18,7 @@ marty-verification = { git = "https://github.com/ElevenID/marty-core", rev = "11
 # Wallet holders generate presentation proofs; Core defaults to verification only.
 marty-zkp = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", default-features = false, features = ["prover"] }
 
-# OID4VCI/VP wallet (holder) — no issuer feature; wallet enables verifier support.
+# OID4VCI/VP wallet (holder) â€” no issuer feature; wallet enables verifier support.
 marty-oid4vci = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f", default-features = false, features = ["wallet", "jwt_vc_json", "sd_jwt", "mso_mdoc", "zk_mdoc"] }
 marty-iso18013 = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
 
@@ -63,6 +63,10 @@ reqwest = { version = "=0.13.4", default-features = false, features = ["json", "
 marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "11152cfb83ec47174a21ad76fd4c9e811c93602f" }
 
 # Android armv7 and iOS simulator builds need generated bindings for the locked TLS backend.
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.22"
+rustls-platform-verifier = "0.7"
+
 [target.'cfg(any(target_os = "android", all(target_os = "ios", target_abi = "sim")))'.dependencies]
 aws-lc-sys = { version = "=0.47.0", default-features = false, features = ["bindgen"] }
 

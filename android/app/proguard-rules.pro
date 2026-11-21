@@ -35,3 +35,6 @@
 
 ## flutter_local_notification plugin rules
 -keep class com.dexterous.** { *; }
+
+# The platform trust verifier is invoked through JNI.
+-keep,includedescriptorclasses class org.rustls.platformverifier.** { *; }

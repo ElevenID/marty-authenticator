@@ -6,7 +6,27 @@ plugins {
 
 
 
+// Cargo distributes the Android verifier AAR inside its checksummed crate.
+def rustMetadata = providers.exec {
+    workingDir rootProject.file('../rust')
+    commandLine 'cargo', 'metadata', '--format-version', '1', '--locked',
+            '--filter-platform', 'aarch64-linux-android'
+}.standardOutput.asText.get()
+def verifierPackage = new groovy.json.JsonSlurper().parseText(rustMetadata).packages.find {
+    it.name == 'rustls-platform-verifier-android'
+}
+if (verifierPackage == null) {
+    throw new GradleException('Cargo metadata is missing the Android platform TLS verifier')
+}
+def verifierVersion = verifierPackage.version
+def verifierRoot = new File(verifierPackage.manifest_path).parentFile
+def verifierAar = new File(verifierRoot, "maven/rustls/rustls-platform-verifier/${verifierVersion}/rustls-platform-verifier-${verifierVersion}.aar")
+if (!verifierAar.isFile()) {
+    throw new GradleException('Android platform TLS verifier AAR is missing from the resolved crate')
+}
+
 dependencies {
+    implementation files(verifierAar)
     // Add this [coreLibraryDesugaring] inside [dependencies]
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 

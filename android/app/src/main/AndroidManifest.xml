@@ -23,6 +23,7 @@
 
 
     <application
+        android:name="it.netknights.piauthenticator.WalletApplication"
         android:label="@string/app_name"
         android:allowBackup="false"
         android:fullBackupContent="false"
