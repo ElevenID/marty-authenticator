@@ -99,8 +99,8 @@ export interface InitOutput {
     readonly health_check: (a: number) => void;
     readonly open_badge_ob3_verify: (a: number, b: number) => number;
     readonly init_panic_hook: () => void;
-    readonly __wasm_bindgen_func_elem_4297: (a: number, b: number, c: number, d: number) => void;
-    readonly __wasm_bindgen_func_elem_4308: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4287: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_4301: (a: number, b: number, c: number, d: number) => void;
     readonly __wbindgen_export: (a: number) => void;
     readonly __wbindgen_export2: (a: number, b: number, c: number) => void;
     readonly __wbindgen_export3: (a: number, b: number) => number;

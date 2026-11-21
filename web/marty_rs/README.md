@@ -1,15 +1,15 @@
 # Public protocol WASM
 
 These files were generated from `ElevenID/marty-credentials` commit
-`f77b37292b61f1490ccec6539b04391ddc124eb0`, crate `rust/marty-rs`
+`76ab864203ff794d28309a220d87aa292d93c9d2`, crate `rust/marty-rs`
 version `0.1.79`, with the hardened Marty Core pin at
-`b30866a81284d97b65a3e4cdd85e917df17e10d4`.
-The locked build used Rust 1.95.0 and wasm-bindgen 0.2.127.
+`11152cfb83ec47174a21ad76fd4c9e811c93602f`.
+The locked build used Rust 1.97.1 and wasm-bindgen 0.2.127.
 
 Build from that Credentials checkout:
 
 ```sh
-cargo +1.95.0 build --locked --release --target wasm32-unknown-unknown -p marty-rs --no-default-features --features wasm
+cargo +1.97.1 build --locked --release --target wasm32-unknown-unknown -p marty-rs --no-default-features --features wasm
 wasm-bindgen --target web --out-dir ./safe-web target/wasm32-unknown-unknown/release/_marty_rs.wasm
 ```
 
