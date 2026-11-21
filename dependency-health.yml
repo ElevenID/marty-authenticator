@@ -16,11 +16,11 @@ dependencies:
     ecosystem: pub
     owner: ElevenID
     upstream: https://github.com/juliansteenbakker/flutter_secure_storage
-    current: local-wasm-override
-    target: upstream-release
+    current: "2.1.1 (hosted, with bounded legacy migration)"
+    target: complete upstream migration qualification
     status: watch
     decision: replace
     advisories: []
     tracking-issue: https://github.com/ElevenID/marty-authenticator/issues/11
-    review-after: 2026-11-20
-    rationale: Re-reviewed 2026-11-06 against upstream commit 10126973316682dd1bae779d86a91a501359b11b (flutter_secure_storage_web pubspec, changelog and implementation) and this branch's pubspec.lock and consumers. Upstream remains 2.1.1 and uses modern web/JS interop with secure-context WebCrypto; the original dart:html rationale is obsolete. The resolved graph still selects the local override, and WalletCredentialStore and card state still consume its namespaced SharedPreferences/base64 format, which is not encrypted and is incompatible with upstream encrypted records. The Open Badges retirement does not remove this dependency. Issue 11 remains open; preserve existing records until a reviewed migration qualifies successful and failed writes, readback, rollback, namespace isolation and logout/deletion, as specified in docs/development-checks.md. This review does not qualify browser storage security or change its implementation.
+    review-after: 2026-11-28
+    rationale: Re-reviewed 2026-11-21 (UTC policy date) against current upstream commit 10126973316682dd1bae779d86a91a501359b11b, its web pubspec/changelog, pub.dev version history, this branch's manifests and migration implementation, and PR57 qualification records. The manifest and lock now select hosted 2.1.1 with SHA-256 073a62b3aeb866ab4ce795f960413948e51e5a42a9b0c8333b6daf5bb3208a1c; no local override remains. The browser-only adapter wraps upstream WebCrypto with bounded namespace locks, encrypted-record checks and exact readback before retiring recognized legacy records; failures and unknown records are preserved without a plaintext fallback. Sixteen controlled migration cases and the historical JS/WASM browser execution at a41c4d4 remain separate evidence. Storage source and storage package pins are unchanged from that execution, but no current-head browser run or full wallet acceptance is inferred. Retain watch/replace and open issue 11 for applicable migration, artifact and release qualification described in docs/browser-storage.md and PR57. Re-review by November 28 or on relevant upstream changes; this inventory correction changes no dependency, runtime behavior or acceptance gate.
