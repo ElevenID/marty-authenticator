@@ -54,9 +54,15 @@ void main() {
           '--target=${entry.value.$1}26 '
           '--sysroot="$sysroot" -I"$sysroot/usr/include/${entry.value.$2}"',
         );
+        final tools = bin.path.replaceAll('\\', '/');
+        final extension = Platform.isWindows ? '.exe' : '';
+        expect(environment['CLANG_PATH'], '$tools/clang$extension');
+        expect(environment['CC_${entry.key}'], '$tools/clang$extension');
+        expect(environment['CXX_${entry.key}'], '$tools/clang++$extension');
+        expect(environment['AR_${entry.key}'], '$tools/llvm-ar');
         expect(
-          environment['CLANG_PATH'],
-          path.join(bin.path, Platform.isWindows ? 'clang.exe' : 'clang'),
+          environment['RANLIB_${entry.key}'],
+          '$tools/llvm-ranlib$extension',
         );
         expect(
           environment['CFLAGS_${entry.key}'],

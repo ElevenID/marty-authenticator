@@ -101,10 +101,17 @@ class AndroidEnvironment {
 
     final exe = Platform.isWindows ? '.exe' : '';
 
+    // Vendored native builds pass these paths through Unix make recipes even
+    // on Windows. Backslashes would escape the following character there.
+    String ndkTool(String name) =>
+        path.join(toolchainPath, name).replaceAll(path.separator, '/');
+
     final arKey = 'AR_${target.rust}';
-    final arValue = ['${target.rust}-ar', 'llvm-ar', 'llvm-ar.exe']
-        .map((e) => path.join(toolchainPath, e))
-        .firstWhereOrNull((element) => File(element).existsSync());
+    final arValue = [
+      '${target.rust}-ar',
+      'llvm-ar',
+      'llvm-ar.exe',
+    ].map(ndkTool).firstWhereOrNull((element) => File(element).existsSync());
     if (arValue == null) {
       throw Exception('Failed to find ar for $target in $toolchainPath');
     }
@@ -128,12 +135,12 @@ class AndroidEnvironment {
         '-I${quotedClangPath(targetHeaders)}';
 
     final ccKey = 'CC_${target.rust}';
-    final ccValue = path.join(toolchainPath, 'clang$exe');
+    final ccValue = ndkTool('clang$exe');
     final cfFlagsKey = 'CFLAGS_${target.rust}';
     final cFlagsValue = targetArg;
 
     final cxxKey = 'CXX_${target.rust}';
-    final cxxValue = path.join(toolchainPath, 'clang++$exe');
+    final cxxValue = ndkTool('clang++$exe');
     final cxxFlagsKey = 'CXXFLAGS_${target.rust}';
     final cxxFlagsValue = targetArg;
 
@@ -141,7 +148,7 @@ class AndroidEnvironment {
         .toUpperCase();
 
     final ranlibKey = 'RANLIB_${target.rust}';
-    final ranlibValue = path.join(toolchainPath, 'llvm-ranlib$exe');
+    final ranlibValue = ndkTool('llvm-ranlib$exe');
 
     final ndkVersionParsed = Version.parse(ndkVersion);
     final rustFlagsKey = 'CARGO_ENCODED_RUSTFLAGS';

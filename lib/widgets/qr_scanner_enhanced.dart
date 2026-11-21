@@ -667,7 +667,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         children: [
           Icon(Icons.card_membership, color: Colors.green),
           SizedBox(width: 8),
-          Text('Credential Offer'),
+          Flexible(child: Text('Credential Offer')),
         ],
       ),
       content: SingleChildScrollView(
