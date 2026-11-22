@@ -63,13 +63,23 @@ case "$PLATFORM_NAME" in
       echo "Rust llvm-tools-preview is required to link the iOS bridge" >&2
       exit 1
     fi
-    symbols=$("$llvm_nm" -gUj "$archive")
+    if ! symbols=$("$llvm_nm" -gUj "$archive"); then
+      echo "error: Rust llvm-nm could not read the iOS bridge archive" >&2
+      exit 1
+    fi
     symbols=$(printf '%s\n' "$symbols" | LC_ALL=C sort -u)
-    printf '%s\n' "$symbols" | grep -q '^_frbgen_'
-    printf '%s\n' "$symbols" | grep -q '^_frb_init_frb_dart_api_dl$'
+    if ! printf '%s\n' "$symbols" | grep -q '^_frbgen_'; then
+      echo 'error: The iOS bridge archive exports no wallet FFI entry points' >&2
+      exit 1
+    fi
+    if ! printf '%s\n' "$symbols" | grep -q '^_frb_init_frb_dart_api_dl$'; then
+      echo 'error: The iOS bridge archive lacks the Dart API initialization symbol' >&2
+      exit 1
+    fi
     printf '%s\n' "$symbols" | awk '/^_(frb_|frbgen_|Dart_)[A-Za-z0-9_]+$/ || /^_(dummy_method_to_enforce_bundling|store_dart_post_cobject)$/ {
       print "-u", $0
     }' > "$CARGOKIT_OUTPUT_DIR/$2.ffi-link.rsp"
+    echo 'iOS bridge FFI linker response file written'
     ;;
 esac
 
