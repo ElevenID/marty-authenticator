@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "version": "1.24.2",
+  "ortSysVersion": "2.0.0-rc.12",
+  "androidMinApi": 24,
+  "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.24.2/onnxruntime-android-1.24.2.aar",
+  "sha256": "bc461499a735653dff285a6a3477d28b9cfd119a09c7753eaf003426b577f223",
+  "libraries": {
+    "armeabi-v7a": {"bytes": 18314848, "sha256": "2de7b5b7b8cdbdd99779004569bb0f2b2ca2692081bd49eb743189256324b8f9"},
+    "arm64-v8a": {"bytes": 25770888, "sha256": "42f83b3c2370300821942d1f61099689d37bb5e05126fb75849d4cc9dbe356a2"},
+    "x86": {"bytes": 30967904, "sha256": "8183cde9062a2c187ef407ba4345eded3f02cd11945b994a16ecf7041218da8e"},
+    "x86_64": {"bytes": 31246072, "sha256": "a824fa2ae49c0686b7730704ae705b03e654a1f71459939e8e0924c6a4226b11"}
+  }
+}

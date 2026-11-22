@@ -4,8 +4,6 @@
 //
 
 import Foundation
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
 /// Handles traditional PKI/X.509 operations
 class PKIHandler {

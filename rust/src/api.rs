@@ -307,9 +307,39 @@ pub struct FrbPresentationRequest {
     pub client_id: String,
     pub nonce: String,
     pub response_uri: String,
+    pub response_mode: Option<String>,
+    pub state: Option<String>,
+    pub request_digest: String,
     pub query_type: String,
     pub presentation_definition_json: Option<String>,
     pub dcql_query_json: Option<String>,
+}
+
+/// Verified presentation awaiting one remote KMS ES256 signature.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPreparedSdJwtPresentation {
+    pub session_id: String,
+    pub signing_input: Vec<u8>,
+}
+
+/// One-use remote ES256 proof challenge for an OID4VCI credential offer.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbPreparedSdJwtReceipt {
+    pub session_id: String,
+    pub signing_input: Vec<u8>,
+}
+
+/// An issuer-signed SD-JWT verified against fresh issuer trust and the paired
+/// public presentation key. No access token or signing key crosses this API.
+#[frb]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrbVerifiedSdJwtReceipt {
+    pub credential: String,
+    pub issuer: String,
+    pub credential_type: String,
+    pub format: String,
 }
 
 /// One ZK proof to include in a presentation.
@@ -474,17 +504,6 @@ pub async fn wallet_exchange_auth_code_token(
     .await
 }
 
-/// Create an `openid4vci-proof+jwt` proof-of-possession JWT.
-#[frb]
-pub fn wallet_create_proof_jwt(
-    holder_kid: String,
-    c_nonce: String,
-    issuer_url: String,
-    jwk_json: String,
-) -> anyhow::Result<String> {
-    crate::operations::issuance::wallet_create_proof_jwt(holder_kid, c_nonce, issuer_url, jwk_json)
-}
-
 /// Request a credential from the issuer.
 #[frb]
 pub async fn wallet_request_credential(
@@ -504,6 +523,60 @@ pub async fn wallet_request_credential(
     .await
 }
 
+/// Prepare pre-authorized SD-JWT receipt. Only one offered configuration is
+/// accepted until an explicit credential-selection UI is available.
+#[frb]
+pub async fn wallet_prepare_verified_sd_jwt_receipt(
+    offer_uri: String,
+    tx_code: Option<String>,
+    holder_public_jwk_json: String,
+    issuer_snapshot_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtReceipt> {
+    let prepared = crate::operations::verified_issuance::prepare(
+        &offer_uri,
+        tx_code.as_deref(),
+        &holder_public_jwk_json,
+        &issuer_snapshot_json,
+    )
+    .await?;
+    Ok(FrbPreparedSdJwtReceipt {
+        session_id: prepared.session_id,
+        signing_input: prepared.signing_input,
+    })
+}
+
+/// Recheck authority, consume the proof and request the credential. Returns
+/// only an opaque handle; the response remains native until final verification.
+#[frb]
+pub async fn wallet_complete_verified_sd_jwt_receipt(
+    session_id: String,
+    remote_signature: Vec<u8>,
+    issuer_snapshot_json: String,
+) -> anyhow::Result<String> {
+    crate::operations::verified_issuance::complete(
+        &session_id,
+        &remote_signature,
+        &issuer_snapshot_json,
+    )
+    .await
+}
+
+/// Consume the response using authority fetched after the credential request.
+#[frb]
+pub fn wallet_finalize_verified_sd_jwt_receipt(
+    response_id: String,
+    issuer_snapshot_json: String,
+) -> anyhow::Result<FrbVerifiedSdJwtReceipt> {
+    let verified =
+        crate::operations::verified_issuance::finalize(&response_id, &issuer_snapshot_json)?;
+    Ok(FrbVerifiedSdJwtReceipt {
+        credential: verified.credential,
+        issuer: verified.issuer,
+        credential_type: verified.credential_type,
+        format: verified.format,
+    })
+}
+
 /// Parse an `openid4vp://` or `https://…` presentation request URI.
 #[frb]
 pub async fn wallet_parse_presentation_request(
@@ -512,7 +585,128 @@ pub async fn wallet_parse_presentation_request(
     crate::operations::presentation::wallet_parse_presentation_request(request_uri).await
 }
 
-/// Build and submit a standard VP presentation.
+/// Verify a candidate before consent and return every always-shared issuer
+/// payload member. This projection grants no signing/submission authority.
+#[frb]
+pub fn wallet_review_verified_sd_jwt_credential(
+    credential: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<String> {
+    crate::operations::disclosure_review::review(
+        &credential,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+}
+
+/// Authenticate the canonical signed request and retain the exact verified
+/// credential behind a short-lived native consent handle. Governance JSON must
+/// come only from the fixed, authenticated paired-device transport.
+#[frb]
+pub async fn wallet_review_governed_sd_jwt_presentation(
+    request_uri: String,
+    governance_json: String,
+    credential: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<String> {
+    crate::operations::governed_presentation::review(
+        request_uri,
+        governance_json,
+        credential,
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+    )
+    .await
+}
+
+/// Consume the native consent handle; Flutter cannot replace its credential,
+/// request, recipient or authenticated policy when approving disclosures.
+#[frb]
+pub async fn wallet_prepare_governed_sd_jwt_presentation(
+    session_id: String,
+    claims_to_disclose: Vec<String>,
+    governance_json: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtPresentation> {
+    let prepared = crate::operations::governed_presentation::prepare(
+        &session_id,
+        &claims_to_disclose,
+        &governance_json,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+    .await?;
+    Ok(FrbPreparedSdJwtPresentation {
+        session_id: prepared.session_id,
+        signing_input: prepared.signing_input,
+    })
+}
+
+/// Reauthenticate the retained original request using fresh confirmed-device
+/// governance and issuer trust, then verify the stored input's remote signature.
+#[frb]
+pub async fn wallet_complete_governed_sd_jwt_presentation(
+    session_id: String,
+    remote_signature: Vec<u8>,
+    governance_json: String,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPresentationResponse> {
+    crate::operations::governed_presentation::complete(
+        &session_id,
+        &remote_signature,
+        &governance_json,
+        &issuer_snapshot_json,
+        &holder_public_jwk_json,
+    )
+    .await
+    .map(Into::into)
+}
+
+/// Idempotently retire an unsubmitted consent or signing handle.
+#[frb]
+pub fn wallet_cancel_governed_sd_jwt_presentation(session_id: String) -> anyhow::Result<()> {
+    crate::operations::governed_presentation::cancel(&session_id)
+}
+
+/// Retired unbound presentation API. Approval requires a native governed handle.
+#[frb]
+pub async fn wallet_prepare_verified_sd_jwt_presentation(
+    request_uri: String,
+    approved_request_digest: String,
+    credential: String,
+    query_id: String,
+    claims_to_disclose: Vec<String>,
+    issuer_snapshot_json: String,
+    holder_public_jwk_json: String,
+) -> anyhow::Result<FrbPreparedSdJwtPresentation> {
+    let _ = (
+        request_uri,
+        approved_request_digest,
+        credential,
+        query_id,
+        claims_to_disclose,
+        issuer_snapshot_json,
+        holder_public_jwk_json,
+    );
+    anyhow::bail!("Presentation approval requires a governed native consent session")
+}
+
+/// Retired completion API. Fresh confirmed-device governance is mandatory.
+#[frb]
+pub async fn wallet_complete_verified_sd_jwt_presentation(
+    session_id: String,
+    remote_signature: Vec<u8>,
+) -> anyhow::Result<FrbPresentationResponse> {
+    let _ = (session_id, remote_signature);
+    anyhow::bail!("Presentation completion requires fresh governed authority")
+}
+
+/// Retired unverified VP entry point. Always rejects until the verified
+/// remote-KMS presenter is exposed through the bridge.
 #[frb]
 pub async fn wallet_build_and_submit_presentation(
     response_uri: String,

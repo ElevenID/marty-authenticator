@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,11 +11,10 @@ import '../../models/card_data.dart';
 import '../../providers/card_state_provider.dart';
 import '../../controllers/scroll_fade_controller.dart';
 import '../../widgets/scrolling_wallet_header.dart';
+import '../../widgets/qr_scanner_enhanced.dart';
 import '../../widgets/cascading_card_list.dart';
 import '../../widgets/stacked_notification_cards.dart';
 import '../../widgets/dialog_widgets/default_dialog.dart';
-import '../../utils/view_utils.dart';
-import '../../utils/riverpod/providers/credentials_provider.dart';
 import '../qr_scanner_view/qr_scanner_view.dart';
 import '../card_details_screen.dart';
 import '../grouped_card_details_screen.dart';
@@ -28,6 +31,7 @@ class DocumentView extends ConsumerStatefulWidget {
 
 class _DocumentViewState extends ConsumerState<DocumentView> {
   late ScrollFadeController fadeController;
+  StreamSubscription<Uri>? _walletLinks;
 
   @override
   void initState() {
@@ -37,10 +41,40 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
       onOpacityChanged: () => setState(() {}),
     );
     fadeController.initialize();
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
+      _walletLinks = AppLinks().uriLinkStream.listen(
+        _receiveWalletLink,
+        onError: (Object _) {},
+      );
+    }
+  }
+
+  void _receiveWalletLink(Uri uri) {
+    if (uri.scheme != 'openid-credential-offer' && uri.scheme != 'openid4vp') {
+      return;
+    }
+    final input = uri.toString();
+    if (input.length > 65536) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            appBar: AppBar(title: const Text('Wallet request')),
+            body: QRScannerEnhanced(walletLink: input),
+          ),
+        ),
+      );
+      if (mounted) await ref.read(cardStateProvider.notifier).refreshCards();
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override
   void dispose() {
+    unawaited(_walletLinks?.cancel());
     fadeController.dispose();
     super.dispose();
   }
@@ -48,6 +82,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   @override
   Widget build(BuildContext context) {
     final cardGroups = ref.watch(activeCardGroupsProvider);
+    final storageUnavailable = ref.watch(walletStorageUnavailableProvider);
     final expiredCards = ref.watch(expiredCardsProvider);
     final draggingCard = ref.watch(draggingCardProvider);
     final isDragging = draggingCard != null;
@@ -70,6 +105,23 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
             body: SingleChildScrollView(
               child: Column(
                 children: [
+                  if (storageUnavailable)
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Your wallet storage could not be opened. Your existing data has been kept.',
+                          ),
+                          TextButton(
+                            onPressed: () => ref
+                                .read(cardStateProvider.notifier)
+                                .refreshCards(),
+                            child: const Text('Retry opening wallet'),
+                          ),
+                        ],
+                      ),
+                    ),
                   StackedNotificationCards(
                     notifications: [
                       NotificationCardData(
@@ -101,17 +153,18 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
                   ),
                   const PassportPlaceholderCard(),
                   const MdlPlaceholderCard(),
-                  CascadingCardList(
-                    cardGroups: cardGroups,
-                    isDragging: isDragging,
-                    onCardTap: _handleCardTap,
-                    onCardLongPress: _handleCardLongPress,
-                    onReorder: (oldIndex, newIndex) {
-                      ref
-                          .read(cardStateProvider.notifier)
-                          .reorderGroup(oldIndex, newIndex);
-                    },
-                  ),
+                  if (!storageUnavailable)
+                    CascadingCardList(
+                      cardGroups: cardGroups,
+                      isDragging: isDragging,
+                      onCardTap: _handleCardTap,
+                      onCardLongPress: _handleCardLongPress,
+                      onReorder: (oldIndex, newIndex) {
+                        ref
+                            .read(cardStateProvider.notifier)
+                            .reorderGroup(oldIndex, newIndex);
+                      },
+                    ),
                   const SizedBox(height: 40),
                   if (expiredCards.isNotEmpty)
                     IgnorePointer(
@@ -134,8 +187,11 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
   Future<void> _handleScanPressed() async {
     try {
       if (await Permission.camera.isPermanentlyDenied) {
-        showAsyncDialog(
+        if (!mounted) return;
+        await showDialog<void>(
+          context: context,
           builder: (_) => DefaultDialog(
+            hasCloseButton: true,
             title: Text(
               AppLocalizations.of(context)!.grantCameraPermissionDialogTitle,
             ),
@@ -153,14 +209,11 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     }
     if (!mounted) return;
 
-    final qrCode = await Navigator.pushNamed(context, QRScannerView.routeName);
-    if (qrCode == null || !mounted) return;
-    final handled = await ref
-        .read(credentialsProvider.notifier)
-        .handleCredentialOffer(qrCode.toString());
-    if (!handled) {
-      showErrorStatusMessage(message: (l) => l.invalidQrScan);
-    }
+    await Navigator.pushNamed(context, QRScannerView.routeName);
+    if (!mounted) return;
+    // The scanner completes the verified remote-KMS receipt flow. Reload its
+    // durable receipts when the scanner closes; no second offer is issued here.
+    await ref.read(cardStateProvider.notifier).refreshCards();
   }
 
   Widget _buildExpiredPassesButton(int count) {
@@ -207,7 +260,8 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     CardGroup? targetGroup;
 
     for (final group in cardGroups) {
-      if (group.cards.any((card) => card.title == cardData.title)) {
+      if (cardData.id != null &&
+          group.cards.any((card) => card.id == cardData.id)) {
         targetGroup = group;
         break;
       }
@@ -216,7 +270,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
     if (targetGroup != null) {
       // Find the index of the tapped card in the group
       final cardIndex = targetGroup.cards.indexWhere(
-        (card) => card.title == cardData.title,
+        (card) => card.id == cardData.id,
       );
 
       Navigator.push(
@@ -233,7 +287,7 @@ class _DocumentViewState extends ConsumerState<DocumentView> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CardDetailsScreen(cardData: cardData.toMap()),
+          builder: (context) => CardDetailsScreen(card: cardData),
         ),
       );
     }

@@ -5,8 +5,6 @@
 
 import UIKit
 import Flutter
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {

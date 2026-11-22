@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import { Jimp } from 'jimp';
+import { decodeQrScreenshotPng } from './qr_screenshot_png.js';
 import jsQR from 'jsqr';
 
 // Script to fetch a live QR code (credential offer) from the demo website.
@@ -21,8 +21,8 @@ async function fetchQRCode() {
     const buffer = await page.screenshot({ fullPage: true });
 
     // Decode QR code
-    const image = await Jimp.read(buffer);
-    const code = jsQR(image.bitmap.data, image.bitmap.width, image.bitmap.height);
+    const image = decodeQrScreenshotPng(buffer);
+    const code = jsQR(image.data, image.width, image.height);
 
     if (code) {
       console.log(code.data);

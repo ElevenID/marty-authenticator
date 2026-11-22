@@ -18,6 +18,13 @@ class CascadingCardList extends StatelessWidget {
     this.onReorder,
   });
 
+  bool _sameCard(CardData left, CardData right) {
+    final id = left.id;
+    return id != null && id.isNotEmpty
+        ? id == right.id
+        : identical(left, right);
+  }
+
   @override
   Widget build(BuildContext context) {
     double totalHeight = (cardGroups.length * 60.0) + 200.0 + 100.0;
@@ -40,15 +47,17 @@ class CascadingCardList extends StatelessWidget {
         right: 0,
         child: DragTarget<CardData>(
           onWillAcceptWithDetails: (details) {
-            // Don't accept if it's the same card
-            return details.data != cardGroup.cards.first;
+            return !cardGroup.cards.any(
+              (card) => _sameCard(card, details.data),
+            );
           },
           onAcceptWithDetails: (details) {
             // Find source index
             int sourceIndex = -1;
             for (int i = 0; i < cardGroups.length; i++) {
-              if (cardGroups[i].cards.first.title == details.data.title) {
-                // Compare by title or equality
+              if (cardGroups[i].cards.any(
+                (card) => _sameCard(card, details.data),
+              )) {
                 sourceIndex = i;
                 break;
               }

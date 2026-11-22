@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		0DCCE7B526CE7AA30029E1D5 /* BuildFile in Resources */ = {isa = PBXBuildFile; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
-		28F2A0802EC065C5001C16BB /* SpruceIDMobileSdk in Frameworks */ = {isa = PBXBuildFile; productRef = 28F2A07F2EC065C5001C16BB /* SpruceIDMobileSdk */; };
-		28F2A0822EC065C5001C16BB /* SpruceIDMobileSdkRs in Frameworks */ = {isa = PBXBuildFile; productRef = 28F2A0812EC065C5001C16BB /* SpruceIDMobileSdkRs */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		6EBCAFBA0FB19CEC0ABC560B /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0A948E39FB9ADC655A3B274 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -97,8 +95,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				28F2A0822EC065C5001C16BB /* SpruceIDMobileSdkRs in Frameworks */,
-				28F2A0802EC065C5001C16BB /* SpruceIDMobileSdk in Frameworks */,
 				6EBCAFBA0FB19CEC0ABC560B /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -282,7 +278,6 @@
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
-				28F2A07E2EC065C5001C16BB /* XCRemoteSwiftPackageReference "sprucekit-mobile" */,
 			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
@@ -696,7 +691,6 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 98247EKA3A;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = lib/main_document.dart;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -939,29 +933,7 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		28F2A07E2EC065C5001C16BB /* XCRemoteSwiftPackageReference "sprucekit-mobile" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/spruceid/sprucekit-mobile.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.12.11;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
 
-/* Begin XCSwiftPackageProductDependency section */
-		28F2A07F2EC065C5001C16BB /* SpruceIDMobileSdk */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 28F2A07E2EC065C5001C16BB /* XCRemoteSwiftPackageReference "sprucekit-mobile" */;
-			productName = SpruceIDMobileSdk;
-		};
-		28F2A0812EC065C5001C16BB /* SpruceIDMobileSdkRs */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 28F2A07E2EC065C5001C16BB /* XCRemoteSwiftPackageReference "sprucekit-mobile" */;
-			productName = SpruceIDMobileSdkRs;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;
 }

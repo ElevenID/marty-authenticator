@@ -4,8 +4,6 @@
 //
 
 import Foundation
-import SpruceIDMobileSdk
-import SpruceIDMobileSdkRs
 
 /// Handles mDoc/MDL operations using X.509 certificates
 class MdocHandler {

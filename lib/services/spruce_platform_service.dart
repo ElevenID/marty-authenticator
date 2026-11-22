@@ -44,6 +44,10 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
 
   bool _initialized = false;
 
+  Future<T> _retiredCredentialStorage<T>() async => throw UnsupportedError(
+    'Legacy credential storage is retired; use verified wallet receipts',
+  );
+
   @override
   bool get isInitialized => _initialized;
 
@@ -69,25 +73,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> createDid({String method = 'key'}) async {
-    if (!_initialized) await initializeW3C();
-
-    try {
-      final result = await _w3cChannel.invokeMethod(
-        SpruceIdW3CMethods.createDid,
-        {'method': method},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to create DID: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> resolveDid(String did) async {
     try {
       final result = await _w3cChannel.invokeMethod(
@@ -99,26 +84,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
       throw SpruceIdException(
         e.code,
         'Failed to resolve DID: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> signVerifiableCredential(
-    Map<String, dynamic> credential, {
-    String? keyId,
-  }) async {
-    try {
-      final result = await _w3cChannel.invokeMethod(
-        SpruceIdW3CMethods.signVerifiableCredential,
-        {'credential': credential, 'keyId': ?keyId},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to sign verifiable credential: ${e.message}',
         e.details,
       );
     }
@@ -148,66 +113,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> generateKeyPair({
-    String keyType = 'RSA',
-    int keySize = 2048,
-  }) async {
-    try {
-      final result = await _pkiChannel.invokeMethod(
-        SpruceIdPkiMethods.generateKeyPair,
-        {'keyType': keyType, 'keySize': keySize},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to generate key pair: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> createCSR(
-    String subject, {
-    String? keyId,
-  }) async {
-    try {
-      final result = await _pkiChannel.invokeMethod(
-        SpruceIdPkiMethods.createCSR,
-        {'subject': subject, 'keyId': ?keyId},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to create CSR: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> signWithCertificate(
-    Map<String, dynamic> document,
-    String certificateId,
-  ) async {
-    try {
-      final result = await _pkiChannel.invokeMethod(
-        SpruceIdPkiMethods.signWithCertificate,
-        {'document': document, 'certificateId': certificateId},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to sign with certificate: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> verifyCertificateChain(
     List<String> certificateChain,
   ) async {
@@ -231,26 +136,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
   // ========================
 
   @override
-  Future<Map<String, dynamic>> createJWT(
-    String issuer,
-    Map<String, dynamic> claims,
-  ) async {
-    try {
-      final result = await _jwtChannel.invokeMethod(
-        SpruceIdJwtMethods.createJWT,
-        {'issuer': issuer, 'claims': claims},
-      );
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to create JWT: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> verifyJWT(String jwt, String issuer) async {
     try {
       final result = await _jwtChannel.invokeMethod(
@@ -262,29 +147,6 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
       throw SpruceIdException(
         e.code,
         'Failed to verify JWT: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> createSdJwt(
-    String issuer,
-    Map<String, dynamic> claims,
-    List<String> selectivelyDisclosableClaims,
-  ) async {
-    try {
-      final result = await _jwtChannel
-          .invokeMethod(SpruceIdJwtMethods.createSdJwt, {
-            'issuer': issuer,
-            'claims': claims,
-            'selectivelyDisclosableClaims': selectivelyDisclosableClaims,
-          });
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to create SD-JWT: ${e.message}',
         e.details,
       );
     }
@@ -350,94 +212,24 @@ class SpruceIdPlatformService implements ISpruceIdPlatformService {
     }
   }
 
-  @override
-  Future<Map<String, dynamic>> createMdocResponse(
-    List<String> requestedAttributes,
-    List<String> hiddenAttributes,
-  ) async {
-    try {
-      final result = await _mdocChannel
-          .invokeMethod(SpruceIdMdocMethods.createMdocResponse, {
-            'requestedAttributes': requestedAttributes,
-            'hiddenAttributes': hiddenAttributes,
-          });
-      return Map<String, dynamic>.from(result);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to create mDoc response: ${e.message}',
-        e.details,
-      );
-    }
-  }
-
   // ========================
   // Wallet Methods (Technology agnostic)
   // ========================
 
   @override
-  Future<void> storeCredential(Map<String, dynamic> credential) async {
-    try {
-      await _walletChannel.invokeMethod(SpruceIdWalletMethods.storeCredential, {
-        'credential': credential,
-      });
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to store credential: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<void> storeCredential(Map<String, dynamic> credential) =>
+      _retiredCredentialStorage<void>();
 
   @override
-  Future<List<Map<String, dynamic>>> getStoredCredentials() async {
-    try {
-      final result = await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.getCredentials,
-      );
-      return List<Map<String, dynamic>>.from(result ?? []);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to get credentials: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<List<Map<String, dynamic>>> getStoredCredentials() =>
+      _retiredCredentialStorage<List<Map<String, dynamic>>>();
 
   @override
-  Future<List<Map<String, dynamic>>> getCredentialsByType(String type) async {
-    try {
-      final result = await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.getCredentialsByType,
-        {'type': type},
-      );
-      return List<Map<String, dynamic>>.from(result ?? []);
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to get credentials by type: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<List<Map<String, dynamic>>> getCredentialsByType(String type) =>
+      _retiredCredentialStorage<List<Map<String, dynamic>>>();
 
   @override
-  Future<void> deleteCredential(String id) async {
-    try {
-      await _walletChannel.invokeMethod(
-        SpruceIdWalletMethods.deleteCredential,
-        {'id': id},
-      );
-    } on PlatformException catch (e) {
-      throw SpruceIdException(
-        e.code,
-        'Failed to delete credential: ${e.message}',
-        e.details,
-      );
-    }
-  }
+  Future<void> deleteCredential(String id) => _retiredCredentialStorage<void>();
 }
 
 /// Provider for SpruceID platform service

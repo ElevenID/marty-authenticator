@@ -33,8 +33,6 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
-  # SpruceID Mobile SDK will be added via Swift Package Manager in Xcode
-  # pod 'SpruceIDMobileSdk', :git => 'https://github.com/spruceid/sprucekit-mobile.git', :tag => '0.12.11'
 end
 
 post_install do |installer|
@@ -78,5 +76,14 @@ post_install do |installer|
         'PERMISSION_CRITICAL_ALERTS=0',
       ]
     end
+  end
+
+  # Enable the pinned ML Kit plugin's Apple Silicon support for simulator smoke.
+  if ENV['MARTY_IOS_SIMULATOR_SMOKE'] == '1'
+    require File.expand_path(
+      '.symlinks/plugins/google_mlkit_commons/ios/scripts/apple_silicon_simulator',
+      __dir__,
+    )
+    mlkit_apple_silicon_simulator_patch(installer)
   end
 end

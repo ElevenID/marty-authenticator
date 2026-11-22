@@ -97,54 +97,22 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
     required List<String> requestedAttributes,
     Map<String, dynamic>? ageVerificationOptions,
     List<String>? hiddenAttributes,
-    String? keyId,
   }) async {
     return await _platformService.createMdocPresentationSDK(
       docType: docType,
       requestedAttributes: requestedAttributes,
       ageVerificationOptions: ageVerificationOptions,
       hiddenAttributes: hiddenAttributes,
-      keyId: keyId,
     );
   }
 
   Future<Map<String, dynamic>> establishMdocSessionSDK({
     required Map<String, dynamic> sessionRequest,
-    String? keyId,
     Map<String, dynamic>? securityOptions,
   }) async {
     return await _platformService.establishMdocSessionSDK(
       sessionRequest: sessionRequest,
-      keyId: keyId,
       securityOptions: securityOptions,
-    );
-  }
-
-  Future<Map<String, dynamic>> performProximityVerificationSDK({
-    required String sessionId,
-    required Map<String, dynamic> proximityRequest,
-  }) async {
-    // Custom logic for proximity verification using SDK
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'proximity_verification',
-      keyId: sessionId,
-      payload: proximityRequest,
-    );
-  }
-
-  Future<Map<String, dynamic>> enableBiometricBindingSDK({
-    required String docId,
-    required String biometricTemplate,
-    Map<String, dynamic>? bindingOptions,
-  }) async {
-    // Custom logic for biometric binding using SDK
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'biometric_binding',
-      keyId: docId,
-      payload: {
-        'biometricTemplate': biometricTemplate,
-        'options': bindingOptions ?? {},
-      },
     );
   }
 
@@ -161,11 +129,10 @@ class SpruceIdMdocManagerExtended extends SpruceIdMdocManager
 // ========================
 
 /// Extended SD-JWT manager with SDK-enhanced selective disclosure
-class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
-    implements ISpruceIdSdJwtManagerExtended {
+class SpruceIdSdJwtManagerExtended implements ISpruceIdSdJwtManagerExtended {
   final ISpruceIdPlatformServiceExtended _platformService;
 
-  SpruceIdSdJwtManagerExtended(this._platformService) : super(_platformService);
+  SpruceIdSdJwtManagerExtended(this._platformService);
 
   @override
   Future<Map<String, dynamic>> createAdvancedSdJwt({
@@ -213,7 +180,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     required Map<String, dynamic> claims,
     required Map<String, dynamic> disclosureTree,
     List<String>? alwaysDisclose,
-    String? keyId,
   }) async {
     return createAdvancedSdJwt(
       issuer: issuer,
@@ -227,13 +193,11 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
     required String sdJwt,
     required Map<String, dynamic> disclosureRequest,
     required String challenge,
-    String? keyId,
   }) async {
     return await _platformService.presentSdJwtSDK(
       sdJwt: sdJwt,
       disclosureRequest: disclosureRequest,
       challenge: challenge,
-      keyId: keyId,
     );
   }
 
@@ -246,19 +210,6 @@ class SpruceIdSdJwtManagerExtended extends SpruceIdSdJwtManager
       presentation: presentation,
       requiredClaims: requiredClaims,
       policies: policies,
-    );
-  }
-
-  Future<Map<String, dynamic>> createSelectiveDisclosureSchemaSDK({
-    required Map<String, dynamic> schema,
-    required Map<String, dynamic> disclosureRules,
-    String? schemaId,
-  }) async {
-    // Custom logic for creating selective disclosure schema
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'create_disclosure_schema',
-      keyId: schemaId ?? 'default-schema',
-      payload: {'schema': schema, 'disclosureRules': disclosureRules},
     );
   }
 
@@ -287,19 +238,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
 
   SpruceIdWalletManagerExtended(this._platformService)
     : super(_platformService);
-
-  @override
-  Future<void> storeCredentialSecure({
-    required Map<String, dynamic> credential,
-    String? encryptionKey,
-    Map<String, dynamic>? securityOptions,
-  }) async {
-    await _platformService.performCryptoOperationSDK(
-      operation: 'store_credential',
-      keyId: encryptionKey ?? 'default-storage-key',
-      payload: {'credential': credential, 'options': securityOptions ?? {}},
-    );
-  }
 
   @override
   Future<List<Map<String, dynamic>>> getCredentialsWithMetadata() async {
@@ -352,12 +290,10 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
 
   Future<Map<String, dynamic>> refreshCredentialSDK({
     required String credentialId,
-    String? keyId,
     Map<String, dynamic>? refreshOptions,
   }) async {
     return await _platformService.refreshCredentialSDK(
       credentialId: credentialId,
-      keyId: keyId,
       refreshOptions: refreshOptions,
     );
   }
@@ -413,42 +349,6 @@ class SpruceIdWalletManagerExtended extends SpruceIdWalletManager
       credentialData: credentialData,
       expectedFormat: expectedFormat,
       importOptions: importOptions,
-    );
-  }
-
-  Future<Map<String, dynamic>> setupAutomaticRenewalSDK({
-    required List<String> credentialIds,
-    required Map<String, dynamic> renewalPolicy,
-    String? keyId,
-  }) async {
-    // Custom logic for automatic renewal setup
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'setup_automatic_renewal',
-      keyId: keyId ?? 'renewal-key',
-      payload: {'credentialIds': credentialIds, 'renewalPolicy': renewalPolicy},
-    );
-  }
-
-  Future<Map<String, dynamic>> analyzeWalletHealthSDK({
-    Map<String, dynamic>? healthCheckOptions,
-  }) async {
-    // Custom logic for wallet health analysis
-    final results = await _platformService.batchProcessCredentialsSDK(
-      operations: [
-        {'operation': 'health_check', 'options': healthCheckOptions ?? {}},
-      ],
-    );
-    return results.isNotEmpty ? results.first : {};
-  }
-
-  Future<Map<String, dynamic>> optimizeWalletStorageSDK({
-    Map<String, dynamic>? optimizationOptions,
-  }) async {
-    // Custom logic for wallet storage optimization
-    return await _platformService.performCryptoOperationSDK(
-      operation: 'optimize_storage',
-      keyId: 'storage-optimization',
-      payload: optimizationOptions ?? {},
     );
   }
 }

@@ -18,24 +18,20 @@
  * limitations under the License.
  */
 
-/// Enhanced QR scanner widget with SDK-integrated processing
-///
-/// This widget provides:
-/// - Real-time QR code scanning with SDK processing
-/// - Intelligent credential matching during scan
-/// - Live preview of scan results with privacy assessment
-/// - Optimized performance for credential workflows
-/// - Hardware-accelerated processing capabilities
+/// QR scanner that routes Rust-parsed protocols to the verified wallet flows.
 library;
 
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 
 import '../services/qr_scanner_service_enhanced.dart';
+import '../services/remote_holder_pairing_service.dart';
 import '../services/spruce_client_extended.dart';
+import '../interfaces/spruce_interfaces_extended.dart';
 import '../services/spruce_platform_service_extended.dart';
 import '../widgets/presentation_request_view.dart';
 import '../utils/logger.dart';
@@ -43,16 +39,21 @@ import '../utils/logger.dart';
 /// Enhanced QR scanner widget with SDK integration
 class QRScannerEnhanced extends ConsumerStatefulWidget {
   final void Function(ProcessedQRResult result)? onScanResult;
+  final String? walletLink;
   final bool enableBackgroundProcessing;
   final bool showLivePreview;
   final bool enableHapticFeedback;
+  @visibleForTesting
+  final Widget? scannerOverride;
 
   const QRScannerEnhanced({
     super.key,
     this.onScanResult,
+    this.walletLink,
     this.enableBackgroundProcessing = true,
     this.showLivePreview = true,
     this.enableHapticFeedback = true,
+    this.scannerOverride,
   });
 
   @override
@@ -65,11 +66,13 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   bool _isProcessing = false;
   String? _lastScannedCode;
   ProcessedQRResult? _currentResult;
+  final Map<String, ISpruceIdClientExtended> _consentSessions = {};
+  final Completer<void> _disposed = Completer<void>();
 
   // Performance tracking
   DateTime? _scanStartTime;
   int _totalScans = 0;
-  int _successfulScans = 0;
+  int _parsedScans = 0;
 
   // Animation controllers
   late AnimationController _processingAnimationController;
@@ -81,6 +84,12 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   void initState() {
     super.initState();
     _initializeAnimations();
+    final link = widget.walletLink;
+    if (link != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(handleScanResult(link));
+      });
+    }
   }
 
   void _initializeAnimations() {
@@ -112,6 +121,11 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   @override
   void dispose() {
+    _disposed.complete();
+    for (final entry in _consentSessions.entries) {
+      unawaited(entry.value.cancelOID4VPRequestSDK(sessionId: entry.key));
+    }
+    _consentSessions.clear();
     _processingAnimationController.dispose();
     _resultPreviewController.dispose();
     super.dispose();
@@ -140,20 +154,17 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       // Process QR code with enhanced service
       final qrService = ref.read(qrScannerServiceEnhancedProvider);
       final result = await qrService.processQRCode(scannedData);
+      if (!mounted) return;
 
       if (result.isSuccess) {
-        _successfulScans++;
+        _parsedScans++;
         await _handleSuccessfulScan(result);
       } else {
         await _handleScanError(result.errorMessage ?? 'Unknown error');
       }
-    } catch (e) {
-      Logger.error(
-        'QR scan processing failed',
-        error: e,
-        name: 'QRScannerEnhanced',
-      );
-      await _handleScanError('Failed to process QR code: $e');
+    } catch (_) {
+      Logger.error('QR scan processing failed', name: 'QRScannerEnhanced');
+      await _handleScanError('Failed to process QR code');
     } finally {
       if (mounted) {
         setState(() {
@@ -170,7 +181,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
     // Show live preview if enabled
     if (widget.showLivePreview) {
-      await _showLivePreview(result);
+      await _showLivePreview();
     }
 
     // Call callback if provided
@@ -200,14 +211,15 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     }
   }
 
-  Future<void> _showLivePreview(ProcessedQRResult result) async {
+  Future<void> _showLivePreview() async {
     await _resultPreviewController.forward();
+  }
 
-    // Auto-hide preview after delay
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        _resultPreviewController.reverse();
-      }
+  void _dismissPreview({bool allowRescan = true}) {
+    _resultPreviewController.reverse();
+    setState(() {
+      _currentResult = null;
+      if (allowRescan) _lastScannedCode = null;
     });
   }
 
@@ -221,61 +233,71 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     if (qrType == QRType.presentationRequest) {
       await _handlePresentationRequest(enrichedResult);
     }
-    // Auto-process credential offers if fully compatible
-    else if (qrType == QRType.credentialOffer &&
-        enrichedResult.canAutoHandleOffer) {
-      await _handleCredentialOffer(enrichedResult);
-    }
   }
 
-  Future<void> _handlePresentationRequest(
-    EnrichedQRResult enrichedResult,
-  ) async {
-    final requestUri = enrichedResult.validatedResult.parsedData.rawData;
+  Future<void> _handlePresentationRequest(EnrichedQRResult enrichedResult) =>
+      handlePresentationRequest(
+        enrichedResult.validatedResult.parsedData.rawData,
+      );
+
+  @visibleForTesting
+  Future<void> handlePresentationRequest(String requestUri) async {
+    final client = ref.read(spruceIdClientExtendedProvider);
 
     try {
-      final client = ref.read(spruceIdClientExtendedProvider);
-
       // Initiate request processing via SDK
       // This will throw UserSelectionRequiredException if matches are found
       await client.initiateOID4VPRequestSDK(presentationRequest: requestUri);
 
-      // If no exception, it means it was auto-approved (shouldn't happen with new flow)
-      // or handled without UI
-      _showSuccess('Presentation submitted successfully');
+      throw StateError('Presentation approval was not requested');
     } on UserSelectionRequiredException catch (e) {
-      // Show selection UI
-      if (!mounted) return;
-
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PresentationRequestView(
-            requestDetails: e.requestDetails,
-            matchingCredentials: e.matches,
-            onReject: () => Navigator.of(context).pop(),
-            onApprove: (selection) async {
-              Navigator.of(context).pop();
-              await _completePresentation(
-                e.sessionId,
-                selection['credentialId'],
-                selection['selectedFields'],
-              );
-            },
+      if (!mounted) {
+        await client.cancelOID4VPRequestSDK(sessionId: e.sessionId);
+        return;
+      }
+      _consentSessions[e.sessionId] = client;
+      var approved = false;
+      try {
+        await Future.any<void>([
+          Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (context) => PresentationRequestView(
+                requestDetails: e.requestDetails,
+                matchingCredentials: e.matches,
+                onReject: () => Navigator.of(context).pop(),
+                onApprove: (selection) async {
+                  approved = true;
+                  Navigator.of(context).pop();
+                  await _completePresentation(
+                    client,
+                    e.sessionId,
+                    selection['credentialId'],
+                    selection['selectedFields'],
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      );
-    } catch (e) {
-      _showError('Failed to process presentation request: $e');
+          _disposed.future,
+        ]);
+      } finally {
+        if (!approved) {
+          _consentSessions.remove(e.sessionId);
+          await client.cancelOID4VPRequestSDK(sessionId: e.sessionId);
+        }
+      }
+    } catch (_) {
+      _showError('Failed to process presentation request');
     }
   }
 
   Future<void> _completePresentation(
+    ISpruceIdClientExtended client,
     String sessionId,
     String credentialId,
     List<String>? fields,
   ) async {
     try {
-      final client = ref.read(spruceIdClientExtendedProvider);
       await client.completeOID4VPRequestSDK(
         sessionId: sessionId,
         selectedCredentialId: credentialId,
@@ -284,34 +306,41 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       _showSuccess('Presentation submitted successfully');
     } catch (e) {
       _showError('Failed to submit presentation: $e');
+    } finally {
+      _consentSessions.remove(sessionId);
+      await client.cancelOID4VPRequestSDK(sessionId: sessionId);
     }
   }
 
   Future<void> _handleCredentialOffer(EnrichedQRResult enrichedResult) async {
+    late final CredentialOfferPreview preview;
+    try {
+      preview = CredentialOfferPreview.fromParsed(
+        enrichedResult.validatedResult.parsedData,
+      );
+    } catch (error) {
+      _showError('This offer cannot be reviewed: $error');
+      return;
+    }
     // Show credential offer acceptance dialog
     final shouldAccept = await showDialog<bool>(
       context: context,
-      builder: (context) => _buildCredentialOfferDialog(enrichedResult),
+      builder: (context) => _buildCredentialOfferDialog(preview),
     );
 
     if (shouldAccept == true) {
-      await _acceptCredentialOffer(enrichedResult);
+      await _acceptCredentialOffer(preview);
     }
   }
 
-  Future<void> _acceptCredentialOffer(EnrichedQRResult enrichedResult) async {
+  Future<void> _acceptCredentialOffer(CredentialOfferPreview preview) async {
     try {
       final client = ref.read(spruceIdClientExtendedProvider);
-      final offerUri =
-          enrichedResult.validatedResult.parsedData.parsedContent?['offer_uri']
-              as String? ??
-          enrichedResult.validatedResult.parsedData.rawData;
-
-      await client.handleOID4VCOfferSDK(credentialOffer: offerUri);
+      await client.handleOID4VCOfferSDK(credentialOffer: preview.offerUri);
 
       _showSuccess('Credential offer accepted successfully');
-    } catch (e) {
-      _showError('Failed to accept credential offer: $e');
+    } catch (_) {
+      _showError('Failed to accept credential offer');
     }
   }
 
@@ -380,6 +409,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
   }
 
   Widget _buildScannerInterface() {
+    if (widget.walletLink != null) return const SizedBox.expand();
+    if (widget.scannerOverride != null) return widget.scannerOverride!;
     // For web, show image upload interface
     if (kIsWeb) {
       return _buildWebInterface();
@@ -438,31 +469,15 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             ),
             const SizedBox(height: 16),
             Text(
-              'SDK-powered credential processing',
+              'QR image scanning is unavailable on web',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              onPressed: _isProcessing ? null : _selectImageFromGallery,
-              icon: Icon(Icons.upload_file),
-              label: Text('Upload QR Image'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.all(20),
-              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _selectImageFromGallery() async {
-    // Implementation would use image picker and process the selected image
-    _showError('Image upload not implemented for web demo');
   }
 
   Widget _buildScannerOverlay() {
@@ -497,7 +512,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             ),
             const SizedBox(height: 24),
             Text(
-              'Processing with SDK...',
+              'Parsing QR code...',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -505,7 +520,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             ),
             const SizedBox(height: 8),
             Text(
-              'Analyzing credentials and privacy implications',
+              'Parsing QR protocol with the Rust wallet',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
@@ -547,7 +562,6 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
 
   Widget _buildResultPreview(EnrichedQRResult result) {
     final qrType = result.validatedResult.parsedData.type;
-    final securityLevel = result.validatedResult.securityLevel;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -568,13 +582,11 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getSecurityColor(securityLevel),
+                color: Colors.blueGrey,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                securityLevel == SecurityLevel.unknown
-                    ? 'TRUST NOT EVALUATED'
-                    : securityLevel.name.toUpperCase(),
+                'QR PARSED',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
@@ -586,76 +598,35 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         ),
         const SizedBox(height: 12),
 
-        if (qrType == QRType.presentationRequest) ...[
-          Text(
-            '${result.matchingCredentials.length} matching credential${result.matchingCredentials.length == 1 ? '' : 's'} found',
-            style: const TextStyle(color: Colors.white70),
+        if (qrType == QRType.presentationRequest)
+          const Text(
+            'Review the request to select a verified wallet receipt.',
+            style: TextStyle(color: Colors.white70),
           ),
-          if (result.privacyAnalysis != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.privacy_tip,
-                  size: 16,
-                  color: _getRiskColor(
-                    result.privacyAnalysis!.overallRiskLevel,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Privacy Risk: ${result.privacyAnalysis!.overallRiskLevel.name}',
-                  style: TextStyle(
-                    color: _getRiskColor(
-                      result.privacyAnalysis!.overallRiskLevel,
-                    ),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
 
-        if (qrType == QRType.credentialOffer) ...[
-          Builder(
-            builder: (context) {
-              final compatibilityResults = result.credentialCompatibility ?? [];
-              final supportedCount = compatibilityResults
-                  .where((c) => c.isSupported)
-                  .length;
-              final hasUnknownCompatibility =
-                  compatibilityResults.isEmpty ||
-                  compatibilityResults.any(
-                    (credential) =>
-                        credential.supportLevel == CompatibilityLevel.unknown,
-                  );
-
-              if (hasUnknownCompatibility) {
-                return const Text(
-                  'Credential compatibility has not been evaluated',
-                  style: TextStyle(color: Colors.white70),
-                );
-              }
-
-              return Text(
-                '$supportedCount of ${compatibilityResults.length} credential${compatibilityResults.length == 1 ? '' : 's'} supported',
-                style: const TextStyle(color: Colors.white70),
-              );
-            },
+        if (qrType == QRType.credentialOffer)
+          const Text(
+            'Review this offer; Rust verifies it before wallet storage.',
+            style: TextStyle(color: Colors.white70),
           ),
-        ],
 
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             TextButton(
-              onPressed: () => _resultPreviewController.reverse(),
+              onPressed: () => _dismissPreview(),
               child: const Text('Dismiss'),
             ),
             ElevatedButton(
-              onPressed: () => _handleResultAction(result),
+              onPressed:
+                  {
+                    QRType.presentationRequest,
+                    QRType.credentialOffer,
+                    QRType.remotePairing,
+                  }.contains(qrType)
+                  ? () => _handleResultAction(result)
+                  : null,
               child: Text(_getPrimaryActionLabel(qrType)),
             ),
           ],
@@ -686,7 +657,7 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
               style: const TextStyle(color: Colors.white, fontSize: 10),
             ),
             Text(
-              'Success: $_successfulScans',
+              'Parsed: $_parsedScans',
               style: const TextStyle(color: Colors.green, fontSize: 10),
             ),
             if (processingTime > 0)
@@ -700,23 +671,13 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
     );
   }
 
-  Widget _buildCredentialOfferDialog(EnrichedQRResult enrichedResult) {
-    final offerContent =
-        enrichedResult.validatedResult.parsedData.parsedContent!;
-    final issuer = offerContent['credential_issuer'] ?? offerContent['issuer'];
-    final issuerName = issuer is String
-        ? issuer
-        : issuer is Map && issuer['name'] is String
-        ? issuer['name'] as String
-        : 'Unknown issuer';
-    final credentials = enrichedResult.credentialCompatibility ?? [];
-
+  Widget _buildCredentialOfferDialog(CredentialOfferPreview preview) {
     return AlertDialog(
       title: const Row(
         children: [
           Icon(Icons.card_membership, color: Colors.green),
           SizedBox(width: 8),
-          Text('Credential Offer'),
+          Flexible(child: Text('Credential Offer')),
         ],
       ),
       content: SingleChildScrollView(
@@ -724,29 +685,26 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$issuerName is offering:'),
-            if (!enrichedResult.canAutoHandleOffer)
-              const Text(
-                'Credential compatibility has not been evaluated. '
-                'The wallet will check the offer when you accept.',
-              ),
+            Text('${preview.issuer} is offering:'),
             const SizedBox(height: 16),
-            ...credentials
+            ...preview.credentialConfigurationIds
                 .take(3)
                 .map(
-                  (cred) => ListTile(
+                  (credentialId) => ListTile(
                     dense: true,
                     leading: const Icon(
                       Icons.card_membership,
                       color: Colors.grey,
                       size: 20,
                     ),
-                    title: Text(cred.credentialType),
+                    title: Text(credentialId),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
-            if (credentials.length > 3)
-              Text('... and ${credentials.length - 3} more'),
+            if (preview.credentialConfigurationIds.length > 3)
+              Text(
+                '... and ${preview.credentialConfigurationIds.length - 3} more',
+              ),
           ],
         ),
       ),
@@ -770,9 +728,94 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
       _handlePresentationRequest(result);
     } else if (qrType == QRType.credentialOffer) {
       _handleCredentialOffer(result);
+    } else if (qrType == QRType.remotePairing) {
+      _handleRemotePairing(result);
     }
 
-    _resultPreviewController.reverse();
+    _dismissPreview(allowRescan: false);
+  }
+
+  Future<void> _handleRemotePairing(EnrichedQRResult result) async {
+    final content = result.validatedResult.parsedData.parsedContent;
+    final origin = content['api_origin'];
+    final code = content['pairing_code'];
+    if (origin is! String ||
+        code is! String ||
+        kIsWeb ||
+        (!Platform.isAndroid && !Platform.isIOS)) {
+      _showError('Remote wallet pairing requires an Android or iOS app');
+      return;
+    }
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pair remote wallet'),
+        content: Text(
+          'Connect this wallet to $origin? Signing keys will remain in the remote KMS.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Pair'),
+          ),
+        ],
+      ),
+    );
+    if (approved != true || !mounted) return;
+    final pairingService = RemoteHolderPairingService();
+    try {
+      final deviceId = await pairingService.pair(
+        apiOrigin: origin,
+        pairingCode: code,
+        platform: Platform.isAndroid ? 'android' : 'ios',
+      );
+      if (mounted) _showSuccess('Wallet paired as $deviceId');
+    } on RemotePairingConfirmationPending {
+      if (!mounted) return;
+      final retry = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Pairing confirmation pending'),
+          content: const Text(
+            'The remote wallet credential was saved, but the server did not confirm it. Retry confirmation before this pairing expires.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Later'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+      if (retry == true) {
+        try {
+          final deviceId = await pairingService.confirmStored();
+          if (mounted) _showSuccess('Wallet paired as $deviceId');
+        } catch (_) {
+          if (mounted) {
+            _showError(
+              'Confirmation still pending. Request a new code if it expires.',
+            );
+          }
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        _showError(
+          'Remote wallet pairing failed. Request a new code and try again.',
+        );
+      }
+    } finally {
+      pairingService.close();
+    }
   }
 
   IconData _getQRTypeIcon(QRType type) {
@@ -783,6 +826,8 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return Icons.card_membership;
       case QRType.mdocDeviceEngagement:
         return Icons.contactless;
+      case QRType.remotePairing:
+        return Icons.phonelink_lock;
       default:
         return Icons.qr_code;
     }
@@ -796,45 +841,23 @@ class QRScannerEnhancedState extends ConsumerState<QRScannerEnhanced>
         return 'Credential Offer';
       case QRType.mdocDeviceEngagement:
         return 'mDoc Device Engagement';
+      case QRType.remotePairing:
+        return 'Remote Wallet Pairing';
       default:
         return 'QR Code';
-    }
-  }
-
-  Color _getSecurityColor(SecurityLevel level) {
-    switch (level) {
-      case SecurityLevel.high:
-        return Colors.green;
-      case SecurityLevel.medium:
-        return Colors.orange;
-      case SecurityLevel.low:
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getRiskColor(RiskLevel level) {
-    switch (level) {
-      case RiskLevel.high:
-        return Colors.red;
-      case RiskLevel.medium:
-        return Colors.orange;
-      case RiskLevel.low:
-        return Colors.yellow;
-      default:
-        return Colors.green;
     }
   }
 
   String _getPrimaryActionLabel(QRType type) {
     switch (type) {
       case QRType.presentationRequest:
-        return 'Share';
+        return 'Review Request';
       case QRType.credentialOffer:
         return 'Review Offer';
+      case QRType.remotePairing:
+        return 'Pair';
       default:
-        return 'Process';
+        return 'Unavailable';
     }
   }
 }
