@@ -21,8 +21,9 @@ export CARGOKIT_DARWIN_ARCHS=$ARCHS
 # Current build configuration (Debug, Release)
 export CARGOKIT_CONFIGURATION=$CONFIGURATION
 
-# Path to directory containing Cargo.toml.
-export CARGOKIT_MANIFEST_DIR=$PODS_TARGET_SRCROOT/$1
+# Resolve the Flutter plugin symlink before walking up to the Rust manifest.
+CARGOKIT_MANIFEST_DIR=$(cd -P "$PODS_TARGET_SRCROOT/$1" && pwd -P)
+export CARGOKIT_MANIFEST_DIR
 
 # Temporary directory for build artifacts.
 export CARGOKIT_TARGET_TEMP_DIR=$TARGET_TEMP_DIR
