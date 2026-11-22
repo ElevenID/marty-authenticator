@@ -117,6 +117,13 @@ jobs:
           if ! make test-device-smoke DEVICE_ID="$device" FLUTTER_DEVICE_SMOKE_FLAGS=--verbose > "$smoke_log" 2>&1; then
             # Keep the symbol and its competing objects together in the job log.
             grep -Ei -A 3 'duplicate symbol|undefined symbol|error[: (]|fatal:|(^|[[:space:]])(ld|clang|llvm-nm):|No such file|not found|unrecognized|iOS bridge FFI linker response file written|PhaseScriptExecution|The following build commands failed|nonzero exit|Cargokit BuildTool failed|exception caught|tests failed|test failed|exit code [1-9]|timed out' "$smoke_log" | cut -c1-600 | tail -n 240 || true
+            # Preserve Flutter's assembler output without printing Xcode's environment.
+            awk '/kernel_snapshot_program: Complete/ { remaining=70; next }
+                 remaining>0 {
+                   remaining--
+                   if ($0 !~ /export |[Tt]oken|[Ss]ecret|[Pp]assword|Bearer |[Aa]uthorization/)
+                     print substr($0, 1, 450)
+                 }' "$smoke_log" | tail -n 100
             exit 1
           fi
           # Flutter's verbose reporter can render its completion line differently.
