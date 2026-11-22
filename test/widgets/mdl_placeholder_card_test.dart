@@ -6,6 +6,7 @@ import 'package:marty_authenticator/models/document_verification_config.dart';
 import 'package:marty_authenticator/providers/verification_state_provider.dart';
 import 'package:marty_authenticator/views/document_verification/document_scanning_view.dart';
 import 'package:marty_authenticator/views/main_view/main_view_widgets/card_widgets/mdl_placeholder_card.dart';
+import 'package:marty_authenticator/views/main_view/main_view_widgets/card_widgets/passport_placeholder_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _NavigationObserver extends NavigatorObserver {
@@ -27,13 +28,17 @@ class _UnavailableCamera extends CameraPlatform {
   }
 }
 
-Future<void> _pumpCard(WidgetTester tester, VerificationStatus status) async {
+Future<void> _pumpCard(
+  WidgetTester tester,
+  VerificationStatus status, {
+  Widget card = const MdlPlaceholderCard(),
+}) async {
   SharedPreferences.setMockInitialValues({
     'verification_status': status.toString(),
   });
   await tester.pumpWidget(
-    const ProviderScope(
-      child: MaterialApp(home: Scaffold(body: MdlPlaceholderCard())),
+    ProviderScope(
+      child: MaterialApp(home: Scaffold(body: card)),
     ),
   );
   await tester.pumpAndSettle();
@@ -115,6 +120,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Add your driver's license to Wallet"), findsOneWidget);
   });
+
+  testWidgets(
+    'passport placeholder opens passport scanning and keeps its own menu',
+    (tester) async {
+      final originalCamera = CameraPlatform.instance;
+      final camera = _UnavailableCamera();
+      CameraPlatform.instance = camera;
+      addTearDown(() => CameraPlatform.instance = originalCamera);
+      await _pumpCard(
+        tester,
+        VerificationStatus.none,
+        card: const PassportPlaceholderCard(),
+      );
+
+      await tester.tap(find.byIcon(Icons.more_horiz));
+      await tester.pumpAndSettle();
+      expect(find.text('Drivers License and ID cards'), findsNothing);
+      await tester.tap(find.text('Card Details'));
+      await tester.pumpAndSettle();
+      expect(find.text('Type: Identity Document'), findsOneWidget);
+      expect(find.text('Issuer: Government Authority'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add your passport to Wallet'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      final scanning = tester.widget<DocumentScanningView>(
+        find.byType(DocumentScanningView),
+      );
+      expect(scanning.config.type, DocumentType.passport);
+      expect(scanning.config.steps, DocumentVerificationConfig.passport.steps);
+      expect(scanning.currentStepIndex, 0);
+      expect(camera.requests, 1);
+      expect(tester.takeException(), isNull);
+
+      Navigator.of(tester.element(find.byType(DocumentScanningView))).pop();
+      await tester.pumpAndSettle();
+    },
+  );
 
   for (final (status, label) in [
     (VerificationStatus.none, 'Not Submitted'),
