@@ -19,219 +19,45 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/document_verification_config.dart';
-import '../../../../providers/verification_state_provider.dart';
 import '../../../document_verification/document_scanning_view.dart';
+import 'document_placeholder_card.dart';
 
-/// Placeholder card for mobile Driver's License (mDL)
-/// Similar to Apple Cash card in Apple Wallet - shows promotional content when no mDL is issued
-class MdlPlaceholderCard extends ConsumerWidget {
+class MdlPlaceholderCard extends StatelessWidget {
   const MdlPlaceholderCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(verificationStateProvider);
-
-    if (status == VerificationStatus.issued) {
-      return const SizedBox.shrink();
-    }
-
-    final isPending = status == VerificationStatus.pendingApproval;
-    return Container(
-      height: 220.0,
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Center(
-        child: Container(
-          height: 220.0,
-          width: 380.0,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0),
-            color: Colors.deepPurple,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: InkWell(
-            onTap: isPending
-                ? null
-                : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DocumentScanningView(
-                          config: DocumentVerificationConfig.driverLicense,
-                        ),
-                      ),
-                    );
-                  },
-            borderRadius: BorderRadius.circular(16.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.credit_card,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Mobile Driver\'s License',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isPending
-                              ? 'Waiting for approval...'
-                              : 'Add your driver\'s license to Wallet',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => _showCardMenu(context, ref),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: const Icon(
-                        Icons.more_horiz,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+  Widget build(BuildContext context) {
+    return DocumentPlaceholderCard(
+      title: "Mobile Driver's License",
+      description: "Add your driver's license to Wallet",
+      documentType: "Driver's License",
+      issuer: 'Department of Motor Vehicles',
+      color: Colors.deepPurple,
+      icon: Icons.credit_card,
+      onScan: () => Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => DocumentScanningView(
+            config: DocumentVerificationConfig.driverLicense,
           ),
         ),
       ),
-    );
-  }
-
-  void _showCardMenu(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.info, color: Colors.white),
-              title: const Text(
-                'Card Details',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showCardDetails(context, ref);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.featured_play_list, color: Colors.blue),
-              title: const Text(
-                'Drivers License and ID cards',
-                style: TextStyle(color: Colors.blue),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _navigateToDriversLicensePage(context);
-              },
-            ),
-            if (ref.watch(verificationStateProvider) ==
-                VerificationStatus.pendingApproval)
-              ListTile(
-                leading: const Icon(Icons.cancel, color: Colors.red),
-                title: const Text(
-                  'Cancel Verification',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  ref
-                      .read(verificationStateProvider.notifier)
-                      .setStatus(VerificationStatus.none);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showCardDetails(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
+      extraMenuItem: (sheetContext) => ListTile(
+        leading: const Icon(Icons.featured_play_list, color: Colors.blue),
         title: const Text(
-          'Mobile Driver\'s License',
-          style: TextStyle(color: Colors.white),
+          'Drivers License and ID cards',
+          style: TextStyle(color: Colors.blue),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Type: Driver\'s License',
-              style: TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 8),
-            const Text('Status:', style: TextStyle(color: Colors.white70)),
-            Text(
-              ref.watch(verificationStateProvider) ==
-                      VerificationStatus.pendingApproval
-                  ? 'Pending Approval'
-                  : 'Not Submitted',
-              style: const TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Issuer: Department of Motor Vehicles',
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Colors.blue)),
-          ),
-        ],
+        onTap: () {
+          Navigator.pop(sheetContext);
+          _navigateToDriversLicensePage(sheetContext);
+        },
       ),
     );
   }
 
-  void _navigateToDriversLicensePage(BuildContext context) {
+  static void _navigateToDriversLicensePage(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
