@@ -43,8 +43,8 @@ anyhow = "1.0"
 # Utilities
 uuid = { version = "1.0", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
-sha2 = "0.10"
-base64 = "0.22"
+sha2 = "0.11"
+base64 = "0.23"
 url = "2.5"
 
 # SD-JWT parsing
@@ -58,7 +58,7 @@ tokio = { version = "1.0", features = ["rt", "sync"] }
 flutter_rust_bridge_codegen = "=2.13.0"
 
 [dev-dependencies]
-reqwest = { version = "=0.13.4", default-features = false, features = ["json", "rustls"] }
+reqwest = { version = "=0.13.5", default-features = false, features = ["json", "rustls"] }
 # Accepted Core test-only remote signers. No software holder-key fallback.
 marty-crypto-test-support = { git = "https://github.com/ElevenID/marty-core", rev = "bd96bd2f91ba921b7a9e42b1bc84356e3b40d5f0" }
 
